@@ -1,0 +1,10 @@
+export { PMDashboardView } from './PMDashboardView';
+export { PMProjectsView } from './PMProjectsView';
+export { PMTeamMembersView } from './PMTeamMembersView';
+export { PMBudgetFinanceView } from './PMBudgetFinanceView';
+export { PMResourcesView } from './PMResourcesView';
+export { PMDocumentsView } from './PMDocumentsView';
+export { PMReportsView } from './PMReportsView';
+export { PMMEView } from './PMMEView';
+export { PMNotificationsView } from './PMNotificationsView';
+export { PMSettingsView } from './PMSettingsView';
