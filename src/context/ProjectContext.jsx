@@ -33,6 +33,12 @@ export const ProjectProvider = ({ children }) => {
   const [users, setUsers] = useState([]);
   const [reports, setReports] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [indicators, setIndicators] = useState([]);
+  const [beneficiaries, setBeneficiaries] = useState([]);
+  const [fieldVisits, setFieldVisits] = useState([]);
+  const [surveys, setSurveys] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [invoices, setInvoices] = useState([]);
   const [activePreviewDoc, setActivePreviewDoc] = useState(null);
 
   // 1. Firebase Mode: Real-time sync with Firestore snapshots
@@ -85,6 +91,24 @@ export const ProjectProvider = ({ children }) => {
     const unsubTx = onSnapshot(collection(db, 'transactions'), (snap) => {
       setTransactions(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => console.warn("Firestore transactions read permission denied:", err));
+    const unsubIndicators = onSnapshot(collection(db, 'indicators'), (snap) => {
+      setIndicators(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    }, (err) => console.warn("Firestore indicators read permission denied:", err));
+    const unsubBeneficiaries = onSnapshot(collection(db, 'beneficiaries'), (snap) => {
+      setBeneficiaries(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    }, (err) => console.warn("Firestore beneficiaries read permission denied:", err));
+    const unsubFieldVisits = onSnapshot(collection(db, 'fieldVisits'), (snap) => {
+      setFieldVisits(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    }, (err) => console.warn("Firestore fieldVisits read permission denied:", err));
+    const unsubSurveys = onSnapshot(collection(db, 'surveys'), (snap) => {
+      setSurveys(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    }, (err) => console.warn("Firestore surveys read permission denied:", err));
+    const unsubEvents = onSnapshot(collection(db, 'events'), (snap) => {
+      setEvents(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    }, (err) => console.warn("Firestore events read permission denied:", err));
+    const unsubInvoices = onSnapshot(collection(db, 'invoices'), (snap) => {
+      setInvoices(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    }, (err) => console.warn("Firestore invoices read permission denied:", err));
 
     return () => {
       unsubProjects();
@@ -101,6 +125,12 @@ export const ProjectProvider = ({ children }) => {
       unsubUsers();
       unsubReports();
       unsubTx();
+      unsubIndicators();
+      unsubBeneficiaries();
+      unsubFieldVisits();
+      unsubSurveys();
+      unsubEvents();
+      unsubInvoices();
     };
   }, [isFirebaseConfigured, user]);
 
@@ -122,6 +152,12 @@ export const ProjectProvider = ({ children }) => {
     setUsers(JSON.parse(localStorage.getItem('baoms_users') || '[]'));
     setReports(JSON.parse(localStorage.getItem('baoms_reports') || '[]'));
     setTransactions(JSON.parse(localStorage.getItem('baoms_transactions') || '[]'));
+    setIndicators(JSON.parse(localStorage.getItem('baoms_indicators') || '[]'));
+    setBeneficiaries(JSON.parse(localStorage.getItem('baoms_beneficiaries') || '[]'));
+    setFieldVisits(JSON.parse(localStorage.getItem('baoms_field_visits') || '[]'));
+    setSurveys(JSON.parse(localStorage.getItem('baoms_surveys') || '[]'));
+    setEvents(JSON.parse(localStorage.getItem('baoms_events') || '[]'));
+    setInvoices(JSON.parse(localStorage.getItem('baoms_invoices') || '[]'));
   }, [isFirebaseConfigured]);
 
   // Sync back to local storage in fallback mode
@@ -171,6 +207,12 @@ export const ProjectProvider = ({ children }) => {
     setUsers([]);
     setReports([]);
     setTransactions([]);
+    setIndicators([]);
+    setBeneficiaries([]);
+    setFieldVisits([]);
+    setSurveys([]);
+    setEvents([]);
+    setInvoices([]);
 
     localStorage.setItem('baoms_projects', '[]');
     localStorage.setItem('baoms_project_files', '[]');
@@ -186,6 +228,12 @@ export const ProjectProvider = ({ children }) => {
     localStorage.setItem('baoms_users', '[]');
     localStorage.setItem('baoms_reports', '[]');
     localStorage.setItem('baoms_transactions', '[]');
+    localStorage.setItem('baoms_indicators', '[]');
+    localStorage.setItem('baoms_beneficiaries', '[]');
+    localStorage.setItem('baoms_field_visits', '[]');
+    localStorage.setItem('baoms_surveys', '[]');
+    localStorage.setItem('baoms_events', '[]');
+    localStorage.setItem('baoms_invoices', '[]');
   };
 
   // Helper to log audit actions
@@ -747,10 +795,11 @@ export const ProjectProvider = ({ children }) => {
   };
 
   // Communications Actions
-  const addAnnouncement = async (title, content) => {
+  const addAnnouncement = async (title, content, targetDepartment = 'All') => {
     const newAnn = {
       title,
       content,
+      targetDepartment,
       authorName: user ? user.personalDetails?.name || user.email : 'System',
       publishedAt: new Date().toISOString().substring(0, 10)
     };
@@ -881,6 +930,315 @@ export const ProjectProvider = ({ children }) => {
     logAudit('REPORT_SUBMISSION', `New report "${newReport.type}" submitted by ${newReport.author}.`);
   };
 
+  // M&E Indicators (also used for targets)
+  const addIndicator = async (data) => {
+    const newIndicator = {
+      name: data.name,
+      description: data.description || '',
+      target: parseFloat(data.target) || 0,
+      achieved: parseFloat(data.achieved) || 0,
+      unit: data.unit || '',
+      projectId: data.projectId || ''
+    };
+    if (isFirebaseConfigured) {
+      try {
+        await addDoc(collection(db, 'indicators'), newIndicator);
+      } catch (err) {
+        console.error("Firestore add indicator error:", err);
+      }
+    } else {
+      const updated = [{ id: 'ind_' + Date.now(), ...newIndicator }, ...indicators];
+      setIndicators(updated);
+      syncLocal('baoms_indicators', updated);
+    }
+    logAudit('ME_INDICATORS', `Registered indicator "${newIndicator.name}" (target: ${newIndicator.target} ${newIndicator.unit}).`);
+  };
+
+  const updateIndicator = async (indicatorId, updatedData) => {
+    if (isFirebaseConfigured) {
+      try {
+        await updateDoc(doc(db, 'indicators', indicatorId), updatedData);
+      } catch (err) {
+        console.error("Firestore update indicator error:", err);
+      }
+    } else {
+      const updated = indicators.map(i => i.id === indicatorId ? { ...i, ...updatedData } : i);
+      setIndicators(updated);
+      syncLocal('baoms_indicators', updated);
+    }
+    logAudit('ME_INDICATORS', `Updated indicator "${indicatorId}".`);
+  };
+
+  const deleteIndicator = async (indicatorId) => {
+    if (isFirebaseConfigured) {
+      try {
+        await deleteDoc(doc(db, 'indicators', indicatorId));
+      } catch (err) {
+        console.error("Firestore delete indicator error:", err);
+      }
+    } else {
+      const updated = indicators.filter(i => i.id !== indicatorId);
+      setIndicators(updated);
+      syncLocal('baoms_indicators', updated);
+    }
+    logAudit('ME_INDICATORS', `Removed indicator "${indicatorId}".`);
+  };
+
+  // Beneficiaries (shared by M&E and Admin views)
+  const addBeneficiary = async (data) => {
+    const newBeneficiary = {
+      name: data.name,
+      gender: data.gender || '',
+      age: data.age || '',
+      location: data.location || '',
+      category: data.category || '',
+      projectId: data.projectId || '',
+      enrollmentDate: data.enrollmentDate || new Date().toISOString().substring(0, 10)
+    };
+    if (isFirebaseConfigured) {
+      try {
+        await addDoc(collection(db, 'beneficiaries'), newBeneficiary);
+      } catch (err) {
+        console.error("Firestore add beneficiary error:", err);
+      }
+    } else {
+      const updated = [{ id: 'ben_' + Date.now(), ...newBeneficiary }, ...beneficiaries];
+      setBeneficiaries(updated);
+      syncLocal('baoms_beneficiaries', updated);
+    }
+    logAudit('BENEFICIARY_ENROLLMENT', `Enrolled beneficiary "${newBeneficiary.name}".`);
+  };
+
+  const updateBeneficiary = async (beneficiaryId, updatedData) => {
+    if (isFirebaseConfigured) {
+      try {
+        await updateDoc(doc(db, 'beneficiaries', beneficiaryId), updatedData);
+      } catch (err) {
+        console.error("Firestore update beneficiary error:", err);
+      }
+    } else {
+      const updated = beneficiaries.map(b => b.id === beneficiaryId ? { ...b, ...updatedData } : b);
+      setBeneficiaries(updated);
+      syncLocal('baoms_beneficiaries', updated);
+    }
+    logAudit('BENEFICIARY_ENROLLMENT', `Updated beneficiary record "${beneficiaryId}".`);
+  };
+
+  const deleteBeneficiary = async (beneficiaryId) => {
+    if (isFirebaseConfigured) {
+      try {
+        await deleteDoc(doc(db, 'beneficiaries', beneficiaryId));
+      } catch (err) {
+        console.error("Firestore delete beneficiary error:", err);
+      }
+    } else {
+      const updated = beneficiaries.filter(b => b.id !== beneficiaryId);
+      setBeneficiaries(updated);
+      syncLocal('baoms_beneficiaries', updated);
+    }
+    logAudit('BENEFICIARY_ENROLLMENT', `Removed beneficiary record "${beneficiaryId}".`);
+  };
+
+  // Field Visits (data collection logs, field visit records, GIS points; quality review via status)
+  const addFieldVisit = async (data) => {
+    const newVisit = {
+      gpsLocation: data.gpsLocation || { latitude: 0, longitude: 0 },
+      notes: data.notes || '',
+      visitDate: data.visitDate || new Date().toISOString().substring(0, 10),
+      projectId: data.projectId || '',
+      officerName: user ? user.personalDetails?.name || user.email : 'Field Officer',
+      officerId: user ? user.id || user.uid : 'System',
+      status: 'Pending Review'
+    };
+    if (isFirebaseConfigured) {
+      try {
+        await addDoc(collection(db, 'fieldVisits'), newVisit);
+      } catch (err) {
+        console.error("Firestore add field visit error:", err);
+      }
+    } else {
+      const updated = [{ id: 'fv_' + Date.now(), ...newVisit }, ...fieldVisits];
+      setFieldVisits(updated);
+      syncLocal('baoms_field_visits', updated);
+    }
+    logAudit('FIELD_DATA_COLLECTION', `Logged field visit (GPS: ${newVisit.gpsLocation.latitude}, ${newVisit.gpsLocation.longitude}).`);
+  };
+
+  const updateFieldVisit = async (visitId, updatedData) => {
+    if (isFirebaseConfigured) {
+      try {
+        await updateDoc(doc(db, 'fieldVisits', visitId), updatedData);
+      } catch (err) {
+        console.error("Firestore update field visit error:", err);
+      }
+    } else {
+      const updated = fieldVisits.map(v => v.id === visitId ? { ...v, ...updatedData } : v);
+      setFieldVisits(updated);
+      syncLocal('baoms_field_visits', updated);
+    }
+    logAudit('FIELD_DATA_COLLECTION', `Updated field visit record "${visitId}".`);
+  };
+
+  // Surveys
+  const addSurvey = async (data) => {
+    const newSurvey = {
+      title: data.title,
+      questions: data.questions || [],
+      projectId: data.projectId || '',
+      createdBy: user ? user.personalDetails?.name || user.email : 'System',
+      createdAt: new Date().toISOString().substring(0, 10)
+    };
+    if (isFirebaseConfigured) {
+      try {
+        await addDoc(collection(db, 'surveys'), newSurvey);
+      } catch (err) {
+        console.error("Firestore add survey error:", err);
+      }
+    } else {
+      const updated = [{ id: 'srv_' + Date.now(), ...newSurvey }, ...surveys];
+      setSurveys(updated);
+      syncLocal('baoms_surveys', updated);
+    }
+    logAudit('ME_SURVEYS', `Created survey "${newSurvey.title}".`);
+  };
+
+  const updateSurvey = async (surveyId, updatedData) => {
+    if (isFirebaseConfigured) {
+      try {
+        await updateDoc(doc(db, 'surveys', surveyId), updatedData);
+      } catch (err) {
+        console.error("Firestore update survey error:", err);
+      }
+    } else {
+      const updated = surveys.map(s => s.id === surveyId ? { ...s, ...updatedData } : s);
+      setSurveys(updated);
+      syncLocal('baoms_surveys', updated);
+    }
+    logAudit('ME_SURVEYS', `Updated survey "${surveyId}".`);
+  };
+
+  const deleteSurvey = async (surveyId) => {
+    if (isFirebaseConfigured) {
+      try {
+        await deleteDoc(doc(db, 'surveys', surveyId));
+      } catch (err) {
+        console.error("Firestore delete survey error:", err);
+      }
+    } else {
+      const updated = surveys.filter(s => s.id !== surveyId);
+      setSurveys(updated);
+      syncLocal('baoms_surveys', updated);
+    }
+    logAudit('ME_SURVEYS', `Removed survey "${surveyId}".`);
+  };
+
+  // Organization Events
+  const addEvent = async (data) => {
+    const newEvent = {
+      title: data.title,
+      date: data.date,
+      location: data.location || '',
+      description: data.description || ''
+    };
+    if (isFirebaseConfigured) {
+      try {
+        await addDoc(collection(db, 'events'), newEvent);
+      } catch (err) {
+        console.error("Firestore add event error:", err);
+      }
+    } else {
+      const updated = [{ id: 'evt_' + Date.now(), ...newEvent }, ...events];
+      setEvents(updated);
+      syncLocal('baoms_events', updated);
+    }
+    logAudit('ORG_EVENTS', `Scheduled event "${newEvent.title}" on ${newEvent.date}.`);
+  };
+
+  const updateEvent = async (eventId, updatedData) => {
+    if (isFirebaseConfigured) {
+      try {
+        await updateDoc(doc(db, 'events', eventId), updatedData);
+      } catch (err) {
+        console.error("Firestore update event error:", err);
+      }
+    } else {
+      const updated = events.map(e => e.id === eventId ? { ...e, ...updatedData } : e);
+      setEvents(updated);
+      syncLocal('baoms_events', updated);
+    }
+    logAudit('ORG_EVENTS', `Updated event "${eventId}".`);
+  };
+
+  const deleteEvent = async (eventId) => {
+    if (isFirebaseConfigured) {
+      try {
+        await deleteDoc(doc(db, 'events', eventId));
+      } catch (err) {
+        console.error("Firestore delete event error:", err);
+      }
+    } else {
+      const updated = events.filter(e => e.id !== eventId);
+      setEvents(updated);
+      syncLocal('baoms_events', updated);
+    }
+    logAudit('ORG_EVENTS', `Removed event "${eventId}".`);
+  };
+
+  // Invoices
+  const addInvoice = async (data) => {
+    const newInvoice = {
+      invoiceNumber: data.invoiceNumber || `INV-${Date.now().toString().slice(-6)}`,
+      clientName: data.clientName,
+      projectId: data.projectId || '',
+      amount: parseFloat(data.amount) || 0,
+      issuedDate: data.issuedDate || new Date().toISOString().substring(0, 10),
+      dueDate: data.dueDate || '',
+      status: 'Unpaid'
+    };
+    if (isFirebaseConfigured) {
+      try {
+        await addDoc(collection(db, 'invoices'), newInvoice);
+      } catch (err) {
+        console.error("Firestore add invoice error:", err);
+      }
+    } else {
+      const updated = [{ id: 'inv_' + Date.now(), ...newInvoice }, ...invoices];
+      setInvoices(updated);
+      syncLocal('baoms_invoices', updated);
+    }
+    logAudit('FINANCE_INVOICES', `Issued invoice "${newInvoice.invoiceNumber}" to "${newInvoice.clientName}" (KES ${newInvoice.amount}).`);
+  };
+
+  const updateInvoiceStatus = async (invoiceId, status) => {
+    if (isFirebaseConfigured) {
+      try {
+        await updateDoc(doc(db, 'invoices', invoiceId), { status });
+      } catch (err) {
+        console.error("Firestore update invoice status error:", err);
+      }
+    } else {
+      const updated = invoices.map(i => i.id === invoiceId ? { ...i, status } : i);
+      setInvoices(updated);
+      syncLocal('baoms_invoices', updated);
+    }
+    logAudit('FINANCE_INVOICES', `Invoice "${invoiceId}" marked as "${status}".`);
+  };
+
+  const deleteInvoice = async (invoiceId) => {
+    if (isFirebaseConfigured) {
+      try {
+        await deleteDoc(doc(db, 'invoices', invoiceId));
+      } catch (err) {
+        console.error("Firestore delete invoice error:", err);
+      }
+    } else {
+      const updated = invoices.filter(i => i.id !== invoiceId);
+      setInvoices(updated);
+      syncLocal('baoms_invoices', updated);
+    }
+    logAudit('FINANCE_INVOICES', `Voided invoice "${invoiceId}".`);
+  };
+
   return (
     <ProjectContext.Provider
       value={{
@@ -898,6 +1256,12 @@ export const ProjectProvider = ({ children }) => {
         users,
         reports,
         transactions,
+        indicators,
+        beneficiaries,
+        fieldVisits,
+        surveys,
+        events,
+        invoices,
         activePreviewDoc,
         setActivePreviewDoc,
         addUser,
@@ -923,6 +1287,23 @@ export const ProjectProvider = ({ children }) => {
         addRequest,
         updateRequestStatus,
         addReport,
+        addIndicator,
+        updateIndicator,
+        deleteIndicator,
+        addBeneficiary,
+        updateBeneficiary,
+        deleteBeneficiary,
+        addFieldVisit,
+        updateFieldVisit,
+        addSurvey,
+        updateSurvey,
+        deleteSurvey,
+        addEvent,
+        updateEvent,
+        deleteEvent,
+        addInvoice,
+        updateInvoiceStatus,
+        deleteInvoice,
         seedLocalSimulation,
         clearDatabase
       }}

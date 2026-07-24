@@ -262,6 +262,92 @@ export const DATABASE_SCHEMA = {
     description: "string",
     ipAddress: "string",
     timestamp: "timestamp"
+  },
+
+  /**
+   * 13. M&E INDICATORS (also used for indicator targets)
+   * Document ID: Auto-generated ID
+   */
+  indicators: {
+    indicatorId: "string (Document ID)",
+    name: "string",
+    description: "string",
+    target: "number",
+    achieved: "number",
+    unit: "string",
+    projectId: "string (Project ID, optional)"
+  },
+
+  /**
+   * 14. BENEFICIARIES (shared by M&E and Admin beneficiary views)
+   * Document ID: Auto-generated ID
+   */
+  beneficiaries: {
+    beneficiaryId: "string (Document ID)",
+    name: "string",
+    gender: "string",
+    age: "string",
+    location: "string",
+    category: "string",
+    projectId: "string (Project ID, optional)",
+    enrollmentDate: "timestamp"
+  },
+
+  /**
+   * 15. FIELD VISITS (data collection logs, field visit records, GIS points; quality review via status)
+   * Document ID: Auto-generated ID
+   */
+  fieldVisits: {
+    visitId: "string (Document ID)",
+    gpsLocation: { latitude: "number", longitude: "number" },
+    notes: "string",
+    visitDate: "timestamp",
+    projectId: "string (Project ID, optional)",
+    officerName: "string",
+    officerId: "string (User UID)",
+    status: "Pending Review | Verified | Flagged"
+  },
+
+  /**
+   * 16. SURVEYS
+   * Document ID: Auto-generated ID
+   */
+  surveys: {
+    surveyId: "string (Document ID)",
+    title: "string",
+    questions: [
+      { id: "string", text: "string", type: "string" }
+    ],
+    projectId: "string (Project ID, optional)",
+    createdBy: "string",
+    createdAt: "timestamp"
+  },
+
+  /**
+   * 17. ORGANIZATION EVENTS
+   * Document ID: Auto-generated ID
+   */
+  events: {
+    eventId: "string (Document ID)",
+    title: "string",
+    date: "timestamp",
+    location: "string",
+    description: "string"
+  },
+
+  /**
+   * 18. INVOICES
+   * Document ID: Auto-generated ID
+   */
+  invoices: {
+    invoiceId: "string (Document ID)",
+    invoiceNumber: "string",
+    clientName: "string",
+    projectId: "string (Project ID, optional)",
+    amount: "number",
+    issuedDate: "timestamp",
+    dueDate: "timestamp",
+    status: "Unpaid | Paid | Overdue"
   }
 };
 

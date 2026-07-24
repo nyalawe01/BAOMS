@@ -91,11 +91,12 @@ service cloud.firestore {
       );
     }
 
-    // 6. ASSETS & VENDORS
+    // 6. ASSETS & VENDORS (also used as the shared Resources/Inventory register)
     match /assetsAndVendors/{registerId} {
       allow read: if isAuthenticated();
       allow write: if isAuthenticated() && (
-        hasRole('Procurement & Logistics Officer') || 
+        hasRole('Procurement & Logistics Officer') ||
+        hasRole('Project Manager') ||
         hasRole('System Administrator')
       );
     }
@@ -133,13 +134,14 @@ service cloud.firestore {
       );
     }
 
-    // 10. COMMUNICATIONS (Announcements & Media Tagging)
+    // 10. COMMUNICATIONS (Announcements, directives & Media Tagging)
     match /announcements/{announcementId} {
       allow read: if isAuthenticated();
       allow write: if isAuthenticated() && (
-        hasRole('Communications Officer') || 
-        hasRole('HR Officer') || 
-        hasRole('Executive Director') || 
+        hasRole('Communications Officer') ||
+        hasRole('HR Officer') ||
+        hasRole('Executive Director') ||
+        hasRole('Project Manager') ||
         hasRole('System Administrator')
       );
     }
@@ -181,6 +183,76 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow write: if isAuthenticated() && (
         hasRole('HR Officer') ||
+        hasRole('System Administrator')
+      );
+    }
+
+    // Helper: M&E role is stored under two accepted spellings elsewhere in the app
+    function isMEOfficer() {
+      return hasRole('M&E Officer') || hasRole('Monitoring & Evaluation Officer');
+    }
+
+    // 15. M&E INDICATORS (covers indicators + their targets)
+    match /indicators/{indicatorId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        isMEOfficer() ||
+        hasRole('Project Manager') ||
+        hasRole('System Administrator')
+      );
+    }
+
+    // 16. BENEFICIARIES (shared by the M&E and Admin beneficiary views)
+    match /beneficiaries/{beneficiaryId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        isMEOfficer() ||
+        hasRole('Program Officer') ||
+        hasRole('System Administrator')
+      );
+    }
+
+    // 17. FIELD VISITS (data collection logs, field visit records, GIS points, quality review)
+    match /fieldVisits/{visitId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (
+        hasRole('Field Officer') ||
+        hasRole('Program Officer') ||
+        isMEOfficer() ||
+        hasRole('System Administrator')
+      );
+      // Quality-review status changes restricted to M&E and Admin
+      allow update: if isAuthenticated() && (
+        isMEOfficer() ||
+        hasRole('System Administrator')
+      );
+      allow delete: if isAuthenticated() && hasRole('System Administrator');
+    }
+
+    // 18. SURVEYS
+    match /surveys/{surveyId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        isMEOfficer() ||
+        hasRole('System Administrator')
+      );
+    }
+
+    // 19. ORGANIZATION EVENTS
+    match /events/{eventId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        hasRole('System Administrator') ||
+        hasRole('Communications Officer') ||
+        hasRole('HR Officer')
+      );
+    }
+
+    // 20. INVOICES
+    match /invoices/{invoiceId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        hasRole('Finance Officer') ||
         hasRole('System Administrator')
       );
     }
