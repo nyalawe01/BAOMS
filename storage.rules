@@ -1,0 +1,60 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Core Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserRole() {
+      // Firebase Storage rules can fetch Firestore data to perform validation
+      return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    function hasRole(role) {
+      return isAuthenticated() && getUserRole() == role;
+    }
+    
+    function hasAnyRole(roles) {
+      return isAuthenticated() && getUserRole() in roles;
+    }
+    
+    // 1. Document Vault: Read-only for all, write only for HR and Admin
+    match /documentVault/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if hasAnyRole(['HR Officer', 'System Administrator']);
+    }
+    
+    // 2. Supporting Documents (Contracts, NSSF, NHIF)
+    // Access: Owner, HR Officer, and System Administrator
+    match /supportingDocuments/{userId}/{fileName} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == userId || 
+        hasAnyRole(['HR Officer', 'System Administrator'])
+      );
+      // Only HR Officer and System Administrator can write/update supporting files
+      allow write: if hasAnyRole(['HR Officer', 'System Administrator']);
+    }
+    
+    // 3. Receipts & Expense Uploads
+    // Access: Owner, Finance, Department Head, ED, and Admin
+    match /receipts/{expenseId}/{fileName} {
+      allow read: if isAuthenticated();
+      // Any authenticated user can upload their receipts for expense claims
+      allow write: if isAuthenticated();
+    }
+    
+    // 4. Project Files (Structured folder uploads)
+    // Access: Project Manager, Admin, and assigned project staff
+    match /projects/{projectId}/{allPaths=**} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // 5. Media Library (Communications Officer upload)
+    match /mediaLibrary/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if hasAnyRole(['Communications Officer', 'System Administrator']);
+    }
+  }
+}

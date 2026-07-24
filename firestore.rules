@@ -1,0 +1,188 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: Check if the requesting user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper: Get user's role from the users collection
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    // Helper: Check if user is a specific role
+    function hasRole(roleName) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        getUserRole() == roleName;
+    }
+
+    // Helper: Check if user owns the document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // 1. USERS COLLECTION
+    match /users/{userId} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow read: if isAuthenticated() && (
+        hasRole('System Administrator') || 
+        hasRole('HR Officer')
+      );
+      // Allow authenticated users to create their own initial profile document
+      allow create: if isAuthenticated() && isOwner(userId);
+      // Profile updates & admin control restricted to HR Officers and Admins
+      allow write: if isAuthenticated() && (
+        hasRole('System Administrator') || 
+        hasRole('HR Officer')
+      );
+      // Allow individual users to edit their own phone number and avatar photo details
+      allow update: if isAuthenticated() && isOwner(userId) && (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'officeDetails', 'supportingDocuments', 'permissions'])
+      );
+    }
+
+    // 2. PROJECTS COLLECTION
+    match /projects/{projectId} {
+      allow read: if isAuthenticated();
+      // Writing project details restricted to PMs and Administrators
+      allow write: if isAuthenticated() && (
+        hasRole('Project Manager') || 
+        hasRole('System Administrator')
+      );
+    }
+
+    // 3. PROJECT FILES SUBCOLLECTION
+    match /projectFiles/{fileId} {
+      allow read: if isAuthenticated();
+      // PMs, Admins, and assigned program officers can upload files
+      allow write: if isAuthenticated();
+    }
+
+    // 4. BUDGETS & LEDGERS
+    match /budgets/{budgetId} {
+      allow read: if isAuthenticated() && (
+        hasRole('Finance Officer') || 
+        hasRole('Executive Director') || 
+        hasRole('Project Manager') || 
+        hasRole('System Administrator')
+      );
+      allow write: if isAuthenticated() && (
+        hasRole('Finance Officer') || 
+        hasRole('Executive Director') || 
+        hasRole('System Administrator')
+      );
+    }
+
+    // 5. EXPENSES & CLAIMS
+    match /expenses/{expenseId} {
+      allow read: if isAuthenticated();
+      // Allow any staff member to submit claims
+      allow create: if isAuthenticated();
+      // Approvals/Status changes restricted to Executive Director and Department Heads
+      allow update, delete: if isAuthenticated() && (
+        hasRole('Executive Director') || 
+        hasRole('Department Head') || 
+        hasRole('Finance Officer') || 
+        hasRole('System Administrator')
+      );
+    }
+
+    // 6. ASSETS & VENDORS
+    match /assetsAndVendors/{registerId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        hasRole('Procurement & Logistics Officer') || 
+        hasRole('System Administrator')
+      );
+    }
+
+    // 7. ORDERS
+    match /orders/{orderId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        hasRole('Procurement & Logistics Officer') || 
+        hasRole('System Administrator')
+      );
+    }
+
+    // 8. AUDIT LOGS
+    match /auditLogs/{logId} {
+      // ONLY System Administrator can read cryptographic audit trails
+      allow read: if isAuthenticated() && hasRole('System Administrator');
+      // Allow writing from any logged-in user to register audit actions
+      allow create: if isAuthenticated();
+      allow update, delete: if false; // Logs are strictly immutable
+    }
+
+    // 9. STAFF REQUESTS (Leave / Docs)
+    match /requests/{requestId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || 
+        hasRole('HR Officer') || 
+        hasRole('System Administrator')
+      );
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      // Approvals restricted to HR and Admin
+      allow update, delete: if isAuthenticated() && (
+        hasRole('HR Officer') || 
+        hasRole('System Administrator')
+      );
+    }
+
+    // 10. COMMUNICATIONS (Announcements & Media Tagging)
+    match /announcements/{announcementId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        hasRole('Communications Officer') || 
+        hasRole('HR Officer') || 
+        hasRole('Executive Director') || 
+        hasRole('System Administrator')
+      );
+    }
+
+    match /mediaLibrary/{mediaId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        hasRole('Communications Officer') || 
+        hasRole('System Administrator')
+      );
+    }
+
+    // 11. OFFLINE SUBMISSIONS
+    match /offlineSubmissions/{submissionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && hasRole('Field Officer');
+      allow update, delete: if isAuthenticated() && hasRole('System Administrator');
+    }
+
+    // 12. REPORTS
+    match /reports/{reportId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // 13. TRANSACTIONS
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        hasRole('Finance Officer') ||
+        hasRole('System Administrator') ||
+        hasRole('Project Manager') ||
+        hasRole('Executive Director')
+      );
+    }
+
+    // 14. POLICY VAULT
+    match /policyVault/{policyId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        hasRole('HR Officer') ||
+        hasRole('System Administrator')
+      );
+    }
+  }
+}
