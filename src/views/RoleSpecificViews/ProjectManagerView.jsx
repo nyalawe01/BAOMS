@@ -14,11 +14,12 @@ export function ProjectManagerView() {
     projects, 
     projectFiles, 
     addProject, 
-    addProjectFile, 
-    updateProject, 
-    users, 
+    addProjectFile,
+    updateProject,
+    users,
     announcements,
-    setActivePreviewDoc 
+    addAnnouncement,
+    setActivePreviewDoc
   } = useProject();
   const { policyVault } = useAuth();
   
@@ -149,6 +150,7 @@ export function ProjectManagerView() {
       return;
     }
     const staff = users.find(u => u.id === selectedStaffId);
+    addAnnouncement(noticeType, `${noticeNotes} (Directed to: ${staff ? staff.name : 'Staff'})`);
     Swal.fire({
       title: 'Project Directive Dispatched',
       text: `Successfully dispatched directive notice (${noticeType}) to ${staff ? staff.name : 'Staff'}.`,
@@ -834,8 +836,8 @@ export function ProjectManagerView() {
                 </div>
                 <div className="flex justify-between items-center text-[10px] text-slate-400">
                   <span>Updated: {docItem.updated || 'N/A'}</span>
-                  <button 
-                    onClick={() => Swal.fire('Preview Mode', `Loading preview for "${docItem.title}"...`, 'info')}
+                  <button
+                    onClick={() => setActivePreviewDoc({ fileName: docItem.title, fileSize: docItem.size })}
                     className="text-indigo-600 font-bold hover:underline"
                   >
                     Open Document

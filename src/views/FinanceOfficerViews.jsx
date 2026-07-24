@@ -787,30 +787,28 @@ export function FinancePayrollView() {
 // 8. INVOICES MODULE (connected to Transaction Engine)
 // ============================================================================
 export function FinanceInvoicesView() {
-  const { addTransaction } = useProject();
-  const [invoices, setInvoices] = useState([
-    { id: 'inv1', client: 'USAID Africa', date: '2026-06-15', amount: 8000000, status: 'Paid' },
-    { id: 'inv2', client: 'Save the Children', date: '2026-07-01', amount: 3500000, status: 'Sent' }
-  ]);
+  const { invoices, addInvoice, updateInvoiceStatus, deleteInvoice, addTransaction, projects } = useProject();
 
   const [client, setClient] = useState('');
   const [amount, setAmount] = useState('');
+  const [projectId, setProjectId] = useState('');
+  const [dueDate, setDueDate] = useState('');
 
-  const handleCreateInvoice = (e) => {
+  const handleCreateInvoice = async (e) => {
     e.preventDefault();
     if (!client || !amount) return;
 
-    const newInv = {
-      id: `inv_${Date.now()}`,
-      client,
-      date: new Date().toISOString().substring(0,10),
+    await addInvoice({
+      clientName: client,
+      projectId,
       amount: parseFloat(amount),
-      status: 'Sent'
-    };
+      dueDate
+    });
 
-    setInvoices([newInv, ...invoices]);
     setClient('');
     setAmount('');
+    setProjectId('');
+    setDueDate('');
     Swal.fire('Invoice Generated', 'Successfully created and dispatched client invoice record.', 'success');
   };
 
@@ -821,7 +819,7 @@ export function FinanceInvoicesView() {
     await addTransaction({
       date: new Date().toISOString().substring(0, 10),
       ref: `PMT-${Date.now().toString().slice(-4)}`,
-      description: `Invoiced receipt from ${inv.client}`,
+      description: `Invoiced receipt from ${inv.clientName}`,
       type: 'Income',
       category: 'Service Revenue',
       amount: inv.amount,
@@ -829,8 +827,23 @@ export function FinanceInvoicesView() {
       bankAccount: 'CRDB'
     });
 
-    setInvoices(invoices.map(i => i.id === invId ? { ...i, status: 'Paid' } : i));
+    await updateInvoiceStatus(invId, 'Paid');
     Swal.fire('Payment Logged', 'Invoice marked as paid and transaction entered in ledger.', 'success');
+  };
+
+  const handleVoidInvoice = async (invId) => {
+    const result = await Swal.fire({
+      title: 'Void this invoice?',
+      text: 'This will permanently remove the invoice record.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Void Invoice',
+      confirmButtonColor: '#0f172a'
+    });
+    if (!result.isConfirmed) return;
+
+    await deleteInvoice(invId);
+    Swal.fire('Invoice Voided', 'The invoice record has been removed.', 'success');
   };
 
   return (
@@ -855,6 +868,19 @@ export function FinanceInvoicesView() {
               <label className="block text-[10px] text-slate-400 uppercase mb-1">Total Billing Amount (KES)</label>
               <input type="number" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 50000" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
             </div>
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase mb-1">Related Project (Optional)</label>
+              <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+                <option value="">None</option>
+                {projects.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase mb-1">Due Date</label>
+              <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+            </div>
             <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Generate Invoice</button>
           </form>
         </div>
@@ -877,16 +903,16 @@ export function FinanceInvoicesView() {
               <tbody className="divide-y divide-slate-150">
                 {invoices.map((inv, idx) => (
                   <tr key={inv.id || idx}>
-                    <td className="p-3 font-mono text-[10px] text-slate-400">{inv.id}</td>
-                    <td className="p-3 font-normal text-slate-808">{inv.client}</td>
-                    <td className="p-3 font-mono text-[10px] text-slate-400">{inv.date}</td>
-                    <td className="p-3 font-normal text-slate-700">KES {inv.amount.toLocaleString()}</td>
+                    <td className="p-3 font-mono text-[10px] text-slate-400">{inv.invoiceNumber}</td>
+                    <td className="p-3 font-normal text-slate-808">{inv.clientName}</td>
+                    <td className="p-3 font-mono text-[10px] text-slate-400">{inv.issuedDate}</td>
+                    <td className="p-3 font-normal text-slate-700">KES {(inv.amount || 0).toLocaleString()}</td>
                     <td className="p-3">
                       <span className="px-2 py-0.5 rounded text-[8px] font-normal border uppercase bg-slate-50 text-slate-600 border-slate-200">
                         {inv.status}
                       </span>
                     </td>
-                    <td className="p-3 text-right">
+                    <td className="p-3 text-right space-x-2">
                       {inv.status !== 'Paid' && (
                         <button
                           onClick={() => handlePayInvoice(inv.id)}
@@ -895,6 +921,12 @@ export function FinanceInvoicesView() {
                           Receive Payment
                         </button>
                       )}
+                      <button
+                        onClick={() => handleVoidInvoice(inv.id)}
+                        className="px-2 py-1 bg-white text-red-600 border border-red-200 rounded hover:bg-red-50 font-normal text-[10px]"
+                      >
+                        Void
+                      </button>
                     </td>
                   </tr>
                 ))}

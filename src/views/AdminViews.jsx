@@ -322,10 +322,23 @@ export function AdminHRView() {
 // 6. ADMIN BENEFICIARIES VIEW
 // ============================================================================
 export function AdminBeneficiariesView() {
-  const beneficiariesList = [
-    { name: 'Asha Salim', age: 14, gender: 'Female', region: 'Nairobi', ward: 'Kibera', project: 'Website Redesign' },
-    { name: 'Mwangi Juma', age: 17, gender: 'Male', region: 'Kisumu', ward: 'Manyatta', project: 'ERP Integration' }
-  ];
+  const { beneficiaries, projects, deleteBeneficiary } = useProject();
+
+  const getProjectName = (id) => projects.find(p => p.id === id)?.name || 'Unassigned';
+
+  const handleDelete = (ben) => {
+    Swal.fire({
+      title: 'Remove Beneficiary?',
+      text: `This will permanently remove "${ben.name}" from the registry.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Remove'
+    }).then(res => {
+      if (res.isConfirmed) {
+        deleteBeneficiary(ben.id);
+      }
+    });
+  };
 
   return (
     <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
@@ -335,28 +348,43 @@ export function AdminBeneficiariesView() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full text-left border-collapse text-xs">
-          <thead>
-            <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
-              <th className="p-3">Name</th>
-              <th className="p-3">Age</th>
-              <th className="p-3">Gender</th>
-              <th className="p-3">Location Ward</th>
-              <th className="p-3">Enrolled Project</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-150">
-            {beneficiariesList.map((ben, idx) => (
-              <tr key={idx} className="hover:bg-slate-50/50">
-                <td className="p-3 font-normal text-slate-808">{ben.name}</td>
-                <td className="p-3 font-normal text-slate-707">{ben.age}</td>
-                <td className="p-3 text-slate-600">{ben.gender}</td>
-                <td className="p-3 text-slate-600">{ben.ward} ({ben.region})</td>
-                <td className="p-3 text-slate-600 font-normal">{ben.project}</td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
+                <th className="p-3">Name</th>
+                <th className="p-3">Age</th>
+                <th className="p-3">Gender</th>
+                <th className="p-3">Location</th>
+                <th className="p-3">Category</th>
+                <th className="p-3">Enrolled Project</th>
+                <th className="p-3"></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-150">
+              {beneficiaries.map((ben, idx) => (
+                <tr key={ben.id || idx} className="hover:bg-slate-50/50">
+                  <td className="p-3 font-normal text-slate-808">{ben.name}</td>
+                  <td className="p-3 font-normal text-slate-707">{ben.age}</td>
+                  <td className="p-3 text-slate-600">{ben.gender}</td>
+                  <td className="p-3 text-slate-600">{ben.location}</td>
+                  <td className="p-3 text-slate-600 font-normal">{ben.category}</td>
+                  <td className="p-3 text-slate-600 font-normal">{getProjectName(ben.projectId)}</td>
+                  <td className="p-3 text-right">
+                    <button onClick={() => handleDelete(ben)} className="text-slate-400 hover:text-red-600 transition-colors" title="Remove beneficiary">
+                      <Trash2 size={13} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {beneficiaries.length === 0 && (
+                <tr>
+                  <td colSpan="7" className="text-center py-12 text-slate-400 italic">No beneficiaries enrolled yet.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -402,25 +430,93 @@ export function AdminMEView() {
 // 8. ADMIN EVENTS VIEW
 // ============================================================================
 export function AdminEventsView() {
-  const events = [
-    { title: 'Donor Annual Meeting 2026', date: '2026-08-01', location: 'Nairobi HQ' },
-    { title: 'Community Outreach Drive', date: '2026-08-15', location: 'Kibera Hub' }
-  ];
+  const { events, addEvent, deleteEvent } = useProject();
+  const [title, setTitle] = useState('');
+  const [date, setDate] = useState('');
+  const [location, setLocation] = useState('');
+  const [description, setDescription] = useState('');
+
+  const handleCreateEvent = (e) => {
+    e.preventDefault();
+    if (!title || !date) return;
+
+    addEvent({ title, date, location, description });
+
+    setTitle('');
+    setDate('');
+    setLocation('');
+    setDescription('');
+    Swal.fire('Event Scheduled', 'Successfully created event record in Firestore database.', 'success');
+  };
+
+  const handleDeleteEvent = (evt) => {
+    Swal.fire({
+      title: 'Remove Event?',
+      text: `This will permanently delete "${evt.title}" from the calendar.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Delete'
+    }).then(res => {
+      if (res.isConfirmed) {
+        deleteEvent(evt.id);
+      }
+    });
+  };
+
+  const sortedEvents = [...events].sort((a, b) => new Date(a.date) - new Date(b.date));
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
         <h2 className="text-sm font-normal text-slate-808">Organization Events Calendar</h2>
         <p className="text-xs text-slate-400 font-normal">Track campaigns, workshops, meetings, and public forums.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-normal">
-        {events.map((evt, idx) => (
-          <div key={idx} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-2">
-            <h4 className="font-normal text-slate-808 text-sm">{evt.title}</h4>
-            <div className="text-[10px] text-slate-400 mt-1">Date: {evt.date} • Location: {evt.location}</div>
-          </div>
-        ))}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Form */}
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 h-fit">
+          <span className="text-[10px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Schedule New Event</span>
+          <form onSubmit={handleCreateEvent} className="space-y-3 font-normal">
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase mb-1">Event Title</label>
+              <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Donor Annual Meeting" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+            </div>
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase mb-1">Event Date</label>
+              <input type="date" required value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+            </div>
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase mb-1">Location</label>
+              <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Nairobi HQ" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+            </div>
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase mb-1">Description</label>
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Brief event description..." className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" rows="3" />
+            </div>
+            <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Schedule Event</button>
+          </form>
+        </div>
+
+        {/* List */}
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 font-normal content-start">
+          {sortedEvents.length === 0 && (
+            <div className="md:col-span-2 bg-white border border-slate-200 rounded-xl p-6 shadow-sm text-center text-slate-400 italic">
+              No events scheduled yet.
+            </div>
+          )}
+          {sortedEvents.map((evt) => (
+            <div key={evt.id} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-2">
+              <div className="flex justify-between items-start gap-2">
+                <h4 className="font-normal text-slate-808 text-sm">{evt.title}</h4>
+                <button onClick={() => handleDeleteEvent(evt)} className="text-slate-400 hover:text-red-600 transition-colors shrink-0" title="Remove event">
+                  <Trash2 size={13} />
+                </button>
+              </div>
+              {evt.description && <p className="text-slate-550 font-normal">{evt.description}</p>}
+              <div className="text-[10px] text-slate-400 mt-1">Date: {evt.date} • Location: {evt.location || 'TBD'}</div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -430,10 +526,8 @@ export function AdminEventsView() {
 // 9. ADMIN INVENTORY VIEW
 // ============================================================================
 export function AdminInventoryView() {
-  const inventory = [
-    { name: 'Dell XPS Project Laptop', qty: 12, category: 'Computers', status: 'In Use' },
-    { name: 'Epson LCD Projector', qty: 3, category: 'Equipment', status: 'Available' }
-  ];
+  const { assetsAndVendors } = useProject();
+  const inventory = assetsAndVendors.filter(av => av.type === 'asset');
 
   return (
     <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
@@ -447,20 +541,25 @@ export function AdminInventoryView() {
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
               <th className="p-3">Asset Item</th>
-              <th className="p-3">Quantity</th>
-              <th className="p-3">Category</th>
+              <th className="p-3">Asset Code</th>
+              <th className="p-3">Last Updated By</th>
               <th className="p-3">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-150">
-            {inventory.map((inv, idx) => (
-              <tr key={idx}>
-                <td className="p-3 font-normal text-slate-808">{inv.name}</td>
-                <td className="p-3 text-slate-700 font-mono">{inv.qty}</td>
-                <td className="p-3 text-slate-600">{inv.category}</td>
-                <td className="p-3 text-slate-500 font-normal">{inv.status}</td>
+            {inventory.map((inv) => (
+              <tr key={inv.id}>
+                <td className="p-3 font-normal text-slate-808">{inv.details?.name}</td>
+                <td className="p-3 text-slate-700 font-mono">{inv.details?.assetCode || 'N/A'}</td>
+                <td className="p-3 text-slate-600">{inv.lastUpdatedBy || 'N/A'}</td>
+                <td className="p-3 text-slate-500 font-normal">{inv.details?.status || 'N/A'}</td>
               </tr>
             ))}
+            {inventory.length === 0 && (
+              <tr>
+                <td colSpan="4" className="text-center py-12 text-slate-400 italic">No assets registered in the database.</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -472,11 +571,13 @@ export function AdminInventoryView() {
 // 10. ADMIN COMMS VIEW
 // ============================================================================
 export function AdminCommsView() {
+  const { addAnnouncement } = useProject();
   const [msg, setMsg] = useState('');
 
   const handleBroadcast = (e) => {
     e.preventDefault();
     if (!msg) return;
+    addAnnouncement('Administrative Broadcast', msg);
     setMsg('');
     Swal.fire('Broadcast Dispatched', 'Successfully sent announcement to all directory staff members.', 'success');
   };

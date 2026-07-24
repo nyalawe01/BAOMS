@@ -2,20 +2,51 @@ import React, { useState } from 'react';
 import { Upload, Activity } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import Swal from 'sweetalert2';
+import { useProject } from '../../context/ProjectContext';
 
 // ============================================================================
 // 12. PM MONITORING & EVALUATION (M&E) VIEW (Excel extraction uploader enabled)
 // ============================================================================
 export function PMMEView() {
-  const [indicators, setIndicators] = useState([
-    { id: '1', name: 'Children reached through feeding program', target: 500, actual: 420 },
-    { id: '2', name: 'Youth trained in vocational tech skills', target: 150, actual: 162 },
-    { id: '3', name: 'Indigenous trees planted in deforested areas', target: 2000, actual: 1850 },
-    { id: '4', name: 'Outreach workshops conducted in rural Hubs', target: 20, actual: 18 }
-  ]);
+  const { indicators, addIndicator, updateIndicator } = useProject();
+  const [achievedDrafts, setAchievedDrafts] = useState({});
 
-  const handleUpdateActual = (id, val) => {
-    setIndicators(prev => prev.map(ind => ind.id === id ? { ...ind, actual: parseInt(val, 10) || 0 } : ind));
+  const handleAchievedChange = (id, value) => {
+    setAchievedDrafts(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleAchievedCommit = (ind) => {
+    if (achievedDrafts[ind.id] === undefined) return;
+    const parsed = parseInt(achievedDrafts[ind.id], 10) || 0;
+    setAchievedDrafts(prev => {
+      const next = { ...prev };
+      delete next[ind.id];
+      return next;
+    });
+    if (parsed !== (ind.achieved || 0)) {
+      updateIndicator(ind.id, { achieved: parsed });
+    }
+  };
+
+  // Persist parsed spreadsheet rows: update the matching indicator by name, or create a new one
+  const persistParsedIndicators = (parsed) => {
+    parsed.forEach((row) => {
+      const existing = indicators.find(
+        (ind) => (ind.name || '').trim().toLowerCase() === row.name.trim().toLowerCase()
+      );
+      if (existing) {
+        updateIndicator(existing.id, { target: row.target, achieved: row.actual });
+      } else {
+        addIndicator({
+          name: row.name,
+          description: '',
+          target: row.target,
+          achieved: row.actual,
+          unit: '',
+          projectId: ''
+        });
+      }
+    });
   };
 
   // Excel/CSV Document parser & data extraction
@@ -32,10 +63,9 @@ export function PMMEView() {
           // CSV Parser
           const text = evt.target.result;
           const lines = text.split('\n').map(l => l.split(','));
-          const parsed = lines.slice(1).map((row, idx) => {
+          const parsed = lines.slice(1).map((row) => {
             if (row.length < 3) return null;
             return {
-              id: String(idx + 1),
               name: row[0].replace(/"/g, '').trim(),
               target: parseInt(row[1], 10) || 100,
               actual: parseInt(row[2], 10) || 0
@@ -43,7 +73,7 @@ export function PMMEView() {
           }).filter(Boolean);
 
           if (parsed.length > 0) {
-            setIndicators(parsed);
+            persistParsedIndicators(parsed);
             Swal.fire('Data Imported!', `Successfully parsed ${parsed.length} indicators from CSV document.`, 'success');
           }
         } else {
@@ -54,10 +84,9 @@ export function PMMEView() {
           const ws = wb.Sheets[wsname];
           const json = XLSX.utils.sheet_to_json(ws, { header: 1 });
 
-          const parsed = json.slice(1).map((row, idx) => {
+          const parsed = json.slice(1).map((row) => {
             if (row.length < 3) return null;
             return {
-              id: String(idx + 1),
               name: String(row[0]).trim(),
               target: parseInt(row[1], 10) || 100,
               actual: parseInt(row[2], 10) || 0
@@ -65,7 +94,7 @@ export function PMMEView() {
           }).filter(Boolean);
 
           if (parsed.length > 0) {
-            setIndicators(parsed);
+            persistParsedIndicators(parsed);
             Swal.fire('Excel Data Extracted!', `Successfully parsed ${parsed.length} indicators from sheet.`, 'success');
           }
         }
@@ -126,18 +155,22 @@ export function PMMEView() {
             </thead>
             <tbody className="divide-y divide-slate-150 font-normal text-slate-700">
               {indicators.map(ind => {
-                const prog = Math.round((ind.actual / ind.target) * 100);
-                const variance = ind.actual - ind.target;
+                const target = ind.target || 0;
+                const achieved = ind.achieved || 0;
+                const prog = target > 0 ? Math.round((achieved / target) * 100) : 0;
+                const variance = achieved - target;
+                const draftValue = achievedDrafts[ind.id] !== undefined ? achievedDrafts[ind.id] : achieved;
 
                 return (
                   <tr key={ind.id} className="hover:bg-slate-50/50">
                     <td className="p-3 font-normal text-slate-808">{ind.name}</td>
-                    <td className="p-3 font-normal text-slate-500">{ind.target}</td>
+                    <td className="p-3 font-normal text-slate-500">{target}</td>
                     <td className="p-3">
                       <input
                         type="number"
-                        value={ind.actual}
-                        onChange={(e) => handleUpdateActual(ind.id, e.target.value)}
+                        value={draftValue}
+                        onChange={(e) => handleAchievedChange(ind.id, e.target.value)}
+                        onBlur={() => handleAchievedCommit(ind)}
                         className="w-20 px-2 py-1 border border-slate-200 rounded text-center text-xs font-normal"
                       />
                     </td>
@@ -148,6 +181,11 @@ export function PMMEView() {
                   </tr>
                 );
               })}
+              {indicators.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="text-center py-12 text-slate-400 italic font-normal">No indicators registered yet. Upload a spreadsheet to get started.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

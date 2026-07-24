@@ -8,7 +8,7 @@ import { usePageLoader } from './_shared';
 // 5. HR REQUESTS VIEW
 // ==========================================
 export function HrRequestsView() {
-  const { requests, updateRequestStatus, users } = useProject();
+  const { requests, updateRequestStatus, users, addAnnouncement } = useProject();
   const loading = usePageLoader([requests]);
   const [selectedStaffId, setSelectedStaffId] = useState('');
   const [noticeType, setNoticeType] = useState('Leave Approval Reminder');
@@ -46,6 +46,7 @@ export function HrRequestsView() {
       return;
     }
     const staff = users.find(u => u.id === selectedStaffId);
+    addAnnouncement(noticeType, `${noticeNotes} (Directed to: ${staff ? staff.name : 'Staff'})`);
     Swal.fire({
       title: 'Notice Synced & Dispatched',
       text: `Successfully dispatched directive notice (${noticeType}) to ${staff ? staff.name : 'Staff'}.`,

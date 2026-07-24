@@ -1,16 +1,19 @@
 import React from 'react';
+import { useProject } from '../../context/ProjectContext';
 import { Bell } from 'lucide-react';
 
 // ============================================================================
 // 14. PM NOTIFICATIONS VIEW
 // ============================================================================
 export function PMNotificationsView() {
-  const alerts = [
-    { message: 'Deadline Tomorrow: Website redesign milestone due.', time: '1h ago', category: 'Urgent' },
-    { message: 'Task Assigned: John allocated to Mombasa Port Assessment.', time: '3h ago', category: 'Task' },
-    { message: 'Budget Approved: UNICEF grant funding ledger configured.', time: '1 day ago', category: 'Finance' },
-    { message: 'Report Due: M&E baseline indicators update required.', time: '2 days ago', category: 'Reminder' }
-  ];
+  const { auditLogs } = useProject();
+
+  // Derive a real-time alerts feed from actual context audit logs (derived from db)
+  const alerts = auditLogs.slice(0, 10).map(log => ({
+    message: log.description || 'Workspace event triggered.',
+    time: log.timestamp ? new Date(log.timestamp).toLocaleString() : 'Just now',
+    category: log.actionType ? log.actionType.replace(/_/g, ' ') : 'Update'
+  }));
 
   return (
     <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700">
@@ -38,6 +41,9 @@ export function PMNotificationsView() {
               </span>
             </div>
           ))}
+          {alerts.length === 0 && (
+            <div className="text-center py-12 text-slate-400 italic">No recent database activity to alert on.</div>
+          )}
         </div>
       </div>
     </div>

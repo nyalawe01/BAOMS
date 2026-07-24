@@ -14,16 +14,20 @@ import Swal from 'sweetalert2';
 // 1. M&E DASHBOARD VIEW
 // ============================================================================
 export function MEDashboardView() {
-  const { projects } = useProject();
+  const { projects, indicators } = useProject();
 
   const activeProjectsCount = projects.filter(p => p.status === 'In Progress').length;
   const totalBeneficiaries = projects.reduce((acc, curr) => acc + (curr.beneficiaryCount || 150), 0);
 
+  const indicatorsRegistered = indicators.length;
+  const indicatorsAchieved = indicators.filter(i => (i.achieved || 0) >= (i.target || 0) && (i.target || 0) > 0).length;
+  const achievementRate = indicatorsRegistered > 0 ? Math.round((indicatorsAchieved / indicatorsRegistered) * 100) : 0;
+
   const kpis = [
     { label: 'Active Projects', value: activeProjectsCount },
-    { label: 'Indicators Registered', value: 145 },
-    { label: 'Indicators Achieved', value: 108 },
-    { label: 'Achievement Rate', value: '74%' },
+    { label: 'Indicators Registered', value: indicatorsRegistered },
+    { label: 'Indicators Achieved', value: indicatorsAchieved },
+    { label: 'Achievement Rate', value: `${achievementRate}%` },
     { label: 'Beneficiaries Reached', value: totalBeneficiaries.toLocaleString() },
     { label: 'Data Collection Forms', value: 86 },
     { label: 'Reports Due', value: 5 },
@@ -137,46 +141,163 @@ export function MEProjectsView() {
 // 3. INDICATORS MODULE
 // ============================================================================
 export function MEIndicatorsView() {
-  const indicators = [
-    { name: 'Children receiving educational aid', baseline: 300, target: 1500, current: 1100, type: 'Output' },
-    { name: 'Youth acquiring vocational certificates', baseline: 50, target: 400, current: 280, type: 'Outcome' }
-  ];
+  const { indicators, addIndicator, updateIndicator, deleteIndicator, projects } = useProject();
+
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [target, setTarget] = useState('');
+  const [unit, setUnit] = useState('');
+  const [projectId, setProjectId] = useState('');
+  const [achievedDrafts, setAchievedDrafts] = useState({});
+
+  const handleAddIndicator = (e) => {
+    e.preventDefault();
+    if (!name || !target) return;
+
+    addIndicator({ name, description, target, achieved: 0, unit, projectId });
+
+    setName('');
+    setDescription('');
+    setTarget('');
+    setUnit('');
+    setProjectId('');
+    Swal.fire('Indicator Registered', 'Successfully added indicator to the performance matrix.', 'success');
+  };
+
+  const handleAchievedChange = (id, value) => {
+    setAchievedDrafts(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleAchievedCommit = (ind) => {
+    if (achievedDrafts[ind.id] === undefined) return;
+    const parsed = parseFloat(achievedDrafts[ind.id]) || 0;
+    setAchievedDrafts(prev => {
+      const next = { ...prev };
+      delete next[ind.id];
+      return next;
+    });
+    if (parsed !== (ind.achieved || 0)) {
+      updateIndicator(ind.id, { achieved: parsed });
+    }
+  };
+
+  const handleDelete = (ind) => {
+    Swal.fire({
+      title: 'Remove Indicator?',
+      text: `This will permanently remove "${ind.name}" from the performance matrix.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Remove'
+    }).then(res => {
+      if (res.isConfirmed) {
+        deleteIndicator(ind.id);
+      }
+    });
+  };
+
+  const getProjectName = (id) => projects.find(p => p.id === id)?.name || 'Unassigned';
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
         <h2 className="text-sm font-normal text-slate-808">Performance Indicators Matrix</h2>
-        <p className="text-xs text-slate-400 font-normal">Define baselines and target indexes across program outputs and outcomes.</p>
+        <p className="text-xs text-slate-400 font-normal">Define targets and track achieved values across program outputs and outcomes.</p>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full text-left border-collapse text-xs">
-          <thead>
-            <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
-              <th className="p-3">Indicator Name</th>
-              <th className="p-3">Type</th>
-              <th className="p-3">Baseline</th>
-              <th className="p-3">Target</th>
-              <th className="p-3">Current</th>
-              <th className="p-3">Achievement %</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-150">
-            {indicators.map((ind, idx) => {
-              const pct = Math.round((ind.current / ind.target) * 100);
-              return (
-                <tr key={idx}>
-                  <td className="p-3 font-normal text-slate-808">{ind.name}</td>
-                  <td className="p-3 text-slate-500 font-normal">{ind.type}</td>
-                  <td className="p-3 text-slate-600 font-mono">{ind.baseline}</td>
-                  <td className="p-3 text-slate-600 font-mono">{ind.target}</td>
-                  <td className="p-3 text-slate-800 font-mono">{ind.current}</td>
-                  <td className="p-3 font-normal text-slate-700">{pct}%</td>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Add Indicator Form */}
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 h-fit">
+          <span className="text-[10px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Add New Indicator</span>
+          <form onSubmit={handleAddIndicator} className="space-y-3 font-normal">
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase mb-1">Indicator Name</label>
+              <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Children receiving educational aid" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+            </div>
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase mb-1">Description</label>
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Definition / notes..." rows="2" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] text-slate-400 uppercase mb-1">Target</label>
+                <input type="number" required min="0" value={target} onChange={(e) => setTarget(e.target.value)} placeholder="e.g. 1500" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              </div>
+              <div>
+                <label className="block text-[10px] text-slate-400 uppercase mb-1">Unit</label>
+                <input type="text" value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="e.g. children" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase mb-1">Project (Optional)</label>
+              <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+                <option value="">Unassigned</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+            <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Add Indicator</button>
+          </form>
+        </div>
+
+        {/* Indicators List */}
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
+                  <th className="p-3">Indicator Name</th>
+                  <th className="p-3">Project</th>
+                  <th className="p-3">Unit</th>
+                  <th className="p-3">Target</th>
+                  <th className="p-3">Achieved</th>
+                  <th className="p-3">Achievement %</th>
+                  <th className="p-3"></th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              </thead>
+              <tbody className="divide-y divide-slate-150">
+                {indicators.map((ind) => {
+                  const targetVal = ind.target || 0;
+                  const achievedVal = ind.achieved || 0;
+                  const pct = targetVal > 0 ? Math.round((achievedVal / targetVal) * 100) : 0;
+                  const draftValue = achievedDrafts[ind.id] !== undefined ? achievedDrafts[ind.id] : achievedVal;
+
+                  return (
+                    <tr key={ind.id} className="hover:bg-slate-50/50">
+                      <td className="p-3 font-normal text-slate-808">
+                        <span className="block">{ind.name}</span>
+                        {ind.description && <span className="block text-[10px] text-slate-400 mt-0.5 font-normal">{ind.description}</span>}
+                      </td>
+                      <td className="p-3 text-slate-600">{getProjectName(ind.projectId)}</td>
+                      <td className="p-3 text-slate-500 font-normal">{ind.unit || '-'}</td>
+                      <td className="p-3 text-slate-600 font-mono">{targetVal}</td>
+                      <td className="p-3">
+                        <input
+                          type="number"
+                          value={draftValue}
+                          onChange={(e) => handleAchievedChange(ind.id, e.target.value)}
+                          onBlur={() => handleAchievedCommit(ind)}
+                          className="w-20 px-2 py-1 border border-slate-200 rounded text-center text-xs font-normal"
+                        />
+                      </td>
+                      <td className="p-3 font-normal text-slate-700">{pct}%</td>
+                      <td className="p-3 text-right">
+                        <button onClick={() => handleDelete(ind)} className="text-slate-400 hover:text-red-600 transition-colors" title="Remove indicator">
+                          <Trash2 size={13} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {indicators.length === 0 && (
+                  <tr>
+                    <td colSpan="7" className="text-center py-12 text-slate-400 italic">No indicators registered yet.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -186,16 +307,15 @@ export function MEIndicatorsView() {
 // 4. TARGETS MODULE
 // ============================================================================
 export function METargetsView() {
-  const targets = [
-    { name: 'Training workshops organized', annual: 24, q1: 6, q2: 6, q3: 6, q4: 6 },
-    { name: 'Water filtration systems installed', annual: 12, q1: 3, q2: 3, q3: 3, q4: 3 }
-  ];
+  const { indicators, projects } = useProject();
+
+  const getProjectName = (id) => projects.find(p => p.id === id)?.name || 'Unassigned';
 
   return (
     <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-808">Annual & Quarterly Target Allocations</h2>
-        <p className="text-xs text-slate-400 font-normal font-normal">Define and monitor targets broken down into operational quarters.</p>
+        <h2 className="text-sm font-normal text-slate-808">Indicator Target Achievement</h2>
+        <p className="text-xs text-slate-400 font-normal font-normal">Compare registered targets against achieved values across program indicators.</p>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
@@ -203,24 +323,36 @@ export function METargetsView() {
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
               <th className="p-3">Target Performance Indicator</th>
-              <th className="p-3">Annual Target</th>
-              <th className="p-3">Q1</th>
-              <th className="p-3">Q2</th>
-              <th className="p-3">Q3</th>
-              <th className="p-3">Q4</th>
+              <th className="p-3">Project</th>
+              <th className="p-3">Target</th>
+              <th className="p-3">Achieved</th>
+              <th className="p-3">Variance</th>
+              <th className="p-3">Progress</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-150 font-normal text-slate-700">
-            {targets.map((tgt, idx) => (
-              <tr key={idx}>
-                <td className="p-3 font-normal text-slate-808">{tgt.name}</td>
-                <td className="p-3 font-mono">{tgt.annual}</td>
-                <td className="p-3 font-mono">{tgt.q1}</td>
-                <td className="p-3 font-mono">{tgt.q2}</td>
-                <td className="p-3 font-mono">{tgt.q3}</td>
-                <td className="p-3 font-mono">{tgt.q4}</td>
+            {indicators.map((ind) => {
+              const targetVal = ind.target || 0;
+              const achievedVal = ind.achieved || 0;
+              const variance = achievedVal - targetVal;
+              const pct = targetVal > 0 ? Math.round((achievedVal / targetVal) * 100) : 0;
+
+              return (
+                <tr key={ind.id}>
+                  <td className="p-3 font-normal text-slate-808">{ind.name}</td>
+                  <td className="p-3 text-slate-600">{getProjectName(ind.projectId)}</td>
+                  <td className="p-3 font-mono">{targetVal}</td>
+                  <td className="p-3 font-mono">{achievedVal}</td>
+                  <td className="p-3 font-mono">{variance >= 0 ? `+${variance}` : variance}</td>
+                  <td className="p-3 font-mono">{pct}%</td>
+                </tr>
+              );
+            })}
+            {indicators.length === 0 && (
+              <tr>
+                <td colSpan="6" className="text-center py-12 text-slate-400 italic">No indicators registered yet.</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
@@ -232,45 +364,145 @@ export function METargetsView() {
 // 5. BENEFICIARIES MODULE
 // ============================================================================
 export function MEBeneficiariesView() {
-  const beneficiariesList = [
-    { name: 'Karanja Mwangi', age: 15, gender: 'Male', region: 'Nairobi', status: 'Active' },
-    { name: 'Fatma Juma', age: 16, gender: 'Female', region: 'Kisumu', status: 'Completed' }
-  ];
+  const { beneficiaries, projects, addBeneficiary, deleteBeneficiary } = useProject();
+
+  const [name, setName] = useState('');
+  const [gender, setGender] = useState('Male');
+  const [age, setAge] = useState('');
+  const [location, setLocation] = useState('');
+  const [category, setCategory] = useState('Child');
+  const [projectId, setProjectId] = useState('');
+
+  const handleEnroll = (e) => {
+    e.preventDefault();
+    if (!name || !age || !location) return;
+
+    addBeneficiary({ name, gender, age, location, category, projectId });
+
+    setName('');
+    setAge('');
+    setLocation('');
+    setProjectId('');
+    Swal.fire('Beneficiary Enrolled', 'Successfully registered beneficiary in Firestore database.', 'success');
+  };
+
+  const handleDelete = (ben) => {
+    Swal.fire({
+      title: 'Remove Beneficiary?',
+      text: `This will permanently remove "${ben.name}" from the registry.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Remove'
+    }).then(res => {
+      if (res.isConfirmed) {
+        deleteBeneficiary(ben.id);
+      }
+    });
+  };
+
+  const getProjectName = (id) => projects.find(p => p.id === id)?.name || 'Unassigned';
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
         <h2 className="text-sm font-normal text-slate-808">Enrolled Beneficiaries Registry</h2>
         <p className="text-xs text-slate-400 font-normal font-normal">Track registered children, youth, and women participating in programmatic outputs.</p>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full text-left border-collapse text-xs">
-          <thead>
-            <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
-              <th className="p-3">Name</th>
-              <th className="p-3">Age</th>
-              <th className="p-3">Gender</th>
-              <th className="p-3">Region</th>
-              <th className="p-3">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-150">
-            {beneficiariesList.map((ben, idx) => (
-              <tr key={idx} className="hover:bg-slate-50/50">
-                <td className="p-3 font-normal text-slate-808">{ben.name}</td>
-                <td className="p-3 font-mono">{ben.age}</td>
-                <td className="p-3 text-slate-600">{ben.gender}</td>
-                <td className="p-3 text-slate-600">{ben.region}</td>
-                <td className="p-3">
-                  <span className="px-2 py-0.5 rounded text-[8px] font-normal border uppercase bg-slate-50 text-slate-600 border-slate-200">
-                    {ben.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Enrollment Form */}
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 h-fit">
+          <span className="text-[10px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Enroll New Beneficiary</span>
+          <form onSubmit={handleEnroll} className="space-y-3 font-normal">
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase mb-1">Full Name</label>
+              <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Karanja Mwangi" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] text-slate-400 uppercase mb-1">Gender</label>
+                <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] text-slate-400 uppercase mb-1">Age</label>
+                <input type="number" required min="0" value={age} onChange={(e) => setAge(e.target.value)} placeholder="e.g. 15" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase mb-1">Location / Region</label>
+              <input type="text" required value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Nairobi" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+            </div>
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase mb-1">Category</label>
+              <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+                <option value="Child">Child</option>
+                <option value="Youth">Youth</option>
+                <option value="Woman">Woman</option>
+                <option value="Elderly">Elderly</option>
+                <option value="Person with Disability">Person with Disability</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase mb-1">Project (Optional)</label>
+              <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+                <option value="">Unassigned</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+            <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Enroll Beneficiary</button>
+          </form>
+        </div>
+
+        {/* Registry List */}
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
+                  <th className="p-3">Name</th>
+                  <th className="p-3">Age</th>
+                  <th className="p-3">Gender</th>
+                  <th className="p-3">Location</th>
+                  <th className="p-3">Category</th>
+                  <th className="p-3">Project</th>
+                  <th className="p-3"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-150">
+                {beneficiaries.map((ben, idx) => (
+                  <tr key={ben.id || idx} className="hover:bg-slate-50/50">
+                    <td className="p-3 font-normal text-slate-808">{ben.name}</td>
+                    <td className="p-3 font-mono">{ben.age}</td>
+                    <td className="p-3 text-slate-600">{ben.gender}</td>
+                    <td className="p-3 text-slate-600">{ben.location}</td>
+                    <td className="p-3">
+                      <span className="px-2 py-0.5 rounded text-[8px] font-normal border uppercase bg-slate-50 text-slate-600 border-slate-200">
+                        {ben.category}
+                      </span>
+                    </td>
+                    <td className="p-3 text-slate-600">{getProjectName(ben.projectId)}</td>
+                    <td className="p-3 text-right">
+                      <button onClick={() => handleDelete(ben)} className="text-slate-400 hover:text-red-600 transition-colors" title="Remove beneficiary">
+                        <Trash2 size={13} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {beneficiaries.length === 0 && (
+                  <tr>
+                    <td colSpan="7" className="text-center py-12 text-slate-400 italic">No beneficiaries enrolled yet.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -280,10 +512,32 @@ export function MEBeneficiariesView() {
 // 6. DATA COLLECTION MODULE
 // ============================================================================
 export function MECollectionView() {
-  const collectionLogs = [
-    { date: '2026-07-15', form: 'School Assessment Survey', district: 'Kisumu Central', submissions: 14 },
-    { date: '2026-07-14', form: 'Household Nutrition Form', district: 'Garissa Hub', submissions: 28 }
-  ];
+  const { fieldVisits, projects, addFieldVisit } = useProject();
+
+  const [notes, setNotes] = useState('');
+  const [projectId, setProjectId] = useState('');
+  const [gpsSimulated, setGpsSimulated] = useState({ latitude: -1.2921, longitude: 36.8219 });
+
+  const handleRandomizeGPS = () => {
+    setGpsSimulated({
+      latitude: -1.2921 + (Math.random() - 0.5) * 0.05,
+      longitude: 36.8219 + (Math.random() - 0.5) * 0.05
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!notes) return;
+    addFieldVisit({
+      notes,
+      projectId,
+      gpsLocation: gpsSimulated,
+      visitDate: new Date().toISOString().substring(0, 10)
+    });
+    setNotes('');
+    setProjectId('');
+    Swal.fire('Logged!', 'Field data collection entry saved.', 'success');
+  };
 
   return (
     <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
@@ -292,27 +546,85 @@ export function MECollectionView() {
         <p className="text-xs text-slate-400 font-normal">Review logs for digital baseline, school assessments, and community intakes.</p>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full text-left border-collapse text-xs">
-          <thead>
-            <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
-              <th className="p-3">Collection Date</th>
-              <th className="p-3">Survey Form</th>
-              <th className="p-3">Target Area District</th>
-              <th className="p-3">Total Submissions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-150">
-            {collectionLogs.map((log, idx) => (
-              <tr key={idx}>
-                <td className="p-3 font-mono text-[10px] text-slate-400">{log.date}</td>
-                <td className="p-3 font-normal text-slate-808">{log.form}</td>
-                <td className="p-3 text-slate-600">{log.district}</td>
-                <td className="p-3 font-mono text-slate-700">{log.submissions} Synced</td>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3 lg:col-span-1">
+          <h3 className="font-normal text-slate-808 text-sm">Log Field Data</h3>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div>
+              <label className="block text-[10px] font-normal text-slate-400 uppercase mb-1">Project</label>
+              <select
+                value={projectId}
+                onChange={(e) => setProjectId(e.target.value)}
+                className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-800"
+              >
+                <option value="">Select project...</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-normal text-slate-400 uppercase mb-1">Notes / Description</label>
+              <textarea
+                required
+                placeholder="Describe the data collected (survey form, submissions, district)..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-800"
+                rows="3"
+              />
+            </div>
+
+            <div className="bg-slate-50 rounded border border-slate-150 p-3 text-xs space-y-2">
+              <span className="font-normal text-slate-700 block flex items-center gap-1">
+                <MapPin size={14} className="text-slate-500" />
+                <span>Simulated GPS Coordinates</span>
+              </span>
+              <div className="font-mono text-[10px] text-slate-600">
+                Lat: {gpsSimulated.latitude.toFixed(6)} <br />
+                Lon: {gpsSimulated.longitude.toFixed(6)}
+              </div>
+              <button
+                type="button"
+                onClick={handleRandomizeGPS}
+                className="text-[10px] bg-slate-200 text-slate-700 py-0.5 px-2 rounded hover:bg-slate-350"
+              >
+                Change Geolocation
+              </button>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded text-xs font-normal"
+            >
+              Submit Collection
+            </button>
+          </form>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden lg:col-span-2">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
+                <th className="p-3">Collection Date</th>
+                <th className="p-3">Notes</th>
+                <th className="p-3">Officer</th>
+                <th className="p-3">Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-150">
+              {fieldVisits.map((log) => (
+                <tr key={log.id}>
+                  <td className="p-3 font-mono text-[10px] text-slate-400">{log.visitDate}</td>
+                  <td className="p-3 font-normal text-slate-808">{log.notes}</td>
+                  <td className="p-3 text-slate-600">{log.officerName}</td>
+                  <td className="p-3 font-mono text-slate-700">{log.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -322,12 +634,23 @@ export function MECollectionView() {
 // 7. SURVEY BUILDER MODULE
 // ============================================================================
 export function MESurveysView() {
-  const [questions, setQuestions] = useState([
-    { text: 'What is the beneficiary household size?', type: 'Number' },
-    { text: 'Upload photo of school facility', type: 'Image' }
-  ]);
+  const { surveys, addSurvey, updateSurvey, deleteSurvey, projects } = useProject();
+  const [title, setTitle] = useState('');
+  const [projectId, setProjectId] = useState('');
+  const [selectedSurveyId, setSelectedSurveyId] = useState(null);
 
-  const handleAddQuestion = () => {
+  const handleCreateSurvey = (e) => {
+    e.preventDefault();
+    if (!title) return;
+
+    addSurvey({ title, questions: [], projectId: projectId || null });
+
+    setTitle('');
+    setProjectId('');
+    Swal.fire('Survey Created', 'New survey form registered in the database.', 'success');
+  };
+
+  const handleAddQuestion = (survey) => {
     Swal.fire({
       title: 'Add Survey Question',
       input: 'text',
@@ -336,30 +659,104 @@ export function MESurveysView() {
       confirmButtonText: 'Add'
     }).then(res => {
       if (res.isConfirmed && res.value) {
-        setQuestions([...questions, { text: res.value, type: 'Text' }]);
+        const newQuestion = { id: Date.now().toString(), text: res.value, type: 'Text' };
+        updateSurvey(survey.id, { questions: [...(survey.questions || []), newQuestion] });
+      }
+    });
+  };
+
+  const handleDeleteSurvey = (survey) => {
+    Swal.fire({
+      title: 'Delete Survey?',
+      text: `This will permanently remove "${survey.title}" and its questions.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Delete'
+    }).then(res => {
+      if (res.isConfirmed) {
+        deleteSurvey(survey.id);
+        if (selectedSurveyId === survey.id) setSelectedSurveyId(null);
       }
     });
   };
 
   return (
     <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700">
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
-        <div>
-          <h2 className="text-sm font-normal text-slate-808">Electronic Survey Form Builder</h2>
-          <p className="text-xs text-slate-400 font-normal">Design questionnaires for data-collection assessments.</p>
-        </div>
-        <button onClick={handleAddQuestion} className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-xs font-normal">
-          + Add Question
-        </button>
+      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <h2 className="text-sm font-normal text-slate-808">Electronic Survey Form Builder</h2>
+        <p className="text-xs text-slate-400 font-normal">Design questionnaires for data-collection assessments.</p>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-3 font-normal">
-        {questions.map((q, idx) => (
-          <div key={idx} className="p-3 bg-slate-50 border border-slate-200 rounded flex justify-between items-center">
-            <span className="font-normal text-slate-700">{q.text}</span>
-            <span className="text-[10px] text-slate-400 font-mono">[{q.type}]</span>
-          </div>
-        ))}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Create Survey Form */}
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 h-fit">
+          <span className="text-[10px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Create New Survey</span>
+          <form onSubmit={handleCreateSurvey} className="space-y-3 font-normal">
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase mb-1">Survey Title</label>
+              <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Household Nutrition Assessment" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+            </div>
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase mb-1">Linked Project (Optional)</label>
+              <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+                <option value="">No Project Linked</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+            <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Create Survey</button>
+          </form>
+        </div>
+
+        {/* Surveys List */}
+        <div className="lg:col-span-2 space-y-4">
+          {surveys.length === 0 && (
+            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm text-center text-slate-400 italic">
+              No surveys registered yet. Create one to begin adding questions.
+            </div>
+          )}
+          {surveys.map((survey) => {
+            const linkedProject = projects.find(p => p.id === survey.projectId);
+            const isSelected = selectedSurveyId === survey.id;
+            return (
+              <div key={survey.id} className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="font-normal text-slate-808 text-sm">{survey.title}</h4>
+                    <span className="text-[10px] text-slate-400 font-normal">
+                      {linkedProject ? `Project: ${linkedProject.name}` : 'No project linked'} • {(survey.questions || []).length} Question(s)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => handleAddQuestion(survey)} className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-xs font-normal">
+                      + Add Question
+                    </button>
+                    <button onClick={() => handleDeleteSurvey(survey)} className="p-1.5 hover:bg-slate-100 rounded text-slate-600 border border-slate-200">
+                      <Trash2 size={13} />
+                    </button>
+                    <button onClick={() => setSelectedSurveyId(isSelected ? null : survey.id)} className="p-1.5 hover:bg-slate-100 rounded text-slate-600 border border-slate-200">
+                      <ChevronDown size={13} className={isSelected ? 'rotate-180 transition-transform' : 'transition-transform'} />
+                    </button>
+                  </div>
+                </div>
+                {isSelected && (
+                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                    {(survey.questions || []).length === 0 && (
+                      <p className="text-slate-400 italic">No questions added yet.</p>
+                    )}
+                    {(survey.questions || []).map((q, idx) => (
+                      <div key={q.id || idx} className="p-3 bg-slate-50 border border-slate-200 rounded flex justify-between items-center">
+                        <span className="font-normal text-slate-700">{q.text}</span>
+                        <span className="text-[10px] text-slate-400 font-mono">[{q.type}]</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -369,10 +766,36 @@ export function MESurveysView() {
 // 8. FIELD VISITS
 // ============================================================================
 export function MEVisitsView() {
-  const visits = [
-    { date: '2026-07-05', village: 'Kisauni Outpost', activities: 'Audit health assessment registers', status: 'Completed' },
-    { date: '2026-07-20', village: 'Viwandani Area', activities: 'Conduct youth tech class evaluation', status: 'Scheduled' }
-  ];
+  const { fieldVisits, projects, addFieldVisit } = useProject();
+
+  const [notes, setNotes] = useState('');
+  const [projectId, setProjectId] = useState('');
+  const [visitDate, setVisitDate] = useState(new Date().toISOString().substring(0, 10));
+  const [gpsSimulated, setGpsSimulated] = useState({ latitude: -1.2921, longitude: 36.8219 });
+
+  const handleRandomizeGPS = () => {
+    setGpsSimulated({
+      latitude: -1.2921 + (Math.random() - 0.5) * 0.05,
+      longitude: 36.8219 + (Math.random() - 0.5) * 0.05
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!notes) return;
+    addFieldVisit({
+      notes,
+      projectId,
+      visitDate,
+      gpsLocation: gpsSimulated
+    });
+    setNotes('');
+    setProjectId('');
+    setVisitDate(new Date().toISOString().substring(0, 10));
+    Swal.fire('Recorded!', 'Field visit successfully logged.', 'success');
+  };
+
+  const getProjectName = (id) => projects.find(p => p.id === id)?.name || 'Unassigned';
 
   return (
     <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
@@ -381,13 +804,80 @@ export function MEVisitsView() {
         <p className="text-xs text-slate-400 font-normal font-normal">Record coordinates, survey results, and program recommendations.</p>
       </div>
 
+      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
+        <h3 className="font-normal text-slate-808 text-sm">Record Visit</h3>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[10px] font-normal text-slate-400 uppercase mb-1">Project</label>
+              <select
+                value={projectId}
+                onChange={(e) => setProjectId(e.target.value)}
+                className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-800"
+              >
+                <option value="">Select project...</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] font-normal text-slate-400 uppercase mb-1">Visit Date</label>
+              <input
+                type="date"
+                value={visitDate}
+                onChange={(e) => setVisitDate(e.target.value)}
+                className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-800"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-normal text-slate-400 uppercase mb-1">Activities / Notes</label>
+              <textarea
+                required
+                placeholder="Describe the visit activities and observations..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-800"
+                rows="3"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="bg-slate-50 rounded border border-slate-150 p-3 text-xs space-y-2">
+              <span className="font-normal text-slate-700 block flex items-center gap-1">
+                <MapPin size={14} className="text-slate-500" />
+                <span>Simulated GPS Coordinates</span>
+              </span>
+              <div className="font-mono text-[10px] text-slate-600">
+                Lat: {gpsSimulated.latitude.toFixed(6)} <br />
+                Lon: {gpsSimulated.longitude.toFixed(6)}
+              </div>
+              <button
+                type="button"
+                onClick={handleRandomizeGPS}
+                className="text-[10px] bg-slate-200 text-slate-700 py-0.5 px-2 rounded hover:bg-slate-350"
+              >
+                Change Geolocation
+              </button>
+            </div>
+            <button
+              type="submit"
+              className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded text-xs font-normal"
+            >
+              Record Visit
+            </button>
+          </div>
+        </form>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-normal">
-        {visits.map((vis, idx) => (
-          <div key={idx} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-2">
-            <h4 className="font-normal text-slate-808 text-sm">{vis.village} Visit</h4>
-            <p className="text-xs text-slate-550 font-normal">{vis.activities}</p>
+        {fieldVisits.map((vis) => (
+          <div key={vis.id} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-2">
+            <h4 className="font-normal text-slate-808 text-sm">{getProjectName(vis.projectId)} Visit</h4>
+            <p className="text-xs text-slate-550 font-normal">{vis.notes}</p>
             <div className="flex justify-between items-center text-[10px] text-slate-400 pt-1.5 border-t border-slate-100 mt-2">
-              <span>Date: {vis.date}</span>
+              <span>Date: {vis.visitDate}</span>
               <span className="uppercase text-[9px] font-normal">{vis.status}</span>
             </div>
           </div>
@@ -431,10 +921,19 @@ export function MEReportsView() {
 // 10. DATA QUALITY
 // ============================================================================
 export function MEQualityView() {
-  const validationLogs = [
-    { type: 'Duplicate ID Record', desc: 'Beneficiary Mwangi Juma double entry flagged in ERP project.', status: 'Review Required' },
-    { type: 'Missing Data Field', desc: 'GPS coordinates missing on Viwandani field visit report.', status: 'Fixed' }
-  ];
+  const { fieldVisits, updateFieldVisit } = useProject();
+
+  const reviewItems = fieldVisits.filter(v => v.status === 'Pending Review' || v.status === 'Flagged');
+
+  const handleVerify = (id) => {
+    updateFieldVisit(id, { status: 'Verified' });
+    Swal.fire('Verified!', 'Field visit record marked as verified.', 'success');
+  };
+
+  const handleFlag = (id) => {
+    updateFieldVisit(id, { status: 'Flagged' });
+    Swal.fire('Flagged!', 'Field visit record flagged for review.', 'warning');
+  };
 
   return (
     <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
@@ -444,13 +943,21 @@ export function MEQualityView() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6 space-y-4 font-normal">
-        {validationLogs.map((log, idx) => (
-          <div key={idx} className="p-3 bg-slate-50 border border-slate-200 rounded-lg flex justify-between items-center">
+        {reviewItems.length === 0 && (
+          <p className="text-slate-400 text-xs text-center py-6">No field visits currently pending quality review.</p>
+        )}
+        {reviewItems.map((log) => (
+          <div key={log.id} className="p-3 bg-slate-50 border border-slate-200 rounded-lg flex justify-between items-center gap-4">
             <div>
-              <span className="block font-normal text-slate-707">{log.type}</span>
-              <span className="text-[10px] text-slate-400 mt-0.5">{log.desc}</span>
+              <span className="block font-normal text-slate-707">{log.officerName}</span>
+              <span className="text-[10px] text-slate-400 mt-0.5">{log.notes}</span>
+              <span className="text-[9px] text-slate-400 font-mono block mt-0.5">GPS: {log.gpsLocation?.latitude?.toFixed(4)}, {log.gpsLocation?.longitude?.toFixed(4)} • {log.visitDate}</span>
             </div>
-            <span className="text-[9px] px-2 py-0.5 border rounded uppercase bg-slate-100 text-slate-600 border-slate-200">{log.status}</span>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-[9px] px-2 py-0.5 border rounded uppercase bg-slate-100 text-slate-600 border-slate-200">{log.status}</span>
+              <button onClick={() => handleVerify(log.id)} className="px-2 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded text-[10px] font-normal">Mark Verified</button>
+              <button onClick={() => handleFlag(log.id)} className="px-2 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded text-[10px] font-normal">Flag for Review</button>
+            </div>
           </div>
         ))}
       </div>
@@ -462,10 +969,9 @@ export function MEQualityView() {
 // 11. GIS MAP VIEW
 // ============================================================================
 export function MEMapsView() {
-  const coordinatesList = [
-    { name: 'Kibera Primary School Hub', coords: '-1.3125, 36.7881', type: 'School' },
-    { name: 'Mombasa Outreach Post', coords: '-4.0435, 39.6682', type: 'Office' }
-  ];
+  const { fieldVisits, projects } = useProject();
+
+  const getProjectName = (id) => projects.find(p => p.id === id)?.name || 'Unassigned';
 
   return (
     <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
@@ -479,16 +985,16 @@ export function MEMapsView() {
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
               <th className="p-3">Location Node</th>
-              <th className="p-3">Type</th>
+              <th className="p-3">Status</th>
               <th className="p-3">GPS Coordinates</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-150">
-            {coordinatesList.map((node, idx) => (
-              <tr key={idx}>
-                <td className="p-3 font-normal text-slate-808">{node.name}</td>
-                <td className="p-3 text-slate-500 font-normal">{node.type}</td>
-                <td className="p-3 font-mono text-[10px] text-slate-550">{node.coords}</td>
+            {fieldVisits.map((node) => (
+              <tr key={node.id}>
+                <td className="p-3 font-normal text-slate-808">{getProjectName(node.projectId)}</td>
+                <td className="p-3 text-slate-500 font-normal">{node.status}</td>
+                <td className="p-3 font-mono text-[10px] text-slate-550">{node.gpsLocation?.latitude?.toFixed(4)}, {node.gpsLocation?.longitude?.toFixed(4)}</td>
               </tr>
             ))}
           </tbody>
@@ -502,6 +1008,8 @@ export function MEMapsView() {
 // 12. ANALYTICS
 // ============================================================================
 export function MEAnalyticsView() {
+  const { indicators } = useProject();
+
   return (
     <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
@@ -509,8 +1017,30 @@ export function MEAnalyticsView() {
         <p className="text-xs text-slate-400 font-normal">Visual analytics tracking indicator curves and targets met.</p>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex items-center justify-center py-12 text-slate-400 italic">
-        [Program Target Achievement Line Charts - Neutral Palette Representation]
+      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-5">
+        {indicators.length === 0 ? (
+          <div className="flex items-center justify-center py-12 text-slate-400 italic">
+            No indicators registered yet. Add indicators to see performance analytics.
+          </div>
+        ) : (
+          indicators.map((ind) => {
+            const targetVal = ind.target || 0;
+            const achievedVal = ind.achieved || 0;
+            const pct = targetVal > 0 ? Math.round((achievedVal / targetVal) * 100) : 0;
+
+            return (
+              <div key={ind.id} className="space-y-1.5">
+                <div className="flex justify-between text-xs text-slate-700 font-normal">
+                  <span>{ind.name}</span>
+                  <span>{achievedVal} / {targetVal} {ind.unit} ({pct}%)</span>
+                </div>
+                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                  <div className="bg-slate-500 h-full" style={{ width: `${Math.min(pct, 100)}%` }}></div>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );
