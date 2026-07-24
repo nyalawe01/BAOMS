@@ -24,7 +24,7 @@ export function PMDashboardView() {
   // Derive recent activities from actual context audit logs (derived from db)
   const recentActivities = auditLogs.slice(0, 5).map(log => ({
     title: log.actionType ? log.actionType.replace(/_/g, ' ') : 'WORKSPACE UPDATE',
-    desc: log.details || 'Workspace event triggered.',
+    desc: log.description || 'Workspace event triggered.',
     time: log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : 'Just now'
   }));
 

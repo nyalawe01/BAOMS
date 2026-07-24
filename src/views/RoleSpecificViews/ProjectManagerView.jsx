@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useProject } from '../../context/ProjectContext';
 import {
-  Users, FileText, Plus, Upload, X, FileCheck, Send, Layers, BookOpen, Search, LayoutDashboard, Eye
+  Users, FileText, Plus, Upload, X, FileCheck, Send, Layers, BookOpen, Search, LayoutDashboard, Eye, ShieldAlert
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { Avatar } from "@/components/base/avatar/avatar";

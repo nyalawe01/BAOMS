@@ -291,6 +291,22 @@ export const ProjectProvider = ({ children }) => {
     logAudit('USER_MANAGEMENT', `Onboarded staff member "${newUser.name}" as "${newUser.role}".`);
   };
 
+  const deleteUser = async (userId) => {
+    const targetUser = users.find(u => u.id === userId);
+    if (isFirebaseConfigured) {
+      try {
+        await deleteDoc(doc(db, 'users', userId));
+      } catch (err) {
+        console.error("Firestore delete user error:", err);
+      }
+    } else {
+      const updated = users.filter(u => u.id !== userId);
+      setUsers(updated);
+      syncLocal('baoms_users', updated);
+    }
+    logAudit('USER_MANAGEMENT', `Removed directory profile for "${targetUser ? targetUser.name : userId}".`);
+  };
+
   const updateUser = async (userId, updatedData) => {
     if (isFirebaseConfigured) {
       try {
@@ -886,6 +902,7 @@ export const ProjectProvider = ({ children }) => {
         setActivePreviewDoc,
         addUser,
         updateUser,
+        deleteUser,
         addProject,
         updateProject,
         deleteProject,

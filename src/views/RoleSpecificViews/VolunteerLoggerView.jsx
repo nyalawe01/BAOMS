@@ -6,8 +6,13 @@ import {
 } from 'lucide-react';
 
 export function VolunteerLoggerView() {
-  const { user, internCountdown } = useAuth();
+  const { user } = useAuth();
   const { projects, logTaskHours } = useProject();
+
+  const internEndDate = user?.internPlacement?.endDate;
+  const internCountdown = internEndDate
+    ? Math.max(0, Math.floor((new Date(internEndDate).getTime() - Date.now()) / 1000))
+    : null;
   const [selectedProj, setSelectedProj] = useState(projects[0]?.id || '');
   const [selectedTask, setSelectedTask] = useState('');
   const [logHrs, setLogHrs] = useState('');
@@ -45,7 +50,7 @@ export function VolunteerLoggerView() {
             <div>
               <span className="text-[10px] text-slate-300 block font-bold uppercase tracking-wider">Internship placement Countdown</span>
               <span className="text-sm font-mono font-extrabold text-white">
-                {internCountdown !== null ? `${Math.floor(internCountdown / 60)}m ${internCountdown % 60}s` : 'Calculating...'}
+                {internCountdown !== null ? `${Math.floor(internCountdown / 60)}m ${internCountdown % 60}s` : 'Not configured'}
               </span>
             </div>
           </div>
@@ -128,9 +133,15 @@ export function VolunteerLoggerView() {
             <div className="bg-indigo-50 border border-indigo-150 rounded-xl p-4 flex items-center justify-between text-xs text-slate-700">
               <div>
                 <span className="block font-bold text-indigo-900">Internship Supervisor</span>
-                <span>{user.internPlacement.supervisorName} ({user.internPlacement.supervisorId})</span>
+                <span>
+                  {user.internPlacement
+                    ? `${user.internPlacement.supervisorName} (${user.internPlacement.supervisorId})`
+                    : 'Not yet assigned'}
+                </span>
               </div>
-              <span className="text-[10px] font-bold bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded uppercase">Linked</span>
+              <span className="text-[10px] font-bold bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded uppercase">
+                {user.internPlacement ? 'Linked' : 'Pending'}
+              </span>
             </div>
           )}
 

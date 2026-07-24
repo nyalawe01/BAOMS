@@ -24,7 +24,7 @@ export function ProgramOfficerView() {
     e.preventDefault();
     if (!reportProjId || !reportAmount || !reportDesc) return;
 
-    addExpense(reportProjId, reportAmount, reportDesc, reportFile);
+    addExpense(reportProjId, reportAmount, reportDesc, undefined, reportFile);
     setReportAmount('');
     setReportDesc('');
     setReportFile('');
