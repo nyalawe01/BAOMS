@@ -173,8 +173,7 @@ export const AuthProvider = ({ children }) => {
         hasPermission,
         updateProfileDetails,
         policyVault,
-        isFirebaseConfigured,
-        mockUsers: FALLBACK_USERS
+        isFirebaseConfigured
       }}
     >
       {children}

@@ -28,7 +28,6 @@ import { InputBase } from "@/components/base/input/input";
 // ==========================================
 export function SystemAdminView() {
   const { auditLogs } = useProject();
-  const { mockUsers } = useAuth();
   const [filterType, setFilterType] = useState('ALL');
 
   const filteredLogs = filterType === 'ALL' 

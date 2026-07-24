@@ -2,15 +2,16 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// BAOMS Firebase Live Configuration
+// BAOMS Firebase configuration, sourced from environment variables.
+// See .env.example for the required keys; actual values live in .env.local (gitignored).
 export const firebaseConfig = {
-  apiKey: "AIzaSyBaDv0toBJ08vU4q_l-ahx4AUtZhOm-s4Y",
-  authDomain: "baoms-3dc26.firebaseapp.com",
-  projectId: "baoms-3dc26",
-  storageBucket: "baoms-3dc26.firebasestorage.app",
-  messagingSenderId: "403394441757",
-  appId: "1:403394441757:web:6369429bcb24bd5b2d0cf4",
-  measurementId: "G-Q1QSZZZTY6"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Check if Firebase is configured with active keys
