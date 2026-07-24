@@ -754,6 +754,33 @@ export const ProjectProvider = ({ children }) => {
     logAudit('ASSET_VENDOR_REGISTER', `Added new ${type} register: "${data.name || data.vendorName}".`);
   };
 
+  const updateAssetOrVendor = async (registerId, updatedDetails) => {
+    const item = assetsAndVendors.find(a => a.id === registerId);
+    const mergedDetails = { ...(item ? item.details : {}), ...updatedDetails };
+
+    if (isFirebaseConfigured) {
+      try {
+        await updateDoc(doc(db, 'assetsAndVendors', registerId), {
+          details: mergedDetails,
+          lastUpdatedBy: user ? user.personalDetails?.name || user.email : 'System',
+          updatedAt: new Date().toISOString()
+        });
+      } catch (err) {
+        console.error("Firestore update asset/vendor error:", err);
+      }
+    } else {
+      const updated = assetsAndVendors.map(a => a.id === registerId ? {
+        ...a,
+        details: mergedDetails,
+        lastUpdatedBy: user ? user.personalDetails?.name || user.email : 'System',
+        updatedAt: new Date().toISOString()
+      } : a);
+      setAssetsAndVendors(updated);
+      syncLocal('baoms_assets_vendors', updated);
+    }
+    logAudit('ASSET_VENDOR_REGISTER', `Updated register "${item ? (item.details.name || item.details.vendorName) : registerId}".`);
+  };
+
   const createOrder = async (orderType, vendorName, items, totalAmount) => {
     const newOrder = {
       orderType,
@@ -1279,6 +1306,7 @@ export const ProjectProvider = ({ children }) => {
         addTransaction,
         updateExpenseStatus,
         addAssetOrVendor,
+        updateAssetOrVendor,
         createOrder,
         updateOrderStatus,
         addAnnouncement,

@@ -6,7 +6,7 @@ import { Package } from 'lucide-react';
 // 8. PM RESOURCES VIEW (categorized per-project)
 // ============================================================================
 export function PMResourcesView() {
-  const { projects, assetsAndVendors, addAssetOrVendor } = useProject();
+  const { projects, assetsAndVendors, addAssetOrVendor, updateAssetOrVendor } = useProject();
   const [selectedProjId, setSelectedProjId] = useState(projects[0]?.id || '');
 
   // Asset register form state
@@ -26,6 +26,10 @@ export function PMResourcesView() {
     setAssetName('');
     setAssetCode('');
     setAssetStatus('Available');
+  };
+
+  const handleStatusChange = (registerId, newStatus) => {
+    updateAssetOrVendor(registerId, { status: newStatus });
   };
 
   return (
@@ -110,11 +114,17 @@ export function PMResourcesView() {
                   <td className="p-3 font-normal text-slate-808">{res.details?.name}</td>
                   <td className="p-3 text-slate-500 font-normal font-mono">{res.details?.assetCode || 'N/A'}</td>
                   <td className="p-3">
-                    <span className={`px-2 py-0.5 rounded text-[8px] font-normal uppercase border ${
-                      res.details?.status === 'Available' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
-                    }`}>
-                      {res.details?.status || 'N/A'}
-                    </span>
+                    <select
+                      value={res.details?.status || 'Available'}
+                      onChange={(e) => handleStatusChange(res.id, e.target.value)}
+                      className={`px-2 py-0.5 rounded text-[8px] font-normal uppercase border focus:outline-none ${
+                        res.details?.status === 'Available' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                      }`}
+                    >
+                      <option value="Available">Available</option>
+                      <option value="Assigned">Assigned</option>
+                      <option value="Maintenance">Maintenance</option>
+                    </select>
                   </td>
                   <td className="p-3 text-slate-600 font-normal">{res.lastUpdatedBy || 'N/A'}</td>
                 </tr>

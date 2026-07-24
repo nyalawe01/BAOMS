@@ -5,7 +5,7 @@ import {
   signOut, 
   onAuthStateChanged
 } from 'firebase/auth';
-import { doc, getDoc, updateDoc, setDoc, collection, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, onSnapshot } from 'firebase/firestore';
 
 const AuthContext = createContext();
 
@@ -32,21 +32,17 @@ export const AuthProvider = ({ children }) => {
                 ...userDoc.data()
               });
             } else {
-              // Create default doc if none exists
-              const defaultProfile = {
-                role: 'Intern',
-                personalDetails: { name: firebaseUser.email.split('@')[0], phone: '', avatarUrl: '' },
-                officeDetails: { position: 'Intern', department: 'Engineering', hireDate: new Date().toISOString().split('T')[0], status: 'Active' },
-                supportingDocuments: { contract: 'N/A', nssf: 'N/A', nhif: 'N/A' },
-                permissions: ['simplified_logger', 'view_dashboard']
-              };
-              await setDoc(doc(db, 'users', firebaseUser.uid), defaultProfile);
-              setUser({
-                uid: firebaseUser.uid,
-                id: firebaseUser.uid,
-                email: firebaseUser.email,
-                ...defaultProfile
-              });
+              // No Firestore profile exists for this authenticated account.
+              // Legitimate accounts always get their profile doc created
+              // atomically with the Auth account (see addUser in
+              // ProjectContext), so a missing doc means this account was
+              // deprovisioned via deleteUser. Do not silently re-provision
+              // a default profile - that would let a deleted user regain
+              // access. Sign them out instead.
+              console.warn(`No Firestore profile found for uid ${firebaseUser.uid} - signing out.`);
+              await signOut(auth);
+              setUser(null);
+              setError('This account has been deactivated or has no active profile. Contact your administrator.');
             }
           } catch (err) {
             console.error("Firebase auth profile load error:", err);
