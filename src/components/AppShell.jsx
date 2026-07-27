@@ -6,6 +6,7 @@ import DynamicSidebar from './DynamicSidebar';
 import TopUtilityHeader from './TopUtilityHeader';
 import DashboardContent from './DashboardContent';
 import LoginView from '../views/LoginView';
+import ErrorBoundary from './ErrorBoundary';
 
 export default function AppShell() {
   const { user, loading } = useAuth();
@@ -123,7 +124,9 @@ export default function AppShell() {
         <TopUtilityHeader activeTab={activeTab} toggleSidebar={toggleSidebar} collapsed={sidebarCollapsed} />
 
         {/* Dynamic Center Screen Container */}
-        <DashboardContent activeTab={activeTab} setActiveTab={setActiveTab} />
+        <ErrorBoundary key={activeTab}>
+          <DashboardContent activeTab={activeTab} setActiveTab={setActiveTab} />
+        </ErrorBoundary>
       </div>
 
       {/* Global Document Preview Modal */}
