@@ -10,8 +10,17 @@ import {
   setDoc, 
   updateDoc,
   onSnapshot,
-  runTransaction
+  runTransaction,
+  query,
+  orderBy,
+  limit
 } from 'firebase/firestore';
+
+// Safety cap for collections with no pagination UI yet - without this, a
+// collection that grows into the tens of thousands of documents would sync
+// its entire history to every client on every load. This is a stopgap, not
+// real pagination (no "load more" / page controls exist yet).
+const RECENT_DOCS_LIMIT = 500;
 
 const ProjectContext = createContext();
 
@@ -62,13 +71,13 @@ export const ProjectProvider = ({ children }) => {
     const unsubProjects = onSnapshot(collection(db, 'projects'), (snap) => {
       setProjects(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(d => !d.deletedAt));
     }, (err) => console.warn("Firestore projects read permission denied:", err));
-    const unsubFiles = onSnapshot(collection(db, 'projectFiles'), (snap) => {
+    const unsubFiles = onSnapshot(query(collection(db, 'projectFiles'), orderBy('uploadedAt', 'desc'), limit(RECENT_DOCS_LIMIT)), (snap) => {
       setProjectFiles(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => console.warn("Firestore projectFiles read permission denied:", err));
     const unsubBudgets = onSnapshot(collection(db, 'budgets'), (snap) => {
       setBudgets(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => console.warn("Firestore budgets read permission denied:", err));
-    const unsubExpenses = onSnapshot(collection(db, 'expenses'), (snap) => {
+    const unsubExpenses = onSnapshot(query(collection(db, 'expenses'), orderBy('createdAt', 'desc'), limit(RECENT_DOCS_LIMIT)), (snap) => {
       setExpenses(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => console.warn("Firestore expenses read permission denied:", err));
     const unsubAssets = onSnapshot(collection(db, 'assetsAndVendors'), (snap) => {
@@ -83,16 +92,14 @@ export const ProjectProvider = ({ children }) => {
     const unsubMedia = onSnapshot(collection(db, 'mediaLibrary'), (snap) => {
       setMediaLibrary(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => console.warn("Firestore mediaLibrary read permission denied:", err));
-    const unsubOffline = onSnapshot(collection(db, 'offlineSubmissions'), (snap) => {
+    const unsubOffline = onSnapshot(query(collection(db, 'offlineSubmissions'), orderBy('submittedAt', 'desc'), limit(RECENT_DOCS_LIMIT)), (snap) => {
       setOfflineSubmissions(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => console.warn("Firestore offlineSubmissions read permission denied:", err));
     const unsubRequests = onSnapshot(collection(db, 'requests'), (snap) => {
       setRequests(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => console.warn("Firestore requests read permission denied:", err));
-    const unsubAudits = onSnapshot(collection(db, 'auditLogs'), (snap) => {
-      const sorted = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      sorted.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-      setAuditLogs(sorted);
+    const unsubAudits = onSnapshot(query(collection(db, 'auditLogs'), orderBy('timestamp', 'desc'), limit(RECENT_DOCS_LIMIT)), (snap) => {
+      setAuditLogs(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => console.warn("Firestore auditLogs read permission denied:", err));
     const unsubUsers = onSnapshot(collection(db, 'users'), (snap) => {
       setUsers(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(d => !d.deletedAt));
@@ -100,7 +107,7 @@ export const ProjectProvider = ({ children }) => {
     const unsubReports = onSnapshot(collection(db, 'reports'), (snap) => {
       setReports(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => console.warn("Firestore reports read permission denied:", err));
-    const unsubTx = onSnapshot(collection(db, 'transactions'), (snap) => {
+    const unsubTx = onSnapshot(query(collection(db, 'transactions'), orderBy('date', 'desc'), limit(RECENT_DOCS_LIMIT)), (snap) => {
       setTransactions(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => console.warn("Firestore transactions read permission denied:", err));
     const unsubIndicators = onSnapshot(collection(db, 'indicators'), (snap) => {
@@ -109,7 +116,7 @@ export const ProjectProvider = ({ children }) => {
     const unsubBeneficiaries = onSnapshot(collection(db, 'beneficiaries'), (snap) => {
       setBeneficiaries(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(d => !d.deletedAt));
     }, (err) => console.warn("Firestore beneficiaries read permission denied:", err));
-    const unsubFieldVisits = onSnapshot(collection(db, 'fieldVisits'), (snap) => {
+    const unsubFieldVisits = onSnapshot(query(collection(db, 'fieldVisits'), orderBy('visitDate', 'desc'), limit(RECENT_DOCS_LIMIT)), (snap) => {
       setFieldVisits(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => console.warn("Firestore fieldVisits read permission denied:", err));
     const unsubSurveys = onSnapshot(collection(db, 'surveys'), (snap) => {
