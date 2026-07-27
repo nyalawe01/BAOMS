@@ -40,6 +40,18 @@ export const ProjectProvider = ({ children }) => {
   const [events, setEvents] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [activePreviewDoc, setActivePreviewDoc] = useState(null);
+  const [clientIp, setClientIp] = useState('');
+
+  // Best-effort client IP for audit logs - fetched once per session via a
+  // public lookup (there's no backend here to read the request IP directly).
+  useEffect(() => {
+    let cancelled = false;
+    fetch('https://api.ipify.org?format=json')
+      .then(res => res.json())
+      .then(data => { if (!cancelled && data?.ip) setClientIp(data.ip); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   // 1. Firebase Mode: Real-time sync with Firestore snapshots
   useEffect(() => {
@@ -243,6 +255,7 @@ export const ProjectProvider = ({ children }) => {
       userRole: user ? user.role : 'System',
       actionType,
       description,
+      ipAddress: clientIp || 'unknown',
       timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
     };
 
@@ -937,6 +950,7 @@ export const ProjectProvider = ({ children }) => {
 
   const addReport = async (reportData) => {
     const newReport = {
+      authorId: user ? (user.id || user.uid) : '',
       author: reportData.author || user?.name || user?.email || 'Staff Member',
       type: reportData.type || 'Weekly Status Report',
       date: new Date().toISOString().substring(0, 10),

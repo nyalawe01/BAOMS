@@ -58,8 +58,13 @@ service cloud.firestore {
     // 3. PROJECT FILES SUBCOLLECTION
     match /projectFiles/{fileId} {
       allow read: if isAuthenticated();
-      // PMs, Admins, and assigned program officers can upload files
-      allow write: if isAuthenticated();
+      // Uploader must be who they claim to be
+      allow create: if isAuthenticated() && request.resource.data.senderOriginId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        resource.data.senderOriginId == request.auth.uid ||
+        hasRole('Project Manager') ||
+        hasRole('System Administrator')
+      );
     }
 
     // 4. BUDGETS & LEDGERS
@@ -80,8 +85,10 @@ service cloud.firestore {
     // 5. EXPENSES & CLAIMS
     match /expenses/{expenseId} {
       allow read: if isAuthenticated();
-      // Allow any staff member to submit claims
-      allow create: if isAuthenticated();
+      // Allow any staff member to submit claims - amount must be a positive number
+      allow create: if isAuthenticated() &&
+        request.resource.data.amount is number &&
+        request.resource.data.amount > 0;
       // Approvals/Status changes restricted to Executive Director and Department Heads
       allow update, delete: if isAuthenticated() && (
         hasRole('Executive Director') || 
@@ -164,13 +171,26 @@ service cloud.firestore {
     // 12. REPORTS
     match /reports/{reportId} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
+      // Author must be who they claim to be
+      allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        resource.data.authorId == request.auth.uid ||
+        hasRole('System Administrator')
+      );
     }
 
     // 13. TRANSACTIONS
     match /transactions/{transactionId} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (
+      allow create: if isAuthenticated() && (
+        hasRole('Finance Officer') ||
+        hasRole('System Administrator') ||
+        hasRole('Project Manager') ||
+        hasRole('Executive Director')
+      ) &&
+        request.resource.data.amount is number &&
+        request.resource.data.amount > 0;
+      allow update, delete: if isAuthenticated() && (
         hasRole('Finance Officer') ||
         hasRole('System Administrator') ||
         hasRole('Project Manager') ||
