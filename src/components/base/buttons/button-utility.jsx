@@ -22,7 +22,7 @@ export function ButtonUtility({ size = 'sm', color = 'tertiary', tooltip = '', i
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center justify-center rounded-lg transition-colors focus:outline-none relative group ${selectedSize} ${selectedColor}`}
+      className={`inline-flex items-center justify-center rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 relative group ${selectedSize} ${selectedColor}`}
       title={tooltip}
     >
       {Icon && <Icon size={size === 'xs' ? 12 : size === 'sm' ? 15 : 18} />}

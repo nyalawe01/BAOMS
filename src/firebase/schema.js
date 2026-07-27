@@ -290,7 +290,9 @@ export const DATABASE_SCHEMA = {
     location: "string",
     category: "string",
     projectId: "string (Project ID, optional)",
-    enrollmentDate: "timestamp"
+    enrollmentDate: "timestamp",
+    consentGiven: "boolean",
+    consentDate: "timestamp"
   },
 
   /**

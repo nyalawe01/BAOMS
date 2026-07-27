@@ -34,7 +34,7 @@ export function Button({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center justify-center gap-1.5 font-sans transition-all focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${selectedSize} ${selectedColor} ${className}`}
+      className={`inline-flex items-center justify-center gap-1.5 font-sans transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${selectedSize} ${selectedColor} ${className}`}
     >
       {IconLeading && typeof IconLeading === 'function' && <IconLeading size={14} />}
       {IconLeading && typeof IconLeading !== 'function' && IconLeading}

@@ -1081,7 +1081,9 @@ export const ProjectProvider = ({ children }) => {
       location: data.location || '',
       category: data.category || '',
       projectId: data.projectId || '',
-      enrollmentDate: data.enrollmentDate || new Date().toISOString().substring(0, 10)
+      enrollmentDate: data.enrollmentDate || new Date().toISOString().substring(0, 10),
+      consentGiven: data.consentGiven || false,
+      consentDate: data.consentDate || ''
     };
     if (isFirebaseConfigured) {
       try {

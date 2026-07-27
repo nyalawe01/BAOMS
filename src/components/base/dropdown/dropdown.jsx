@@ -25,17 +25,31 @@ export function Root({ children }) {
   const trigger = childrenArray[0];
   const popover = childrenArray.slice(1);
 
-  // Clone trigger to inject click handler and ref
+  const handleTriggerKeyDown = (e) => {
+    if (trigger.props.onKeyDown) trigger.props.onKeyDown(e);
+    if (!isOpen && (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      setIsOpen(true);
+    } else if (isOpen && e.key === 'Escape') {
+      e.preventDefault();
+      setIsOpen(false);
+    }
+  };
+
+  // Clone trigger to inject click handler, ref and ARIA attributes
   const clonedTrigger = React.cloneElement(trigger, {
     ref: triggerRef,
+    'aria-haspopup': 'menu',
+    'aria-expanded': isOpen,
     onClick: (e) => {
       if (trigger.props.onClick) trigger.props.onClick(e);
       setIsOpen(!isOpen);
-    }
+    },
+    onKeyDown: handleTriggerKeyDown
   });
 
   return (
-    <DropdownContext.Provider value={{ isOpen, setIsOpen, popoverRef }}>
+    <DropdownContext.Provider value={{ isOpen, setIsOpen, popoverRef, triggerRef }}>
       <div className="relative inline-block text-left font-sans">
         {clonedTrigger}
         {isOpen && popover}
@@ -45,10 +59,40 @@ export function Root({ children }) {
 }
 
 export function Popover({ className = '', children }) {
-  const { popoverRef } = useContext(DropdownContext);
+  const { popoverRef, setIsOpen, triggerRef } = useContext(DropdownContext);
+
+  // Move focus into the menu as soon as it opens so arrow keys work immediately.
+  useEffect(() => {
+    const firstItem = popoverRef.current?.querySelector('[role="menuitem"]');
+    firstItem?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleKeyDown = (e) => {
+    const menuItems = Array.from(popoverRef.current?.querySelectorAll('[role="menuitem"]') || []);
+    if (menuItems.length === 0) return;
+    const currentIndex = menuItems.indexOf(document.activeElement);
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      const nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % menuItems.length;
+      menuItems[nextIndex]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const prevIndex = currentIndex < 0 ? menuItems.length - 1 : (currentIndex - 1 + menuItems.length) % menuItems.length;
+      menuItems[prevIndex]?.focus();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setIsOpen(false);
+      triggerRef.current?.focus();
+    }
+  };
+
   return (
     <div
       ref={popoverRef}
+      role="menu"
+      onKeyDown={handleKeyDown}
       className={`absolute left-0 mt-1.5 rounded-lg border border-slate-200 bg-white shadow-xl overflow-hidden z-50 animate-fadeIn ${className}`}
     >
       {children}
@@ -61,15 +105,15 @@ export function Menu({ children, selectionMode = 'none', selectedKeys = new Set(
     <div className="py-1 min-w-[140px] flex flex-col">
       {React.Children.map(children, child => {
         if (!child) return null;
-        
+
         // Pass selections to items if needed
         if (child.type === Item) {
-          const isSelected = selectedKeys instanceof Set 
-            ? selectedKeys.has(child.props.id) 
-            : Array.isArray(selectedKeys) 
+          const isSelected = selectedKeys instanceof Set
+            ? selectedKeys.has(child.props.id)
+            : Array.isArray(selectedKeys)
               ? selectedKeys.includes(child.props.id)
               : selectedKeys === child.props.id;
-          
+
           return React.cloneElement(child, {
             isSelected,
             selectionMode,
@@ -95,15 +139,15 @@ export function Menu({ children, selectionMode = 'none', selectedKeys = new Set(
   );
 }
 
-export function Item({ 
-  id, 
-  icon: Icon = null, 
-  avatarUrl = '', 
-  selectionIndicator = 'none', 
-  isSelected = false, 
-  addon = '', 
-  onClick = () => {}, 
-  children 
+export function Item({
+  id,
+  icon: Icon = null,
+  avatarUrl = '',
+  selectionIndicator = 'none',
+  isSelected = false,
+  addon = '',
+  onClick = () => {},
+  children
 }) {
   const { setIsOpen } = useContext(DropdownContext);
 
@@ -118,25 +162,27 @@ export function Item({
   return (
     <button
       type="button"
+      role="menuitem"
+      tabIndex={-1}
       onClick={handleClick}
-      className="w-full flex items-center justify-between px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors text-left"
+      className="w-full flex items-center justify-between px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors text-left focus:outline-none focus-visible:bg-slate-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
     >
       <div className="flex items-center gap-2 truncate">
         {selectionIndicator === 'checkbox' && (
-          <input 
-            type="checkbox" 
-            checked={isSelected} 
-            readOnly 
-            className="rounded border-slate-300 text-indigo-650 focus:ring-indigo-500 w-3.5 h-3.5" 
+          <input
+            type="checkbox"
+            checked={isSelected}
+            readOnly
+            className="rounded border-slate-300 text-indigo-650 focus:ring-indigo-500 w-3.5 h-3.5"
           />
         )}
-        
+
         {selectionIndicator === 'radio' && (
-          <input 
-            type="radio" 
-            checked={isSelected} 
-            readOnly 
-            className="border-slate-350 text-indigo-600 focus:ring-indigo-500 w-3 h-3" 
+          <input
+            type="radio"
+            checked={isSelected}
+            readOnly
+            className="border-slate-350 text-indigo-600 focus:ring-indigo-500 w-3 h-3"
           />
         )}
 

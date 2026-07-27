@@ -372,17 +372,23 @@ export function MEBeneficiariesView() {
   const [location, setLocation] = useState('');
   const [category, setCategory] = useState('Child');
   const [projectId, setProjectId] = useState('');
+  const [consentGiven, setConsentGiven] = useState(false);
 
   const handleEnroll = (e) => {
     e.preventDefault();
-    if (!name || !age || !location) return;
+    if (!name || !age || !location || !consentGiven) return;
 
-    addBeneficiary({ name, gender, age, location, category, projectId });
+    addBeneficiary({
+      name, gender, age, location, category, projectId,
+      consentGiven: true,
+      consentDate: new Date().toISOString().substring(0, 10)
+    });
 
     setName('');
     setAge('');
     setLocation('');
     setProjectId('');
+    setConsentGiven(false);
     Swal.fire('Beneficiary Enrolled', 'Successfully registered beneficiary in Firestore database.', 'success');
   };
 
@@ -455,6 +461,18 @@ export function MEBeneficiariesView() {
                 ))}
               </select>
             </div>
+            <div className="border-t border-slate-100 pt-3">
+              <label className="flex items-start gap-2 text-slate-600 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  required
+                  checked={consentGiven}
+                  onChange={(e) => setConsentGiven(e.target.checked)}
+                  className="mt-0.5 rounded border-slate-300 text-slate-800 focus:ring-slate-500 w-3.5 h-3.5 shrink-0"
+                />
+                <span className="text-[10px] leading-snug">I confirm this individual (or their guardian) has been informed about how their data will be used and has consented to enrollment.</span>
+              </label>
+            </div>
             <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Enroll Beneficiary</button>
           </form>
         </div>
@@ -471,6 +489,7 @@ export function MEBeneficiariesView() {
                   <th className="p-3">Location</th>
                   <th className="p-3">Category</th>
                   <th className="p-3">Project</th>
+                  <th className="p-3">Consent</th>
                   <th className="p-3"></th>
                 </tr>
               </thead>
@@ -487,6 +506,19 @@ export function MEBeneficiariesView() {
                       </span>
                     </td>
                     <td className="p-3 text-slate-600">{getProjectName(ben.projectId)}</td>
+                    <td className="p-3">
+                      {ben.consentGiven ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[8px] font-normal border uppercase bg-emerald-50 text-emerald-700 border-emerald-200" title={ben.consentDate ? `Consent captured ${ben.consentDate}` : 'Consent captured'}>
+                          <Check size={10} />
+                          Consent
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[8px] font-normal border uppercase bg-rose-50 text-rose-700 border-rose-200" title="No consent on record">
+                          <AlertCircle size={10} />
+                          None
+                        </span>
+                      )}
+                    </td>
                     <td className="p-3 text-right">
                       <button onClick={() => handleDelete(ben)} className="text-slate-400 hover:text-red-600 transition-colors" title="Remove beneficiary">
                         <Trash2 size={13} />
@@ -496,7 +528,7 @@ export function MEBeneficiariesView() {
                 ))}
                 {beneficiaries.length === 0 && (
                   <tr>
-                    <td colSpan="7" className="text-center py-12 text-slate-400 italic">No beneficiaries enrolled yet.</td>
+                    <td colSpan="8" className="text-center py-12 text-slate-400 italic">No beneficiaries enrolled yet.</td>
                   </tr>
                 )}
               </tbody>
@@ -890,8 +922,90 @@ export function MEVisitsView() {
 // ============================================================================
 // 9. REPORTS
 // ============================================================================
+
+// Helper to escape a CSV cell value
+const escapeCsvCell = (val) => {
+  const str = String(val ?? '');
+  if (/[",\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+};
+
+// Helper to build a CSV string from header + row arrays
+const buildCsv = (headers, rows) => {
+  return [headers, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n');
+};
+
+// Helper to download CSV content as a real file
+const downloadCsvFile = (filename, content) => {
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 export function MEReportsView() {
+  const { indicators, beneficiaries, fieldVisits, projects } = useProject();
+
+  const getProjectName = (id) => projects.find(p => p.id === id)?.name || 'Unassigned';
+
   const handleDownload = (rep) => {
+    const dateStr = new Date().toISOString().substring(0, 10);
+    let csvContent = '';
+
+    if (rep === 'Annual Impact') {
+      const indicatorRows = indicators.map(ind => {
+        const target = ind.target || 0;
+        const achieved = ind.achieved || 0;
+        const pct = target > 0 ? Math.round((achieved / target) * 100) : 0;
+        return [ind.name, getProjectName(ind.projectId), ind.unit || '', target, achieved, `${pct}%`];
+      });
+
+      const categoryCounts = beneficiaries.reduce((acc, b) => {
+        const cat = b.category || 'Uncategorized';
+        acc[cat] = (acc[cat] || 0) + 1;
+        return acc;
+      }, {});
+      const beneficiaryRows = Object.entries(categoryCounts).map(([cat, count]) => [cat, count]);
+
+      csvContent = buildCsv(
+        ['Indicator', 'Project', 'Unit', 'Target', 'Achieved', 'Achievement %'],
+        indicatorRows
+      ) + '\n\nBeneficiary Category,Count\n' + beneficiaryRows.map(r => r.map(escapeCsvCell).join(',')).join('\n');
+    } else if (rep === 'Quarterly Indicator Progress') {
+      csvContent = buildCsv(
+        ['Indicator', 'Project', 'Target', 'Achieved', 'Variance', 'Progress %'],
+        indicators.map(ind => {
+          const target = ind.target || 0;
+          const achieved = ind.achieved || 0;
+          const variance = achieved - target;
+          const pct = target > 0 ? Math.round((achieved / target) * 100) : 0;
+          return [ind.name, getProjectName(ind.projectId), target, achieved, variance, `${pct}%`];
+        })
+      );
+    } else {
+      csvContent = buildCsv(
+        ['Visit Date', 'Project', 'Officer', 'Notes', 'Status', 'Latitude', 'Longitude'],
+        fieldVisits.map(v => [
+          v.visitDate || '',
+          getProjectName(v.projectId),
+          v.officerName || '',
+          v.notes || '',
+          v.status || '',
+          v.gpsLocation?.latitude ?? '',
+          v.gpsLocation?.longitude ?? ''
+        ])
+      );
+    }
+
+    const slug = rep.toLowerCase().replace(/\s+/g, '-');
+    downloadCsvFile(`me-report-${slug}-${dateStr}.csv`, csvContent);
     Swal.fire('Outreach Report compiled', `Downloading "${rep}" matrix CSV.`, 'success');
   };
 
@@ -1069,7 +1183,12 @@ export function MEDocumentsView() {
               <span className="block font-normal">{doc.name}</span>
               <span className="text-[10px] text-slate-405 block mt-0.5 font-normal">Size: {doc.size} • Category: {doc.category}</span>
             </div>
-            <button onClick={() => Swal.fire('Downloaded!', 'Evaluation report document downloading...', 'success')} className="p-1 hover:bg-slate-100 rounded text-slate-600 border border-slate-200">
+            <button
+              disabled
+              title="No file attached"
+              aria-disabled="true"
+              className="p-1 rounded text-slate-300 border border-slate-200 cursor-not-allowed"
+            >
               <Download size={13} />
             </button>
           </div>

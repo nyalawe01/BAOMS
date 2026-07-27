@@ -1,9 +1,10 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useProject } from '../../context/ProjectContext';
-import { 
+import {
   Check, X, Briefcase
 } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 export function DepartmentHeadView() {
   const { user } = useAuth();
@@ -11,6 +12,38 @@ export function DepartmentHeadView() {
 
   const myDept = user?.officeDetails?.department || 'Engineering';
   const pendingRequests = requests.filter(r => r.status === 'pending' && r.department === myDept);
+
+  const handleApproveRequest = (req) => {
+    Swal.fire({
+      title: 'Approve Request',
+      text: `Approve ${req.requestType} request for ${req.userName}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#10b981',
+      confirmButtonText: 'Yes, Approve'
+    }).then((res) => {
+      if (res.isConfirmed) {
+        updateRequestStatus(req.id, 'Approved');
+        Swal.fire('Approved!', 'Request has been approved.', 'success');
+      }
+    });
+  };
+
+  const handleRejectRequest = (req) => {
+    Swal.fire({
+      title: 'Reject Request',
+      text: `Deny ${req.requestType} request for ${req.userName}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      confirmButtonText: 'Yes, Reject'
+    }).then((res) => {
+      if (res.isConfirmed) {
+        updateRequestStatus(req.id, 'rejected');
+        Swal.fire('Rejected', 'Request has been denied.', 'info');
+      }
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -53,14 +86,14 @@ export function DepartmentHeadView() {
               </div>
 
               <div className="flex gap-2">
-                <button 
-                  onClick={() => updateRequestStatus(req.id, 'Approved')}
+                <button
+                  onClick={() => handleApproveRequest(req)}
                   className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs py-1 px-3.5 rounded flex items-center gap-1"
                 >
                   <Check size={12} /> Approve
                 </button>
-                <button 
-                  onClick={() => updateRequestStatus(req.id, 'rejected')}
+                <button
+                  onClick={() => handleRejectRequest(req)}
                   className="bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs py-1 px-3.5 rounded flex items-center gap-1"
                 >
                   <X size={12} /> Reject

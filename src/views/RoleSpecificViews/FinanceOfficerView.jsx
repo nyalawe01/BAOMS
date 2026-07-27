@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useProject } from '../../context/ProjectContext';
-import { 
+import {
   FileText, Plus, FileSpreadsheet, Check, X
 } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 export function FinanceOfficerView() {
   const { budgets, expenses, updateExpenseStatus, addBudgetLedgerItem, projects } = useProject();
@@ -23,6 +24,38 @@ export function FinanceOfficerView() {
     addBudgetLedgerItem(selectedProjId, budgetDesc, budgetCat, budgetAmount);
     setBudgetDesc('');
     setBudgetAmount('');
+  };
+
+  const handleApproveExpense = (id, description, amount) => {
+    Swal.fire({
+      title: 'Approve Expense?',
+      text: `Are you sure you want to approve TZS ${amount.toLocaleString()} for "${description}"?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#10b981',
+      confirmButtonText: 'Yes, Approve'
+    }).then((res) => {
+      if (res.isConfirmed) {
+        updateExpenseStatus(id, 'Approved');
+        Swal.fire('Approved!', 'Expense claim has been approved.', 'success');
+      }
+    });
+  };
+
+  const handleRejectExpense = (id, description) => {
+    Swal.fire({
+      title: 'Reject Expense?',
+      text: `Deny the expense claim for "${description}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      confirmButtonText: 'Yes, Reject'
+    }).then((res) => {
+      if (res.isConfirmed) {
+        updateExpenseStatus(id, 'Rejected');
+        Swal.fire('Rejected', 'Expense claim was declined.', 'info');
+      }
+    });
   };
 
   return (
@@ -176,14 +209,14 @@ export function FinanceOfficerView() {
               <div className="flex items-center gap-4">
                 <span className="text-xs font-extrabold text-slate-800">TZS {ex.amount.toLocaleString()}</span>
                 <div className="flex gap-1.5">
-                  <button 
-                    onClick={() => updateExpenseStatus(ex.id, 'Approved')}
+                  <button
+                    onClick={() => handleApproveExpense(ex.id, ex.description, ex.amount)}
                     className="p-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded transition-colors"
                   >
                     <Check size={12} />
                   </button>
-                  <button 
-                    onClick={() => updateExpenseStatus(ex.id, 'Rejected')}
+                  <button
+                    onClick={() => handleRejectExpense(ex.id, ex.description)}
                     className="p-1 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded transition-colors"
                   >
                     <X size={12} />

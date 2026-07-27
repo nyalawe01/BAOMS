@@ -1,25 +1,29 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
 
-export function Select({ 
-  isRequired = false, 
-  label = '', 
-  tooltip = '', 
-  hint = '', 
-  placeholder = 'Select option', 
-  icon: Icon = null, 
-  items = [], 
+export function Select({
+  isRequired = false,
+  label = '',
+  tooltip = '',
+  hint = '',
+  placeholder = 'Select option',
+  icon: Icon = null,
+  items = [],
   value = '',
   onChange = () => {},
-  children 
+  children
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(value);
   const containerRef = useRef(null);
+  const triggerRef = useRef(null);
+  const optionRefs = useRef([]);
+  const listboxId = useId();
 
   const handleSelect = (id) => {
     setSelectedId(id);
     onChange(id);
     setIsOpen(false);
+    triggerRef.current?.focus();
   };
 
   useEffect(() => {
@@ -35,6 +39,45 @@ export function Select({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // When the listbox opens, move focus onto the currently selected option
+  // (or the first option) so arrow keys work immediately.
+  useEffect(() => {
+    if (isOpen) {
+      const selectedIndex = items.findIndex(item => item.id === selectedId);
+      const focusIndex = selectedIndex >= 0 ? selectedIndex : 0;
+      optionRefs.current[focusIndex]?.focus();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  const handleTriggerKeyDown = (event) => {
+    if (!isOpen && (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault();
+      setIsOpen(true);
+    } else if (isOpen && event.key === 'Escape') {
+      event.preventDefault();
+      setIsOpen(false);
+      triggerRef.current?.focus();
+    }
+  };
+
+  const handleOptionKeyDown = (event, index) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      const nextIndex = Math.min(index + 1, items.length - 1);
+      optionRefs.current[nextIndex]?.focus();
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      const prevIndex = Math.max(index - 1, 0);
+      optionRefs.current[prevIndex]?.focus();
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      setIsOpen(false);
+      triggerRef.current?.focus();
+    }
+    // Enter / Space are handled natively since options render as <button>.
+  };
 
   const selectedItem = items.find(item => item.id === selectedId);
 
@@ -54,8 +97,13 @@ export function Select({
 
       <button
         type="button"
+        ref={triggerRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 hover:border-slate-350 focus:outline-none focus:border-indigo-500 shadow-sm transition-all"
+        onKeyDown={handleTriggerKeyDown}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-controls={listboxId}
+        className="w-full flex items-center justify-between px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 hover:border-slate-350 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 focus:border-indigo-500 shadow-sm transition-all"
       >
         <div className="flex items-center gap-2 truncate">
           {Icon && <Icon size={16} className="text-slate-400 shrink-0" />}
@@ -72,8 +120,12 @@ export function Select({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 w-full mt-1.5 bg-white border border-slate-200 rounded-lg shadow-xl overflow-hidden z-50 divide-y divide-slate-100 max-h-[220px] overflow-y-auto pr-1 animate-fadeIn">
-          {items.map(item => {
+        <div
+          id={listboxId}
+          role="listbox"
+          className="absolute left-0 w-full mt-1.5 bg-white border border-slate-200 rounded-lg shadow-xl overflow-hidden z-50 divide-y divide-slate-100 max-h-[220px] overflow-y-auto pr-1 animate-fadeIn"
+        >
+          {items.map((item, index) => {
             const isSelected = item.id === selectedId;
             const element = children ? children(item) : null;
 
@@ -85,8 +137,13 @@ export function Select({
               <button
                 key={item.id}
                 type="button"
+                ref={(el) => { optionRefs.current[index] = el; }}
+                role="option"
+                aria-selected={isSelected}
+                tabIndex={-1}
                 onClick={() => handleSelect(item.id)}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-slate-50 transition-colors text-left text-xs ${
+                onKeyDown={(event) => handleOptionKeyDown(event, index)}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-slate-50 transition-colors text-left text-xs focus:outline-none focus-visible:bg-slate-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${
                   isSelected ? 'bg-indigo-50/50 text-indigo-900 font-bold' : 'text-slate-700'
                 }`}
               >
