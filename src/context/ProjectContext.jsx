@@ -8,9 +8,9 @@ import {
   doc, 
   addDoc, 
   setDoc, 
-  updateDoc, 
-  deleteDoc, 
-  onSnapshot 
+  updateDoc,
+  onSnapshot,
+  runTransaction
 } from 'firebase/firestore';
 
 const ProjectContext = createContext();
@@ -60,7 +60,7 @@ export const ProjectProvider = ({ children }) => {
     console.log("BAOMS: Fetching real-time records from Firestore database...");
     
     const unsubProjects = onSnapshot(collection(db, 'projects'), (snap) => {
-      setProjects(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setProjects(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(d => !d.deletedAt));
     }, (err) => console.warn("Firestore projects read permission denied:", err));
     const unsubFiles = onSnapshot(collection(db, 'projectFiles'), (snap) => {
       setProjectFiles(snap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -95,7 +95,7 @@ export const ProjectProvider = ({ children }) => {
       setAuditLogs(sorted);
     }, (err) => console.warn("Firestore auditLogs read permission denied:", err));
     const unsubUsers = onSnapshot(collection(db, 'users'), (snap) => {
-      setUsers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setUsers(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(d => !d.deletedAt));
     }, (err) => console.warn("Firestore users read permission denied:", err));
     const unsubReports = onSnapshot(collection(db, 'reports'), (snap) => {
       setReports(snap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -104,22 +104,22 @@ export const ProjectProvider = ({ children }) => {
       setTransactions(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => console.warn("Firestore transactions read permission denied:", err));
     const unsubIndicators = onSnapshot(collection(db, 'indicators'), (snap) => {
-      setIndicators(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setIndicators(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(d => !d.deletedAt));
     }, (err) => console.warn("Firestore indicators read permission denied:", err));
     const unsubBeneficiaries = onSnapshot(collection(db, 'beneficiaries'), (snap) => {
-      setBeneficiaries(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setBeneficiaries(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(d => !d.deletedAt));
     }, (err) => console.warn("Firestore beneficiaries read permission denied:", err));
     const unsubFieldVisits = onSnapshot(collection(db, 'fieldVisits'), (snap) => {
       setFieldVisits(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => console.warn("Firestore fieldVisits read permission denied:", err));
     const unsubSurveys = onSnapshot(collection(db, 'surveys'), (snap) => {
-      setSurveys(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setSurveys(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(d => !d.deletedAt));
     }, (err) => console.warn("Firestore surveys read permission denied:", err));
     const unsubEvents = onSnapshot(collection(db, 'events'), (snap) => {
-      setEvents(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setEvents(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(d => !d.deletedAt));
     }, (err) => console.warn("Firestore events read permission denied:", err));
     const unsubInvoices = onSnapshot(collection(db, 'invoices'), (snap) => {
-      setInvoices(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setInvoices(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(d => !d.deletedAt));
     }, (err) => console.warn("Firestore invoices read permission denied:", err));
 
     return () => {
@@ -356,7 +356,7 @@ export const ProjectProvider = ({ children }) => {
     const targetUser = users.find(u => u.id === userId);
     if (isFirebaseConfigured) {
       try {
-        await deleteDoc(doc(db, 'users', userId));
+        await updateDoc(doc(db, 'users', userId), { deletedAt: new Date().toISOString() });
       } catch (err) {
         console.error("Firestore delete user error:", err);
       }
@@ -437,7 +437,7 @@ export const ProjectProvider = ({ children }) => {
     const proj = projects.find(p => p.id === projectId);
     if (isFirebaseConfigured) {
       try {
-        await deleteDoc(doc(db, 'projects', projectId));
+        await updateDoc(doc(db, 'projects', projectId), { deletedAt: new Date().toISOString() });
       } catch (err) {
         console.error("Firestore delete project error:", err);
       }
@@ -675,34 +675,50 @@ export const ProjectProvider = ({ children }) => {
 
     if (isFirebaseConfigured) {
       try {
-        await updateDoc(doc(db, 'expenses', expenseId), { status });
-        
-        // If approved, update corresponding project budget spent caches and log transaction
-        if (status === 'Approved') {
-          const b = budgets.find(bu => bu.projectId === ex.projectId);
-          if (b) {
-            const updatedItems = (b.items || []).map((item, index) => {
-              if (index === 0 || item.description.toLowerCase().includes(ex.description.toLowerCase())) {
-                return { ...item, spent: item.spent + ex.amount };
-              }
-              return item;
-            });
-            await updateDoc(doc(db, 'budgets', b.id), { items: updatedItems });
-          }
+        // Runs as a single atomic transaction so the expense status, the
+        // budget's spent total, and the resulting ledger transaction can't
+        // drift out of sync under concurrent approvals - previously these
+        // were three separate writes. Also guards against double-counting
+        // if the same expense is approved twice (e.g. a duplicate click).
+        await runTransaction(db, async (transaction) => {
+          const expenseRef = doc(db, 'expenses', expenseId);
+          const expenseSnap = await transaction.get(expenseRef);
+          if (!expenseSnap.exists()) return;
+          const alreadyApplied = expenseSnap.data().status === 'Approved';
 
-          await addTransaction({
-            date: ex.createdAt || new Date().toISOString().substring(0, 10),
-            ref: `EXP-${ex.id ? ex.id.substring(0, 4).toUpperCase() : Date.now().toString().slice(-4)}`,
-            description: ex.description,
-            type: 'Expense',
-            category: ex.category || 'Office',
-            projectId: ex.projectId,
-            projectName: ex.projectName,
-            amount: ex.amount,
-            status: 'Approved',
-            bankAccount: ex.bankAccount || 'CRDB'
-          });
-        }
+          transaction.update(expenseRef, { status });
+
+          if (status === 'Approved' && !alreadyApplied) {
+            const b = budgets.find(bu => bu.projectId === ex.projectId);
+            if (b) {
+              const budgetRef = doc(db, 'budgets', b.id);
+              const budgetSnap = await transaction.get(budgetRef);
+              if (budgetSnap.exists()) {
+                const updatedItems = (budgetSnap.data().items || []).map((item, index) => {
+                  if (index === 0 || item.description.toLowerCase().includes(ex.description.toLowerCase())) {
+                    return { ...item, spent: item.spent + ex.amount };
+                  }
+                  return item;
+                });
+                transaction.update(budgetRef, { items: updatedItems });
+              }
+            }
+
+            const txRef = doc(collection(db, 'transactions'));
+            transaction.set(txRef, {
+              date: ex.createdAt || new Date().toISOString().substring(0, 10),
+              ref: `EXP-${ex.id ? ex.id.substring(0, 4).toUpperCase() : Date.now().toString().slice(-4)}`,
+              description: ex.description,
+              type: 'Expense',
+              category: ex.category || 'Office',
+              projectId: ex.projectId,
+              projectName: ex.projectName,
+              amount: ex.amount,
+              status: 'Approved',
+              bankAccount: ex.bankAccount || 'CRDB'
+            });
+          }
+        });
       } catch (err) {
         console.error("Firestore update expense status error:", err);
       }
@@ -1013,7 +1029,7 @@ export const ProjectProvider = ({ children }) => {
   const deleteIndicator = async (indicatorId) => {
     if (isFirebaseConfigured) {
       try {
-        await deleteDoc(doc(db, 'indicators', indicatorId));
+        await updateDoc(doc(db, 'indicators', indicatorId), { deletedAt: new Date().toISOString() });
       } catch (err) {
         console.error("Firestore delete indicator error:", err);
       }
@@ -1068,7 +1084,7 @@ export const ProjectProvider = ({ children }) => {
   const deleteBeneficiary = async (beneficiaryId) => {
     if (isFirebaseConfigured) {
       try {
-        await deleteDoc(doc(db, 'beneficiaries', beneficiaryId));
+        await updateDoc(doc(db, 'beneficiaries', beneficiaryId), { deletedAt: new Date().toISOString() });
       } catch (err) {
         console.error("Firestore delete beneficiary error:", err);
       }
@@ -1161,7 +1177,7 @@ export const ProjectProvider = ({ children }) => {
   const deleteSurvey = async (surveyId) => {
     if (isFirebaseConfigured) {
       try {
-        await deleteDoc(doc(db, 'surveys', surveyId));
+        await updateDoc(doc(db, 'surveys', surveyId), { deletedAt: new Date().toISOString() });
       } catch (err) {
         console.error("Firestore delete survey error:", err);
       }
@@ -1213,7 +1229,7 @@ export const ProjectProvider = ({ children }) => {
   const deleteEvent = async (eventId) => {
     if (isFirebaseConfigured) {
       try {
-        await deleteDoc(doc(db, 'events', eventId));
+        await updateDoc(doc(db, 'events', eventId), { deletedAt: new Date().toISOString() });
       } catch (err) {
         console.error("Firestore delete event error:", err);
       }
@@ -1268,7 +1284,7 @@ export const ProjectProvider = ({ children }) => {
   const deleteInvoice = async (invoiceId) => {
     if (isFirebaseConfigured) {
       try {
-        await deleteDoc(doc(db, 'invoices', invoiceId));
+        await updateDoc(doc(db, 'invoices', invoiceId), { deletedAt: new Date().toISOString() });
       } catch (err) {
         console.error("Firestore delete invoice error:", err);
       }
