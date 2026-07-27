@@ -37,7 +37,7 @@ export function HrPayrollsView() {
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
               {users.map((u, idx) => {
-                const salary = u.role === 'Executive Director' ? 'KES 250,000' : u.role === 'Project Manager' ? 'KES 140,000' : 'KES 120,000';
+                const salary = u.role === 'Executive Director' ? 'TZS 250,000' : u.role === 'Project Manager' ? 'TZS 140,000' : 'TZS 120,000';
                 return (
                   <tr key={idx} className="hover:bg-slate-50/40">
                     <td className="py-3.5 px-6 font-bold text-slate-800">{u.name}</td>

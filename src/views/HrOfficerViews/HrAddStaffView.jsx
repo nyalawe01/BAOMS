@@ -252,7 +252,7 @@ export function HrAddStaffView() {
                   type="text"
                   value={formData.phone}
                   onChange={(e) => handleFormChange('phone', e.target.value)}
-                  placeholder="+254 711 000 222"
+                  placeholder="+255 711 000 222"
                   className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
@@ -301,7 +301,7 @@ export function HrAddStaffView() {
                   type="text"
                   value={formData.placeOfBirth}
                   onChange={(e) => handleFormChange('placeOfBirth', e.target.value)}
-                  placeholder="Mombasa"
+                  placeholder="Zanzibar"
                   className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
@@ -311,7 +311,7 @@ export function HrAddStaffView() {
                   type="text"
                   value={formData.placeOfLiving}
                   onChange={(e) => handleFormChange('placeOfLiving', e.target.value)}
-                  placeholder="Westlands, Nairobi"
+                  placeholder="Masaki, Dar es Salaam"
                   className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
@@ -376,7 +376,7 @@ export function HrAddStaffView() {
                   type="text"
                   value={formData.officeLocation}
                   onChange={(e) => handleFormChange('officeLocation', e.target.value)}
-                  placeholder="e.g. HQ Annex, Nairobi"
+                  placeholder="e.g. HQ Annex, Dar es Salaam"
                   className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>

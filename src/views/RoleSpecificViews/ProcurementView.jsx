@@ -190,7 +190,7 @@ export function ProcurementView() {
           <input 
             type="number" 
             required 
-            placeholder="Price (KES)" 
+            placeholder="Price (TZS)" 
             value={orderItemPrice} 
             onChange={(e) => setOrderItemPrice(e.target.value)}
             className="px-2 py-1.5 border border-slate-200 rounded text-xs text-slate-800"
@@ -218,7 +218,7 @@ export function ProcurementView() {
                   <td className="py-2.5">{ord.orderType}</td>
                   <td className="py-2.5 font-medium">{ord.vendorName}</td>
                   <td className="py-2.5">{ord.items?.[0]?.description} (x{ord.items?.[0]?.quantity})</td>
-                  <td className="py-2.5 font-bold text-slate-900">KES {ord.totalAmount.toLocaleString()}</td>
+                  <td className="py-2.5 font-bold text-slate-900">TZS {ord.totalAmount.toLocaleString()}</td>
                   <td className="py-2.5 px-3">
                     <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-bold border ${
                       ord.status === 'Ordered' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'

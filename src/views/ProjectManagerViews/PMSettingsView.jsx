@@ -32,7 +32,7 @@ export function PMSettingsView() {
           <div className="space-y-3 text-xs">
             <div>
               <span className="text-slate-400 block mb-1">Configured Location Hubs</span>
-              <span className="font-normal text-slate-700 block bg-slate-50 p-2.5 rounded border border-slate-200">Nairobi HQ, Kisumu Hub, Mombasa Outpost, Garissa Field Office</span>
+              <span className="font-normal text-slate-700 block bg-slate-50 p-2.5 rounded border border-slate-200">Dar es Salaam HQ, Mwanza Hub, Zanzibar Outpost, Dodoma Field Office</span>
             </div>
           </div>
         </div>

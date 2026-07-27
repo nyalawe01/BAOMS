@@ -205,7 +205,7 @@ export function ProjectManagerView() {
                 <input 
                   type="text" 
                   required 
-                  placeholder="e.g. Mombasa Port Assessment" 
+                  placeholder="e.g. Zanzibar Port Assessment" 
                   value={newProjName}
                   onChange={(e) => setNewProjName(e.target.value)}
                   className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
@@ -222,7 +222,7 @@ export function ProjectManagerView() {
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Starting Budget Limit (KES)</label>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Starting Budget Limit (TZS)</label>
                 <input 
                   type="number" 
                   placeholder="e.g. 5000" 
@@ -375,7 +375,7 @@ export function ProjectManagerView() {
                       <h4 className="font-extrabold text-slate-800 text-sm">{proj.name}</h4>
                       <p className="text-slate-500 text-[11px] mt-1 leading-relaxed">{proj.description}</p>
                       <span className="text-[10px] text-slate-400 font-semibold block mt-1">
-                        Budget: KES {proj.budget?.toLocaleString()} Limit • {proj.startDate} to {proj.endDate}
+                        Budget: TZS {proj.budget?.toLocaleString()} Limit • {proj.startDate} to {proj.endDate}
                       </span>
                     </div>
                     <div className="text-right shrink-0">

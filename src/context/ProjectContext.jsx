@@ -417,7 +417,7 @@ export const ProjectProvider = ({ children }) => {
       syncLocal('baoms_budgets', updatedBudgets);
     }
 
-    logAudit('PROJECT_CREATION', `Initialized project portfolio: "${newProj.name}" with budget limit KES ${newProj.budget}.`);
+    logAudit('PROJECT_CREATION', `Initialized project portfolio: "${newProj.name}" with budget limit TZS ${newProj.budget}.`);
   };
 
   const deleteProject = async (projectId) => {
@@ -594,7 +594,7 @@ export const ProjectProvider = ({ children }) => {
       setBudgets(updated);
       syncLocal('baoms_budgets', updated);
     }
-    logAudit('BUDGET_ENTRY', `Allocated ledger item "${description}" under category "${category}" (KES ${amount}).`);
+    logAudit('BUDGET_ENTRY', `Allocated ledger item "${description}" under category "${category}" (TZS ${amount}).`);
   };
 
   const addExpense = async (projectId, amount, description, category = 'Office', receiptName = 'receipt_upload.jpg', bankAccount = 'CRDB') => {
@@ -625,7 +625,7 @@ export const ProjectProvider = ({ children }) => {
       setExpenses(updated);
       syncLocal('baoms_expenses', updated);
     }
-    logAudit('EXPENSE_ROUTING', `Submitted expense claim of KES ${amount} for project "${newExpense.projectName}".`);
+    logAudit('EXPENSE_ROUTING', `Submitted expense claim of TZS ${amount} for project "${newExpense.projectName}".`);
   };
 
   const addTransaction = async (txData) => {
@@ -653,7 +653,7 @@ export const ProjectProvider = ({ children }) => {
       setTransactions(updated);
       syncLocal('baoms_transactions', updated);
     }
-    logAudit('TRANSACTION_LOG', `Logged ${newTx.type} transaction of KES ${newTx.amount} (Ref: ${newTx.ref}).`);
+    logAudit('TRANSACTION_LOG', `Logged ${newTx.type} transaction of TZS ${newTx.amount} (Ref: ${newTx.ref}).`);
   };
 
   const updateExpenseStatus = async (expenseId, status, approverNotes = '') => {
@@ -803,7 +803,7 @@ export const ProjectProvider = ({ children }) => {
       setOrders(updated);
       syncLocal('baoms_orders', updated);
     }
-    logAudit('ORDER_WORKFLOWS', `Drafted ${orderType} order for vendor "${vendorName}" (KES ${totalAmount}).`);
+    logAudit('ORDER_WORKFLOWS', `Drafted ${orderType} order for vendor "${vendorName}" (TZS ${totalAmount}).`);
   };
 
   const updateOrderStatus = async (orderId, status) => {
@@ -1233,7 +1233,7 @@ export const ProjectProvider = ({ children }) => {
       setInvoices(updated);
       syncLocal('baoms_invoices', updated);
     }
-    logAudit('FINANCE_INVOICES', `Issued invoice "${newInvoice.invoiceNumber}" to "${newInvoice.clientName}" (KES ${newInvoice.amount}).`);
+    logAudit('FINANCE_INVOICES', `Issued invoice "${newInvoice.invoiceNumber}" to "${newInvoice.clientName}" (TZS ${newInvoice.amount}).`);
   };
 
   const updateInvoiceStatus = async (invoiceId, status) => {

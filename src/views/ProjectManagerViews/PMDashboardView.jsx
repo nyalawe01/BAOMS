@@ -110,12 +110,12 @@ export function PMDashboardView() {
                   <div>
                     <span className="w-2 h-2 inline-block rounded-full bg-slate-500 mr-2"></span>
                     <span className="text-slate-500">Allocated Spent:</span>
-                    <div className="font-normal text-slate-800 ml-4">KES {spentBudget.toLocaleString()}</div>
+                    <div className="font-normal text-slate-800 ml-4">TZS {spentBudget.toLocaleString()}</div>
                   </div>
                   <div>
                     <span className="w-2 h-2 inline-block rounded-full bg-slate-300 mr-2"></span>
                     <span className="text-slate-500">Remaining Limit:</span>
-                    <div className="font-normal text-slate-800 ml-4">KES {(totalBudget - spentBudget).toLocaleString()}</div>
+                    <div className="font-normal text-slate-800 ml-4">TZS {(totalBudget - spentBudget).toLocaleString()}</div>
                   </div>
                 </div>
                 {/* Simulated circle SVG */}

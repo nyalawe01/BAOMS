@@ -134,7 +134,7 @@ export function OnboardingEngine() {
             <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Phone Number</label>
             <input 
               type="text" 
-              placeholder="e.g. +254 700 123 456" 
+              placeholder="e.g. +255 700 123 456" 
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"

@@ -25,7 +25,7 @@ export function ExecutiveDirectorView() {
   const handleApproveExpense = (id, description, amount) => {
     Swal.fire({
       title: 'Approve Strategic Expense?',
-      text: `Are you sure you want to approve KES ${amount.toLocaleString()} for "${description}"?`,
+      text: `Are you sure you want to approve TZS ${amount.toLocaleString()} for "${description}"?`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#10b981',
@@ -68,7 +68,7 @@ export function ExecutiveDirectorView() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-1">
           <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">Aggregate Project Budget Limit</span>
-          <span className="text-2xl font-extrabold text-slate-800 block">KES {totalKPIBudget.toLocaleString()}</span>
+          <span className="text-2xl font-extrabold text-slate-800 block">TZS {totalKPIBudget.toLocaleString()}</span>
           <span className="text-xs text-slate-500 block pt-2">Allocated across {projects.length} portfolios.</span>
         </div>
 
@@ -112,7 +112,7 @@ export function ExecutiveDirectorView() {
             <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded uppercase">Ready to Export</span>
           </div>
           <div className="space-y-2 text-xs text-slate-600">
-            <p><strong>Executive Summary:</strong> The organization portfolio contains {projects.length} projects running with high output efficiency. Total fiscal liability is KES {totalKPIBudget}.</p>
+            <p><strong>Executive Summary:</strong> The organization portfolio contains {projects.length} projects running with high output efficiency. Total fiscal liability is TZS {totalKPIBudget}.</p>
             <p><strong>Core Deliverables:</strong> Website Redesign is currently at 60% completion. Security Audit is 100% completed.</p>
           </div>
         </div>
@@ -121,7 +121,7 @@ export function ExecutiveDirectorView() {
       {/* Strategic Approval Queue (High-Value Budgets >= 2,000) */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-5 border-b border-slate-250 bg-slate-50/50">
-          <h3 className="font-bold text-slate-800 text-sm">Strategic Approval Queue (KES &gt;= 2,000)</h3>
+          <h3 className="font-bold text-slate-800 text-sm">Strategic Approval Queue (TZS &gt;= 2,000)</h3>
           <p className="text-xs text-slate-400">High-value expenses requiring executive director sign-off.</p>
         </div>
 
@@ -138,7 +138,7 @@ export function ExecutiveDirectorView() {
               </div>
               
               <div className="flex items-center gap-4">
-                <span className="text-sm font-extrabold text-slate-900">KES {ex.amount.toLocaleString()}</span>
+                <span className="text-sm font-extrabold text-slate-900">TZS {ex.amount.toLocaleString()}</span>
                 <div className="flex gap-1.5">
                   <button 
                     onClick={() => handleApproveExpense(ex.id, ex.description, ex.amount)}

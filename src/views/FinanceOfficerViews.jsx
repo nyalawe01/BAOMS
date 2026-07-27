@@ -48,7 +48,7 @@ export function FinanceDashboardView() {
 
   // Calculators State
   const [vatAmount, setVatAmount] = useState('');
-  const [vatRate, setVatRate] = useState(16);
+  const [vatRate, setVatRate] = useState(18);
   const [vatResult, setVatResult] = useState(null);
 
   const [grossSalary, setGrossSalary] = useState('');
@@ -101,13 +101,13 @@ export function FinanceDashboardView() {
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'Cash Flow on Hand', value: `KES ${cashOnHand.toLocaleString()}` },
-          { label: 'Total Database Income', value: `KES ${totalIncome.toLocaleString()}` },
-          { label: 'Total Approved Expenses', value: `KES ${totalExpenses.toLocaleString()}` },
+          { label: 'Cash Flow on Hand', value: `TZS ${cashOnHand.toLocaleString()}` },
+          { label: 'Total Database Income', value: `TZS ${totalIncome.toLocaleString()}` },
+          { label: 'Total Approved Expenses', value: `TZS ${totalExpenses.toLocaleString()}` },
           { label: 'Budget Utilization %', value: `${budgetUtilization}%` },
           { label: 'Active Grants', value: activeGrants },
           { label: 'Pending Approvals', value: pendingApprovalsCount },
-          { label: 'Available Bank Balance', value: `KES ${cashOnHand.toLocaleString()}` }
+          { label: 'Available Bank Balance', value: `TZS ${cashOnHand.toLocaleString()}` }
         ].map((kpi, idx) => (
           <div key={idx} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:border-slate-350 transition-all">
             <span className="text-[10px] font-normal text-slate-400 uppercase tracking-widest">{kpi.label}</span>
@@ -156,7 +156,7 @@ export function FinanceDashboardView() {
                   <div key={idx} className="space-y-1">
                     <div className="flex justify-between text-xs font-normal text-slate-700">
                       <span>{p.name}</span>
-                      <span>KES {spent.toLocaleString()} spent ({percent}%)</span>
+                      <span>TZS {spent.toLocaleString()} spent ({percent}%)</span>
                     </div>
                     <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                       <div className="bg-slate-500 h-full" style={{ width: `${Math.min(percent, 100)}%` }}></div>
@@ -192,8 +192,8 @@ export function FinanceDashboardView() {
               </div>
               {vatResult && (
                 <div className="bg-slate-50 p-2.5 border border-slate-200 rounded space-y-1 text-slate-600">
-                  <div>VAT: KES {vatResult.vat.toFixed(2)}</div>
-                  <div>Total: KES {vatResult.total.toFixed(2)}</div>
+                  <div>VAT: TZS {vatResult.vat.toFixed(2)}</div>
+                  <div>Total: TZS {vatResult.total.toFixed(2)}</div>
                 </div>
               )}
             </div>
@@ -216,10 +216,10 @@ export function FinanceDashboardView() {
               <button onClick={handleCalculateNetSalary} className="w-full py-1.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Calculate Net</button>
               {netSalaryResult && (
                 <div className="bg-slate-50 p-2.5 border border-slate-200 rounded space-y-1 text-slate-600">
-                  <div>NSSF (6%): KES {netSalaryResult.nssf.toFixed(2)}</div>
-                  <div>NHIF (2.5%): KES {netSalaryResult.nhif.toFixed(2)}</div>
-                  <div>PAYE (30%): KES {netSalaryResult.paye.toFixed(2)}</div>
-                  <div>Net Salary: KES {netSalaryResult.net.toFixed(2)}</div>
+                  <div>NSSF (6%): TZS {netSalaryResult.nssf.toFixed(2)}</div>
+                  <div>NHIF (2.5%): TZS {netSalaryResult.nhif.toFixed(2)}</div>
+                  <div>PAYE (30%): TZS {netSalaryResult.paye.toFixed(2)}</div>
+                  <div>Net Salary: TZS {netSalaryResult.net.toFixed(2)}</div>
                 </div>
               )}
             </div>
@@ -246,8 +246,8 @@ export function FinanceDashboardView() {
               <button onClick={handleCalculateLoan} className="w-full py-1.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Calculate Monthly</button>
               {loanResult && (
                 <div className="bg-slate-50 p-2.5 border border-slate-200 rounded space-y-1 text-slate-600">
-                  <div>Monthly Paid: KES {loanResult.monthly.toFixed(2)}</div>
-                  <div>Total Payments: KES {loanResult.total.toFixed(2)}</div>
+                  <div>Monthly Paid: TZS {loanResult.monthly.toFixed(2)}</div>
+                  <div>Total Payments: TZS {loanResult.total.toFixed(2)}</div>
                 </div>
               )}
             </div>
@@ -320,7 +320,7 @@ export function FinanceTransactionsView() {
                   <td className="p-3 text-slate-600">{t.projectName}</td>
                   <td className="p-3 text-slate-600 font-mono text-[10px]">{t.bankAccount || 'CRDB'}</td>
                   <td className="p-3 font-normal text-slate-800">
-                    {t.type === 'Income' ? `+` : `-`} KES {t.amount?.toLocaleString()}
+                    {t.type === 'Income' ? `+` : `-`} TZS {t.amount?.toLocaleString()}
                   </td>
                   <td className="p-3">
                     <span className="px-2 py-0.5 rounded text-[8px] font-normal border uppercase bg-slate-50 text-slate-600 border-slate-200">
@@ -407,7 +407,7 @@ export function FinanceIncomeView() {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[10px] text-slate-400 uppercase mb-1">Amount (KES)</label>
+                <label className="block text-[10px] text-slate-400 uppercase mb-1">Amount (TZS)</label>
                 <input type="number" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 50000" className="w-full px-2 py-1.5 border border-slate-200 rounded bg-white" />
               </div>
               <div>
@@ -454,7 +454,7 @@ export function FinanceIncomeView() {
                     <td className="p-3 font-normal text-slate-808">{inc.description} ({inc.category})</td>
                     <td className="p-3 text-slate-600">{inc.projectName}</td>
                     <td className="p-3 font-mono text-[10px] text-slate-500">{inc.bankAccount || 'CRDB'}</td>
-                    <td className="p-3 font-normal text-slate-700">KES {inc.amount.toLocaleString()}</td>
+                    <td className="p-3 font-normal text-slate-700">TZS {inc.amount.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -503,7 +503,7 @@ export function FinanceExpensesView() {
           <form onSubmit={handleRecordExpense} className="space-y-3 font-normal">
             <div>
               <label className="block text-[10px] text-slate-400 uppercase mb-1">Expense Item Description</label>
-              <input type="text" required value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="e.g. Travel tickets to Kisumu" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="text" required value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="e.g. Travel tickets to Mwanza" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
@@ -518,7 +518,7 @@ export function FinanceExpensesView() {
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] text-slate-400 uppercase mb-1">Amount (KES)</label>
+                <label className="block text-[10px] text-slate-400 uppercase mb-1">Amount (TZS)</label>
                 <input type="number" required value={amt} onChange={(e) => setAmt(e.target.value)} placeholder="e.g. 1500" className="w-full px-2 py-1 border border-slate-200 rounded bg-white" />
               </div>
             </div>
@@ -565,7 +565,7 @@ export function FinanceExpensesView() {
                   <tr key={exp.id || idx}>
                     <td className="p-3 font-normal text-slate-808">{exp.description}</td>
                     <td className="p-3 text-slate-500 font-normal">{exp.category || 'Operations'}</td>
-                    <td className="p-3 font-normal text-slate-707">KES {exp.amount.toLocaleString()}</td>
+                    <td className="p-3 font-normal text-slate-707">TZS {exp.amount.toLocaleString()}</td>
                     <td className="p-3 font-mono text-[10px] text-slate-500">{exp.bankAccount || 'CRDB'}</td>
                     <td className="p-3">
                       <span className="px-2 py-0.5 rounded text-[8px] font-normal border uppercase bg-slate-50 text-slate-600 border-slate-200">
@@ -633,15 +633,15 @@ export function FinanceBudgetsView() {
               <div className="grid grid-cols-3 gap-3 text-center text-xs font-normal">
                 <div className="p-2.5 bg-slate-50 border border-slate-150 rounded">
                   <span className="text-[9px] text-slate-400 uppercase font-normal block">Allocated Limit</span>
-                  <span className="font-normal text-slate-750">KES {totalBudget.toLocaleString()}</span>
+                  <span className="font-normal text-slate-750">TZS {totalBudget.toLocaleString()}</span>
                 </div>
                 <div className="p-2.5 bg-slate-50 border border-slate-150 rounded">
                   <span className="text-[9px] text-slate-400 uppercase font-normal block">Total Spent</span>
-                  <span className="font-normal text-slate-750">KES {totalSpent.toLocaleString()}</span>
+                  <span className="font-normal text-slate-750">TZS {totalSpent.toLocaleString()}</span>
                 </div>
                 <div className="p-2.5 bg-slate-50 border border-slate-150 rounded">
                   <span className="text-[9px] text-slate-400 uppercase font-normal block">Remaining</span>
-                  <span className="font-normal text-slate-750">KES {remaining.toLocaleString()}</span>
+                  <span className="font-normal text-slate-750">TZS {remaining.toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -685,9 +685,9 @@ export function FinanceProjectsView() {
               return (
                 <tr key={proj.id} className="hover:bg-slate-50/50">
                   <td className="p-3 font-normal text-slate-808">{proj.name}</td>
-                  <td className="p-3 font-normal text-slate-700">KES {proj.budget?.toLocaleString() || 0}</td>
-                  <td className="p-3 font-normal text-slate-700">KES {spent.toLocaleString()}</td>
-                  <td className="p-3 font-normal text-slate-700">KES {remaining.toLocaleString()}</td>
+                  <td className="p-3 font-normal text-slate-700">TZS {proj.budget?.toLocaleString() || 0}</td>
+                  <td className="p-3 font-normal text-slate-700">TZS {spent.toLocaleString()}</td>
+                  <td className="p-3 font-normal text-slate-700">TZS {remaining.toLocaleString()}</td>
                   <td className="p-3 font-normal text-slate-600">{proj.progress || 0}% Complete</td>
                 </tr>
               );
@@ -703,30 +703,68 @@ export function FinanceProjectsView() {
 // 7. PAYROLL (connected to Transaction Engine)
 // ============================================================================
 export function FinancePayrollView() {
-  const { users, addTransaction } = useProject();
+  const { users, transactions, addTransaction } = useProject();
+  const [isDisbursing, setIsDisbursing] = useState(false);
 
-  const handleApprovePayroll = async () => {
-    // Approve payroll automatically posts salary transactions to general ledger
-    for (const u of users) {
-      const baseSalary = u.role === 'Executive Director' ? 180000 : u.role === 'HR Officer' ? 95000 : 75000;
-      const transportAllowance = 5000;
-      const paye = baseSalary * 0.30;
-      const nssf = baseSalary * 0.06;
-      const netSalary = baseSalary + transportAllowance - paye - nssf;
+  const currentPeriod = new Date().toISOString().substring(0, 7); // YYYY-MM
+  const alreadyDisbursedCount = transactions.filter(
+    t => t.category === 'Salary' && t.payPeriod === currentPeriod
+  ).length;
 
-      await addTransaction({
-        date: new Date().toISOString().substring(0, 10),
-        ref: `PAY-${Date.now().toString().slice(-4)}`,
-        description: `Net salary payout for staff: ${u.name}`,
-        type: 'Expense',
-        category: 'Salary',
-        amount: netSalary,
-        status: 'Approved',
-        bankAccount: 'CRDB'
+  const runDisbursement = async () => {
+    setIsDisbursing(true);
+    try {
+      for (const u of users) {
+        const baseSalary = u.role === 'Executive Director' ? 180000 : u.role === 'HR Officer' ? 95000 : 75000;
+        const transportAllowance = 5000;
+        const paye = baseSalary * 0.30;
+        const nssf = baseSalary * 0.06;
+        const netSalary = baseSalary + transportAllowance - paye - nssf;
+
+        await addTransaction({
+          date: new Date().toISOString().substring(0, 10),
+          ref: `PAY-${Date.now().toString().slice(-4)}`,
+          description: `Net salary payout for staff: ${u.name}`,
+          type: 'Expense',
+          category: 'Salary',
+          payPeriod: currentPeriod,
+          amount: netSalary,
+          status: 'Approved',
+          bankAccount: 'CRDB'
+        });
+      }
+      Swal.fire('Payroll Executed', 'Successfully approved salary disbursements and generated ledger expenses.', 'success');
+    } finally {
+      setIsDisbursing(false);
+    }
+  };
+
+  const handleApprovePayroll = () => {
+    if (isDisbursing) return;
+
+    if (alreadyDisbursedCount > 0) {
+      Swal.fire({
+        title: `Payroll for ${currentPeriod} already run`,
+        text: `${alreadyDisbursedCount} salary transaction(s) already exist for this period. Running it again will pay staff a second time. Continue anyway?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Yes, disburse again'
+      }).then((result) => {
+        if (result.isConfirmed) runDisbursement();
       });
+      return;
     }
 
-    Swal.fire('Payroll Executed', 'Successfully approved salary disbursements and generated ledger expenses.', 'success');
+    Swal.fire({
+      title: `Disburse payroll for ${currentPeriod}?`,
+      text: `This will pay all ${users.length} staff members. This cannot be undone.`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, disburse'
+    }).then((result) => {
+      if (result.isConfirmed) runDisbursement();
+    });
   };
 
   return (
@@ -736,8 +774,19 @@ export function FinancePayrollView() {
           <h2 className="text-sm font-normal text-slate-808">Staff Directory Payroll ledgers</h2>
           <p className="text-xs text-slate-400 font-normal">Generate base salary calculations, allocate allowances, and deduct tax/social security contributions.</p>
         </div>
-        <div className="flex gap-2 text-xs">
-          <button onClick={handleApprovePayroll} className="px-3 py-1.5 bg-slate-900 text-white rounded hover:bg-slate-800">Approve & Disburse Payroll</button>
+        <div className="flex flex-col items-end gap-1 text-xs">
+          <button
+            onClick={handleApprovePayroll}
+            disabled={isDisbursing}
+            className="px-3 py-1.5 bg-slate-900 text-white rounded hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isDisbursing ? 'Disbursing...' : 'Approve & Disburse Payroll'}
+          </button>
+          {alreadyDisbursedCount > 0 && (
+            <span className="text-[10px] text-amber-600 font-semibold">
+              {alreadyDisbursedCount} payment(s) already recorded for {currentPeriod}
+            </span>
+          )}
         </div>
       </div>
 
@@ -767,11 +816,11 @@ export function FinancePayrollView() {
                   <tr key={u.id || idx} className="hover:bg-slate-50/50">
                     <td className="p-3 font-normal text-slate-808">{u.name}</td>
                     <td className="p-3 text-slate-500 font-normal">{u.officeDetails?.position || u.role}</td>
-                    <td className="p-3">KES {baseSalary.toLocaleString()}</td>
-                    <td className="p-3">KES {transportAllowance.toLocaleString()}</td>
-                    <td className="p-3">KES {paye.toLocaleString()}</td>
-                    <td className="p-3">KES {nssf.toLocaleString()}</td>
-                    <td className="p-3 font-normal text-slate-800">KES {netSalary.toLocaleString()}</td>
+                    <td className="p-3">TZS {baseSalary.toLocaleString()}</td>
+                    <td className="p-3">TZS {transportAllowance.toLocaleString()}</td>
+                    <td className="p-3">TZS {paye.toLocaleString()}</td>
+                    <td className="p-3">TZS {nssf.toLocaleString()}</td>
+                    <td className="p-3 font-normal text-slate-800">TZS {netSalary.toLocaleString()}</td>
                   </tr>
                 );
               })}
@@ -865,7 +914,7 @@ export function FinanceInvoicesView() {
               <input type="text" required value={client} onChange={(e) => setClient(e.target.value)} placeholder="e.g. UNICEF Somalia" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
             </div>
             <div>
-              <label className="block text-[10px] text-slate-400 uppercase mb-1">Total Billing Amount (KES)</label>
+              <label className="block text-[10px] text-slate-400 uppercase mb-1">Total Billing Amount (TZS)</label>
               <input type="number" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 50000" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
             </div>
             <div>
@@ -906,7 +955,7 @@ export function FinanceInvoicesView() {
                     <td className="p-3 font-mono text-[10px] text-slate-400">{inv.invoiceNumber}</td>
                     <td className="p-3 font-normal text-slate-808">{inv.clientName}</td>
                     <td className="p-3 font-mono text-[10px] text-slate-400">{inv.issuedDate}</td>
-                    <td className="p-3 font-normal text-slate-700">KES {(inv.amount || 0).toLocaleString()}</td>
+                    <td className="p-3 font-normal text-slate-700">TZS {(inv.amount || 0).toLocaleString()}</td>
                     <td className="p-3">
                       <span className="px-2 py-0.5 rounded text-[8px] font-normal border uppercase bg-slate-50 text-slate-600 border-slate-200">
                         {inv.status}
@@ -955,15 +1004,15 @@ BAOMS GENERAL FINANCIAL LEDGER STATEMENT
 Generated On: ${new Date().toLocaleDateString()}
 -----------------------------------------
 1. INCOME STATEMENT SUMMARY
-Total Grants Received: KES ${totalIncome.toLocaleString()}
-Total Expenses Approved: KES ${totalSpent.toLocaleString()}
-Net Cash Reserve: KES ${(totalIncome - totalSpent).toLocaleString()}
+Total Grants Received: TZS ${totalIncome.toLocaleString()}
+Total Expenses Approved: TZS ${totalSpent.toLocaleString()}
+Net Cash Reserve: TZS ${(totalIncome - totalSpent).toLocaleString()}
 
 2. EXPENDITURES BREAKDOWN BY PROJECT:
 ${projects.map(p => {
   const projExps = approvedTx.filter(t => t.projectId === p.id && t.type === 'Expense');
   const spent = projExps.reduce((acc, curr) => acc + (curr.amount || 0), 0);
-  return `- ${p.name}: KES ${spent.toLocaleString()} spent out of KES ${p.budget?.toLocaleString() || 0}`;
+  return `- ${p.name}: TZS ${spent.toLocaleString()} spent out of TZS ${p.budget?.toLocaleString() || 0}`;
 }).join('\n')}
 -----------------------------------------
 EOF
@@ -1034,7 +1083,7 @@ export function FinanceAccountsView() {
             <div className="border-t border-slate-100 pt-3">
               <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-normal">Available Balance</span>
               <span className="text-lg font-normal text-slate-800 mt-1 block">
-                KES {acc.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                TZS {acc.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
           </div>
@@ -1074,7 +1123,7 @@ export function FinanceApprovalsView() {
             <div key={exp.id || idx} className="p-4 bg-slate-50 border border-slate-200 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <span className="font-normal text-slate-808 text-xs block">{exp.description}</span>
-                <span className="text-[10px] text-slate-400 block mt-0.5">Amount requested: KES {exp.amount.toLocaleString()} • Category: {exp.category || 'Operations'} • Wallet: {exp.bankAccount || 'CRDB'}</span>
+                <span className="text-[10px] text-slate-400 block mt-0.5">Amount requested: TZS {exp.amount.toLocaleString()} • Category: {exp.category || 'Operations'} • Wallet: {exp.bankAccount || 'CRDB'}</span>
               </div>
               <div className="flex gap-2">
                 <button onClick={() => handleAction(exp.id, 'Approved')} className="px-3 py-1.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800 text-xs">Approve Clearance</button>
@@ -1111,7 +1160,7 @@ export function FinanceSettingsView() {
           </div>
           <div>
             <span className="text-slate-400 block mb-1">Default Base Currency</span>
-            <span className="font-normal text-slate-700 block bg-slate-50 p-2.5 rounded border border-slate-200">Kenyan Shilling (KES)</span>
+            <span className="font-normal text-slate-700 block bg-slate-50 p-2.5 rounded border border-slate-200">Kenyan Shilling (TZS)</span>
           </div>
         </div>
       </div>

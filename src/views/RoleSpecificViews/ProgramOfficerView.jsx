@@ -90,7 +90,7 @@ export function ProgramOfficerView() {
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Expense Liability Amount (KES)</label>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Expense Liability Amount (TZS)</label>
                 <input 
                   type="number" 
                   required 

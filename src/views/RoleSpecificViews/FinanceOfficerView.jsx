@@ -82,11 +82,11 @@ export function FinanceOfficerView() {
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Amount (KES)</label>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Amount (TZS)</label>
                 <input 
                   type="number" 
                   required 
-                  placeholder="KES" 
+                  placeholder="TZS" 
                   value={budgetAmount}
                   onChange={(e) => setBudgetAmount(e.target.value)}
                   className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-800 focus:outline-none focus:border-emerald-500"
@@ -113,7 +113,7 @@ export function FinanceOfficerView() {
             <div className="space-y-4">
               <div className="flex justify-between text-xs font-semibold text-slate-500 bg-slate-50 p-3 rounded border border-slate-150">
                 <span>Project: {activeBudget.projectName}</span>
-                <span>Cumulative Portfolio Allocation: KES {activeBudget.allocatedBudget.toLocaleString()}</span>
+                <span>Cumulative Portfolio Allocation: TZS {activeBudget.allocatedBudget.toLocaleString()}</span>
               </div>
               
               <div className="overflow-x-auto">
@@ -135,8 +135,8 @@ export function FinanceOfficerView() {
                             {item.category}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 font-semibold text-slate-900">KES {item.allocatedAmount.toLocaleString()}</td>
-                        <td className="py-2.5 text-right font-semibold text-rose-600">KES {item.spent.toLocaleString()}</td>
+                        <td className="py-2.5 px-3 font-semibold text-slate-900">TZS {item.allocatedAmount.toLocaleString()}</td>
+                        <td className="py-2.5 text-right font-semibold text-rose-600">TZS {item.spent.toLocaleString()}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -174,7 +174,7 @@ export function FinanceOfficerView() {
               </div>
               
               <div className="flex items-center gap-4">
-                <span className="text-xs font-extrabold text-slate-800">KES {ex.amount.toLocaleString()}</span>
+                <span className="text-xs font-extrabold text-slate-800">TZS {ex.amount.toLocaleString()}</span>
                 <div className="flex gap-1.5">
                   <button 
                     onClick={() => updateExpenseStatus(ex.id, 'Approved')}

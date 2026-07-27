@@ -434,7 +434,7 @@ export function MEBeneficiariesView() {
             </div>
             <div>
               <label className="block text-[10px] text-slate-400 uppercase mb-1">Location / Region</label>
-              <input type="text" required value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Nairobi" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="text" required value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Dar es Salaam" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
             </div>
             <div>
               <label className="block text-[10px] text-slate-400 uppercase mb-1">Category</label>
@@ -516,12 +516,12 @@ export function MECollectionView() {
 
   const [notes, setNotes] = useState('');
   const [projectId, setProjectId] = useState('');
-  const [gpsSimulated, setGpsSimulated] = useState({ latitude: -1.2921, longitude: 36.8219 });
+  const [gpsSimulated, setGpsSimulated] = useState({ latitude: -6.7924, longitude: 39.2083 });
 
   const handleRandomizeGPS = () => {
     setGpsSimulated({
-      latitude: -1.2921 + (Math.random() - 0.5) * 0.05,
-      longitude: 36.8219 + (Math.random() - 0.5) * 0.05
+      latitude: -6.7924 + (Math.random() - 0.5) * 0.05,
+      longitude: 39.2083 + (Math.random() - 0.5) * 0.05
     });
   };
 
@@ -771,12 +771,12 @@ export function MEVisitsView() {
   const [notes, setNotes] = useState('');
   const [projectId, setProjectId] = useState('');
   const [visitDate, setVisitDate] = useState(new Date().toISOString().substring(0, 10));
-  const [gpsSimulated, setGpsSimulated] = useState({ latitude: -1.2921, longitude: 36.8219 });
+  const [gpsSimulated, setGpsSimulated] = useState({ latitude: -6.7924, longitude: 39.2083 });
 
   const handleRandomizeGPS = () => {
     setGpsSimulated({
-      latitude: -1.2921 + (Math.random() - 0.5) * 0.05,
-      longitude: 36.8219 + (Math.random() - 0.5) * 0.05
+      latitude: -6.7924 + (Math.random() - 0.5) * 0.05,
+      longitude: 39.2083 + (Math.random() - 0.5) * 0.05
     });
   };
 

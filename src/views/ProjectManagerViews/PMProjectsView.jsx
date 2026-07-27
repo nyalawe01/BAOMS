@@ -33,7 +33,7 @@ export function PMProjectsView() {
   const [newProjEnd, setNewProjEnd] = useState('');
   const [newProjDonor, setNewProjDonor] = useState('UNICEF');
   const [newProjProgram, setNewProjProgram] = useState('Education Pillar');
-  const [newProjLocation, setNewProjLocation] = useState('Nairobi Hub');
+  const [newProjLocation, setNewProjLocation] = useState('Dar es Salaam Hub');
 
   const [filterStatus, setFilterStatus] = useState('All');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -117,7 +117,7 @@ End Date: ${proj.endDate}
 Status: ${proj.status}
 Overall Completion: ${proj.progress || 0}%
 
-Budget Allocation: KES ${proj.budget?.toLocaleString() || 0}
+Budget Allocation: TZS ${proj.budget?.toLocaleString() || 0}
 Budget Items Registered: ${projBudgetList.length}
 
 Tasks Overview:
@@ -203,7 +203,7 @@ EOF
                   <td className="p-3 font-mono text-[10px] text-slate-400">#{proj.id.substring(0,6) || idx+1}</td>
                   <td className="p-3 font-normal text-slate-800">{proj.name}</td>
                   <td className="p-3 text-slate-550 font-normal">{proj.program || 'Field Program'}</td>
-                  <td className="p-3 font-normal text-slate-700">KES {proj.budget?.toLocaleString() || '0'}</td>
+                  <td className="p-3 font-normal text-slate-700">TZS {proj.budget?.toLocaleString() || '0'}</td>
                   <td className="p-3">
                     <span className="px-2 py-0.5 rounded text-[8px] font-normal uppercase border bg-slate-50 text-slate-600 border-slate-200">
                       {proj.status}
@@ -277,7 +277,7 @@ EOF
                 </div>
                 <div>
                   <span className="text-slate-400 block text-[9px] uppercase font-normal">Authorized Budget Limit</span>
-                  <span className="text-slate-700 block font-normal">KES {selectedProj.budget?.toLocaleString() || 0}</span>
+                  <span className="text-slate-700 block font-normal">TZS {selectedProj.budget?.toLocaleString() || 0}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 block text-[9px] uppercase font-normal">Donor Sponsors</span>
@@ -382,7 +382,7 @@ EOF
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-normal text-slate-400 uppercase mb-1">Budget Limit (KES)</label>
+                  <label className="block text-[10px] font-normal text-slate-400 uppercase mb-1">Budget Limit (TZS)</label>
                   <input
                     type="number"
                     value={newProjBudget}

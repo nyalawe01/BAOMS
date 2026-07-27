@@ -37,8 +37,8 @@ export function AdminDashboardView() {
     { label: 'Staff Online', value: onlineStaff },
     { label: 'Active Projects', value: activeProjects },
     { label: 'Beneficiaries Served', value: totalBeneficiaries.toLocaleString() },
-    { label: 'Current Reserves', value: `KES ${currentBudget.toLocaleString()}` },
-    { label: 'Monthly Expenses', value: `KES ${totalExpenses.toLocaleString()}` },
+    { label: 'Current Reserves', value: `TZS ${currentBudget.toLocaleString()}` },
+    { label: 'Monthly Expenses', value: `TZS ${totalExpenses.toLocaleString()}` },
     { label: 'Pending Approvals', value: pendingApprovals },
     { label: 'Open Tasks Action', value: openTasksCount }
   ];
@@ -161,7 +161,7 @@ export function AdminProjectsView() {
             {projects.map((proj, idx) => (
               <tr key={proj.id || idx} className="hover:bg-slate-50/50">
                 <td className="p-3 font-normal text-slate-808">{proj.name}</td>
-                <td className="p-3 font-normal text-slate-700">KES {proj.budget?.toLocaleString()}</td>
+                <td className="p-3 font-normal text-slate-700">TZS {proj.budget?.toLocaleString()}</td>
                 <td className="p-3">
                   <div className="flex items-center gap-3">
                     <span className="font-normal text-slate-800">{proj.progress || 0}%</span>
@@ -213,7 +213,7 @@ export function AdminFinanceView() {
             </div>
             <div className="border-t border-slate-100 pt-3">
               <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-normal font-normal">Available Balance</span>
-              <span className="text-lg font-normal text-slate-800 mt-1 block">KES {getBalance(wallet).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              <span className="text-lg font-normal text-slate-800 mt-1 block">TZS {getBalance(wallet).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
             </div>
           </div>
         ))}
@@ -487,7 +487,7 @@ export function AdminEventsView() {
             </div>
             <div>
               <label className="block text-[10px] text-slate-400 uppercase mb-1">Location</label>
-              <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Nairobi HQ" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Dar es Salaam HQ" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
             </div>
             <div>
               <label className="block text-[10px] text-slate-400 uppercase mb-1">Description</label>

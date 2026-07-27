@@ -43,10 +43,10 @@ export function PMBudgetFinanceView() {
       {/* Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Project Budget Limit', value: `KES ${totalBudget.toLocaleString()}`, color: 'border-l-slate-400' },
-          { label: 'Project Expenditures Spent', value: `KES ${totalSpent.toLocaleString()}`, color: 'border-l-slate-600' },
-          { label: 'Remaining Cashflow', value: `KES ${remaining.toLocaleString()}`, color: 'border-l-slate-300' },
-          { label: 'Pending Approvals', value: `KES ${pending.toLocaleString()}`, color: 'border-l-slate-200' }
+          { label: 'Project Budget Limit', value: `TZS ${totalBudget.toLocaleString()}`, color: 'border-l-slate-400' },
+          { label: 'Project Expenditures Spent', value: `TZS ${totalSpent.toLocaleString()}`, color: 'border-l-slate-600' },
+          { label: 'Remaining Cashflow', value: `TZS ${remaining.toLocaleString()}`, color: 'border-l-slate-300' },
+          { label: 'Pending Approvals', value: `TZS ${pending.toLocaleString()}`, color: 'border-l-slate-200' }
         ].map((card, idx) => (
           <div key={idx} className={`bg-white border border-slate-200 rounded-xl p-4 shadow-sm border-l-4 ${card.color} flex flex-col justify-between`}>
             <span className="text-[9px] font-normal text-slate-500 uppercase tracking-widest">{card.label}</span>
@@ -77,7 +77,7 @@ export function PMBudgetFinanceView() {
                 <tr key={exp.id || idx} className="hover:bg-slate-50/50">
                   <td className="p-3 font-normal text-slate-800">{exp.description}</td>
                   <td className="p-3 text-slate-655 font-normal">{exp.category || 'Operations'}</td>
-                  <td className="p-3 font-normal text-slate-700">KES {exp.amount?.toLocaleString()}</td>
+                  <td className="p-3 font-normal text-slate-700">TZS {exp.amount?.toLocaleString()}</td>
                   <td className="p-3">
                     <span className="px-2 py-0.5 rounded text-[8px] font-normal border uppercase bg-slate-50 text-slate-600 border-slate-200">
                       {exp.status || 'Pending'}

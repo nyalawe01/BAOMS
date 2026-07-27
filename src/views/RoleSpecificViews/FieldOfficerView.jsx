@@ -11,14 +11,14 @@ export function FieldOfficerView() {
   // Form details
   const [activityNotes, setActivityNotes] = useState('');
   const [photoName, setPhotoName] = useState('');
-  const [gpsSimulated, setGpsSimulated] = useState({ latitude: -1.2921, longitude: 36.8219 });
+  const [gpsSimulated, setGpsSimulated] = useState({ latitude: -6.7924, longitude: 39.2083 });
   const [cachedSubmissions, setCachedSubmissions] = useState([]);
 
   // Generate simulated random GPS coords
   const handleRandomizeGPS = () => {
     setGpsSimulated({
-      latitude: -1.2921 + (Math.random() - 0.5) * 0.05,
-      longitude: 36.8219 + (Math.random() - 0.5) * 0.05
+      latitude: -6.7924 + (Math.random() - 0.5) * 0.05,
+      longitude: 39.2083 + (Math.random() - 0.5) * 0.05
     });
   };
 

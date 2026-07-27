@@ -41,7 +41,7 @@ export function HrProjectsView() {
               <div className="flex justify-between items-center border-b border-slate-100 pb-2">
                 <div>
                   <h4 className="font-extrabold text-slate-800 text-sm">{proj.name}</h4>
-                  <span className="text-[10px] text-slate-400">{proj.status} — KES {proj.budget?.toLocaleString()} Limit</span>
+                  <span className="text-[10px] text-slate-400">{proj.status} — TZS {proj.budget?.toLocaleString()} Limit</span>
                 </div>
                 <div className="text-right">
                   <span className="text-xs font-bold text-slate-700">{proj.progress}% Done</span>
