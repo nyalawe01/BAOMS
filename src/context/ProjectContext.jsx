@@ -22,6 +22,28 @@ import {
 // real pagination (no "load more" / page controls exist yet).
 const RECENT_DOCS_LIMIT = 500;
 
+// Default permission set per role, applied when a new user is onboarded and
+// no explicit permissions are supplied. Without this, addUser left
+// `permissions` unset entirely, so hasPermission() (used to gate Add
+// Project/Add Task/etc. in ProjectManagement.jsx) was always false for
+// every onboarded user regardless of role.
+const ROLE_PERMISSIONS = {
+  'System Administrator': ['manage_users', 'role_builder', 'system_health', 'audit_logs', 'view_dashboard'],
+  'Executive Director': ['exec_dashboard', 'strategic_approvals', 'board_reports', 'view_dashboard'],
+  'HR Officer': ['staff_onboarding', 'staff_status', 'leave_pipeline', 'manage_users', 'view_dashboard'],
+  'Project Manager': ['create_project', 'manage_projects', 'manage_project_files', 'assign_tasks', 'update_task_status', 'task_board', 'partner_reports', 'view_dashboard'],
+  'Finance Officer': ['spreadsheet_ledger', 'expense_router', 'financial_exporter', 'view_dashboard'],
+  'Procurement & Logistics Officer': ['asset_register', 'order_workflows', 'view_dashboard'],
+  'Department Head': ['dept_dashboard', 'approval_inbox', 'view_dashboard', 'task_board'],
+  'Program Officer': ['task_board', 'partner_reports', 'update_task_status', 'view_dashboard'],
+  'Communications Officer': ['media_uploader', 'announcement_portal', 'view_dashboard'],
+  'Field Officer': ['offline_surveys', 'gps_submissions', 'view_dashboard'],
+  'Volunteer': ['simplified_logger', 'view_dashboard'],
+  'Intern': ['simplified_logger', 'view_dashboard', 'task_board'],
+  'M&E Officer': ['view_dashboard'],
+  'Monitoring & Evaluation Officer': ['view_dashboard']
+};
+
 const ProjectContext = createContext();
 
 export const ProjectProvider = ({ children }) => {
@@ -296,6 +318,7 @@ export const ProjectProvider = ({ children }) => {
       department: userData.department || 'Engineering',
       status: 'Active',
       avatar: userData.avatar || '',
+      permissions: userData.permissions || ROLE_PERMISSIONS[userData.role] || ['view_dashboard'],
       personalDetails: {
         dob: userData.dob || '',
         placeOfBirth: userData.placeOfBirth || '',
@@ -730,11 +753,12 @@ export const ProjectProvider = ({ children }) => {
         console.error("Firestore update expense status error:", err);
       }
     } else {
+      const alreadyApplied = ex.status === 'Approved';
       const updatedExpenses = expenses.map(e => e.id === expenseId ? { ...e, status } : e);
       setExpenses(updatedExpenses);
       syncLocal('baoms_expenses', updatedExpenses);
 
-      if (status === 'Approved') {
+      if (status === 'Approved' && !alreadyApplied) {
         const updatedBudgets = budgets.map(b => {
           if (b.projectId === ex.projectId) {
             const updatedItems = (b.items || []).map((item, index) => {
