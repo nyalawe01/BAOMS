@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // BAOMS Firebase configuration, sourced from environment variables.
 // See .env.example for the required keys; actual values live in .env.local (gitignored).
@@ -21,4 +22,5 @@ export const isFirebaseConfigured = firebaseConfig.projectId && firebaseConfig.p
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 export default app;

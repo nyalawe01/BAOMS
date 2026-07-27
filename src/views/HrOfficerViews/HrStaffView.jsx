@@ -314,7 +314,13 @@ export function HrStaffView({ setActiveTab }) {
                               <>
                                 <span className="text-[9px] text-slate-400 font-mono truncate max-w-[100px]">{attachedFile.fileName}</span>
                                 <button
-                                  onClick={() => setActivePreviewDoc({ fileName: attachedFile.fileName, dataUrl: attachedFile.dataUrl, fileSize: attachedFile.fileSize })}
+                                  onClick={() => setActivePreviewDoc({
+                                    fileName: attachedFile.fileName,
+                                    dataUrl: attachedFile.dataUrl,
+                                    downloadUrl: attachedFile.downloadUrl,
+                                    fileType: attachedFile.fileType,
+                                    fileSize: attachedFile.fileSize
+                                  })}
                                   className="p-1 hover:bg-slate-100 rounded text-slate-700 hover:text-slate-900"
                                   title="Preview document"
                                 >
@@ -322,6 +328,10 @@ export function HrStaffView({ setActiveTab }) {
                                 </button>
                                 <button
                                   onClick={() => {
+                                    if (attachedFile.downloadUrl) {
+                                      window.open(attachedFile.downloadUrl, '_blank');
+                                      return;
+                                    }
                                     const link = document.createElement('a');
                                     link.href = attachedFile.dataUrl;
                                     link.download = attachedFile.fileName;

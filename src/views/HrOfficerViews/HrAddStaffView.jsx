@@ -12,6 +12,9 @@ export function HrAddStaffView() {
   const { addUser } = useProject();
   const loading = usePageLoader([]);
   const [step, setStep] = useState(1);
+  // Files must land in Storage before the new user's Auth UID exists, so
+  // uploads for this onboarding session share one temporary folder id.
+  const [uploadSessionId] = useState(() => crypto.randomUUID());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittingPhase, setSubmittingPhase] = useState('');
   const [formData, setFormData] = useState({
@@ -97,7 +100,7 @@ export function HrAddStaffView() {
 
           const staffData = {
             ...formData,
-            avatar: formData.avatarFile?.dataUrl || '',
+            avatar: formData.avatarFile?.downloadUrl || '',
             tempPassword
           };
 
@@ -188,7 +191,7 @@ export function HrAddStaffView() {
             <div className="space-y-1.5">
               <label className="text-[11px] font-bold text-slate-500 block">Profile Picture (Manually Uploaded)</label>
               <FileUpload.Root value={formData.avatarFile} onChange={(file) => handleFormChange('avatarFile', file)}>
-                <FileUpload.DropZone label="Attach Profile Picture Photo" accept="image/*" />
+                <FileUpload.DropZone label="Attach Profile Picture Photo" accept="image/*" storagePath={`supportingDocuments/${uploadSessionId}`} />
               </FileUpload.Root>
             </div>
 
@@ -450,35 +453,35 @@ export function HrAddStaffView() {
               <div className="space-y-1">
                 <label className="text-[11.5px] font-bold text-slate-655 block">Curriculum Vitae (CV) *</label>
                 <FileUpload.Root value={formData.supportingDocuments.cv} onChange={(file) => handleDocUpload('cv', file)}>
-                  <FileUpload.DropZone label="Attach Curriculum Vitae (CV) PDF" accept=".pdf,.doc,.docx" />
+                  <FileUpload.DropZone label="Attach Curriculum Vitae (CV) PDF" accept=".pdf,.doc,.docx" storagePath={`supportingDocuments/${uploadSessionId}`} />
                 </FileUpload.Root>
               </div>
 
               <div className="space-y-1">
                 <label className="text-[11.5px] font-bold text-slate-655 block">Academic Certificates *</label>
                 <FileUpload.Root value={formData.supportingDocuments.certificates} onChange={(file) => handleDocUpload('certificates', file)}>
-                  <FileUpload.DropZone label="Attach Academic Credentials / Certificates" accept=".pdf,.png,.jpg,.jpeg" />
+                  <FileUpload.DropZone label="Attach Academic Credentials / Certificates" accept=".pdf,.png,.jpg,.jpeg" storagePath={`supportingDocuments/${uploadSessionId}`} />
                 </FileUpload.Root>
               </div>
 
               <div className="space-y-1">
                 <label className="text-[11.5px] font-bold text-slate-655 block">Employment Agreement Contract *</label>
                 <FileUpload.Root value={formData.supportingDocuments.contract} onChange={(file) => handleDocUpload('contract', file)}>
-                  <FileUpload.DropZone label="Attach Signed Employment Agreement" accept=".pdf" />
+                  <FileUpload.DropZone label="Attach Signed Employment Agreement" accept=".pdf" storagePath={`supportingDocuments/${uploadSessionId}`} />
                 </FileUpload.Root>
               </div>
 
               <div className="space-y-1">
                 <label className="text-[11.5px] font-bold text-slate-655 block">National Insurance Card (NHIF) *</label>
                 <FileUpload.Root value={formData.supportingDocuments.insurance} onChange={(file) => handleDocUpload('insurance', file)}>
-                  <FileUpload.DropZone label="Attach NHIF / Insurance Scan" accept=".pdf,.png,.jpg,.jpeg" />
+                  <FileUpload.DropZone label="Attach NHIF / Insurance Scan" accept=".pdf,.png,.jpg,.jpeg" storagePath={`supportingDocuments/${uploadSessionId}`} />
                 </FileUpload.Root>
               </div>
 
               <div className="space-y-1">
                 <label className="text-[11.5px] font-bold text-slate-655 block">Other Supporting Documents (Others) *</label>
                 <FileUpload.Root value={formData.supportingDocuments.others} onChange={(file) => handleDocUpload('others', file)}>
-                  <FileUpload.DropZone label="Attach Extra Identifications / Police Clearance" accept=".pdf,.png,.jpg,.jpeg" />
+                  <FileUpload.DropZone label="Attach Extra Identifications / Police Clearance" accept=".pdf,.png,.jpg,.jpeg" storagePath={`supportingDocuments/${uploadSessionId}`} />
                 </FileUpload.Root>
               </div>
             </div>

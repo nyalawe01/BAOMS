@@ -147,9 +147,13 @@ export default function AppShell() {
                 <span className="text-[10px] text-slate-400 font-mono">({activePreviewDoc.fileSize || 'N/A'})</span>
               </div>
               <div className="flex items-center gap-3">
-                {activePreviewDoc.dataUrl && (
-                  <button 
+                {(activePreviewDoc.downloadUrl || activePreviewDoc.dataUrl) && (
+                  <button
                     onClick={() => {
+                      if (activePreviewDoc.downloadUrl) {
+                        window.open(activePreviewDoc.downloadUrl, '_blank');
+                        return;
+                      }
                       const link = document.createElement('a');
                       link.href = activePreviewDoc.dataUrl;
                       link.download = activePreviewDoc.fileName;
@@ -172,28 +176,46 @@ export default function AppShell() {
 
             {/* Modal Body */}
             <div className="flex-1 overflow-auto p-6 bg-slate-100 flex items-center justify-center min-h-[400px]">
-              {activePreviewDoc.dataUrl ? (
-                activePreviewDoc.dataUrl.startsWith('data:image/') ? (
-                  <img 
-                    src={activePreviewDoc.dataUrl} 
-                    alt={activePreviewDoc.fileName} 
-                    className="max-w-full max-h-[65vh] object-contain rounded-lg border border-slate-200 shadow bg-white"
-                  />
-                ) : activePreviewDoc.dataUrl.startsWith('data:application/pdf') ? (
-                  <iframe 
-                    src={activePreviewDoc.dataUrl} 
-                    title={activePreviewDoc.fileName} 
-                    className="w-full h-[65vh] rounded-lg border border-slate-200 shadow bg-white"
-                  />
-                ) : (
+              {(() => {
+                const previewUrl = activePreviewDoc.downloadUrl || activePreviewDoc.dataUrl;
+                if (!previewUrl) {
+                  return <div className="text-center text-slate-400 text-xs py-8">Document preview content not found.</div>;
+                }
+                const fileType = activePreviewDoc.fileType || '';
+                const isImage = fileType.startsWith('image/') || previewUrl.startsWith('data:image/');
+                const isPdf = fileType === 'application/pdf' || previewUrl.startsWith('data:application/pdf');
+
+                if (isImage) {
+                  return (
+                    <img
+                      src={previewUrl}
+                      alt={activePreviewDoc.fileName}
+                      className="max-w-full max-h-[65vh] object-contain rounded-lg border border-slate-200 shadow bg-white"
+                    />
+                  );
+                }
+                if (isPdf) {
+                  return (
+                    <iframe
+                      src={previewUrl}
+                      title={activePreviewDoc.fileName}
+                      className="w-full h-[65vh] rounded-lg border border-slate-200 shadow bg-white"
+                    />
+                  );
+                }
+                return (
                   <div className="flex flex-col items-center justify-center p-12 bg-white border border-slate-200 rounded-xl space-y-4 text-center max-w-md w-full shadow">
                     <FileText size={48} className="text-slate-400" />
                     <div>
                       <h4 className="font-extrabold text-slate-800 text-sm">{activePreviewDoc.fileName}</h4>
                       <p className="text-slate-400 text-[10px] mt-1">{activePreviewDoc.fileSize || 'Unknown Size'}</p>
                     </div>
-                    <button 
+                    <button
                       onClick={() => {
+                        if (activePreviewDoc.downloadUrl) {
+                          window.open(activePreviewDoc.downloadUrl, '_blank');
+                          return;
+                        }
                         const link = document.createElement('a');
                         link.href = activePreviewDoc.dataUrl;
                         link.download = activePreviewDoc.fileName;
@@ -204,10 +226,8 @@ export default function AppShell() {
                       Download Document File
                     </button>
                   </div>
-                )
-              ) : (
-                <div className="text-center text-slate-400 text-xs py-8">Document preview content not found.</div>
-              )}
+                );
+              })()}
             </div>
           </div>
         </div>
