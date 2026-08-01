@@ -1,19 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useProject } from '../../context/ProjectContext';
-import { 
-  Activity, Check, X
+import {
+  Activity, Check, X, Users2, ClipboardList
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { ProgressBarHalfCircle } from "@/components/base/progress-indicators/progress-circles";
 import { Button } from "@/components/base/buttons/button";
 
 export function ExecutiveDirectorView() {
-  const { projects, expenses, updateExpenseStatus } = useProject();
+  const { projects, expenses, users, requests, updateExpenseStatus } = useProject();
   const [boardReportStatus, setBoardReportStatus] = useState('');
 
   const pendingStrategicExpenses = expenses.filter(ex => ex.status === 'Pending' && ex.amount >= 2000);
   const totalKPIBudget = projects.reduce((acc, p) => acc + p.budget, 0);
   const avgProgress = Math.round(projects.reduce((acc, p) => acc + p.progress, 0) / (projects.length || 1));
+
+  // Cross-department rollup - department list is derived from the distinct
+  // values actually present on `users` (never hardcoded), so newly added
+  // departments show up automatically. `transactions` has no per-record
+  // department attribution (see ProjectContext addTransaction), so a net
+  // cash position column is intentionally left out here rather than
+  // fabricated - it would misattribute every ledger entry.
+  const departmentRollup = useMemo(() => {
+    const byDept = new Map();
+    users.forEach(u => {
+      const dept = u.officeDetails?.department || u.department;
+      if (!dept) return;
+      if (!byDept.has(dept)) byDept.set(dept, { department: dept, headcount: 0, openApprovals: 0 });
+      const status = u.officeDetails?.status || u.status;
+      if (status === 'Active') byDept.get(dept).headcount += 1;
+    });
+    requests.forEach(r => {
+      if (r.status === 'pending' && byDept.has(r.department)) {
+        byDept.get(r.department).openApprovals += 1;
+      }
+    });
+    return Array.from(byDept.values()).sort((a, b) => a.department.localeCompare(b.department));
+  }, [users, requests]);
+
+  const totalHeadcount = useMemo(
+    () => users.filter(u => (u.officeDetails?.status || u.status) === 'Active').length,
+    [users]
+  );
+  const totalOpenApprovalsOrgWide = useMemo(
+    () => requests.filter(r => r.status === 'pending').length,
+    [requests]
+  );
 
   const handleGenerateReport = () => {
     setBoardReportStatus('compiling');
@@ -96,6 +128,67 @@ export function ExecutiveDirectorView() {
           >
             Compile Briefing Draft
           </Button>
+        </div>
+      </div>
+
+      {/* Organization-Wide Rollup */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h3 className="font-bold text-slate-800 text-sm">Organization-Wide Rollup</h3>
+            <p className="text-xs text-slate-400">Headcount and open approvals across every department, in one view.</p>
+          </div>
+          <div className="flex gap-4">
+            <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-lg px-3 py-1.5">
+              <Users2 size={14} className="text-indigo-600" />
+              <div className="leading-tight">
+                <span className="block text-[9px] font-bold uppercase tracking-wider text-indigo-500">Total Headcount</span>
+                <span className="block text-sm font-extrabold text-indigo-800">{totalHeadcount}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5">
+              <ClipboardList size={14} className="text-amber-600" />
+              <div className="leading-tight">
+                <span className="block text-[9px] font-bold uppercase tracking-wider text-amber-500">Open Approvals Org-Wide</span>
+                <span className="block text-sm font-extrabold text-amber-800">{totalOpenApprovalsOrgWide}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-slate-150 text-[10px] font-bold text-slate-400 uppercase">
+                <th className="py-2 px-5">Department</th>
+                <th className="py-2 px-3">Headcount (Active)</th>
+                <th className="py-2 px-3 text-right pr-5">Open Approvals</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-slate-700">
+              {departmentRollup.map(dept => (
+                <tr key={dept.department} className="hover:bg-slate-50/50">
+                  <td className="py-2.5 px-5 font-semibold text-slate-800">{dept.department}</td>
+                  <td className="py-2.5 px-3">{dept.headcount}</td>
+                  <td className="py-2.5 px-3 text-right pr-5">
+                    {dept.openApprovals > 0 ? (
+                      <span className="text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded">
+                        {dept.openApprovals} pending
+                      </span>
+                    ) : (
+                      <span className="text-slate-300">—</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {departmentRollup.length === 0 && (
+            <div className="p-8 text-center text-slate-400 text-xs italic">
+              No department directory data available yet.
+            </div>
+          )}
         </div>
       </div>
 

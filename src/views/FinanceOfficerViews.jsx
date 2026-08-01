@@ -28,13 +28,44 @@ const downloadTxtFile = (filename, content) => {
 // 1. FINANCE DASHBOARD VIEW
 // ============================================================================
 export function FinanceDashboardView() {
-  const { projects, expenses, transactions, addTransaction, addExpense } = useProject();
+  const { projects, expenses, transactions, invoices, budgets, addTransaction, addExpense } = useProject();
 
   // Calculations derived from transaction database
   const approvedTx = transactions.filter(t => t.status === 'Approved');
   const totalIncome = approvedTx.filter(t => t.type === 'Income').reduce((acc, curr) => acc + (curr.amount || 0), 0);
   const totalExpenses = approvedTx.filter(t => t.type === 'Expense').reduce((acc, curr) => acc + (curr.amount || 0), 0);
   const cashOnHand = totalIncome - totalExpenses;
+
+  // Cash Flow Forecast: upcoming unpaid invoices sorted soonest-first
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const unpaidInvoices = (invoices || [])
+    .filter(inv => inv.status === 'Unpaid' || inv.status === 'Overdue')
+    .filter(inv => !!inv.dueDate)
+    .map(inv => {
+      const due = new Date(inv.dueDate);
+      const daysUntilDue = Math.round((due.setHours(0, 0, 0, 0) - today.getTime()) / msPerDay);
+      return { ...inv, daysUntilDue };
+    })
+    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+  const UPCOMING_INVOICE_LIMIT = 6;
+  const visibleInvoices = unpaidInvoices.slice(0, UPCOMING_INVOICE_LIMIT);
+  const extraInvoiceCount = unpaidInvoices.length - visibleInvoices.length;
+
+  const next30DaysTotal = unpaidInvoices
+    .filter(inv => inv.daysUntilDue >= 0 && inv.daysUntilDue <= 30)
+    .reduce((acc, inv) => acc + (inv.amount || 0), 0);
+
+  // Pending budget commitments: items awaiting approval, not yet in allocatedBudget
+  const pendingBudgetItems = (budgets || []).flatMap(b =>
+    (b.items || [])
+      .filter(item => item.status === 'Pending Approval')
+      .map(item => ({ ...item, projectName: b.projectName }))
+  );
+  const pendingBudgetTotal = pendingBudgetItems.reduce((acc, item) => acc + (item.allocatedAmount || 0), 0);
 
   const budgetSpent = projects.reduce((acc, curr) => {
     // Sum approved transactions for this project
@@ -136,6 +167,73 @@ export function FinanceDashboardView() {
               + {act.label}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Cash Flow Forecast */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h3 className="font-normal text-slate-850 text-sm">Cash Flow Forecast &mdash; Upcoming Invoices</h3>
+            <span className="text-[10px] text-slate-400 uppercase tracking-wider">{unpaidInvoices.length} unpaid</span>
+          </div>
+          <div className="space-y-2 font-normal">
+            {visibleInvoices.map((inv, idx) => (
+              <div key={inv.id || idx} className="flex items-center justify-between p-3 bg-slate-50 border border-slate-150 rounded-lg">
+                <div>
+                  <span className="text-xs font-normal text-slate-808 block">{inv.clientName}</span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">Due {inv.dueDate || 'N/A'}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-normal text-slate-700 block">TZS {(inv.amount || 0).toLocaleString()}</span>
+                  <span className={`text-[10px] block mt-0.5 ${inv.daysUntilDue < 0 ? 'text-slate-600 font-semibold' : 'text-slate-400'}`}>
+                    {inv.daysUntilDue < 0
+                      ? `Overdue by ${Math.abs(inv.daysUntilDue)} day${Math.abs(inv.daysUntilDue) === 1 ? '' : 's'}`
+                      : inv.daysUntilDue === 0
+                      ? 'Due today'
+                      : `Due in ${inv.daysUntilDue} day${inv.daysUntilDue === 1 ? '' : 's'}`}
+                  </span>
+                </div>
+              </div>
+            ))}
+            {extraInvoiceCount > 0 && (
+              <p className="text-center py-1 text-slate-400 italic">+{extraInvoiceCount} more unpaid invoice{extraInvoiceCount === 1 ? '' : 's'}</p>
+            )}
+            {unpaidInvoices.length === 0 && (
+              <p className="text-center py-6 text-slate-400 italic">No unpaid invoices with due dates outstanding.</p>
+            )}
+          </div>
+          <div className="border-t border-slate-100 pt-3">
+            <span className="text-xs font-normal text-slate-700">
+              TZS {next30DaysTotal.toLocaleString()} expected from unpaid invoices in the next 30 days
+            </span>
+          </div>
+        </div>
+
+        {/* Pending Budget Commitments */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
+          <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-normal border-b border-slate-100 pb-1.5">Pending Budget Commitments</span>
+          <div className="space-y-2 font-normal">
+            {pendingBudgetItems.slice(0, 6).map((item, idx) => (
+              <div key={item.id || idx} className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-150 rounded">
+                <div>
+                  <span className="text-xs font-normal text-slate-808 block">{item.description}</span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">{item.projectName}</span>
+                </div>
+                <span className="text-xs font-normal text-slate-700">TZS {(item.allocatedAmount || 0).toLocaleString()}</span>
+              </div>
+            ))}
+            {pendingBudgetItems.length > 6 && (
+              <p className="text-center py-1 text-slate-400 italic">+{pendingBudgetItems.length - 6} more pending item{pendingBudgetItems.length - 6 === 1 ? '' : 's'}</p>
+            )}
+            {pendingBudgetItems.length === 0 && (
+              <p className="text-center py-6 text-slate-400 italic">No budget items awaiting approval.</p>
+            )}
+          </div>
+          <div className="border-t border-slate-100 pt-3">
+            <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-normal">Total Committed, Not Yet Allocated</span>
+            <span className="text-lg font-normal text-slate-800 mt-1 block">TZS {pendingBudgetTotal.toLocaleString()}</span>
+          </div>
         </div>
       </div>
 

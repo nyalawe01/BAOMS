@@ -1,6 +1,20 @@
 import { useProject } from '../../context/ProjectContext';
-import { Users, Building, Bell, UserCheck } from 'lucide-react';
+import { Users, Building, Bell, UserCheck, AlarmClock } from 'lucide-react';
 import { usePageLoader, CardSkeleton } from './_shared';
+
+// Badge styling for the expiry radar, matching this file's slate/amber/rose conventions
+function getExpiryBadge(daysRemaining) {
+  if (daysRemaining < 0) {
+    return { label: 'Overdue', className: 'text-rose-600 bg-rose-50 border-rose-150' };
+  }
+  if (daysRemaining < 14) {
+    return { label: `${daysRemaining}d remaining`, className: 'text-rose-600 bg-rose-50 border-rose-150' };
+  }
+  if (daysRemaining < 30) {
+    return { label: `${daysRemaining}d remaining`, className: 'text-amber-600 bg-amber-50 border-amber-150' };
+  }
+  return { label: `${daysRemaining}d remaining`, className: 'text-slate-600 bg-slate-100 border-slate-200' };
+}
 
 // ==========================================
 // 1. HR HOME VIEW
@@ -18,6 +32,7 @@ export function HrHomeView() {
           <div className="bg-white border border-slate-200 p-5 rounded-xl h-64 animate-pulse"></div>
           <div className="lg:col-span-2 bg-white border border-slate-200 p-5 rounded-xl h-64 animate-pulse"></div>
         </div>
+        <div className="bg-white border border-slate-200 p-5 rounded-xl h-40 animate-pulse"></div>
       </div>
     );
   }
@@ -34,7 +49,21 @@ export function HrHomeView() {
   }).length;
 
   const pendingRequests = requests.filter(r => r.status === 'pending').length;
-  const expiringContracts = 2; // Simulated count
+
+  // Contract & placement expiry radar: active users with a recorded internPlacement.endDate,
+  // expiring within the next 90 days, soonest first.
+  const usersWithPlacementDates = users.filter(u => !!u.internPlacement?.endDate);
+  const placementRadar = usersWithPlacementDates
+    .filter(u => u.officeDetails?.status === 'Active')
+    .map(u => {
+      const endDate = new Date(u.internPlacement.endDate);
+      const diffTime = endDate.setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0);
+      const daysRemaining = Math.round(diffTime / (1000 * 60 * 60 * 24));
+      return { ...u, daysRemaining };
+    })
+    .filter(u => u.daysRemaining <= 90)
+    .sort((a, b) => a.daysRemaining - b.daysRemaining);
+  const expiringContracts = placementRadar.length;
 
   // Department distribution count
   const deptCounts = users.reduce((acc, u) => {
@@ -145,6 +174,44 @@ export function HrHomeView() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Contract & Placement Expiry Radar */}
+      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div className="border-b border-slate-100 pb-2">
+          <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+            <AlarmClock size={16} className="text-rose-500" />
+            <span>Contract & Placement Expiry Radar</span>
+          </h3>
+          <p className="text-[10px] text-slate-400">Active intern/placement end dates expiring in the next 90 days</p>
+        </div>
+
+        {usersWithPlacementDates.length === 0 ? (
+          <div className="text-center py-8 text-slate-400 text-xs">
+            No placement end dates on record. This list will populate once HR onboarding captures an internship/placement end date for active staff.
+          </div>
+        ) : placementRadar.length === 0 ? (
+          <div className="text-center py-8 text-slate-400 text-xs">
+            No contracts or placements expiring in the next 90 days.
+          </div>
+        ) : (
+          <div className="space-y-2.5 max-h-[280px] overflow-y-auto pr-1">
+            {placementRadar.map((u) => {
+              const badge = getExpiryBadge(u.daysRemaining);
+              return (
+                <div key={u.id} className="flex justify-between items-center gap-3 text-xs border-b border-slate-50 pb-2.5 last:border-0 last:pb-0">
+                  <div className="min-w-0">
+                    <p className="font-bold text-slate-800 truncate">{u.name}</p>
+                    <p className="text-slate-500 text-[11px]">{u.role}</p>
+                  </div>
+                  <span className={`shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${badge.className}`}>
+                    {badge.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useProject } from '../../context/ProjectContext';
-import { LayoutDashboard, Activity, FileClock, Clock } from 'lucide-react';
+import { LayoutDashboard, Activity, FileClock, Clock, Calendar } from 'lucide-react';
 
 // ============================================================================
 // 1. PM DASHBOARD VIEW
@@ -36,6 +36,36 @@ export function PMDashboardView() {
       name: p.name,
       endDate: p.endDate
     }));
+
+  // Derive an overall date range across all projects for the timeline (poor man's Gantt)
+  const timelineProjects = projects.filter(p => p.startDate && p.endDate && !isNaN(new Date(p.startDate)) && !isNaN(new Date(p.endDate)));
+  const timelineStart = timelineProjects.length > 0
+    ? new Date(Math.min(...timelineProjects.map(p => new Date(p.startDate).getTime())))
+    : null;
+  const timelineEnd = timelineProjects.length > 0
+    ? new Date(Math.max(...timelineProjects.map(p => new Date(p.endDate).getTime())))
+    : null;
+  const timelineSpanMs = timelineStart && timelineEnd
+    ? Math.max(timelineEnd.getTime() - timelineStart.getTime(), 1)
+    : 1;
+
+  // Status color conventions matching ProjectManagerView.jsx / ProjectManagement.jsx
+  const getStatusTrackClass = (status) => {
+    switch (status) {
+      case 'Completed': return 'bg-emerald-100 border-emerald-200';
+      case 'In Progress': return 'bg-indigo-100 border-indigo-200';
+      case 'On Hold': return 'bg-amber-100 border-amber-200';
+      default: return 'bg-slate-100 border-slate-200';
+    }
+  };
+  const getStatusFillClass = (status) => {
+    switch (status) {
+      case 'Completed': return 'bg-emerald-500';
+      case 'In Progress': return 'bg-indigo-500';
+      case 'On Hold': return 'bg-amber-500';
+      default: return 'bg-slate-400';
+    }
+  };
 
   const kpis = [
     { label: 'Total Projects', value: totalProjects },
@@ -195,6 +225,64 @@ export function PMDashboardView() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Project Timeline (Gantt-style overview of overlapping project windows) */}
+      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <h3 className="font-normal text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
+          <Calendar size={16} className="text-slate-500" />
+          <span>Project Timeline</span>
+        </h3>
+
+        {timelineProjects.length > 0 ? (
+          <div className="space-y-4">
+            <div className="space-y-3">
+              {timelineProjects.map((p, idx) => {
+                const startMs = new Date(p.startDate).getTime();
+                const endMs = new Date(p.endDate).getTime();
+                const leftPct = ((startMs - timelineStart.getTime()) / timelineSpanMs) * 100;
+                const widthPct = Math.max(((endMs - startMs) / timelineSpanMs) * 100, 2);
+
+                return (
+                  <div key={p.id || idx} className="flex items-center gap-3">
+                    <span className="w-28 md:w-36 shrink-0 truncate text-xs font-normal text-slate-700" title={p.name}>
+                      {p.name}
+                    </span>
+                    <div className="relative flex-1 h-5 bg-slate-50 rounded-md">
+                      <div
+                        className={`absolute top-0 h-full rounded-md border overflow-hidden ${getStatusTrackClass(p.status)}`}
+                        style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
+                        title={`${p.name}: ${p.startDate} to ${p.endDate}`}
+                      >
+                        <div
+                          className={`h-full rounded-md ${getStatusFillClass(p.status)}`}
+                          style={{ width: `${p.progress || 0}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <span className="w-9 shrink-0 text-right text-[10px] font-mono text-slate-400">{p.progress || 0}%</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Date-axis scale reference */}
+            <div className="flex justify-between text-[10px] text-slate-400 font-mono pl-[7.5rem] md:pl-[9.5rem] pr-9 pt-1 border-t border-slate-100">
+              <span>{timelineStart.toLocaleDateString()}</span>
+              <span>{timelineEnd.toLocaleDateString()}</span>
+            </div>
+
+            {/* Status legend */}
+            <div className="flex flex-wrap items-center gap-4 pt-1 text-[10px] text-slate-500">
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-slate-400 inline-block"></span>Planning</span>
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span>In Progress</span>
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>Completed</span>
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>On Hold</span>
+            </div>
+          </div>
+        ) : (
+          <p className="text-xs text-slate-400 italic text-center py-6">No project dates available to render a timeline.</p>
+        )}
       </div>
     </div>
   );

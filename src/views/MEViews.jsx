@@ -13,6 +13,15 @@ import Swal from 'sweetalert2';
 // ============================================================================
 // 1. M&E DASHBOARD VIEW
 // ============================================================================
+
+// Maps an achievement percentage (0-100+) to a semantic heatmap tile color scale.
+const getHeatmapTileClass = (rawPct) => {
+  if (rawPct >= 100) return 'bg-emerald-600 text-white border-emerald-700';
+  if (rawPct >= 70) return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+  if (rawPct >= 40) return 'bg-amber-100 text-amber-700 border-amber-200';
+  return 'bg-rose-100 text-rose-700 border-rose-200';
+};
+
 export function MEDashboardView() {
   const { projects, indicators } = useProject();
 
@@ -53,6 +62,57 @@ export function MEDashboardView() {
             <span className="text-xl font-normal text-slate-808 mt-4 block">{kpi.value}</span>
           </div>
         ))}
+      </div>
+
+      {/* Indicator Achievement Heatmap */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-2">
+          <h3 className="font-normal text-slate-850 text-sm">Indicator Achievement Heatmap</h3>
+          <div className="flex flex-wrap items-center gap-3 text-[9px] text-slate-500 uppercase tracking-wider font-normal">
+            <span className="flex items-center gap-1">
+              <span className="w-2.5 h-2.5 rounded-sm bg-rose-100 border border-rose-200"></span>
+              Under 40%
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-2.5 h-2.5 rounded-sm bg-amber-100 border border-amber-200"></span>
+              40-70%
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-2.5 h-2.5 rounded-sm bg-emerald-100 border border-emerald-200"></span>
+              70-100%
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-2.5 h-2.5 rounded-sm bg-emerald-600"></span>
+              100%+
+            </span>
+          </div>
+        </div>
+        {indicators.length === 0 ? (
+          <div className="flex items-center justify-center py-12 text-slate-400 italic">
+            No indicators registered yet. Add indicators to see the achievement heatmap.
+          </div>
+        ) : (
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+            {indicators.map((ind) => {
+              const targetVal = ind.target || 0;
+              const achievedVal = ind.achieved || 0;
+              const rawPct = targetVal > 0 ? (achievedVal / targetVal) * 100 : 0;
+              const displayPct = Math.round(rawPct);
+              const unitSuffix = ind.unit ? ` ${ind.unit}` : '';
+
+              return (
+                <div
+                  key={ind.id}
+                  title={`${ind.name}\nTarget: ${targetVal}${unitSuffix}\nAchieved: ${achievedVal}${unitSuffix}\nAchievement: ${displayPct}%`}
+                  className={`aspect-square rounded-md border px-1.5 py-1.5 flex flex-col items-center justify-center text-center gap-0.5 transition-transform hover:scale-105 ${getHeatmapTileClass(rawPct)}`}
+                >
+                  <span className="text-[9px] font-normal leading-tight line-clamp-2 break-words">{ind.name}</span>
+                  <span className="text-[10px] font-normal">{displayPct}%</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Widgets */}
