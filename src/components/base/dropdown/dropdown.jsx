@@ -194,7 +194,7 @@ export function Item({
         <span className="font-semibold text-slate-700 truncate">{children}</span>
       </div>
 
-      {addon && <span className="text-[9px] font-mono text-slate-400">{addon}</span>}
+      {addon && <span className="text-[11px] font-mono text-slate-400">{addon}</span>}
     </button>
   );
 }
@@ -205,7 +205,7 @@ export function Section({ children }) {
 
 export function SectionHeader({ className = '', children }) {
   return (
-    <div className={`px-3.5 py-1 text-[9px] font-bold text-slate-400 uppercase tracking-widest ${className}`}>
+    <div className={`px-3.5 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-widest ${className}`}>
       {children}
     </div>
   );

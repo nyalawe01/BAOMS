@@ -47,7 +47,7 @@ export function BaselineRequestFormView() {
           
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Request Category</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Request Category</label>
               <select 
                 value={requestType} 
                 onChange={(e) => setRequestType(e.target.value)}
@@ -64,7 +64,7 @@ export function BaselineRequestFormView() {
             {requestType === 'Leave' && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-semibold text-slate-500">Start</label>
+                  <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1 font-semibold text-slate-500">Start</label>
                   <input 
                     type="date" 
                     required 
@@ -74,7 +74,7 @@ export function BaselineRequestFormView() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-semibold text-slate-500">End</label>
+                  <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1 font-semibold text-slate-500">End</label>
                   <input 
                     type="date" 
                     required 
@@ -87,7 +87,7 @@ export function BaselineRequestFormView() {
             )}
 
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Justification Reason</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Justification Reason</label>
               <textarea 
                 required 
                 placeholder="Explain the reason for this submission..." 
@@ -117,7 +117,7 @@ export function BaselineRequestFormView() {
               <div key={req.id} className="p-3 bg-slate-50 border border-slate-150 rounded text-xs space-y-1">
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-slate-800">{req.requestType} Report</span>
-                  <span className={`px-2 py-0.5 rounded text-[9px] font-bold border uppercase ${
+                  <span className={`px-2 py-0.5 rounded text-[11px] font-bold border uppercase ${
                     req.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                     req.status === 'rejected' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200'
                   }`}>
@@ -126,9 +126,9 @@ export function BaselineRequestFormView() {
                 </div>
                 <p className="text-slate-600 text-[11px]">Reason: {req.details.reason}</p>
                 {req.details.startDate && (
-                  <div className="text-[10px] text-slate-400">Dates: {req.details.startDate} to {req.details.endDate}</div>
+                  <div className="text-[11px] text-slate-400">Dates: {req.details.startDate} to {req.details.endDate}</div>
                 )}
-                <span className="text-[10px] text-slate-400 block font-mono">Filed on {req.createdAt}</span>
+                <span className="text-[11px] text-slate-400 block font-mono">Filed on {req.createdAt}</span>
               </div>
             ))}
 

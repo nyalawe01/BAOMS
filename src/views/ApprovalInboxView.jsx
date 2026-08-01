@@ -215,7 +215,7 @@ export function ApprovalInboxView() {
               </h3>
               <p className="text-xs text-slate-400">Expense claims awaiting your sign-off.</p>
             </div>
-            <span className="text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
+            <span className="text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
               {pendingExpenses.length} Pending
             </span>
           </div>
@@ -276,7 +276,7 @@ export function ApprovalInboxView() {
               </h3>
               <p className="text-xs text-slate-400">Leave and staff requests awaiting your decision.</p>
             </div>
-            <span className="text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
+            <span className="text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
               {pendingRequests.length} Pending
             </span>
           </div>
@@ -286,8 +286,8 @@ export function ApprovalInboxView() {
               <div key={req.id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="space-y-1">
                   <span className="text-xs font-bold text-slate-800">{req.userName} &mdash; {req.requestType} Request</span>
-                  <p className="text-[10px] text-slate-400">Department: {req.department}</p>
-                  <p className="text-[10px] text-slate-400">Reason: {req.details?.reason}</p>
+                  <p className="text-[11px] text-slate-400">Department: {req.department}</p>
+                  <p className="text-[11px] text-slate-400">Reason: {req.details?.reason}</p>
                 </div>
 
                 <div className="flex gap-2">
@@ -327,7 +327,7 @@ export function ApprovalInboxView() {
               </h3>
               <p className="text-xs text-slate-400">Equipment/asset requests awaiting fulfillment sign-off.</p>
             </div>
-            <span className="text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
+            <span className="text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
               {pendingAssetRequests.length} Pending
             </span>
           </div>
@@ -337,8 +337,8 @@ export function ApprovalInboxView() {
               <div key={req.id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="space-y-1">
                   <span className="text-xs font-bold text-slate-800">{req.userName} &mdash; Asset Request</span>
-                  <p className="text-[10px] text-slate-400">Department: {req.department}</p>
-                  <p className="text-[10px] text-slate-400">Reason: {req.details?.reason}</p>
+                  <p className="text-[11px] text-slate-400">Department: {req.department}</p>
+                  <p className="text-[11px] text-slate-400">Reason: {req.details?.reason}</p>
                 </div>
 
                 <div className="flex gap-2">
@@ -378,7 +378,7 @@ export function ApprovalInboxView() {
               </h3>
               <p className="text-xs text-slate-400">Orders over the procurement threshold, awaiting sign-off before they're placed.</p>
             </div>
-            <span className="text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
+            <span className="text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
               {pendingOrders.length} Pending
             </span>
           </div>
@@ -388,7 +388,7 @@ export function ApprovalInboxView() {
               <div key={order.id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="space-y-1">
                   <span className="text-xs font-bold text-slate-800">{order.orderType} &mdash; {order.vendorName}</span>
-                  <p className="text-[10px] text-slate-400">Requested {order.createdAt}</p>
+                  <p className="text-[11px] text-slate-400">Requested {order.createdAt}</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-sm font-extrabold text-slate-900">TZS {Number(order.totalAmount || 0).toLocaleString()}</span>
@@ -422,7 +422,7 @@ export function ApprovalInboxView() {
               </h3>
               <p className="text-xs text-slate-400">Line items over the budget threshold, proposed but not yet allocated.</p>
             </div>
-            <span className="text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
+            <span className="text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
               {pendingBudgetItems.length} Pending
             </span>
           </div>
@@ -432,7 +432,7 @@ export function ApprovalInboxView() {
               <div key={item.id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="space-y-1">
                   <span className="text-xs font-bold text-slate-800">{item.description}</span>
-                  <p className="text-[10px] text-slate-400">Project: {item.projectName} &bull; Category: {item.category}</p>
+                  <p className="text-[11px] text-slate-400">Project: {item.projectName} &bull; Category: {item.category}</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-sm font-extrabold text-slate-900">TZS {Number(item.allocatedAmount || 0).toLocaleString()}</span>
@@ -466,7 +466,7 @@ export function ApprovalInboxView() {
               </h3>
               <p className="text-xs text-slate-400">Beneficiary records awaiting field verification sign-off.</p>
             </div>
-            <span className="text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
+            <span className="text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
               {pendingBeneficiaries.length} Pending
             </span>
           </div>
@@ -476,7 +476,7 @@ export function ApprovalInboxView() {
               <div key={ben.id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="space-y-1">
                   <span className="text-xs font-bold text-slate-800">{ben.name}</span>
-                  <p className="text-[10px] text-slate-400">Status: {ben.status}</p>
+                  <p className="text-[11px] text-slate-400">Status: {ben.status}</p>
                 </div>
 
                 <button

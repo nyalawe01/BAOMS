@@ -222,7 +222,7 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
           </div>
           <div className="animate-fadeIn">
             <h1 className="font-extrabold text-[13px] leading-none tracking-tight text-slate-100">BAOMS Portal</h1>
-            <span className="text-[9px] text-slate-400">Org Management</span>
+            <span className="text-[11px] text-slate-400">Org Management</span>
           </div>
         </div>
       )}
@@ -232,7 +232,7 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
         {/* Navigation Group Header (Optional label in expanded state) */}
         {!collapsed && (
           <div className="px-3 mb-2">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest block">
               {user.role === 'HR Officer' ? 'HR Console' : 'Navigation'}
             </span>
           </div>

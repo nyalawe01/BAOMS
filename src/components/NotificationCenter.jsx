@@ -98,7 +98,7 @@ export default function NotificationCenter({ onNavigate }) {
       >
         <Bell size={18} />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 flex items-center justify-center bg-indigo-600 text-white text-[10px] font-bold rounded-full border border-white leading-none">
+          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 flex items-center justify-center bg-indigo-600 text-white text-[11px] font-bold rounded-full border border-white leading-none">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -154,7 +154,7 @@ export default function NotificationCenter({ onNavigate }) {
                         <p className={`text-xs leading-snug ${!notification.read ? 'text-slate-800 font-semibold' : 'text-slate-600 font-medium'}`}>
                           {notification.message}
                         </p>
-                        <p className="text-[10px] text-slate-400 mt-1">
+                        <p className="text-[11px] text-slate-400 mt-1">
                           {formatTimeAgo(notification.createdAt)}
                         </p>
                       </div>

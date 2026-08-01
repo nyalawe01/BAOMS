@@ -69,7 +69,7 @@ export function CommunicationsView() {
               <div key={ann.id} className="p-3 bg-slate-50 border border-slate-150 rounded text-xs space-y-1">
                 <div className="font-bold text-slate-800">{ann.title}</div>
                 <p className="text-slate-600 text-[11px] leading-relaxed">{ann.content}</p>
-                <span className="text-[10px] text-slate-400 block font-mono">By: {ann.authorName} • {ann.publishedAt}</span>
+                <span className="text-[11px] text-slate-400 block font-mono">By: {ann.authorName} • {ann.publishedAt}</span>
               </div>
             ))}
           </div>
@@ -106,8 +106,8 @@ export function CommunicationsView() {
             {mediaLibrary.map(med => (
               <div key={med.id} className="border border-slate-200 rounded p-2 bg-slate-50 space-y-1">
                 <img src={med.url} alt={med.fileName} className="w-full h-16 object-cover rounded bg-slate-200" />
-                <div className="text-[10px] font-bold text-slate-700 truncate">{med.fileName}</div>
-                <div className="text-[9px] text-indigo-600 truncate">Project: {med.projectName}</div>
+                <div className="text-[11px] font-bold text-slate-700 truncate">{med.fileName}</div>
+                <div className="text-[11px] text-indigo-600 truncate">Project: {med.projectName}</div>
               </div>
             ))}
           </div>

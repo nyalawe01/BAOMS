@@ -139,26 +139,26 @@ export default function OverviewDashboard() {
         </div>
         <div className="text-right">
           <span className="text-2xl font-medium text-slate-805 block">{taskCompletionRate}%</span>
-          <span className="text-[9px] text-slate-400 uppercase font-medium">Overall Score</span>
+          <span className="text-[11px] text-slate-400 uppercase font-medium">Overall Score</span>
         </div>
       </div>
 
       <div className="bg-slate-50 rounded-lg p-3 border border-slate-200 text-xs text-slate-600 flex justify-around">
         <div className="text-center">
           <span className="block font-medium text-slate-800">{completedTasks}</span>
-          <span className="text-slate-400 text-[10px]">Closed Tasks</span>
+          <span className="text-slate-400 text-[11px]">Closed Tasks</span>
         </div>
         <div className="w-px bg-slate-200"></div>
         <div className="text-center">
           <span className="block font-medium text-slate-800">{pendingTasks}</span>
-          <span className="text-slate-400 text-[10px]">Open Tasks</span>
+          <span className="text-slate-400 text-[11px]">Open Tasks</span>
         </div>
         <div className="w-px bg-slate-200"></div>
         <div className="text-center">
           <span className="block font-medium text-slate-800">
             {totalTasks > 0 ? (totalTasks / totalProjects).toFixed(1) : 0}
           </span>
-          <span className="text-slate-400 text-[10px]">Avg Tasks / Project</span>
+          <span className="text-slate-400 text-[11px]">Avg Tasks / Project</span>
         </div>
       </div>
     </div>,
@@ -175,7 +175,7 @@ export default function OverviewDashboard() {
           <div key={p.id} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded border border-slate-200 transition-colors">
             <div className="truncate max-w-[180px]">
               <span className="font-medium text-xs text-slate-700 block truncate">{p.name}</span>
-              <span className="text-[10px] text-slate-400 block truncate">{p.description}</span>
+              <span className="text-[11px] text-slate-400 block truncate">{p.description}</span>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs font-medium text-slate-800">{p.progress}%</span>
@@ -188,7 +188,7 @@ export default function OverviewDashboard() {
       </div>
 
       <div className="text-right">
-        <span className="text-[10px] font-medium text-slate-400">Showing first 3 items</span>
+        <span className="text-[11px] font-medium text-slate-400">Showing first 3 items</span>
       </div>
     </div>
   ];
@@ -214,7 +214,7 @@ export default function OverviewDashboard() {
           <div>
             <span className="text-slate-500 text-xs font-medium block">Total Managed Projects</span>
             <span className="text-2xl font-medium text-slate-800 block mt-1">{totalProjects}</span>
-            <span className="text-[10px] text-slate-400 block mt-2">
+            <span className="text-[11px] text-slate-400 block mt-2">
               <span className="text-slate-600 font-medium">{activeProjects}</span> currently active
             </span>
           </div>
@@ -228,7 +228,7 @@ export default function OverviewDashboard() {
           <div>
             <span className="text-slate-500 text-xs font-medium block">Pending Tasks Action</span>
             <span className="text-2xl font-medium text-slate-800 block mt-1">{pendingTasks}</span>
-            <span className="text-[10px] text-slate-400 block mt-2">
+            <span className="text-[11px] text-slate-400 block mt-2">
               <span className="text-slate-600 font-medium">{completedTasks}</span> closed tasks
             </span>
           </div>
@@ -242,7 +242,7 @@ export default function OverviewDashboard() {
           <div>
             <span className="text-slate-500 text-xs font-medium block">Active Directory Members</span>
             <span className="text-2xl font-medium text-slate-800 block mt-1">{users.length}</span>
-            <span className="text-[10px] text-slate-400 block mt-2">
+            <span className="text-[11px] text-slate-400 block mt-2">
               Assigned across authorization tiers
             </span>
           </div>
@@ -263,9 +263,9 @@ export default function OverviewDashboard() {
                 <div className="flex justify-between items-start">
                   <div>
                     <h4 className="font-medium text-xs text-slate-800">{project.name}</h4>
-                    <p className="text-[10px] text-slate-400 mt-0.5">{project.description}</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">{project.description}</p>
                   </div>
-                  <span className="px-2 py-0.5 text-[9px] font-medium uppercase rounded border bg-slate-100 text-slate-600 border-slate-200">
+                  <span className="px-2 py-0.5 text-[11px] font-medium uppercase rounded border bg-slate-100 text-slate-600 border-slate-200">
                     {project.status}
                   </span>
                 </div>
@@ -310,10 +310,10 @@ export default function OverviewDashboard() {
               <div key={ann.id} className="pb-4 border-b border-slate-100 last:border-0 last:pb-0">
                 <div className="flex items-start justify-between gap-3">
                   <h4 className="text-xs font-semibold text-slate-800">{ann.title}</h4>
-                  <span className="text-[10px] text-slate-400 shrink-0">{ann.publishedAt}</span>
+                  <span className="text-[11px] text-slate-400 shrink-0">{ann.publishedAt}</span>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">{ann.content}</p>
-                <span className="text-[10px] text-slate-400 mt-1 block">— {ann.authorName}</span>
+                <span className="text-[11px] text-slate-400 mt-1 block">— {ann.authorName}</span>
               </div>
             ))}
             {recentAnnouncements.length === 0 && (
@@ -334,9 +334,9 @@ export default function OverviewDashboard() {
                 <div key={item.id} className="flex items-center justify-between gap-3 p-2.5 rounded-lg hover:bg-slate-50 transition-colors">
                   <div className="min-w-0">
                     <p className="text-xs font-semibold text-slate-800 truncate">{item.title}</p>
-                    <p className="text-[10px] text-slate-400">{item.subtitle} · {item.date}</p>
+                    <p className="text-[11px] text-slate-400">{item.subtitle} · {item.date}</p>
                   </div>
-                  <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${label.tone}`}>
+                  <span className={`shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${label.tone}`}>
                     {label.text}
                   </span>
                 </div>

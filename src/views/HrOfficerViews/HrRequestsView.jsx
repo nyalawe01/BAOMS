@@ -66,7 +66,7 @@ export function HrRequestsView() {
               <Send size={16} className="text-indigo-500" />
               <span>Incoming Staff Requests Pipeline</span>
             </h3>
-            <p className="text-[10px] text-slate-400">Review time-off, complaints, or contract query forms</p>
+            <p className="text-[11px] text-slate-400">Review time-off, complaints, or contract query forms</p>
           </div>
 
           <div className="divide-y divide-slate-100 max-h-[360px] overflow-y-auto pr-1">
@@ -74,13 +74,13 @@ export function HrRequestsView() {
               <div key={req.id} className="py-3 flex justify-between items-center text-xs">
                 <div className="space-y-1">
                   <div className="font-bold text-slate-800">{req.userName} ({req.department})</div>
-                  <div className="text-slate-500 font-medium text-[10px]">
+                  <div className="text-slate-500 font-medium text-[11px]">
                     Type: <span className="font-bold text-slate-700">{req.requestType}</span> — {req.details?.reason || 'No description supplied.'}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className={`px-2 py-0.5 rounded text-[9px] font-bold border uppercase ${
+                  <span className={`px-2 py-0.5 rounded text-[11px] font-bold border uppercase ${
                     req.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-250' :
                     req.status === 'Rejected' ? 'bg-rose-50 text-rose-700 border-rose-250' : 'bg-amber-50 text-amber-700 border-amber-200'
                   }`}>
@@ -120,7 +120,7 @@ export function HrRequestsView() {
               <ShieldAlert size={16} className="text-rose-500" />
               <span>Dispatch Directive / Formal Notice</span>
             </h3>
-            <p className="text-[10px] text-slate-400">Issue warnings, leave notices, or official reminders</p>
+            <p className="text-[11px] text-slate-400">Issue warnings, leave notices, or official reminders</p>
           </div>
 
           <form onSubmit={handleSendNotice} className="space-y-4 text-xs">

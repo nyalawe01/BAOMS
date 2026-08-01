@@ -116,9 +116,9 @@ export function DirectoryView() {
                 <Avatar size="lg" src={u.avatar} alt={u.name} className="ring-1 ring-slate-100" />
                 <div>
                   <h4 className="font-normal text-slate-808 text-sm leading-tight">{u.name}</h4>
-                  <p className="text-slate-400 text-[10px] mt-0.5 font-normal">{u.officeDetails?.position || u.role}</p>
+                  <p className="text-slate-400 text-[11px] mt-0.5 font-normal">{u.officeDetails?.position || u.role}</p>
                 </div>
-                <div className="flex flex-col gap-1 w-full text-[10px] border-t border-slate-100 pt-3 font-normal">
+                <div className="flex flex-col gap-1 w-full text-[11px] border-t border-slate-100 pt-3 font-normal">
                   <div className="flex justify-between text-slate-550">
                     <span>Role</span>
                     <span className="text-slate-700">{u.role || 'N/A'}</span>
@@ -149,7 +149,7 @@ export function DirectoryView() {
                 <Avatar size="sm" src={selectedUser.avatar} alt={selectedUser.name} />
                 <div>
                   <h3 className="text-sm font-normal leading-none">{selectedUser.name}</h3>
-                  <span className="text-[10px] text-slate-400 font-normal">{selectedUser.officeDetails?.position || selectedUser.role}</span>
+                  <span className="text-[11px] text-slate-400 font-normal">{selectedUser.officeDetails?.position || selectedUser.role}</span>
                 </div>
               </div>
               <button onClick={() => setSelectedUser(null)} className="p-1 hover:bg-slate-800 rounded text-slate-400"><X size={16} /></button>
@@ -157,7 +157,7 @@ export function DirectoryView() {
 
             <div className="p-6 space-y-4 text-xs bg-slate-50 max-h-[70vh] overflow-y-auto font-normal">
               <div className="space-y-2">
-                <h5 className="text-[10px] font-normal text-slate-400 uppercase tracking-wider">Contact & Role</h5>
+                <h5 className="text-[11px] font-normal text-slate-400 uppercase tracking-wider">Contact & Role</h5>
                 <div className="grid grid-cols-2 gap-3 bg-white border border-slate-200 rounded-lg p-3">
                   <div className="col-span-2">
                     <span className="text-slate-400 flex items-center gap-1 font-normal"><Mail size={11} /> Email</span>

@@ -41,7 +41,7 @@ export function HrProjectsView() {
               <div className="flex justify-between items-center border-b border-slate-100 pb-2">
                 <div>
                   <h4 className="font-extrabold text-slate-800 text-sm">{proj.name}</h4>
-                  <span className="text-[10px] text-slate-400">{proj.status} — TZS {proj.budget?.toLocaleString()} Limit</span>
+                  <span className="text-[11px] text-slate-400">{proj.status} — TZS {proj.budget?.toLocaleString()} Limit</span>
                 </div>
                 <div className="text-right">
                   <span className="text-xs font-bold text-slate-700">{proj.progress}% Done</span>
@@ -55,17 +55,17 @@ export function HrProjectsView() {
 
               {/* Team Hierarchy Tree list */}
               <div className="space-y-2">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Assigned Project Personnel</span>
+                <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider block">Assigned Project Personnel</span>
                 {staff.slice(0, 3).map((member, mIdx) => (
                   <div key={mIdx} className="flex justify-between items-center p-2 bg-slate-50 border border-slate-100 rounded">
                     <div className="flex items-center gap-2">
                       <Avatar size="xs" src={member.avatar} alt={member.name} />
                       <div className="text-xs">
                         <div className="font-bold text-slate-800">{member.name}</div>
-                        <span className="text-[9px] text-slate-400">Task Owner</span>
+                        <span className="text-[11px] text-slate-400">Task Owner</span>
                       </div>
                     </div>
-                    <span className="text-[9px] bg-slate-100 border border-slate-200 text-slate-750 px-2 py-0.5 rounded font-semibold">Active</span>
+                    <span className="text-[11px] bg-slate-100 border border-slate-200 text-slate-750 px-2 py-0.5 rounded font-semibold">Active</span>
                   </div>
                 ))}
               </div>

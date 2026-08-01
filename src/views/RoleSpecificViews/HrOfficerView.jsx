@@ -44,13 +44,13 @@ export function HrOfficerView() {
             <div key={req.id} className="py-3.5 flex justify-between items-center text-xs">
               <div className="space-y-1">
                 <div className="font-bold text-slate-800">{req.userName} ({req.department})</div>
-                <div className="text-slate-455 text-[10px] font-medium">
+                <div className="text-slate-455 text-[11px] font-medium">
                   Requested Dates: {req.details.startDate} to {req.details.endDate} — Reason: {req.details.reason}
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className={`px-2 py-0.5 rounded text-[9px] font-bold border uppercase ${
+                <span className={`px-2 py-0.5 rounded text-[11px] font-bold border uppercase ${
                   req.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-250' :
                   req.status === 'rejected' ? 'bg-rose-50 text-rose-700 border-rose-250' : 'bg-amber-50 text-amber-700 border-amber-200'
                 }`}>

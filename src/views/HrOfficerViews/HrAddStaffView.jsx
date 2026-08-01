@@ -166,7 +166,7 @@ export function HrAddStaffView() {
       <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex justify-between items-center shrink-0">
         <div>
           <h3 className="font-bold text-slate-800 text-sm">Onboard New Team Member</h3>
-          <p className="text-[10px] text-slate-400">Step {step} of 4: Fill out the details below.</p>
+          <p className="text-[11px] text-slate-400">Step {step} of 4: Fill out the details below.</p>
         </div>
         <div className="flex gap-1.5">
           {[1, 2, 3, 4].map(s => (
@@ -446,7 +446,7 @@ export function HrAddStaffView() {
           <div className="space-y-5 animate-slideRight">
             <div className="border-b border-slate-100 pb-1.5">
               <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider">Step 3: Attach Mandatory Documents</h4>
-              <p className="text-[10px] text-slate-400">All supporting documents are required to complete onboarding registration.</p>
+              <p className="text-[11px] text-slate-400">All supporting documents are required to complete onboarding registration.</p>
             </div>
 
             <div className="space-y-4">

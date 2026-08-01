@@ -145,11 +145,11 @@ export function HrStaffView({ setActiveTab }) {
               />
               <div className="space-y-1 w-full">
                 <h4 className="font-bold text-slate-800 text-sm truncate">{u.name}</h4>
-                <p className="text-slate-400 text-[10px] truncate">{u.email}</p>
+                <p className="text-slate-400 text-[11px] truncate">{u.email}</p>
                 <div className="text-[11px] font-semibold text-slate-500 truncate">{dept} — {u.role}</div>
               </div>
 
-              <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold border uppercase ${
+              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border uppercase ${
                 uStatus === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-250' :
                 uStatus === 'On Leave' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-rose-50 text-rose-700 border-rose-250'
               }`}>
@@ -197,7 +197,7 @@ export function HrStaffView({ setActiveTab }) {
                 <div>
                   <h4 className="font-extrabold text-slate-800 text-base">{selectedUser.name}</h4>
                   <p className="text-slate-400 text-xs">{selectedUser.email}</p>
-                  <span className={`inline-block px-2 py-0.5 mt-1 rounded text-[9px] font-bold border uppercase ${
+                  <span className={`inline-block px-2 py-0.5 mt-1 rounded text-[11px] font-bold border uppercase ${
                     (selectedUser.officeDetails?.status || selectedUser.status || 'Active') === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-250' : 'bg-rose-50 text-rose-700 border-rose-250'
                   }`}>
                     {selectedUser.officeDetails?.status || selectedUser.status || 'Active'}
@@ -312,7 +312,7 @@ export function HrStaffView({ setActiveTab }) {
                           <div className="flex items-center gap-1.5">
                             {attachedFile ? (
                               <>
-                                <span className="text-[9px] text-slate-400 font-mono truncate max-w-[100px]">{attachedFile.fileName}</span>
+                                <span className="text-[11px] text-slate-400 font-mono truncate max-w-[100px]">{attachedFile.fileName}</span>
                                 <button
                                   onClick={() => setActivePreviewDoc({
                                     fileName: attachedFile.fileName,
@@ -344,7 +344,7 @@ export function HrStaffView({ setActiveTab }) {
                                 </button>
                               </>
                             ) : (
-                              <span className="text-[10px] text-slate-400 italic">Not Attached</span>
+                              <span className="text-[11px] text-slate-400 italic">Not Attached</span>
                             )}
                           </div>
                         </div>

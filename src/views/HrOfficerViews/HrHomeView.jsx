@@ -84,7 +84,7 @@ export function HrHomeView() {
             </h2>
             <p className="text-slate-400 text-xs mt-1">Review workforce stats, monitor leave pipelines, and inspect organizational activity feeds.</p>
           </div>
-          <span className="bg-indigo-500/10 text-indigo-400 text-[10px] font-bold border border-indigo-500/20 px-3 py-1 rounded-full uppercase tracking-wider animate-pulse">
+          <span className="bg-indigo-500/10 text-indigo-400 text-[11px] font-bold border border-indigo-500/20 px-3 py-1 rounded-full uppercase tracking-wider animate-pulse">
             Live Database Sync
           </span>
         </div>
@@ -101,7 +101,7 @@ export function HrHomeView() {
           { label: 'Expiring Contracts', val: expiringContracts, color: 'text-slate-800 bg-slate-50 border-slate-100' }
         ].map((m, idx) => (
           <div key={idx} className={`p-4 rounded-xl border bg-white shadow-sm flex flex-col justify-between ${m.color.split(' ')[2]}`}>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-tight">{m.label}</span>
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider leading-tight">{m.label}</span>
             <span className={`text-2xl font-black mt-2 ${m.color.split(' ')[0]}`}>{m.val}</span>
           </div>
         ))}
@@ -116,7 +116,7 @@ export function HrHomeView() {
               <Building size={16} className="text-indigo-500" />
               <span>Department Resources</span>
             </h3>
-            <p className="text-[10px] text-slate-400">Resource counts across functional units</p>
+            <p className="text-[11px] text-slate-400">Resource counts across functional units</p>
           </div>
           <div className="space-y-3">
             {Object.entries(deptCounts).map(([dept, count], idx) => {
@@ -144,9 +144,9 @@ export function HrHomeView() {
                 <Bell size={16} className="text-amber-500" />
                 <span>Real-Time Audit Activity Feed</span>
               </h3>
-              <p className="text-[10px] text-slate-400">Force activity log tracking submissions</p>
+              <p className="text-[11px] text-slate-400">Force activity log tracking submissions</p>
             </div>
-            <span className="text-[9px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-mono">Immutable</span>
+            <span className="text-[11px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-mono">Immutable</span>
           </div>
 
           <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
@@ -163,7 +163,7 @@ export function HrHomeView() {
                 <div className="flex-1 space-y-0.5">
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-slate-800">{log.userName}</span>
-                    <span className="text-[9px] text-slate-400">{log.timestamp}</span>
+                    <span className="text-[11px] text-slate-400">{log.timestamp}</span>
                   </div>
                   <p className="text-slate-655 text-[11px] leading-relaxed">{log.description}</p>
                 </div>
@@ -183,7 +183,7 @@ export function HrHomeView() {
             <AlarmClock size={16} className="text-rose-500" />
             <span>Contract & Placement Expiry Radar</span>
           </h3>
-          <p className="text-[10px] text-slate-400">Active intern/placement end dates expiring in the next 90 days</p>
+          <p className="text-[11px] text-slate-400">Active intern/placement end dates expiring in the next 90 days</p>
         </div>
 
         {usersWithPlacementDates.length === 0 ? (
@@ -204,7 +204,7 @@ export function HrHomeView() {
                     <p className="font-bold text-slate-800 truncate">{u.name}</p>
                     <p className="text-slate-500 text-[11px]">{u.role}</p>
                   </div>
-                  <span className={`shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${badge.className}`}>
+                  <span className={`shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${badge.className}`}>
                     {badge.label}
                   </span>
                 </div>

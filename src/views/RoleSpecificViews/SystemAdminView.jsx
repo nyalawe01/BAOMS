@@ -116,7 +116,7 @@ export function SystemAdminView() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-100/50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <tr className="bg-slate-100/50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 <th className="py-3 px-6">Timestamp</th>
                 <th className="py-3 px-6">Principal User</th>
                 <th className="py-3 px-6">Access Role</th>
@@ -131,7 +131,7 @@ export function SystemAdminView() {
                   <td className="py-3 px-6 font-semibold text-slate-900">{log.userName}</td>
                   <td className="py-3 px-6 text-slate-500">{log.userRole}</td>
                   <td className="py-3 px-6">
-                    <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold ${
+                    <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold ${
                       log.actionType === 'SYSTEM_HEALTH' ? 'bg-emerald-50 text-emerald-700' :
                       log.actionType === 'PROJECT_CREATION' ? 'bg-indigo-50 text-indigo-700' :
                       log.actionType === 'EXPENSE_APPROVAL' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-600'

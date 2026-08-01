@@ -63,11 +63,11 @@ export function HrLeaveView() {
                 <div className="text-slate-500">Department: {s.officeDetails?.department || s.department} — Position: {s.officeDetails?.position || s.role}</div>
                 {/* Timeline Bar */}
                 <div className="flex items-center gap-2 pt-1.5">
-                  <span className="text-[10px] text-slate-400 font-mono">Starts: 2026-07-01</span>
+                  <span className="text-[11px] text-slate-400 font-mono">Starts: 2026-07-01</span>
                   <div className="w-32 bg-slate-200 h-2 rounded-full overflow-hidden">
                     <div className="bg-indigo-600 h-full w-[65%]"></div>
                   </div>
-                  <span className="text-[10px] text-slate-400 font-mono">Ends: 2026-07-30 (16 Days Remaining)</span>
+                  <span className="text-[11px] text-slate-400 font-mono">Ends: 2026-07-30 (16 Days Remaining)</span>
                 </div>
               </div>
 

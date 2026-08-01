@@ -32,7 +32,7 @@ export function BadgeGroup({ addonText = '', color = 'brand', theme = 'light', a
   return (
     <div className={`inline-flex items-center gap-2 rounded-full border ${selectedColor.bg} ${selectedSize} font-medium shadow-sm max-w-full truncate`}>
       {addonText && (
-        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${selectedColor.badge}`}>
+        <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${selectedColor.badge}`}>
           {addonText}
         </span>
       )}

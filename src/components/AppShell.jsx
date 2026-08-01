@@ -144,7 +144,7 @@ export default function AppShell() {
               <div className="flex items-center gap-2">
                 <FileText size={18} className="text-slate-500" />
                 <h3 className="font-extrabold text-slate-800 text-sm">{activePreviewDoc.fileName}</h3>
-                <span className="text-[10px] text-slate-400 font-mono">({activePreviewDoc.fileSize || 'N/A'})</span>
+                <span className="text-[11px] text-slate-400 font-mono">({activePreviewDoc.fileSize || 'N/A'})</span>
               </div>
               <div className="flex items-center gap-3">
                 {(activePreviewDoc.downloadUrl || activePreviewDoc.dataUrl) && (
@@ -208,7 +208,7 @@ export default function AppShell() {
                     <FileText size={48} className="text-slate-400" />
                     <div>
                       <h4 className="font-extrabold text-slate-800 text-sm">{activePreviewDoc.fileName}</h4>
-                      <p className="text-slate-400 text-[10px] mt-1">{activePreviewDoc.fileSize || 'Unknown Size'}</p>
+                      <p className="text-slate-400 text-[11px] mt-1">{activePreviewDoc.fileSize || 'Unknown Size'}</p>
                     </div>
                     <button
                       onClick={() => {

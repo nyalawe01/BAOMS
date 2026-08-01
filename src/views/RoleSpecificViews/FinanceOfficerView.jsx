@@ -78,7 +78,7 @@ export function FinanceOfficerView() {
 
           <form onSubmit={handleAddBudgetItem} className="space-y-3">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Project Portfolio</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Project Portfolio</label>
               <select 
                 value={selectedProjId}
                 onChange={(e) => setSelectedProjId(e.target.value)}
@@ -90,7 +90,7 @@ export function FinanceOfficerView() {
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Line Item Description</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Line Item Description</label>
               <input 
                 type="text" 
                 required 
@@ -102,7 +102,7 @@ export function FinanceOfficerView() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Expense Category</label>
+                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Expense Category</label>
                 <select 
                   value={budgetCat} 
                   onChange={(e) => setBudgetCat(e.target.value)}
@@ -115,7 +115,7 @@ export function FinanceOfficerView() {
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Amount (TZS)</label>
+                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Amount (TZS)</label>
                 <input 
                   type="number" 
                   required 
@@ -152,7 +152,7 @@ export function FinanceOfficerView() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-150 text-[10px] font-bold text-slate-400 uppercase">
+                    <tr className="border-b border-slate-150 text-[11px] font-bold text-slate-400 uppercase">
                       <th className="pb-2">Details</th>
                       <th className="pb-2 px-3">Category</th>
                       <th className="pb-2 px-3">Allocation</th>
@@ -164,7 +164,7 @@ export function FinanceOfficerView() {
                       <tr key={item.id} className="hover:bg-slate-50/50">
                         <td className="py-2.5 font-semibold text-slate-900">{item.description}</td>
                         <td className="py-2.5 px-3">
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600 uppercase border border-slate-200">
+                          <span className="px-1.5 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-600 uppercase border border-slate-200">
                             {item.category}
                           </span>
                         </td>
@@ -194,7 +194,7 @@ export function FinanceOfficerView() {
             <div key={ex.id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="space-y-1">
                 <div className="font-bold text-xs text-slate-800">{ex.description}</div>
-                <div className="text-[10px] text-slate-400 flex items-center gap-2">
+                <div className="text-[11px] text-slate-400 flex items-center gap-2">
                   <span>Project: {ex.projectName}</span>
                   <span>•</span>
                   <span>Submitted by: {ex.submittedByName} ({ex.department})</span>

@@ -106,7 +106,7 @@ export function OnboardingEngine() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Full Name</label>
+            <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Full Name</label>
             <input 
               type="text" 
               required 
@@ -117,7 +117,7 @@ export function OnboardingEngine() {
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Email Address</label>
+            <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Email Address</label>
             <input 
               type="email" 
               required 
@@ -131,7 +131,7 @@ export function OnboardingEngine() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Phone Number</label>
+            <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Phone Number</label>
             <input 
               type="text" 
               placeholder="e.g. +255 700 123 456" 
@@ -141,7 +141,7 @@ export function OnboardingEngine() {
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">National ID Number</label>
+            <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">National ID Number</label>
             <input 
               type="text" 
               required
@@ -155,7 +155,7 @@ export function OnboardingEngine() {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">CV Document Name</label>
+            <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">CV Document Name</label>
             <input 
               type="text" 
               placeholder="e.g. CV_Kimani.pdf" 
@@ -165,7 +165,7 @@ export function OnboardingEngine() {
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">NHIF Identifier</label>
+            <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">NHIF Identifier</label>
             <input 
               type="text" 
               required
@@ -176,7 +176,7 @@ export function OnboardingEngine() {
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">PSSF / NSSF Code</label>
+            <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">PSSF / NSSF Code</label>
             <input 
               type="text" 
               required

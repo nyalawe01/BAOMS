@@ -49,7 +49,7 @@ export function PMBudgetFinanceView() {
           { label: 'Pending Approvals', value: `TZS ${pending.toLocaleString()}`, color: 'border-l-slate-200' }
         ].map((card, idx) => (
           <div key={idx} className={`bg-white border border-slate-200 rounded-xl p-4 shadow-sm border-l-4 ${card.color} flex flex-col justify-between`}>
-            <span className="text-[9px] font-normal text-slate-500 uppercase tracking-widest">{card.label}</span>
+            <span className="text-[11px] font-normal text-slate-500 uppercase tracking-widest">{card.label}</span>
             <span className="text-base font-normal text-slate-800 mt-2 block">{card.value}</span>
           </div>
         ))}

@@ -96,7 +96,7 @@ export function ProcurementView() {
             {assets.map(as => (
               <div key={as.id} className="p-2 bg-slate-50 border border-slate-150 rounded flex justify-between items-center text-xs">
                 <span><strong>{as.details.assetCode}:</strong> {as.details.name}</span>
-                <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                <span className={`px-1.5 py-0.5 rounded text-[11px] font-bold ${
                   as.details.status === 'Operational' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
                 }`}>
                   {as.details.status}
@@ -140,7 +140,7 @@ export function ProcurementView() {
             {vendors.map(v => (
               <div key={v.id} className="p-2 bg-slate-50 border border-slate-150 rounded text-xs flex justify-between">
                 <span><strong>{v.details.vendorName}</strong> ({v.details.contactPerson})</span>
-                <span className="text-[10px] text-slate-400 font-mono">{v.details.email}</span>
+                <span className="text-[11px] text-slate-400 font-mono">{v.details.email}</span>
               </div>
             ))}
           </div>
@@ -201,7 +201,7 @@ export function ProcurementView() {
         <div className="overflow-x-auto pt-2">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-slate-150 text-[10px] font-bold text-slate-400 uppercase">
+              <tr className="border-b border-slate-150 text-[11px] font-bold text-slate-400 uppercase">
                 <th className="pb-2">Order ID</th>
                 <th className="pb-2">Order Type</th>
                 <th className="pb-2">Vendor Name</th>
@@ -220,7 +220,7 @@ export function ProcurementView() {
                   <td className="py-2.5">{ord.items?.[0]?.description} (x{ord.items?.[0]?.quantity})</td>
                   <td className="py-2.5 font-bold text-slate-900">TZS {ord.totalAmount.toLocaleString()}</td>
                   <td className="py-2.5 px-3">
-                    <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-bold border ${
+                    <span className={`inline-block px-1.5 py-0.5 rounded text-[11px] font-bold border ${
                       ord.status === 'Ordered' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'
                     }`}>
                       {ord.status}

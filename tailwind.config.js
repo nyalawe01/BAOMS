@@ -6,6 +6,18 @@ export default {
   ],
   theme: {
     extend: {
+      // Named type scale from the dashboard design plan - nothing below
+      // 11px anywhere in the app. Prefer these over ad hoc text-[Npx]
+      // values so new code converges on one scale instead of picking a
+      // new size each time. Existing text-[11px]/text-xs usage is fine
+      // as-is; these are additive, not a breaking rename.
+      fontSize: {
+        caption: ['11px', { lineHeight: '1.4' }],
+        body: ['14px', { lineHeight: '1.5' }],
+        'card-title': ['16px', { lineHeight: '1.4', fontWeight: '600' }],
+        'page-title': ['20px', { lineHeight: '1.3', fontWeight: '700' }],
+        kpi: ['28px', { lineHeight: '1.2', fontWeight: '700' }]
+      },
       colors: {
         brand: {
           50: '#f0f3ff',

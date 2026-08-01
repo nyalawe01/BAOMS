@@ -143,7 +143,7 @@ export default function ProjectManagement() {
         <div className="space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Milestone Stage</span>
-            <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${
+            <span className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase border ${
               phase.status === 'Completed' 
                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
                 : phase.status === 'Active'
@@ -210,7 +210,7 @@ export default function ProjectManagement() {
                   <h4 className="font-bold text-sm text-slate-800 truncate max-w-[70%]">{p.name}</h4>
                   <div className="flex items-center gap-1.5">
                     <span className={`w-2 h-2 rounded-full ${statusDot}`}></span>
-                    <span className="text-[10px] font-semibold text-slate-500 uppercase">{p.status}</span>
+                    <span className="text-[11px] font-semibold text-slate-500 uppercase">{p.status}</span>
                   </div>
                 </div>
                 <p className="text-xs text-slate-400 mt-1 line-clamp-1">{p.description}</p>
@@ -220,7 +220,7 @@ export default function ProjectManagement() {
                   <div className="flex-1 bg-slate-200 h-1 rounded-full overflow-hidden">
                     <div style={{ width: `${p.progress}%` }} className="bg-brand-500 h-full"></div>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-600">{p.progress}%</span>
+                  <span className="text-[11px] font-bold text-slate-600">{p.progress}%</span>
                 </div>
               </button>
             );
@@ -244,7 +244,7 @@ export default function ProjectManagement() {
                 <div>
                   <div className="flex items-center gap-3">
                     <h2 className="text-xl font-bold text-slate-800">{selectedProject.name}</h2>
-                    <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded border ${
+                    <span className={`px-2 py-0.5 text-[11px] font-bold uppercase rounded border ${
                       selectedProject.status === 'In Progress' 
                         ? 'bg-blue-50 text-blue-700 border-blue-200' 
                         : selectedProject.status === 'Completed'
@@ -276,20 +276,20 @@ export default function ProjectManagement() {
                 <div className="flex items-center gap-2">
                   <Calendar size={16} className="text-slate-400" />
                   <div>
-                    <span className="text-[10px] text-slate-400 block font-semibold uppercase">Start Date</span>
+                    <span className="text-[11px] text-slate-400 block font-semibold uppercase">Start Date</span>
                     <span className="text-slate-700 font-bold">{selectedProject.startDate}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar size={16} className="text-slate-400" />
                   <div>
-                    <span className="text-[10px] text-slate-400 block font-semibold uppercase">End Date</span>
+                    <span className="text-[11px] text-slate-400 block font-semibold uppercase">End Date</span>
                     <span className="text-slate-700 font-bold">{selectedProject.endDate}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 col-span-2">
                   <div className="flex-1">
-                    <span className="text-[10px] text-slate-400 block font-semibold uppercase">Overall Completion</span>
+                    <span className="text-[11px] text-slate-400 block font-semibold uppercase">Overall Completion</span>
                     <div className="flex items-center gap-3 mt-0.5">
                       <div className="flex-1 bg-slate-100 h-2 rounded-full overflow-hidden">
                         <div style={{ width: `${selectedProject.progress}%` }} className="bg-brand-500 h-full"></div>
@@ -331,7 +331,7 @@ export default function ProjectManagement() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-100 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                    <tr className="border-b border-slate-100 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                       <th className="pb-3 pr-4">Task Details</th>
                       <th className="pb-3 px-4">Assigned Resource</th>
                       <th className="pb-3 px-4">Work Status</th>
@@ -358,7 +358,7 @@ export default function ProjectManagement() {
                             </div>
                           </td>
                           <td className="py-3 px-4">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${badge}`}>
+                            <span className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase border ${badge}`}>
                               {task.status}
                             </span>
                           </td>
@@ -379,7 +379,7 @@ export default function ProjectManagement() {
                                 <option value="Completed">Completed</option>
                               </select>
                             ) : (
-                              <span className="text-[10px] text-slate-400 italic">Read-Only</span>
+                              <span className="text-[11px] text-slate-400 italic">Read-Only</span>
                             )}
                           </td>
                         </tr>

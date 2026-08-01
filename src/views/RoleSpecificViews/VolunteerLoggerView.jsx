@@ -48,7 +48,7 @@ export function VolunteerLoggerView() {
           <div className="bg-indigo-900/50 border border-indigo-500/30 rounded-xl px-4 py-2.5 flex items-center gap-3">
             <AlertTriangle className="text-yellow-500 animate-pulse" size={20} />
             <div>
-              <span className="text-[10px] text-slate-300 block font-bold uppercase tracking-wider">Internship placement Countdown</span>
+              <span className="text-[11px] text-slate-300 block font-bold uppercase tracking-wider">Internship placement Countdown</span>
               <span className="text-sm font-mono font-extrabold text-white">
                 {internCountdown !== null ? `${Math.floor(internCountdown / 60)}m ${internCountdown % 60}s` : 'Not configured'}
               </span>
@@ -64,7 +64,7 @@ export function VolunteerLoggerView() {
           
           <form onSubmit={handleTimeSubmit} className="space-y-3">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Select Project</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Select Project</label>
               <select 
                 value={selectedProj} 
                 onChange={(e) => setSelectedProj(e.target.value)}
@@ -77,7 +77,7 @@ export function VolunteerLoggerView() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Task Deliverable</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Task Deliverable</label>
               <select 
                 value={selectedTask} 
                 onChange={(e) => setSelectedTask(e.target.value)}
@@ -92,7 +92,7 @@ export function VolunteerLoggerView() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Hours Logged</label>
+                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Hours Logged</label>
                 <input 
                   type="number" 
                   step="0.5"
@@ -106,7 +106,7 @@ export function VolunteerLoggerView() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Log Notes</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Log Notes</label>
               <textarea 
                 required 
                 placeholder="Details of what was accomplished..." 
@@ -139,7 +139,7 @@ export function VolunteerLoggerView() {
                     : 'Not yet assigned'}
                 </span>
               </div>
-              <span className="text-[10px] font-bold bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded uppercase">
+              <span className="text-[11px] font-bold bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded uppercase">
                 {user.internPlacement ? 'Linked' : 'Pending'}
               </span>
             </div>
@@ -155,7 +155,7 @@ export function VolunteerLoggerView() {
                     <span className="text-indigo-600">{l.hours} Hours</span>
                   </div>
                   <p className="text-slate-600 text-[11px]">Notes: {l.notes}</p>
-                  <span className="text-[10px] text-slate-400 block font-mono">Logged by: {l.loggedBy} on {l.date}</span>
+                  <span className="text-[11px] text-slate-400 block font-mono">Logged by: {l.loggedBy} on {l.date}</span>
                 </div>
               ))
             )}

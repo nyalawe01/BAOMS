@@ -200,7 +200,7 @@ EOF
                   className={`hover:bg-slate-50/50 cursor-pointer transition-colors ${selectedProjId === proj.id ? 'bg-slate-50' : ''}`}
                   onClick={() => { setSelectedProjId(proj.id); setIsModalOpen(true); }}
                 >
-                  <td className="p-3 font-mono text-[10px] text-slate-400">#{proj.id.substring(0,6) || idx+1}</td>
+                  <td className="p-3 font-mono text-[11px] text-slate-400">#{proj.id.substring(0,6) || idx+1}</td>
                   <td className="p-3 font-normal text-slate-800">{proj.name}</td>
                   <td className="p-3 text-slate-550 font-normal">{proj.program || 'Field Program'}</td>
                   <td className="p-3 font-normal text-slate-700">TZS {proj.budget?.toLocaleString() || '0'}</td>
@@ -248,7 +248,7 @@ EOF
             <div className="px-6 py-4 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-white">
               <div>
                 <h3 className="text-sm font-normal">{selectedProj.name}</h3>
-                <span className="text-[10px] text-slate-400 font-normal">Project workspace overview</span>
+                <span className="text-[11px] text-slate-400 font-normal">Project workspace overview</span>
               </div>
               <button
                 onClick={() => { setIsModalOpen(false); setSelectedProjId(null); }}
@@ -261,38 +261,38 @@ EOF
             {/* Scrollable Body */}
             <div className="flex-1 overflow-y-auto p-6 space-y-5 select-none bg-slate-50 text-xs text-slate-700">
               <div>
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-normal mb-1">Project Objectives</span>
+                <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-normal mb-1">Project Objectives</span>
                 <p className="text-slate-600 leading-relaxed font-normal">{selectedProj.description || 'No description provided.'}</p>
               </div>
 
               {/* Data fields grid */}
               <div className="grid grid-cols-2 gap-3 bg-white border border-slate-200 rounded-lg p-3 font-normal">
                 <div>
-                  <span className="text-slate-400 block text-[9px] uppercase font-normal">Timeline Limit</span>
+                  <span className="text-slate-400 block text-[11px] uppercase font-normal">Timeline Limit</span>
                   <span className="text-slate-700 block font-normal">{selectedProj.startDate} to {selectedProj.endDate}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[9px] uppercase font-normal">Overall Progress</span>
+                  <span className="text-slate-400 block text-[11px] uppercase font-normal">Overall Progress</span>
                   <span className="text-slate-700 block font-normal">{selectedProj.progress || 0}% Complete</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[9px] uppercase font-normal">Authorized Budget Limit</span>
+                  <span className="text-slate-400 block text-[11px] uppercase font-normal">Authorized Budget Limit</span>
                   <span className="text-slate-700 block font-normal">TZS {selectedProj.budget?.toLocaleString() || 0}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[9px] uppercase font-normal">Donor Sponsors</span>
+                  <span className="text-slate-400 block text-[11px] uppercase font-normal">Donor Sponsors</span>
                   <span className="text-slate-700 block font-normal">{selectedProj.donor || 'UNICEF'}</span>
                 </div>
               </div>
 
               {/* Team Members List */}
               <div className="space-y-2 pt-2 border-t border-slate-200">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-normal">Team Members Allocated</span>
+                <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-normal">Team Members Allocated</span>
                 <div className="space-y-1.5">
                   {users.filter(u => (selectedProj.assignedStaff || []).includes(u.id)).map(member => (
                     <div key={member.id} className="flex justify-between items-center p-2 bg-white border border-slate-200 rounded">
                       <span className="text-slate-700 font-normal">{member.name}</span>
-                      <span className="text-[10px] text-slate-400 font-normal">{member.officeDetails?.position || member.role}</span>
+                      <span className="text-[11px] text-slate-400 font-normal">{member.officeDetails?.position || member.role}</span>
                     </div>
                   ))}
                   {users.filter(u => (selectedProj.assignedStaff || []).includes(u.id)).length === 0 && (
@@ -303,12 +303,12 @@ EOF
 
               {/* Files / Folder Documents (Resources) */}
               <div className="space-y-2 pt-2 border-t border-slate-200">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-normal">Linked Folder Documents</span>
+                <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-normal">Linked Folder Documents</span>
                 <div className="space-y-1.5">
                   {projectFiles.filter(f => f.projectId === selectedProj.id).map(file => (
                     <div key={file.id} className="p-2 bg-white border border-slate-200 rounded flex justify-between items-center text-slate-700 font-normal">
                       <span>{file.fileName}</span>
-                      <span className="text-[9px] text-slate-400 font-mono">/{file.folderPath}</span>
+                      <span className="text-[11px] text-slate-400 font-mono">/{file.folderPath}</span>
                     </div>
                   ))}
                   {projectFiles.filter(f => f.projectId === selectedProj.id).length === 0 && (
@@ -351,7 +351,7 @@ EOF
 
             <form onSubmit={(e) => { handleCreateProj(e); setIsDrawerOpen(false); }} className="space-y-3 text-xs font-normal">
               <div>
-                <label className="block text-[10px] font-normal text-slate-400 uppercase mb-1">Project Name</label>
+                <label className="block text-[11px] font-normal text-slate-400 uppercase mb-1">Project Name</label>
                 <input
                   type="text"
                   required
@@ -362,7 +362,7 @@ EOF
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-normal text-slate-400 uppercase mb-1">Description / Objectives</label>
+                <label className="block text-[11px] font-normal text-slate-400 uppercase mb-1">Description / Objectives</label>
                 <textarea
                   placeholder="Goals & Description..."
                   value={newProjDesc}
@@ -373,7 +373,7 @@ EOF
               </div>
               <div className="grid grid-cols-2 gap-3 font-normal">
                 <div>
-                  <label className="block text-[10px] font-normal text-slate-400 uppercase mb-1">Donor Sponsor</label>
+                  <label className="block text-[11px] font-normal text-slate-400 uppercase mb-1">Donor Sponsor</label>
                   <input
                     type="text"
                     value={newProjDonor}
@@ -382,7 +382,7 @@ EOF
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-normal text-slate-400 uppercase mb-1">Budget Limit (TZS)</label>
+                  <label className="block text-[11px] font-normal text-slate-400 uppercase mb-1">Budget Limit (TZS)</label>
                   <input
                     type="number"
                     value={newProjBudget}
@@ -393,7 +393,7 @@ EOF
               </div>
               <div className="grid grid-cols-2 gap-3 font-normal">
                 <div>
-                  <label className="block text-[10px] font-normal text-slate-400 uppercase mb-1">Start Date</label>
+                  <label className="block text-[11px] font-normal text-slate-400 uppercase mb-1">Start Date</label>
                   <input
                     type="date"
                     required
@@ -403,7 +403,7 @@ EOF
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-normal text-slate-400 uppercase mb-1">End Date</label>
+                  <label className="block text-[11px] font-normal text-slate-400 uppercase mb-1">End Date</label>
                   <input
                     type="date"
                     required

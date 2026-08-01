@@ -34,7 +34,7 @@ export function PMNotificationsView() {
             <div key={idx} className="py-3 flex justify-between items-center gap-4">
               <div>
                 <p className="font-normal text-slate-808">{alert.message}</p>
-                <span className="text-[9px] text-slate-400 block mt-0.5 font-normal">{alert.time}</span>
+                <span className="text-[11px] text-slate-400 block mt-0.5 font-normal">{alert.time}</span>
               </div>
               <span className="px-2 py-0.5 rounded text-[8px] font-normal border uppercase shrink-0 bg-slate-100 text-slate-600 border-slate-200">
                 {alert.category}

@@ -52,9 +52,9 @@ export function ProgramOfficerView() {
               <div key={task.id} className="p-3 bg-slate-50 border border-slate-150 rounded text-xs space-y-1.5">
                 <div className="flex justify-between font-bold">
                   <span className="text-slate-800">{task.title}</span>
-                  <span className="text-[10px] font-semibold text-indigo-600">{task.projectName}</span>
+                  <span className="text-[11px] font-semibold text-indigo-600">{task.projectName}</span>
                 </div>
-                <div className="flex justify-between items-center text-[10px]">
+                <div className="flex justify-between items-center text-[11px]">
                   <span className="text-slate-400">Status: {task.status}</span>
                   <span className="bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded text-indigo-700 font-bold uppercase">Assignee</span>
                 </div>
@@ -76,7 +76,7 @@ export function ProgramOfficerView() {
           <form onSubmit={handleActivitySubmit} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Related Project</label>
+                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Related Project</label>
                 <select 
                   required
                   value={reportProjId} 
@@ -90,7 +90,7 @@ export function ProgramOfficerView() {
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Expense Liability Amount (TZS)</label>
+                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Expense Liability Amount (TZS)</label>
                 <input 
                   type="number" 
                   required 
@@ -103,7 +103,7 @@ export function ProgramOfficerView() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Activity Log Description</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Activity Log Description</label>
               <textarea 
                 required 
                 placeholder="Details of expense, activities, or travel logs..." 
@@ -115,7 +115,7 @@ export function ProgramOfficerView() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Supporting Receipt File Name</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Supporting Receipt File Name</label>
               <input 
                 type="text" 
                 placeholder="e.g. receipt_transport_kajiado.jpg" 

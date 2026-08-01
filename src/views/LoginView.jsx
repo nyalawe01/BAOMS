@@ -53,7 +53,7 @@ export default function LoginView() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email */}
               <div className="space-y-1">
-                <label htmlFor="email" className="block text-[10px] font-bold uppercase tracking-wider text-slate-450">
+                <label htmlFor="email" className="block text-[11px] font-bold uppercase tracking-wider text-slate-450">
                   Email Address
                 </label>
                 <div className="relative">
@@ -74,7 +74,7 @@ export default function LoginView() {
 
               {/* Password */}
               <div className="space-y-1">
-                <label htmlFor="password" className="block text-[10px] font-bold uppercase tracking-wider text-slate-455">
+                <label htmlFor="password" className="block text-[11px] font-bold uppercase tracking-wider text-slate-455">
                   Password
                 </label>
                 <div className="relative">

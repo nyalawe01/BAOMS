@@ -93,7 +93,7 @@ export function HrDepartmentsView() {
                   <Building size={16} className="text-indigo-500" />
                   <span>{dept} Department</span>
                 </h4>
-                <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-semibold">{staff.length} Members</span>
+                <span className="text-[11px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-semibold">{staff.length} Members</span>
               </div>
 
               {/* Hierarchy Tree (Top to Bottom List) */}
@@ -113,14 +113,14 @@ export function HrDepartmentsView() {
                         />
                         <div className="text-xs">
                           <div className="font-bold text-slate-800">{s.name}</div>
-                          <div className="text-[10px] text-slate-400">{s.role}</div>
+                          <div className="text-[11px] text-slate-400">{s.role}</div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => handleShiftDepartment(s.id, dept)}
-                          className="px-2 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-[9px] font-bold text-slate-655"
+                          className="px-2 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-[11px] font-bold text-slate-655"
                         >
                           Shift
                         </button>

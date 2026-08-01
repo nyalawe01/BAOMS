@@ -59,7 +59,7 @@ export function PMDocumentsView() {
               <div key={doc.id} className="p-3 bg-slate-50 border border-slate-200 rounded flex justify-between items-center text-slate-700 font-normal">
                 <div>
                   <span className="block font-normal">{doc.title}</span>
-                  <span className="text-[10px] text-slate-400 block mt-0.5">Updated: {doc.updated} • Size: {doc.size}</span>
+                  <span className="text-[11px] text-slate-400 block mt-0.5">Updated: {doc.updated} • Size: {doc.size}</span>
                 </div>
                 <button onClick={() => Swal.fire('Preview Mode', 'Opening organizational compliance file...', 'info')} className="p-1 hover:bg-slate-200 rounded text-slate-600 border border-slate-200">
                   <Eye size={12} />
@@ -79,7 +79,7 @@ export function PMDocumentsView() {
               <div key={doc.id} className="p-3 bg-slate-50 border border-slate-200 rounded flex justify-between items-center text-slate-700 font-normal">
                 <div>
                   <span className="block font-normal">{doc.title}</span>
-                  <span className="text-[10px] text-slate-400 block mt-0.5">Updated: {doc.updated} • Size: {doc.size}</span>
+                  <span className="text-[11px] text-slate-400 block mt-0.5">Updated: {doc.updated} • Size: {doc.size}</span>
                 </div>
                 <button onClick={() => Swal.fire('Preview Mode', 'Opening role guideline guidelines...', 'info')} className="p-1 hover:bg-slate-200 rounded text-slate-600 border border-slate-200">
                   <Eye size={12} />
@@ -99,12 +99,12 @@ export function PMDocumentsView() {
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
           <div>
             <h3 className="font-normal text-slate-800 text-sm">Project Workspace Folders</h3>
-            <p className="text-[10px] text-slate-400 mt-0.5">Categorized per active project workspace</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">Categorized per active project workspace</p>
           </div>
 
           <div className="space-y-3 font-normal text-xs">
             <div>
-              <label className="block text-[10px] text-slate-400 uppercase mb-1">Select Project</label>
+              <label className="block text-[11px] text-slate-400 uppercase mb-1">Select Project</label>
               <select
                 value={selectedProjId}
                 onChange={(e) => setSelectedProjId(e.target.value)}
@@ -136,7 +136,7 @@ export function PMDocumentsView() {
 
           <form onSubmit={handleUpload} className="space-y-3 pt-3 border-t border-slate-200 text-xs font-normal">
             <div>
-              <label className="block text-[10px] text-slate-400 uppercase mb-1 font-normal">Upload File Name</label>
+              <label className="block text-[11px] text-slate-400 uppercase mb-1 font-normal">Upload File Name</label>
               <input
                 type="text"
                 required
@@ -169,7 +169,7 @@ export function PMDocumentsView() {
                   <FileText size={18} className="text-slate-400" />
                   <div>
                     <span className="font-normal block">{file.fileName}</span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5 font-normal">Uploaded by: {file.senderName || 'Manager'} • {file.uploadedAt || 'N/A'}</span>
+                    <span className="text-[11px] text-slate-400 block mt-0.5 font-normal">Uploaded by: {file.senderName || 'Manager'} • {file.uploadedAt || 'N/A'}</span>
                   </div>
                 </div>
                 <button onClick={() => Swal.fire('Downloaded!', 'File download initiated.', 'success')} className="p-1 hover:bg-slate-200 border border-slate-200 rounded text-slate-600">

@@ -89,7 +89,7 @@ export function StaffStatusController() {
       <div className="overflow-x-auto max-h-[360px] overflow-y-auto pr-1">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="border-b border-slate-150 text-[10px] font-bold text-slate-450 uppercase tracking-wider bg-slate-50/50">
+            <tr className="border-b border-slate-150 text-[11px] font-bold text-slate-450 uppercase tracking-wider bg-slate-50/50">
               <th className="pb-2.5 pt-1.5 px-3">Name</th>
               <th className="pb-2.5 pt-1.5">Role</th>
               <th className="pb-2.5 pt-1.5">Department</th>
@@ -109,7 +109,7 @@ export function StaffStatusController() {
                     />
                     <div className="flex flex-col">
                       <span className="truncate max-w-[120px]">{u.name}</span>
-                      <span className="text-[9px] text-slate-400 font-mono font-normal truncate max-w-[120px]">{u.email}</span>
+                      <span className="text-[11px] text-slate-400 font-mono font-normal truncate max-w-[120px]">{u.email}</span>
                     </div>
                   </div>
                 </td>

@@ -93,10 +93,10 @@ export function PMDashboardView() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((kpi, idx) => (
           <div key={idx} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all">
-            <span className="text-[10px] font-normal text-slate-500 uppercase tracking-wider">{kpi.label}</span>
+            <span className="text-[11px] font-normal text-slate-500 uppercase tracking-wider">{kpi.label}</span>
             <div className="flex justify-between items-center mt-3">
               <span className="text-xl font-normal text-slate-800">{kpi.value}</span>
-              <span className="text-[9px] px-2 py-0.5 rounded-full font-normal border bg-slate-100 text-slate-600 border-slate-200">Database</span>
+              <span className="text-[11px] px-2 py-0.5 rounded-full font-normal border bg-slate-100 text-slate-600 border-slate-200">Database</span>
             </div>
           </div>
         ))}
@@ -192,9 +192,9 @@ export function PMDashboardView() {
                   <div className="w-1.5 h-1.5 rounded-full bg-slate-400 mt-1.5 shrink-0"></div>
                   <div className="flex-1 min-w-0">
                     <div className="font-normal text-slate-700 truncate">{act.title}</div>
-                    <p className="text-slate-400 text-[10px] truncate mt-0.5">{act.desc}</p>
+                    <p className="text-slate-400 text-[11px] truncate mt-0.5">{act.desc}</p>
                   </div>
-                  <span className="text-[9px] text-slate-400 font-mono shrink-0">{act.time}</span>
+                  <span className="text-[11px] text-slate-400 font-mono shrink-0">{act.time}</span>
                 </div>
               ))}
               {recentActivities.length === 0 && (
@@ -214,9 +214,9 @@ export function PMDashboardView() {
                 <div key={idx} className="py-2.5 flex justify-between items-center">
                   <div>
                     <div className="font-normal text-slate-800">{proj.name}</div>
-                    <span className="text-[10px] text-slate-400">Deadline: {proj.endDate}</span>
+                    <span className="text-[11px] text-slate-400">Deadline: {proj.endDate}</span>
                   </div>
-                  <span className="px-2 py-0.5 rounded text-[9px] font-normal uppercase bg-slate-100 text-slate-600 border border-slate-200">Milestone</span>
+                  <span className="px-2 py-0.5 rounded text-[11px] font-normal uppercase bg-slate-100 text-slate-600 border border-slate-200">Milestone</span>
                 </div>
               ))}
               {upcomingDeadlines.length === 0 && (
@@ -260,20 +260,20 @@ export function PMDashboardView() {
                         ></div>
                       </div>
                     </div>
-                    <span className="w-9 shrink-0 text-right text-[10px] font-mono text-slate-400">{p.progress || 0}%</span>
+                    <span className="w-9 shrink-0 text-right text-[11px] font-mono text-slate-400">{p.progress || 0}%</span>
                   </div>
                 );
               })}
             </div>
 
             {/* Date-axis scale reference */}
-            <div className="flex justify-between text-[10px] text-slate-400 font-mono pl-[7.5rem] md:pl-[9.5rem] pr-9 pt-1 border-t border-slate-100">
+            <div className="flex justify-between text-[11px] text-slate-400 font-mono pl-[7.5rem] md:pl-[9.5rem] pr-9 pt-1 border-t border-slate-100">
               <span>{timelineStart.toLocaleDateString()}</span>
               <span>{timelineEnd.toLocaleDateString()}</span>
             </div>
 
             {/* Status legend */}
-            <div className="flex flex-wrap items-center gap-4 pt-1 text-[10px] text-slate-500">
+            <div className="flex flex-wrap items-center gap-4 pt-1 text-[11px] text-slate-500">
               <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-slate-400 inline-block"></span>Planning</span>
               <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span>In Progress</span>
               <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>Completed</span>

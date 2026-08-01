@@ -26,7 +26,7 @@ export function HrPayrollsView() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-100/50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <tr className="bg-slate-100/50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 <th className="py-3 px-6">Staff name</th>
                 <th className="py-3 px-6">Department Unit</th>
                 <th className="py-3 px-6">Salary Rate</th>
@@ -45,7 +45,7 @@ export function HrPayrollsView() {
                     <td className="py-3.5 px-6 font-semibold text-slate-900">{salary}</td>
                     <td className="py-3.5 px-6 text-slate-455 font-mono">2026-06-30</td>
                     <td className="py-3.5 px-6">
-                      <span className="inline-block px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded text-[9px] font-bold border border-emerald-150 uppercase">Processed</span>
+                      <span className="inline-block px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded text-[11px] font-bold border border-emerald-150 uppercase">Processed</span>
                     </td>
                     <td className="py-3.5 px-6">
                       <button

@@ -36,7 +36,7 @@ export function HrReportsView() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-100/50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <tr className="bg-slate-100/50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 <th className="py-3 px-6">Author</th>
                 <th className="py-3 px-6">Report Type</th>
                 <th className="py-3 px-6">Submission Date</th>
@@ -51,7 +51,7 @@ export function HrReportsView() {
                   <td className="py-3.5 px-6 text-slate-550">{rep.type}</td>
                   <td className="py-3.5 px-6 text-slate-400 font-mono">{rep.date}</td>
                   <td className="py-3.5 px-6">
-                    <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold border uppercase ${
+                    <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold border uppercase ${
                       rep.status === 'Reviewed' ? 'bg-emerald-50 text-emerald-700 border-emerald-150' : 'bg-amber-50 text-amber-700 border-amber-200'
                     }`}>{rep.status}</span>
                   </td>

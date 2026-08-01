@@ -36,7 +36,7 @@ export function HrDocumentsView() {
                 <BookOpen size={20} />
               </div>
               <h4 className="font-bold text-slate-800 text-sm leading-snug">{doc.title}</h4>
-              <p className="text-slate-400 text-[10px]">Updated: {doc.updated} — Category: {doc.category}</p>
+              <p className="text-slate-400 text-[11px]">Updated: {doc.updated} — Category: {doc.category}</p>
             </div>
 
             <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-xs">

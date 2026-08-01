@@ -154,7 +154,7 @@ export function Select({
                   <div className="truncate">
                     <span className="block font-semibold">{item.label}</span>
                     {supportingText && (
-                      <span className="block text-[10px] text-slate-400 font-medium truncate">{supportingText}</span>
+                      <span className="block text-[11px] text-slate-400 font-medium truncate">{supportingText}</span>
                     )}
                   </div>
                 </div>
@@ -169,7 +169,7 @@ export function Select({
         </div>
       )}
 
-      {hint && <p className="text-[10px] text-slate-400 font-medium mt-1">{hint}</p>}
+      {hint && <p className="text-[11px] text-slate-400 font-medium mt-1">{hint}</p>}
     </div>
   );
 }

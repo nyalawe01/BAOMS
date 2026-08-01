@@ -126,7 +126,7 @@ export function FileUploadDropZone({ label = "Click to attach document", accept 
             <FileText size={16} className="text-slate-400 shrink-0" />
             <div className="truncate">
               <p className="font-bold text-slate-800 truncate leading-tight">{value.fileName}</p>
-              <p className="text-[9px] text-slate-400">{value.fileSize}</p>
+              <p className="text-[11px] text-slate-400">{value.fileSize}</p>
             </div>
           </div>
           {!disabled && (
@@ -143,11 +143,11 @@ export function FileUploadDropZone({ label = "Click to attach document", accept 
         <div className="flex flex-col items-center justify-center space-y-1 py-1">
           <Paperclip size={16} className="text-slate-400" />
           <span className="text-[11px] font-bold text-slate-500">{label}</span>
-          <span className="text-[9px] text-slate-400">PDF, PNG, JPG up to 10MB</span>
+          <span className="text-[11px] text-slate-400">PDF, PNG, JPG up to 10MB</span>
         </div>
       )}
       {uploadError && (
-        <p className="text-[9px] text-rose-600 font-semibold mt-1">{uploadError}</p>
+        <p className="text-[11px] text-rose-600 font-semibold mt-1">{uploadError}</p>
       )}
     </div>
   );

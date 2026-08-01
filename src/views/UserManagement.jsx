@@ -82,7 +82,7 @@ export default function UserManagement() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <tr className="bg-slate-50/50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 <th className="py-4 px-6">Name & Identifier</th>
                 <th className="py-4 px-6">Email Address</th>
                 <th className="py-4 px-6">Access Scope / Role</th>

@@ -57,15 +57,15 @@ export function DepartmentHeadView() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-1">
-          <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">My Department</span>
+          <span className="text-slate-400 text-[11px] font-bold uppercase tracking-wider block">My Department</span>
           <span className="text-2xl font-extrabold text-indigo-700 block">{myDept}</span>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-1">
-          <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">Team Capacity</span>
+          <span className="text-slate-400 text-[11px] font-bold uppercase tracking-wider block">Team Capacity</span>
           <span className="text-2xl font-extrabold text-slate-800 block">Active</span>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-1">
-          <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">Pending Team Claims</span>
+          <span className="text-slate-400 text-[11px] font-bold uppercase tracking-wider block">Pending Team Claims</span>
           <span className="text-2xl font-extrabold text-slate-800 block">{pendingRequests.length} Inbox Items</span>
         </div>
       </div>
@@ -82,7 +82,7 @@ export function DepartmentHeadView() {
             <div key={req.id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="space-y-1">
                 <span className="text-xs font-bold text-slate-800">{req.userName} — {req.requestType} Report</span>
-                <p className="text-[10px] text-slate-400">Reason: {req.details.reason}</p>
+                <p className="text-[11px] text-slate-400">Reason: {req.details.reason}</p>
               </div>
 
               <div className="flex gap-2">

@@ -99,14 +99,14 @@ export function ExecutiveDirectorView() {
       {/* KPI Stats Panel */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-1">
-          <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">Aggregate Project Budget Limit</span>
+          <span className="text-slate-400 text-[11px] font-bold uppercase tracking-wider block">Aggregate Project Budget Limit</span>
           <span className="text-2xl font-extrabold text-slate-800 block">TZS {totalKPIBudget.toLocaleString()}</span>
           <span className="text-xs text-slate-500 block pt-2">Allocated across {projects.length} portfolios.</span>
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">Portfolio Execution Index</span>
+            <span className="text-slate-400 text-[11px] font-bold uppercase tracking-wider block">Portfolio Execution Index</span>
             <span className="text-2xl font-extrabold text-slate-850 block">{avgProgress}%</span>
             <span className="text-xs text-emerald-600 font-semibold block pt-2">Average project progress.</span>
           </div>
@@ -117,7 +117,7 @@ export function ExecutiveDirectorView() {
 
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
           <div>
-            <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">Board Report Readiness</span>
+            <span className="text-slate-400 text-[11px] font-bold uppercase tracking-wider block">Board Report Readiness</span>
             <span className="text-2xl font-extrabold text-slate-800 block">Q3 Active</span>
           </div>
           <Button 
@@ -142,14 +142,14 @@ export function ExecutiveDirectorView() {
             <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-lg px-3 py-1.5">
               <Users2 size={14} className="text-indigo-600" />
               <div className="leading-tight">
-                <span className="block text-[9px] font-bold uppercase tracking-wider text-indigo-500">Total Headcount</span>
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-indigo-500">Total Headcount</span>
                 <span className="block text-sm font-extrabold text-indigo-800">{totalHeadcount}</span>
               </div>
             </div>
             <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5">
               <ClipboardList size={14} className="text-amber-600" />
               <div className="leading-tight">
-                <span className="block text-[9px] font-bold uppercase tracking-wider text-amber-500">Open Approvals Org-Wide</span>
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-amber-500">Open Approvals Org-Wide</span>
                 <span className="block text-sm font-extrabold text-amber-800">{totalOpenApprovalsOrgWide}</span>
               </div>
             </div>
@@ -159,7 +159,7 @@ export function ExecutiveDirectorView() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-slate-150 text-[10px] font-bold text-slate-400 uppercase">
+              <tr className="border-b border-slate-150 text-[11px] font-bold text-slate-400 uppercase">
                 <th className="py-2 px-5">Department</th>
                 <th className="py-2 px-3">Headcount (Active)</th>
                 <th className="py-2 px-3 text-right pr-5">Open Approvals</th>
@@ -172,7 +172,7 @@ export function ExecutiveDirectorView() {
                   <td className="py-2.5 px-3">{dept.headcount}</td>
                   <td className="py-2.5 px-3 text-right pr-5">
                     {dept.openApprovals > 0 ? (
-                      <span className="text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded">
+                      <span className="text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded">
                         {dept.openApprovals} pending
                       </span>
                     ) : (
@@ -202,7 +202,7 @@ export function ExecutiveDirectorView() {
         <div className="bg-white border border-emerald-200 rounded-xl p-5 shadow-sm space-y-3">
           <div className="flex justify-between items-start border-b border-slate-100 pb-2">
             <h4 className="font-bold text-slate-800 text-sm">Compiled Board Briefing: Q3 2026</h4>
-            <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded uppercase">Ready to Export</span>
+            <span className="text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded uppercase">Ready to Export</span>
           </div>
           <div className="space-y-2 text-xs text-slate-600">
             <p><strong>Executive Summary:</strong> The organization portfolio contains {projects.length} projects running with high output efficiency. Total fiscal liability is TZS {totalKPIBudget}.</p>

@@ -50,7 +50,7 @@ export function UserBaselineProfileView() {
           />
           <div>
             <h3 className="text-lg font-bold text-slate-800">{user.name}</h3>
-            <span className="inline-block px-2.5 py-0.5 mt-1 text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-full uppercase">
+            <span className="inline-block px-2.5 py-0.5 mt-1 text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-full uppercase">
               {user.role}
             </span>
           </div>
@@ -60,12 +60,12 @@ export function UserBaselineProfileView() {
         <div className="space-y-4">
           <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
             <span>Personal Details</span>
-            <span className="text-[10px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-normal uppercase">User Configurable</span>
+            <span className="text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-normal uppercase">User Configurable</span>
           </h4>
 
           <form onSubmit={handleUpdatePersonal} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Email Address</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Email Address</label>
               <input 
                 type="text" 
                 disabled 
@@ -74,7 +74,7 @@ export function UserBaselineProfileView() {
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Phone Number</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Phone Number</label>
               <input 
                 type="text" 
                 required 
@@ -99,21 +99,21 @@ export function UserBaselineProfileView() {
         <div className="space-y-4 pt-4 border-t border-slate-100">
           <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
             <span>Office Placement Details</span>
-            <span className="text-[10px] text-rose-600 bg-rose-50 px-2 py-0.5 rounded font-normal uppercase flex items-center gap-1">
+            <span className="text-[11px] text-rose-600 bg-rose-50 px-2 py-0.5 rounded font-normal uppercase flex items-center gap-1">
               <Shield size={10} /> Locked Property
             </span>
           </h4>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
             <div>
-              <span className="text-slate-450 block text-[10px] font-bold uppercase">Assigned Position</span>
+              <span className="text-slate-450 block text-[11px] font-bold uppercase">Assigned Position</span>
               <span className="font-semibold text-slate-700">{user.officeDetails?.position}</span>
             </div>
             <div>
-              <span className="text-slate-450 block text-[10px] font-bold uppercase">Department Unit</span>
+              <span className="text-slate-450 block text-[11px] font-bold uppercase">Department Unit</span>
               <span className="font-semibold text-slate-700">{user.officeDetails?.department}</span>
             </div>
             <div>
-              <span className="text-slate-450 block text-[10px] font-bold uppercase">Date of Hire</span>
+              <span className="text-slate-450 block text-[11px] font-bold uppercase">Date of Hire</span>
               <span className="font-semibold text-slate-700">{user.officeDetails?.hireDate}</span>
             </div>
           </div>
@@ -123,22 +123,22 @@ export function UserBaselineProfileView() {
         <div className="space-y-4 pt-4 border-t border-slate-100">
           <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
             <span>Supporting Audited Documents</span>
-            <span className="text-[10px] text-rose-600 bg-rose-50 px-2 py-0.5 rounded font-normal uppercase flex items-center gap-1">
+            <span className="text-[11px] text-rose-600 bg-rose-50 px-2 py-0.5 rounded font-normal uppercase flex items-center gap-1">
               <Shield size={10} /> Locked Property
             </span>
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono">
             <div className="p-3 bg-slate-50 border border-slate-150 rounded flex flex-col justify-between h-14">
-              <span className="text-slate-400 text-[9px] font-bold uppercase block font-sans">Employment Contract</span>
-              <span className="font-semibold text-[10px] text-slate-750 truncate">{user.supportingDocuments?.contract}</span>
+              <span className="text-slate-400 text-[11px] font-bold uppercase block font-sans">Employment Contract</span>
+              <span className="font-semibold text-[11px] text-slate-750 truncate">{user.supportingDocuments?.contract}</span>
             </div>
             <div className="p-3 bg-slate-50 border border-slate-150 rounded flex flex-col justify-between h-14">
-              <span className="text-slate-400 text-[9px] font-bold uppercase block font-sans">NSSF Identifier</span>
-              <span className="font-semibold text-[10px] text-slate-750">{user.supportingDocuments?.nssf}</span>
+              <span className="text-slate-400 text-[11px] font-bold uppercase block font-sans">NSSF Identifier</span>
+              <span className="font-semibold text-[11px] text-slate-750">{user.supportingDocuments?.nssf}</span>
             </div>
             <div className="p-3 bg-slate-50 border border-slate-150 rounded flex flex-col justify-between h-14">
-              <span className="text-slate-400 text-[9px] font-bold uppercase block font-sans">NHIF Identifier</span>
-              <span className="font-semibold text-[10px] text-slate-750">{user.supportingDocuments?.nhif}</span>
+              <span className="text-slate-400 text-[11px] font-bold uppercase block font-sans">NHIF Identifier</span>
+              <span className="font-semibold text-[11px] text-slate-750">{user.supportingDocuments?.nhif}</span>
             </div>
           </div>
         </div>
@@ -153,12 +153,12 @@ export function UserBaselineProfileView() {
                 <BookOpen className="text-indigo-500" size={16} />
                 <span>Read-Only Document Vault</span>
               </h3>
-              <p className="text-[10px] text-slate-400 mt-0.5">Official templates and organization policy manuals.</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Official templates and organization policy manuals.</p>
             </div>
             
             <button 
               onClick={() => setSimulateEmptyVault(!simulateEmptyVault)}
-              className="text-[10px] text-indigo-650 hover:underline font-bold"
+              className="text-[11px] text-indigo-650 hover:underline font-bold"
               title="Toggle view to test vault empty states illustration"
             >
               {simulateEmptyVault ? 'Restore' : 'Test Empty State'}
@@ -176,7 +176,7 @@ export function UserBaselineProfileView() {
                 <div key={vault.id} className="p-2.5 bg-slate-50 border border-slate-150 rounded text-xs flex justify-between items-center hover:bg-slate-100 transition-colors">
                   <div className="space-y-0.5">
                     <span className="font-bold text-slate-700 block truncate max-w-[150px]">{vault.title}</span>
-                    <span className="text-[9px] text-slate-400 uppercase font-mono">{vault.category} • {vault.size}</span>
+                    <span className="text-[11px] text-slate-400 uppercase font-mono">{vault.category} • {vault.size}</span>
                   </div>
                   <button 
                     onClick={() => {
@@ -204,7 +204,7 @@ export function UserBaselineProfileView() {
           )}
         </div>
         
-        <p className="text-[10px] text-slate-400 text-center leading-relaxed">Documents are managed by the Administration & HR departments. Editing is restricted.</p>
+        <p className="text-[11px] text-slate-400 text-center leading-relaxed">Documents are managed by the Administration & HR departments. Editing is restricted.</p>
       </div>
     </div>
   );

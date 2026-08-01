@@ -184,7 +184,7 @@ export default function GlobalSearch({ onNavigate }) {
                     <div key={category.key} className="border-b border-slate-50 last:border-b-0">
                       <div className="px-4 pt-2.5 pb-1 flex items-center gap-1.5">
                         <CategoryIcon size={11} className="text-slate-400" />
-                        <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                        <p className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">
                           {category.label}
                         </p>
                       </div>
@@ -206,7 +206,7 @@ export default function GlobalSearch({ onNavigate }) {
                         </button>
                       ))}
                       {remaining > 0 && (
-                        <p className="px-4 pb-2 text-[10px] text-slate-400 font-medium">
+                        <p className="px-4 pb-2 text-[11px] text-slate-400 font-medium">
                           {remaining} more result{remaining === 1 ? '' : 's'}
                         </p>
                       )}
