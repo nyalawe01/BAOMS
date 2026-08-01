@@ -121,7 +121,7 @@ export default function AppShell() {
       {/* Main Panel */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
-        <TopUtilityHeader activeTab={activeTab} toggleSidebar={toggleSidebar} collapsed={sidebarCollapsed} />
+        <TopUtilityHeader activeTab={activeTab} setActiveTab={setActiveTab} toggleSidebar={toggleSidebar} collapsed={sidebarCollapsed} />
 
         {/* Dynamic Center Screen Container */}
         <ErrorBoundary key={activeTab}>

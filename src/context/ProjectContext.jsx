@@ -631,20 +631,28 @@ export const ProjectProvider = ({ children }) => {
   };
 
   // Finance Actions
+  // Line items above orgSettings.budgetApprovalThreshold need Finance/ED
+  // sign-off (approveBudgetItem) before they count toward the project's
+  // allocated total - previously every line item was a direct write with
+  // no review step at all, regardless of size.
   const addBudgetLedgerItem = async (projectId, description, category, amount) => {
     const b = budgets.find(bu => bu.projectId === projectId);
     if (!b) return;
 
+    const parsedAmount = parseFloat(amount);
+    const needsApproval = parsedAmount > orgSettings.budgetApprovalThreshold;
     const newItem = {
       id: 'bi_' + Date.now(),
       description,
       category,
-      allocatedAmount: parseFloat(amount),
-      spent: 0
+      allocatedAmount: parsedAmount,
+      spent: 0,
+      status: needsApproval ? 'Pending Approval' : 'Approved',
+      proposedBy: user ? (user.id || user.uid) : 'System'
     };
 
     const updatedItems = [...(b.items || []), newItem];
-    const newAllocated = b.allocatedBudget + parseFloat(amount);
+    const newAllocated = b.allocatedBudget + (needsApproval ? 0 : parsedAmount);
 
     if (isFirebaseConfigured) {
       try {
@@ -660,7 +668,43 @@ export const ProjectProvider = ({ children }) => {
       setBudgets(updated);
       syncLocal('baoms_budgets', updated);
     }
-    logAudit('BUDGET_ENTRY', `Allocated ledger item "${description}" under category "${category}" (TZS ${amount}).`);
+    if (needsApproval) {
+      logAudit('BUDGET_ENTRY', `Proposed ledger item "${description}" under category "${category}" (TZS ${amount}) - awaiting approval (threshold TZS ${orgSettings.budgetApprovalThreshold.toLocaleString()}).`);
+      notifyRoles(
+        ['Finance Officer', 'Executive Director'],
+        `Budget line item "${description}" (TZS ${parsedAmount.toLocaleString()}) for "${b.projectName}" needs approval.`,
+        'budget_pending',
+        'fin_budgets'
+      );
+    } else {
+      logAudit('BUDGET_ENTRY', `Allocated ledger item "${description}" under category "${category}" (TZS ${amount}).`);
+    }
+  };
+
+  const approveBudgetItem = async (projectId, itemId) => {
+    const b = budgets.find(bu => bu.projectId === projectId);
+    if (!b) return;
+    const item = (b.items || []).find(i => i.id === itemId);
+    if (!item || item.status === 'Approved') return;
+
+    const updatedItems = b.items.map(i => i.id === itemId ? { ...i, status: 'Approved' } : i);
+    const newAllocated = b.allocatedBudget + item.allocatedAmount;
+
+    if (isFirebaseConfigured) {
+      try {
+        await updateDoc(doc(db, 'budgets', b.id), { allocatedBudget: newAllocated, items: updatedItems });
+      } catch (err) {
+        console.error("Firestore approve budget item error:", err);
+      }
+    } else {
+      const updated = budgets.map(bu => bu.projectId === projectId ? { ...bu, allocatedBudget: newAllocated, items: updatedItems } : bu);
+      setBudgets(updated);
+      syncLocal('baoms_budgets', updated);
+    }
+    logAudit('BUDGET_ENTRY', `Approved ledger item "${item.description}" (TZS ${item.allocatedAmount.toLocaleString()}) for "${b.projectName}".`);
+    if (item.proposedBy) {
+      addNotification(item.proposedBy, `Your proposed budget item "${item.description}" was approved.`, 'budget_approved', 'fin_budgets');
+    }
   };
 
   const addExpense = async (projectId, amount, description, category = 'Office', receiptName = 'receipt_upload.jpg', bankAccount = 'CRDB') => {
@@ -728,26 +772,71 @@ export const ProjectProvider = ({ children }) => {
     logAudit('TRANSACTION_LOG', `Logged ${newTx.type} transaction of TZS ${newTx.amount} (Ref: ${newTx.ref}).`);
   };
 
-  const updateExpenseStatus = async (expenseId, status, approverNotes = '') => {
+  // Expenses above orgSettings.expenseApprovalThreshold need two approvals
+  // from two different people before they're actually applied to the
+  // budget/ledger; at or below threshold, one approval is enough. This
+  // reuses the approvalLogs shape schema.js documented from the start but
+  // that nothing ever actually populated.
+  const updateExpenseStatus = async (expenseId, decision, approverNotes = '') => {
     const ex = expenses.find(e => e.id === expenseId);
     if (!ex) return;
 
+    const approverId = user ? (user.id || user.uid) : 'System';
+    const approverRole = user ? user.role : 'System';
+    const logEntry = { role: approverRole, approverId, decision, notes: approverNotes, timestamp: new Date().toISOString() };
+    const priorLogs = ex.approvalLogs || [];
+
+    if (decision === 'Rejected') {
+      const finalStatus = 'Rejected';
+      await applyExpenseStatusWrite(ex, finalStatus, [...priorLogs, logEntry], false);
+      logAudit('EXPENSE_APPROVAL', `Expense claim "${expenseId}" rejected by ${approverRole}.`);
+      if (ex.submittedBy) {
+        addNotification(ex.submittedBy, `Your expense claim "${ex.description}" (TZS ${ex.amount?.toLocaleString()}) was rejected.`, 'expense_rejected', 'fin_expenses');
+      }
+      return;
+    }
+
+    // decision === 'Approved'
+    const priorApprovers = new Set(priorLogs.filter(l => l.decision === 'Approved').map(l => l.approverId));
+    priorApprovers.add(approverId);
+    const needsSecondApproval = ex.amount > orgSettings.expenseApprovalThreshold;
+    const isFinal = !needsSecondApproval || priorApprovers.size >= 2;
+    const finalStatus = isFinal ? 'Approved' : 'Pending Second Approval';
+
+    await applyExpenseStatusWrite(ex, finalStatus, [...priorLogs, logEntry], isFinal);
+    logAudit(
+      'EXPENSE_APPROVAL',
+      isFinal
+        ? `Expense claim "${expenseId}" fully approved by ${approverRole}.`
+        : `Expense claim "${expenseId}" received first approval from ${approverRole}; awaiting a second approver (threshold TZS ${orgSettings.expenseApprovalThreshold.toLocaleString()}).`
+    );
+    if (isFinal && ex.submittedBy) {
+      addNotification(ex.submittedBy, `Your expense claim "${ex.description}" (TZS ${ex.amount?.toLocaleString()}) was approved.`, 'expense_approved', 'fin_expenses');
+    } else if (!isFinal) {
+      notifyRoles(
+        ['Department Head', 'Finance Officer', 'Executive Director'],
+        `Expense claim "${ex.description}" (TZS ${ex.amount?.toLocaleString()}) has one approval and needs a second (over the TZS ${orgSettings.expenseApprovalThreshold.toLocaleString()} threshold).`,
+        'expense_pending',
+        'fin_approvals'
+      );
+    }
+  };
+
+  // Shared write path for both the single- and two-step expense approval
+  // outcomes above - only applies budget/ledger effects when applyEffects
+  // is true (i.e. this write is the one that finally reaches "Approved").
+  const applyExpenseStatusWrite = async (ex, finalStatus, approvalLogs, applyEffects) => {
     if (isFirebaseConfigured) {
       try {
-        // Runs as a single atomic transaction so the expense status, the
-        // budget's spent total, and the resulting ledger transaction can't
-        // drift out of sync under concurrent approvals - previously these
-        // were three separate writes. Also guards against double-counting
-        // if the same expense is approved twice (e.g. a duplicate click).
         await runTransaction(db, async (transaction) => {
-          const expenseRef = doc(db, 'expenses', expenseId);
+          const expenseRef = doc(db, 'expenses', ex.id);
           const expenseSnap = await transaction.get(expenseRef);
           if (!expenseSnap.exists()) return;
           const alreadyApplied = expenseSnap.data().status === 'Approved';
 
-          transaction.update(expenseRef, { status });
+          transaction.update(expenseRef, { status: finalStatus, approvalLogs });
 
-          if (status === 'Approved' && !alreadyApplied) {
+          if (applyEffects && !alreadyApplied) {
             const b = budgets.find(bu => bu.projectId === ex.projectId);
             if (b) {
               const budgetRef = doc(db, 'budgets', b.id);
@@ -783,11 +872,11 @@ export const ProjectProvider = ({ children }) => {
       }
     } else {
       const alreadyApplied = ex.status === 'Approved';
-      const updatedExpenses = expenses.map(e => e.id === expenseId ? { ...e, status } : e);
+      const updatedExpenses = expenses.map(e => e.id === ex.id ? { ...e, status: finalStatus, approvalLogs } : e);
       setExpenses(updatedExpenses);
       syncLocal('baoms_expenses', updatedExpenses);
 
-      if (status === 'Approved' && !alreadyApplied) {
+      if (applyEffects && !alreadyApplied) {
         const updatedBudgets = budgets.map(b => {
           if (b.projectId === ex.projectId) {
             const updatedItems = (b.items || []).map((item, index) => {
@@ -816,15 +905,6 @@ export const ProjectProvider = ({ children }) => {
           bankAccount: ex.bankAccount || 'CRDB'
         });
       }
-    }
-    logAudit('EXPENSE_APPROVAL', `Expense claim "${expenseId}" updated to status: "${status}" by ${user ? user.personalDetails?.name || user.email : 'System'}.`);
-    if (ex.submittedBy) {
-      addNotification(
-        ex.submittedBy,
-        `Your expense claim "${ex.description}" (TZS ${ex.amount?.toLocaleString()}) was ${status.toLowerCase()}.`,
-        status === 'Approved' ? 'expense_approved' : 'expense_rejected',
-        'fin_expenses'
-      );
     }
   };
 
@@ -903,19 +983,57 @@ export const ProjectProvider = ({ children }) => {
     logAudit('ORDER_WORKFLOWS', `Drafted ${orderType} order for vendor "${vendorName}" (TZS ${totalAmount}).`);
   };
 
+  // Orders above orgSettings.procurementApprovalThreshold can't go straight
+  // to "Ordered" - they route through "Pending Approval" first (see
+  // approveOrder below) instead of Procurement effectively self-approving.
   const updateOrderStatus = async (orderId, status) => {
+    const order = orders.find(o => o.id === orderId);
+    let finalStatus = status;
+    if (status === 'Ordered' && order && order.totalAmount > orgSettings.procurementApprovalThreshold && order.status !== 'Pending Approval') {
+      finalStatus = 'Pending Approval';
+    }
+
     if (isFirebaseConfigured) {
       try {
-        await updateDoc(doc(db, 'orders', orderId), { status });
+        await updateDoc(doc(db, 'orders', orderId), { status: finalStatus });
       } catch (err) {
         console.error("Firestore update order status error:", err);
       }
     } else {
-      const updated = orders.map(o => o.id === orderId ? { ...o, status } : o);
+      const updated = orders.map(o => o.id === orderId ? { ...o, status: finalStatus } : o);
       setOrders(updated);
       syncLocal('baoms_orders', updated);
     }
-    logAudit('ORDER_WORKFLOWS', `Updated order "${orderId}" status to "${status}".`);
+    logAudit('ORDER_WORKFLOWS', `Updated order "${orderId}" status to "${finalStatus}".`);
+    if (finalStatus === 'Pending Approval' && order) {
+      notifyRoles(
+        ['Finance Officer', 'Executive Director', 'System Administrator'],
+        `Purchase order for "${order.vendorName}" (TZS ${order.totalAmount?.toLocaleString()}) needs approval before it can be placed.`,
+        'order_pending',
+        'procurement_panel'
+      );
+    }
+  };
+
+  const approveOrder = async (orderId) => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order || order.status !== 'Pending Approval') return;
+
+    if (isFirebaseConfigured) {
+      try {
+        await updateDoc(doc(db, 'orders', orderId), { status: 'Ordered' });
+      } catch (err) {
+        console.error("Firestore approve order error:", err);
+      }
+    } else {
+      const updated = orders.map(o => o.id === orderId ? { ...o, status: 'Ordered' } : o);
+      setOrders(updated);
+      syncLocal('baoms_orders', updated);
+    }
+    logAudit('ORDER_WORKFLOWS', `Approved order for "${order.vendorName}" (TZS ${order.totalAmount?.toLocaleString()}).`);
+    if (order.createdBy) {
+      addNotification(order.createdBy, `Your purchase order for "${order.vendorName}" was approved and can now be placed.`, 'order_approved', 'procurement_panel');
+    }
   };
 
   // Communications Actions
@@ -1512,6 +1630,7 @@ export const ProjectProvider = ({ children }) => {
         logTaskHours,
         addProjectFile,
         addBudgetLedgerItem,
+        approveBudgetItem,
         addExpense,
         addTransaction,
         updateExpenseStatus,
@@ -1519,6 +1638,7 @@ export const ProjectProvider = ({ children }) => {
         updateAssetOrVendor,
         createOrder,
         updateOrderStatus,
+        approveOrder,
         addAnnouncement,
         addMediaAsset,
         submitOfflineForm,

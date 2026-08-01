@@ -3,6 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import OverviewDashboard from '../views/OverviewDashboard';
 import { BaselineRequestFormView } from '../views/RoleSpecificViews/BaselineRequestFormView';
 import { UserBaselineProfileView } from '../views/RoleSpecificViews/UserBaselineProfileView';
+import { ApprovalInboxView } from '../views/ApprovalInboxView';
+import { DirectoryView } from '../views/DirectoryView';
 
 // Each router below is its own chunk, only downloaded by users whose role
 // actually needs it - previously every role's full view bundle loaded
@@ -27,6 +29,8 @@ export default function DashboardContent({ activeTab, setActiveTab }) {
       case 'profile': return <UserBaselineProfileView />;
       case 'request': return <BaselineRequestFormView />;
       case 'overview': return <OverviewDashboard />;
+      case 'approvals': return <ApprovalInboxView />;
+      case 'directory': return <DirectoryView />;
       default: break;
     }
 

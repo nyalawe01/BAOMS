@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Bell, Calendar, LogOut, ChevronDown, CheckCircle2, PanelLeft } from 'lucide-react';
+import { Calendar, LogOut, ChevronDown, CheckCircle2, PanelLeft } from 'lucide-react';
+import NotificationCenter from './NotificationCenter';
+import GlobalSearch from './GlobalSearch';
 
-export default function TopUtilityHeader({ activeTab, toggleSidebar, collapsed }) {
+export default function TopUtilityHeader({ activeTab, setActiveTab, toggleSidebar, collapsed }) {
   const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -29,6 +31,8 @@ export default function TopUtilityHeader({ activeTab, toggleSidebar, collapsed }
       case 'users': return 'User Access & Directory';
       case 'profile': return 'Baseline Profile';
       case 'request': return 'Request Center';
+      case 'approvals': return 'Approval Inbox';
+      case 'directory': return 'Organization Directory';
       default: return 'Management Portal';
     }
   };
@@ -63,17 +67,17 @@ export default function TopUtilityHeader({ activeTab, toggleSidebar, collapsed }
 
       {/* Utilities */}
       <div className="flex items-center gap-6">
+        {/* Global Search */}
+        <GlobalSearch onNavigate={setActiveTab} />
+
         {/* Date Display */}
         <div className="hidden lg:flex items-center gap-2 text-slate-500 text-xs">
           <Calendar size={14} />
           <span>{currentDate}</span>
         </div>
 
-        {/* Notifications Mock */}
-        <button className="relative p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-colors">
-          <Bell size={18} />
-          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-indigo-600 rounded-full border border-white"></span>
-        </button>
+        {/* Notifications */}
+        <NotificationCenter onNavigate={setActiveTab} />
 
         {/* Vertical Divider */}
         <div className="h-6 w-px bg-slate-200"></div>

@@ -1,10 +1,11 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { 
-  LayoutDashboard, LogOut, ShieldAlert, User, Send, Shield, Activity, 
-  Users, FileText, FileSpreadsheet, Layers, Briefcase, Calendar, 
+import {
+  LayoutDashboard, LogOut, ShieldAlert, User, Send, Shield, Activity,
+  Users, FileText, FileSpreadsheet, Layers, Briefcase, Calendar,
   MessageSquare, Radio, Clock, ChevronLeft, ChevronRight, Plus, BookOpen, Clipboard,
-  Settings, DollarSign, Bell, TrendingUp, Check, Package, MapPin, FileClock
+  Settings, DollarSign, Bell, TrendingUp, Check, Package, MapPin, FileClock,
+  Inbox, Contact
 } from 'lucide-react';
 
 export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
@@ -27,7 +28,9 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
       { id: 'hr_leave', label: 'Leave Management', icon: Calendar },
       { id: 'hr_reports', label: 'Reports', icon: Clipboard },
       { id: 'hr_documents', label: 'Documents', icon: BookOpen },
-      { id: 'hr_settings', label: 'Settings', icon: Shield }
+      { id: 'hr_settings', label: 'Settings', icon: Shield },
+      { id: 'approvals', label: 'Approval Inbox', icon: Inbox },
+      { id: 'directory', label: 'Directory', icon: Contact }
     ];
   } else if (user.role === 'Project Manager') {
     menuItems = [
@@ -41,6 +44,8 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
       { id: 'pm_me', label: 'Monitoring & Evaluation', icon: Activity },
       { id: 'pm_notifications', label: 'Notifications', icon: Bell },
       { id: 'pm_settings', label: 'Settings', icon: Settings },
+      { id: 'approvals', label: 'Approval Inbox', icon: Inbox },
+      { id: 'directory', label: 'Directory', icon: Contact },
       { id: 'profile', label: 'Profile', icon: User }
     ];
   } else if (user.role === 'Finance Officer') {
@@ -62,6 +67,8 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
       { id: 'fin_taxes', label: 'Taxes', icon: Shield },
       { id: 'fin_approvals', label: 'Approvals', icon: Check },
       { id: 'fin_settings', label: 'Settings', icon: Settings },
+      { id: 'approvals', label: 'Approval Inbox', icon: Inbox },
+      { id: 'directory', label: 'Directory', icon: Contact },
       { id: 'profile', label: 'Profile', icon: User }
     ];
   } else if (user.role === 'System Administrator' || user.role === 'Administrator') {
@@ -80,6 +87,8 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
       { id: 'admin_reports', label: 'Reports', icon: FileText },
       { id: 'admin_settings', label: 'Settings', icon: Settings },
       { id: 'admin_logs', label: 'Audit Logs', icon: FileClock },
+      { id: 'approvals', label: 'Approval Inbox', icon: Inbox },
+      { id: 'directory', label: 'Directory', icon: Contact },
       { id: 'profile', label: 'Profile', icon: User }
     ];
   } else if (user.role === 'M&E Officer' || user.role === 'Monitoring & Evaluation Officer') {
@@ -98,6 +107,8 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
       { id: 'me_analytics', label: 'Analytics', icon: TrendingUp },
       { id: 'me_documents', label: 'Documents', icon: BookOpen },
       { id: 'me_settings', label: 'Settings', icon: Settings },
+      { id: 'approvals', label: 'Approval Inbox', icon: Inbox },
+      { id: 'directory', label: 'Directory', icon: Contact },
       { id: 'profile', label: 'Profile', icon: User }
     ];
   } else {
@@ -119,6 +130,18 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
         label: 'System Overview',
         icon: LayoutDashboard,
         roles: ['System Administrator', 'Executive Director', 'Project Manager', 'Finance Officer', 'Procurement & Logistics Officer', 'Department Head', 'Program Officer', 'Communications Officer', 'Field Officer', 'Volunteer', 'Intern']
+      },
+      {
+        id: 'approvals',
+        label: 'Approval Inbox',
+        icon: Inbox,
+        roles: ['*']
+      },
+      {
+        id: 'directory',
+        label: 'Directory',
+        icon: Contact,
+        roles: ['*']
       },
       {
         id: 'admin_panel',
