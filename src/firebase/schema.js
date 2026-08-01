@@ -292,7 +292,8 @@ export const DATABASE_SCHEMA = {
     projectId: "string (Project ID, optional)",
     enrollmentDate: "timestamp",
     consentGiven: "boolean",
-    consentDate: "timestamp"
+    consentDate: "timestamp",
+    status: "Pending Verification | Verified"
   },
 
   /**
@@ -350,6 +351,30 @@ export const DATABASE_SCHEMA = {
     issuedDate: "timestamp",
     dueDate: "timestamp",
     status: "Unpaid | Paid | Overdue"
+  },
+
+  /**
+   * 19. NOTIFICATIONS (in-app notification center)
+   * Document ID: Auto-generated ID
+   */
+  notifications: {
+    notificationId: "string (Document ID)",
+    userId: "string (User UID) - recipient",
+    message: "string",
+    type: "string (e.g. expense_pending | expense_approved | request_pending | announcement | ...)",
+    link: "string (activeTab value to route to on click)",
+    read: "boolean",
+    createdAt: "timestamp"
+  },
+
+  /**
+   * 20. ORG SETTINGS (singleton documents, org-wide configuration)
+   * Document ID: fixed, e.g. "general"
+   */
+  orgSettings: {
+    expenseApprovalThreshold: "number (TZS - claims above this need a second approver)",
+    procurementApprovalThreshold: "number (TZS)",
+    budgetApprovalThreshold: "number (TZS)"
   }
 };
 

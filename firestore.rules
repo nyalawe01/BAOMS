@@ -276,5 +276,32 @@ service cloud.firestore {
         hasRole('System Administrator')
       );
     }
+
+    // 21. NOTIFICATIONS (in-app notification center)
+    match /notifications/{notificationId} {
+      // Users read their own notifications; Admin can read all for support.
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        hasRole('System Administrator')
+      );
+      // Any authenticated user's action can generate a notification for
+      // someone else (e.g. approving an expense notifies the submitter).
+      allow create: if isAuthenticated();
+      // Only the recipient (marking read) or Admin can modify/remove.
+      allow update, delete: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        hasRole('System Administrator')
+      );
+    }
+
+    // 22. ORG SETTINGS (approval thresholds, org-wide config)
+    match /orgSettings/{settingId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        hasRole('System Administrator') ||
+        hasRole('Executive Director') ||
+        hasRole('Finance Officer')
+      );
+    }
   }
 }

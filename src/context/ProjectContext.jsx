@@ -13,7 +13,8 @@ import {
   runTransaction,
   query,
   orderBy,
-  limit
+  limit,
+  where
 } from 'firebase/firestore';
 
 // Safety cap for collections with no pagination UI yet - without this, a
@@ -70,6 +71,12 @@ export const ProjectProvider = ({ children }) => {
   const [surveys, setSurveys] = useState([]);
   const [events, setEvents] = useState([]);
   const [invoices, setInvoices] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [orgSettings, setOrgSettings] = useState({
+    expenseApprovalThreshold: 500000,
+    procurementApprovalThreshold: 500000,
+    budgetApprovalThreshold: 1000000
+  });
   const [activePreviewDoc, setActivePreviewDoc] = useState(null);
   const [clientIp, setClientIp] = useState('');
 
@@ -150,6 +157,15 @@ export const ProjectProvider = ({ children }) => {
     const unsubInvoices = onSnapshot(collection(db, 'invoices'), (snap) => {
       setInvoices(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(d => !d.deletedAt));
     }, (err) => console.warn("Firestore invoices read permission denied:", err));
+    const unsubNotifications = onSnapshot(
+      query(collection(db, 'notifications'), where('userId', '==', user.id || user.uid), orderBy('createdAt', 'desc'), limit(100)),
+      (snap) => {
+        setNotifications(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      }, (err) => console.warn("Firestore notifications read permission denied:", err)
+    );
+    const unsubOrgSettings = onSnapshot(doc(db, 'orgSettings', 'general'), (snap) => {
+      if (snap.exists()) setOrgSettings(prev => ({ ...prev, ...snap.data() }));
+    }, (err) => console.warn("Firestore orgSettings read permission denied:", err));
 
     return () => {
       unsubProjects();
@@ -172,6 +188,8 @@ export const ProjectProvider = ({ children }) => {
       unsubSurveys();
       unsubEvents();
       unsubInvoices();
+      unsubNotifications();
+      unsubOrgSettings();
     };
   }, [isFirebaseConfigured, user]);
 
@@ -199,6 +217,9 @@ export const ProjectProvider = ({ children }) => {
     setSurveys(JSON.parse(localStorage.getItem('baoms_surveys') || '[]'));
     setEvents(JSON.parse(localStorage.getItem('baoms_events') || '[]'));
     setInvoices(JSON.parse(localStorage.getItem('baoms_invoices') || '[]'));
+    setNotifications(JSON.parse(localStorage.getItem('baoms_notifications') || '[]'));
+    const savedSettings = localStorage.getItem('baoms_org_settings');
+    if (savedSettings) setOrgSettings(prev => ({ ...prev, ...JSON.parse(savedSettings) }));
   }, [isFirebaseConfigured]);
 
   // Sync back to local storage in fallback mode
@@ -254,6 +275,7 @@ export const ProjectProvider = ({ children }) => {
     setSurveys([]);
     setEvents([]);
     setInvoices([]);
+    setNotifications([]);
 
     localStorage.setItem('baoms_projects', '[]');
     localStorage.setItem('baoms_project_files', '[]');
@@ -275,6 +297,7 @@ export const ProjectProvider = ({ children }) => {
     localStorage.setItem('baoms_surveys', '[]');
     localStorage.setItem('baoms_events', '[]');
     localStorage.setItem('baoms_invoices', '[]');
+    localStorage.setItem('baoms_notifications', '[]');
   };
 
   // Helper to log audit actions
@@ -669,6 +692,12 @@ export const ProjectProvider = ({ children }) => {
       syncLocal('baoms_expenses', updated);
     }
     logAudit('EXPENSE_ROUTING', `Submitted expense claim of TZS ${amount} for project "${newExpense.projectName}".`);
+    notifyRoles(
+      ['Department Head', 'Finance Officer', 'Executive Director'],
+      `New expense claim of TZS ${Number(amount).toLocaleString()} submitted by ${newExpense.submittedByName} for "${newExpense.projectName}".`,
+      'expense_pending',
+      'fin_approvals'
+    );
   };
 
   const addTransaction = async (txData) => {
@@ -789,6 +818,14 @@ export const ProjectProvider = ({ children }) => {
       }
     }
     logAudit('EXPENSE_APPROVAL', `Expense claim "${expenseId}" updated to status: "${status}" by ${user ? user.personalDetails?.name || user.email : 'System'}.`);
+    if (ex.submittedBy) {
+      addNotification(
+        ex.submittedBy,
+        `Your expense claim "${ex.description}" (TZS ${ex.amount?.toLocaleString()}) was ${status.toLowerCase()}.`,
+        status === 'Approved' ? 'expense_approved' : 'expense_rejected',
+        'fin_expenses'
+      );
+    }
   };
 
   // Procurement & Logistics Actions
@@ -903,6 +940,10 @@ export const ProjectProvider = ({ children }) => {
       syncLocal('baoms_announcements', updated);
     }
     logAudit('ANNOUNCEMENT_PUBLISHER', `Published announcement: "${title}".`);
+    const recipients = targetDepartment && targetDepartment !== 'All'
+      ? users.filter(u => u.officeDetails?.department === targetDepartment || u.department === targetDepartment)
+      : users;
+    recipients.forEach(u => addNotification(u.id, `New announcement: "${title}"`, 'announcement', 'overview'));
   };
 
   const addMediaAsset = async (fileName, url, projectTagId) => {
@@ -978,9 +1019,19 @@ export const ProjectProvider = ({ children }) => {
       syncLocal('baoms_requests', updated);
     }
     logAudit('REQUEST_CENTER', `Submitted request for "${requestType}": "${reason}".`);
+    const approverRoles = requestType === 'Asset Request'
+      ? ['Procurement & Logistics Officer', 'System Administrator']
+      : ['HR Officer', 'System Administrator'];
+    notifyRoles(
+      approverRoles,
+      `New ${requestType} request from ${newReq.userName}.`,
+      'request_pending',
+      'hr_requests'
+    );
   };
 
   const updateRequestStatus = async (requestId, status) => {
+    const req = requests.find(r => r.id === requestId);
     if (isFirebaseConfigured) {
       try {
         await updateDoc(doc(db, 'requests', requestId), { status });
@@ -993,6 +1044,14 @@ export const ProjectProvider = ({ children }) => {
       syncLocal('baoms_requests', updated);
     }
     logAudit('REQUEST_CENTER', `Request "${requestId}" status updated to "${status}" by HR/Admin.`);
+    if (req?.userId) {
+      addNotification(
+        req.userId,
+        `Your ${req.requestType} request was ${status}.`,
+        status === 'approved' ? 'request_approved' : 'request_rejected',
+        'request'
+      );
+    }
   };
 
   const addReport = async (reportData) => {
@@ -1083,7 +1142,8 @@ export const ProjectProvider = ({ children }) => {
       projectId: data.projectId || '',
       enrollmentDate: data.enrollmentDate || new Date().toISOString().substring(0, 10),
       consentGiven: data.consentGiven || false,
-      consentDate: data.consentDate || ''
+      consentDate: data.consentDate || '',
+      status: 'Pending Verification'
     };
     if (isFirebaseConfigured) {
       try {
@@ -1096,7 +1156,13 @@ export const ProjectProvider = ({ children }) => {
       setBeneficiaries(updated);
       syncLocal('baoms_beneficiaries', updated);
     }
-    logAudit('BENEFICIARY_ENROLLMENT', `Enrolled beneficiary "${newBeneficiary.name}".`);
+    logAudit('BENEFICIARY_ENROLLMENT', `Enrolled beneficiary "${newBeneficiary.name}" (pending M&E verification).`);
+    notifyRoles(
+      ['M&E Officer', 'Monitoring & Evaluation Officer'],
+      `New beneficiary "${newBeneficiary.name}" awaiting verification.`,
+      'beneficiary_pending',
+      'me_beneficiaries'
+    );
   };
 
   const updateBeneficiary = async (beneficiaryId, updatedData) => {
@@ -1329,6 +1395,85 @@ export const ProjectProvider = ({ children }) => {
     logAudit('FINANCE_INVOICES', `Voided invoice "${invoiceId}".`);
   };
 
+  // Notifications
+  const addNotification = async (targetUserId, message, type = 'general', link = '') => {
+    if (!targetUserId) return;
+    const newNotification = {
+      userId: targetUserId,
+      message,
+      type,
+      link,
+      read: false,
+      createdAt: new Date().toISOString()
+    };
+    if (isFirebaseConfigured) {
+      try {
+        await addDoc(collection(db, 'notifications'), newNotification);
+      } catch (err) {
+        console.error("Firestore add notification error:", err);
+      }
+    } else if (user && (user.id || user.uid) === targetUserId) {
+      // Local fallback mode only has visibility into the current user's own
+      // notifications (there's no cross-user storage without a real backend).
+      const updated = [{ id: 'notif_' + Date.now() + Math.random().toString(36).slice(2), ...newNotification }, ...notifications];
+      setNotifications(updated);
+      syncLocal('baoms_notifications', updated);
+    }
+  };
+
+  // Notify every user holding one of the given roles (used for "who should
+  // hear about this" fan-out, e.g. a new expense claim notifying approvers).
+  const notifyRoles = (roles, message, type = 'general', link = '') => {
+    const roleList = Array.isArray(roles) ? roles : [roles];
+    users
+      .filter(u => roleList.includes(u.role))
+      .forEach(u => addNotification(u.id, message, type, link));
+  };
+
+  const markNotificationRead = async (notificationId) => {
+    if (isFirebaseConfigured) {
+      try {
+        await updateDoc(doc(db, 'notifications', notificationId), { read: true });
+      } catch (err) {
+        console.error("Firestore mark notification read error:", err);
+      }
+    } else {
+      const updated = notifications.map(n => n.id === notificationId ? { ...n, read: true } : n);
+      setNotifications(updated);
+      syncLocal('baoms_notifications', updated);
+    }
+  };
+
+  const markAllNotificationsRead = async () => {
+    const unread = notifications.filter(n => !n.read);
+    if (isFirebaseConfigured) {
+      await Promise.all(unread.map(n =>
+        updateDoc(doc(db, 'notifications', n.id), { read: true }).catch(err =>
+          console.error("Firestore mark notification read error:", err))
+      ));
+    } else {
+      const updated = notifications.map(n => ({ ...n, read: true }));
+      setNotifications(updated);
+      syncLocal('baoms_notifications', updated);
+    }
+  };
+
+  // Org Settings (approval thresholds, etc.)
+  const updateOrgSettings = async (data) => {
+    const updated = { ...orgSettings, ...data };
+    if (isFirebaseConfigured) {
+      try {
+        await setDoc(doc(db, 'orgSettings', 'general'), updated, { merge: true });
+      } catch (err) {
+        console.error("Firestore update org settings error:", err);
+      }
+    } else {
+      setOrgSettings(updated);
+      localStorage.setItem('baoms_org_settings', JSON.stringify(updated));
+    }
+    logAudit('ORG_SETTINGS', `Updated organization settings.`);
+  };
+
   return (
     <ProjectContext.Provider
       value={{
@@ -1352,6 +1497,8 @@ export const ProjectProvider = ({ children }) => {
         surveys,
         events,
         invoices,
+        notifications,
+        orgSettings,
         activePreviewDoc,
         setActivePreviewDoc,
         addUser,
@@ -1395,6 +1542,11 @@ export const ProjectProvider = ({ children }) => {
         addInvoice,
         updateInvoiceStatus,
         deleteInvoice,
+        addNotification,
+        notifyRoles,
+        markNotificationRead,
+        markAllNotificationsRead,
+        updateOrgSettings,
         seedLocalSimulation,
         clearDatabase
       }}
