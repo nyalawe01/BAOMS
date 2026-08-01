@@ -57,6 +57,7 @@ export function BaselineRequestFormView() {
                 <option value="Support Document Access">Supporting Documents Access</option>
                 <option value="IT Support">IT Support Ticket</option>
                 <option value="Grievance">Grievance Submission</option>
+                <option value="Asset Request">Asset / Equipment Request</option>
               </select>
             </div>
 
