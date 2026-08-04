@@ -68,7 +68,7 @@ export default function TopUtilityHeader({ activeTab, setActiveTab, toggleSideba
       {/* Utilities */}
       <div className="flex items-center gap-6">
         {/* Global Search */}
-        <GlobalSearch onNavigate={setActiveTab} />
+        <GlobalSearch onNavigate={setActiveTab} role={user.role} />
 
         {/* Date Display */}
         <div className="hidden lg:flex items-center gap-2 text-slate-500 text-xs">

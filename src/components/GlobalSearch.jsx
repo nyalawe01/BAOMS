@@ -17,14 +17,25 @@ const MAX_RESULTS_PER_CATEGORY = 5;
 const MIN_QUERY_LENGTH = 2;
 
 // Category definitions: how to build the searchable haystack per record,
-// how to render the primary/secondary line, and which tab onNavigate
-// should jump to when a result is clicked.
+// how to render the primary/secondary line, and which tab a result should
+// navigate to. `targetsByRole` maps the signed-in role to the page that
+// role can actually open; `fallbackTarget` is used for every other role
+// (always 'overview' - the one dashboard tab every role can reach) so a
+// result never sends someone to a page gated to a different role.
 const CATEGORIES = [
   {
     key: 'projects',
     label: 'Projects',
     icon: FolderKanban,
-    target: 'admin_projects',
+    targetsByRole: {
+      'System Administrator': 'admin_projects',
+      'Project Manager': 'pm_projects',
+      'Finance Officer': 'fin_projects',
+      'HR Officer': 'hr_projects',
+      'M&E Officer': 'me_projects',
+      'Monitoring & Evaluation Officer': 'me_projects'
+    },
+    fallbackTarget: 'overview',
     fields: (p) => [p.name, p.description],
     title: (p) => p.name || 'Untitled Project',
     subtitle: (p) => p.description || ''
@@ -33,7 +44,10 @@ const CATEGORIES = [
     key: 'users',
     label: 'People',
     icon: Users,
-    target: 'admin_hr',
+    targetsByRole: {},
+    // Directory is real, works for every role, and is a better fit for a
+    // "find this person" search result than any role-specific staff list.
+    fallbackTarget: 'directory',
     fields: (u) => [u.name, u.email, u.role],
     title: (u) => u.name || u.email || 'Unnamed User',
     subtitle: (u) => [u.role, u.email].filter(Boolean).join(' • ')
@@ -42,7 +56,12 @@ const CATEGORIES = [
     key: 'beneficiaries',
     label: 'Beneficiaries',
     icon: HeartHandshake,
-    target: 'me_beneficiaries',
+    targetsByRole: {
+      'System Administrator': 'admin_beneficiaries',
+      'M&E Officer': 'me_beneficiaries',
+      'Monitoring & Evaluation Officer': 'me_beneficiaries'
+    },
+    fallbackTarget: 'overview',
     fields: (b) => [b.name, b.location, b.category],
     title: (b) => b.name || 'Unnamed Beneficiary',
     subtitle: (b) => [b.location, b.category].filter(Boolean).join(' • ')
@@ -51,7 +70,10 @@ const CATEGORIES = [
     key: 'expenses',
     label: 'Expenses',
     icon: Receipt,
-    target: 'fin_expenses',
+    targetsByRole: {
+      'Finance Officer': 'fin_expenses'
+    },
+    fallbackTarget: 'overview',
     fields: (e) => [e.description, e.projectName, e.submittedByName],
     title: (e) => e.description || 'Untitled Expense',
     subtitle: (e) => [e.projectName, e.submittedByName].filter(Boolean).join(' • ')
@@ -60,14 +82,18 @@ const CATEGORIES = [
     key: 'events',
     label: 'Events',
     icon: CalendarDays,
-    target: 'admin_events',
+    targetsByRole: {
+      'System Administrator': 'admin_events'
+    },
+    // Events also surface on the Overview dashboard's deadlines widget.
+    fallbackTarget: 'overview',
     fields: (ev) => [ev.title, ev.location],
     title: (ev) => ev.title || 'Untitled Event',
     subtitle: (ev) => ev.location || ''
   }
 ];
 
-export default function GlobalSearch({ onNavigate }) {
+export default function GlobalSearch({ onNavigate, role }) {
   const { projects, users, beneficiaries, expenses, events } = useProject();
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -128,7 +154,7 @@ export default function GlobalSearch({ onNavigate }) {
   const handleSelect = (category) => {
     setQuery('');
     setIsFocused(false);
-    onNavigate?.(category.target);
+    onNavigate?.(category.targetsByRole[role] || category.fallbackTarget);
   };
 
   const handleClear = () => {
