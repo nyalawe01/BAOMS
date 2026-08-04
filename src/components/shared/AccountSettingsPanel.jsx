@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
-import { KeyRound, Sun, Moon, AlertTriangle, Lock } from 'lucide-react';
+import { KeyRound, AlertTriangle, Lock } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 const inputClass = "w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white";
 
 // Standard account-settings block reused across every role's Settings page:
-// theme, change password, delete account. Role-specific org configuration
+// change password, delete account. Role-specific org configuration
 // (approval thresholds, tax defaults, etc.) lives in that role's own
 // Settings view, above or below this panel.
 export function AccountSettingsPanel() {
   const { changePassword, deleteMyAccount } = useAuth();
-  const { theme, toggleTheme } = useTheme();
 
   const [currentPwd, setCurrentPwd] = useState('');
   const [newPwd, setNewPwd] = useState('');
@@ -72,30 +70,6 @@ export function AccountSettingsPanel() {
 
   return (
     <div className="space-y-6">
-      {/* Appearance */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-        <h3 className="font-bold text-slate-800 text-base flex items-center gap-2 mb-1">
-          {theme === 'dark' ? <Moon size={16} className="text-indigo-500" /> : <Sun size={16} className="text-indigo-500" />}
-          <span>Appearance</span>
-        </h3>
-        <p className="text-xs text-slate-400 mb-4">Switch between light and dark navigation chrome.</p>
-        <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-150 rounded-lg">
-          <div>
-            <p className="text-sm font-semibold text-slate-700">Dark Mode</p>
-            <p className="text-xs text-slate-400">{theme === 'dark' ? 'Enabled' : 'Disabled'}</p>
-          </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={theme === 'dark'}
-            onClick={toggleTheme}
-            className={`relative w-12 h-6 rounded-full transition-colors ${theme === 'dark' ? 'bg-indigo-600' : 'bg-slate-300'}`}
-          >
-            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${theme === 'dark' ? 'translate-x-6' : ''}`} />
-          </button>
-        </div>
-      </div>
-
       {/* Password & Security */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
         <h3 className="font-bold text-slate-800 text-base flex items-center gap-2 mb-1">
