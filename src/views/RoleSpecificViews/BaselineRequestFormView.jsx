@@ -119,7 +119,7 @@ export function BaselineRequestFormView() {
                   <span className="font-bold text-slate-800">{req.requestType} Report</span>
                   <span className={`px-2 py-0.5 rounded text-[11px] font-bold border uppercase ${
                     req.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                    req.status === 'rejected' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                    req.status === 'Rejected' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200'
                   }`}>
                     {req.status}
                   </span>

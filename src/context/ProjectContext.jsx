@@ -674,7 +674,7 @@ export const ProjectProvider = ({ children }) => {
         ['Finance Officer', 'Executive Director'],
         `Budget line item "${description}" (TZS ${parsedAmount.toLocaleString()}) for "${b.projectName}" needs approval.`,
         'budget_pending',
-        'fin_budgets'
+        'approvals'
       );
     } else {
       logAudit('BUDGET_ENTRY', `Allocated ledger item "${description}" under category "${category}" (TZS ${amount}).`);
@@ -740,7 +740,7 @@ export const ProjectProvider = ({ children }) => {
       ['Department Head', 'Finance Officer', 'Executive Director'],
       `New expense claim of TZS ${Number(amount).toLocaleString()} submitted by ${newExpense.submittedByName} for "${newExpense.projectName}".`,
       'expense_pending',
-      'fin_approvals'
+      'approvals'
     );
   };
 
@@ -817,7 +817,7 @@ export const ProjectProvider = ({ children }) => {
         ['Department Head', 'Finance Officer', 'Executive Director'],
         `Expense claim "${ex.description}" (TZS ${ex.amount?.toLocaleString()}) has one approval and needs a second (over the TZS ${orgSettings.expenseApprovalThreshold.toLocaleString()} threshold).`,
         'expense_pending',
-        'fin_approvals'
+        'approvals'
       );
     }
   };
@@ -1010,7 +1010,7 @@ export const ProjectProvider = ({ children }) => {
         ['Finance Officer', 'Executive Director', 'System Administrator'],
         `Purchase order for "${order.vendorName}" (TZS ${order.totalAmount?.toLocaleString()}) needs approval before it can be placed.`,
         'order_pending',
-        'procurement_panel'
+        'approvals'
       );
     }
   };
@@ -1121,7 +1121,7 @@ export const ProjectProvider = ({ children }) => {
       department: user?.officeDetails?.department || 'Operations',
       requestType,
       details: { reason, ...extraDetails },
-      status: 'pending',
+      status: 'Pending',
       createdAt: new Date().toISOString().substring(0, 10)
     };
 
@@ -1144,11 +1144,16 @@ export const ProjectProvider = ({ children }) => {
       approverRoles,
       `New ${requestType} request from ${newReq.userName}.`,
       'request_pending',
-      'hr_requests'
+      'approvals'
     );
   };
 
-  const updateRequestStatus = async (requestId, status) => {
+  const updateRequestStatus = async (requestId, rawStatus) => {
+    // Callers have historically passed inconsistent casing ('approved',
+    // 'Approved', 'rejected'...) which broke status badges and misfired
+    // approve/reject notifications. Normalize once here so every writer
+    // and every reader agrees on the same values.
+    const status = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
     const req = requests.find(r => r.id === requestId);
     if (isFirebaseConfigured) {
       try {
@@ -1166,7 +1171,7 @@ export const ProjectProvider = ({ children }) => {
       addNotification(
         req.userId,
         `Your ${req.requestType} request was ${status}.`,
-        status === 'approved' ? 'request_approved' : 'request_rejected',
+        status === 'Approved' ? 'request_approved' : 'request_rejected',
         'request'
       );
     }
@@ -1279,7 +1284,7 @@ export const ProjectProvider = ({ children }) => {
       ['M&E Officer', 'Monitoring & Evaluation Officer'],
       `New beneficiary "${newBeneficiary.name}" awaiting verification.`,
       'beneficiary_pending',
-      'me_beneficiaries'
+      'approvals'
     );
   };
 

@@ -52,12 +52,12 @@ export function HrOfficerView() {
               <div className="flex items-center gap-2">
                 <span className={`px-2 py-0.5 rounded text-[11px] font-bold border uppercase ${
                   req.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-250' :
-                  req.status === 'rejected' ? 'bg-rose-50 text-rose-700 border-rose-250' : 'bg-amber-50 text-amber-700 border-amber-200'
+                  req.status === 'Rejected' ? 'bg-rose-50 text-rose-700 border-rose-250' : 'bg-amber-50 text-amber-700 border-amber-200'
                 }`}>
                   {req.status}
                 </span>
                 
-                {req.status === 'pending' && (
+                {req.status === 'Pending' && (
                   <div className="flex gap-1.5">
                     <button 
                       onClick={() => {

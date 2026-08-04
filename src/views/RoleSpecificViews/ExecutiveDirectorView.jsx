@@ -31,7 +31,7 @@ export function ExecutiveDirectorView() {
       if (status === 'Active') byDept.get(dept).headcount += 1;
     });
     requests.forEach(r => {
-      if (r.status === 'pending' && byDept.has(r.department)) {
+      if (r.status === 'Pending' && byDept.has(r.department)) {
         byDept.get(r.department).openApprovals += 1;
       }
     });
@@ -43,7 +43,7 @@ export function ExecutiveDirectorView() {
     [users]
   );
   const totalOpenApprovalsOrgWide = useMemo(
-    () => requests.filter(r => r.status === 'pending').length,
+    () => requests.filter(r => r.status === 'Pending').length,
     [requests]
   );
 

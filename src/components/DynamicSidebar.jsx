@@ -30,7 +30,8 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
       { id: 'hr_documents', label: 'Documents', icon: BookOpen },
       { id: 'hr_settings', label: 'Settings', icon: Shield },
       { id: 'approvals', label: 'Approval Inbox', icon: Inbox },
-      { id: 'directory', label: 'Directory', icon: Contact }
+      { id: 'directory', label: 'Directory', icon: Contact },
+      { id: 'profile', label: 'Profile', icon: User }
     ];
   } else if (user.role === 'Project Manager') {
     menuItems = [
@@ -59,12 +60,7 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
       { id: 'fin_budgets', label: 'Budgets', icon: Clipboard },
       { id: 'fin_payroll', label: 'Payroll', icon: Users },
       { id: 'fin_invoices', label: 'Invoices', icon: FileText },
-      { id: 'fin_vendors', label: 'Vendors', icon: Users },
-      { id: 'fin_donors', label: 'Customers / Donors', icon: Users },
       { id: 'fin_reports', label: 'Reports', icon: FileText },
-      { id: 'fin_assets', label: 'Assets', icon: Package },
-      { id: 'fin_loans', label: 'Loans', icon: Layers },
-      { id: 'fin_taxes', label: 'Taxes', icon: Shield },
       { id: 'fin_approvals', label: 'Approvals', icon: Check },
       { id: 'fin_settings', label: 'Settings', icon: Settings },
       { id: 'approvals', label: 'Approval Inbox', icon: Inbox },

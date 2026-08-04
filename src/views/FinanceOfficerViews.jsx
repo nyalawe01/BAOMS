@@ -1196,8 +1196,9 @@ export function FinanceAccountsView() {
 // ============================================================================
 export function FinanceApprovalsView() {
   const { expenses, updateExpenseStatus } = useProject();
+  const { user } = useAuth();
 
-  const pendingExpenses = expenses.filter(e => e.status === 'Pending');
+  const pendingExpenses = expenses.filter(e => e.status === 'Pending' || e.status === 'Pending Second Approval');
 
   const handleAction = async (id, status) => {
     await updateExpenseStatus(id, status);
@@ -1217,18 +1218,40 @@ export function FinanceApprovalsView() {
         </h3>
 
         <div className="space-y-3 font-normal">
-          {pendingExpenses.map((exp, idx) => (
-            <div key={exp.id || idx} className="p-4 bg-slate-50 border border-slate-200 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <span className="font-normal text-slate-808 text-xs block">{exp.description}</span>
-                <span className="text-[11px] text-slate-400 block mt-0.5">Amount requested: TZS {exp.amount.toLocaleString()} • Category: {exp.category || 'Operations'} • Wallet: {exp.bankAccount || 'CRDB'}</span>
+          {pendingExpenses.map((exp, idx) => {
+            const needsSecond = exp.status === 'Pending Second Approval';
+            const alreadyApprovedByMe = (exp.approvalLogs || []).some(
+              l => l.decision === 'Approved' && l.approverId === (user?.id || user?.uid)
+            );
+            return (
+              <div key={exp.id || idx} className="p-4 bg-slate-50 border border-slate-200 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-normal text-slate-808 text-xs">{exp.description}</span>
+                    {needsSecond && (
+                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                        Awaiting 2nd approval
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[11px] text-slate-400 block mt-0.5">Amount requested: TZS {exp.amount.toLocaleString()} • Category: {exp.category || 'Operations'} • Wallet: {exp.bankAccount || 'CRDB'}</span>
+                  {alreadyApprovedByMe && (
+                    <span className="text-[11px] text-slate-400 italic block mt-0.5">You already gave the first approval — a different approver is needed for the second.</span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleAction(exp.id, 'Approved')}
+                    disabled={alreadyApprovedByMe}
+                    className="px-3 py-1.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800 text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {needsSecond ? 'Give Second Approval' : 'Approve Clearance'}
+                  </button>
+                  <button onClick={() => handleAction(exp.id, 'Rejected')} className="px-3 py-1.5 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 text-xs">Reject Voucher</button>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <button onClick={() => handleAction(exp.id, 'Approved')} className="px-3 py-1.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800 text-xs">Approve Clearance</button>
-                <button onClick={() => handleAction(exp.id, 'Rejected')} className="px-3 py-1.5 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 text-xs">Reject Voucher</button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
           {pendingExpenses.length === 0 && (
             <p className="text-center py-8 text-slate-400 italic">No vouchers awaiting approval.</p>
           )}

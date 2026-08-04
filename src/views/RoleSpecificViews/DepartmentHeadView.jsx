@@ -11,7 +11,7 @@ export function DepartmentHeadView() {
   const { requests, updateRequestStatus, projects } = useProject();
 
   const myDept = user?.officeDetails?.department || 'Engineering';
-  const pendingRequests = requests.filter(r => r.status === 'pending' && r.department === myDept);
+  const pendingRequests = requests.filter(r => r.status === 'Pending' && r.department === myDept);
 
   const handleApproveRequest = (req) => {
     Swal.fire({

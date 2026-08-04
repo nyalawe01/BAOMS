@@ -14,7 +14,7 @@ const ORDER_APPROVER_ROLES = ['Finance Officer', 'Executive Director', 'System A
 const BUDGET_APPROVER_ROLES = ['Finance Officer', 'Executive Director', 'System Administrator'];
 
 export function ApprovalInboxView() {
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const {
     expenses, requests, beneficiaries, orders, budgets,
     updateExpenseStatus, updateRequestStatus, updateBeneficiary, approveOrder, approveBudgetItem
@@ -30,9 +30,9 @@ export function ApprovalInboxView() {
   const noSectionsVisible = !canApproveExpenses && !canApproveRequests && !canVerifyBeneficiaries &&
     !canApproveAssetRequests && !canApproveOrders && !canApproveBudgetItems;
 
-  const pendingExpenses = (expenses || []).filter(ex => ex.status === 'Pending');
-  const pendingRequests = (requests || []).filter(r => r.status === 'pending' && r.requestType !== 'Asset Request');
-  const pendingAssetRequests = (requests || []).filter(r => r.status === 'pending' && r.requestType === 'Asset Request');
+  const pendingExpenses = (expenses || []).filter(ex => ex.status === 'Pending' || ex.status === 'Pending Second Approval');
+  const pendingRequests = (requests || []).filter(r => r.status === 'Pending' && r.requestType !== 'Asset Request');
+  const pendingAssetRequests = (requests || []).filter(r => r.status === 'Pending' && r.requestType === 'Asset Request');
   const pendingBeneficiaries = (beneficiaries || []).filter(b => b.status === 'Pending Verification');
   const pendingOrders = (orders || []).filter(o => o.status === 'Pending Approval');
   const pendingBudgetItems = (budgets || []).flatMap(b =>
@@ -221,40 +221,57 @@ export function ApprovalInboxView() {
           </div>
 
           <div className="divide-y divide-slate-100">
-            {pendingExpenses.map(ex => (
-              <div key={ex.id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div className="space-y-1">
-                  <span className="text-xs font-bold text-slate-800">{ex.description}</span>
-                  <div className="text-[11px] text-slate-400 flex items-center gap-2 flex-wrap">
-                    <span>Project: {ex.projectName}</span>
-                    <span>&bull;</span>
-                    <span>Category: {ex.category}</span>
-                    <span>&bull;</span>
-                    <span>Submitted by: {ex.submittedByName}</span>
+            {pendingExpenses.map(ex => {
+              const needsSecond = ex.status === 'Pending Second Approval';
+              const alreadyApprovedByMe = (ex.approvalLogs || []).some(
+                l => l.decision === 'Approved' && l.approverId === (user?.id || user?.uid)
+              );
+              return (
+                <div key={ex.id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-bold text-slate-800">{ex.description}</span>
+                      {needsSecond && (
+                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                          Awaiting 2nd approval
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-slate-400 flex items-center gap-2 flex-wrap">
+                      <span>Project: {ex.projectName}</span>
+                      <span>&bull;</span>
+                      <span>Category: {ex.category}</span>
+                      <span>&bull;</span>
+                      <span>Submitted by: {ex.submittedByName}</span>
+                    </div>
+                    {alreadyApprovedByMe && (
+                      <p className="text-[11px] text-slate-400 italic">You already gave the first approval — a different approver is needed for the second.</p>
+                    )}
                   </div>
-                </div>
 
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-extrabold text-slate-900">TZS {Number(ex.amount || 0).toLocaleString()}</span>
-                  <div className="flex gap-1.5">
-                    <button
-                      onClick={() => handleApproveExpense(ex.id, ex.description, ex.amount)}
-                      className="p-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded transition-colors"
-                      title="Approve Expense"
-                    >
-                      <Check size={14} />
-                    </button>
-                    <button
-                      onClick={() => handleRejectExpense(ex.id, ex.description)}
-                      className="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-750 rounded transition-colors"
-                      title="Reject Expense"
-                    >
-                      <X size={14} />
-                    </button>
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-extrabold text-slate-900">TZS {Number(ex.amount || 0).toLocaleString()}</span>
+                    <div className="flex gap-1.5">
+                      <button
+                        onClick={() => handleApproveExpense(ex.id, ex.description, ex.amount)}
+                        disabled={alreadyApprovedByMe}
+                        className="p-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        title={needsSecond ? 'Give Second Approval' : 'Approve Expense'}
+                      >
+                        <Check size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleRejectExpense(ex.id, ex.description)}
+                        className="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-750 rounded transition-colors"
+                        title="Reject Expense"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             {pendingExpenses.length === 0 && (
               <div className="p-8 text-center text-slate-400 text-xs italic flex flex-col items-center gap-2">

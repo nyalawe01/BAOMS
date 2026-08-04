@@ -48,7 +48,7 @@ export function HrHomeView() {
     return diffDays <= 60;
   }).length;
 
-  const pendingRequests = requests.filter(r => r.status === 'pending').length;
+  const pendingRequests = requests.filter(r => r.status === 'Pending').length;
 
   // Contract & placement expiry radar: active users with a recorded internPlacement.endDate,
   // expiring within the next 90 days, soonest first.

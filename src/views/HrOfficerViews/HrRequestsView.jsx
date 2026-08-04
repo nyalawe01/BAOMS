@@ -86,7 +86,7 @@ export function HrRequestsView() {
                   }`}>
                     {req.status}
                   </span>
-                  {req.status === 'pending' && (
+                  {req.status === 'Pending' && (
                     <div className="flex gap-1">
                       <button
                         onClick={() => handleAction(req.id, 'Approve')}
