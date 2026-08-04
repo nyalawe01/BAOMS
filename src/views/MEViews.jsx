@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { AccountSettingsPanel } from '@/components/shared/AccountSettingsPanel';
+import { KpiCard, KpiCardGrid } from '@/components/base/kpi-card/kpi-card';
 
 // ============================================================================
 // 1. M&E DASHBOARD VIEW
@@ -56,14 +57,11 @@ export function MEDashboardView() {
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <KpiCardGrid>
         {kpis.map((kpi, idx) => (
-          <div key={idx} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:border-slate-350 transition-all">
-            <span className="text-xs font-normal text-slate-400 uppercase tracking-widest">{kpi.label}</span>
-            <span className="text-xl font-normal text-slate-808 mt-4 block">{kpi.value}</span>
-          </div>
+          <KpiCard key={idx} label={kpi.label} value={kpi.value} />
         ))}
-      </div>
+      </KpiCardGrid>
 
       {/* Indicator Achievement Heatmap */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">

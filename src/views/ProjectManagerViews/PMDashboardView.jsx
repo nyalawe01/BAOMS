@@ -1,6 +1,7 @@
 import React from 'react';
 import { useProject } from '../../context/ProjectContext';
 import { LayoutDashboard, Activity, FileClock, Clock, Calendar } from 'lucide-react';
+import { KpiCard, KpiCardGrid } from '@/components/base/kpi-card/kpi-card';
 
 // ============================================================================
 // 1. PM DASHBOARD VIEW
@@ -90,17 +91,11 @@ export function PMDashboardView() {
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <KpiCardGrid>
         {kpis.map((kpi, idx) => (
-          <div key={idx} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all">
-            <span className="text-xs font-normal text-slate-500 uppercase tracking-wider">{kpi.label}</span>
-            <div className="flex justify-between items-center mt-3">
-              <span className="text-xl font-normal text-slate-800">{kpi.value}</span>
-              <span className="text-xs px-2 py-0.5 rounded-full font-normal border bg-slate-100 text-slate-600 border-slate-200">Database</span>
-            </div>
-          </div>
+          <KpiCard key={idx} label={kpi.label} value={kpi.value} badge="Database" />
         ))}
-      </div>
+      </KpiCardGrid>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Charts */}

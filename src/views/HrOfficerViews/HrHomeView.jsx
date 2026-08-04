@@ -1,6 +1,7 @@
 import { useProject } from '../../context/ProjectContext';
 import { Users, Building, Bell, UserCheck, AlarmClock } from 'lucide-react';
 import { usePageLoader, CardSkeleton } from './_shared';
+import { KpiCard, KpiCardGrid } from '@/components/base/kpi-card/kpi-card';
 
 // Badge styling for the expiry radar, matching this file's slate/amber/rose conventions
 function getExpiryBadge(daysRemaining) {
@@ -91,21 +92,18 @@ export function HrHomeView() {
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+      <KpiCardGrid cols={6}>
         {[
-          { label: 'Total Employees', val: totalStaff, color: 'text-slate-800 bg-slate-50 border-slate-100' },
-          { label: 'Active Staff', val: activeStaff, color: 'text-slate-800 bg-slate-50 border-slate-100' },
-          { label: 'New Employees', val: newStaff, color: 'text-slate-800 bg-slate-50 border-slate-100' },
-          { label: 'Staff on Leave', val: onLeave, color: 'text-slate-800 bg-slate-50 border-slate-100' },
-          { label: 'Pending Requests', val: pendingRequests, color: 'text-rose-600 bg-rose-50 border-rose-150' },
-          { label: 'Expiring Contracts', val: expiringContracts, color: 'text-slate-800 bg-slate-50 border-slate-100' }
+          { label: 'Total Employees', val: totalStaff, tone: 'default' },
+          { label: 'Active Staff', val: activeStaff, tone: 'default' },
+          { label: 'New Employees', val: newStaff, tone: 'default' },
+          { label: 'Staff on Leave', val: onLeave, tone: 'default' },
+          { label: 'Pending Requests', val: pendingRequests, tone: 'danger' },
+          { label: 'Expiring Contracts', val: expiringContracts, tone: 'default' }
         ].map((m, idx) => (
-          <div key={idx} className={`p-4 rounded-xl border bg-white shadow-sm flex flex-col justify-between ${m.color.split(' ')[2]}`}>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider leading-tight">{m.label}</span>
-            <span className={`text-2xl font-black mt-2 ${m.color.split(' ')[0]}`}>{m.val}</span>
-          </div>
+          <KpiCard key={idx} label={m.label} value={m.val} tone={m.tone} />
         ))}
-      </div>
+      </KpiCardGrid>
 
       {/* Dash Widgets */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

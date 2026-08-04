@@ -2,10 +2,8 @@ import React from 'react';
 import { useProject } from '../context/ProjectContext';
 import { useAuth } from '../context/AuthContext';
 import Carousel from '../components/Carousel';
+import { KpiCard, KpiCardGrid } from '../components/base/kpi-card/kpi-card';
 import {
-  FolderKanban,
-  CheckSquare,
-  Users,
   TrendingUp,
   AlertCircle,
   Activity,
@@ -208,49 +206,25 @@ export default function OverviewDashboard() {
       </div>
 
       {/* Numerical Indicators Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Metric 1 */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex items-center justify-between">
-          <div>
-            <span className="text-slate-500 text-sm font-medium block">Total Managed Projects</span>
-            <span className="text-2xl font-medium text-slate-800 block mt-1">{totalProjects}</span>
-            <span className="text-xs text-slate-400 block mt-2">
-              <span className="text-slate-600 font-medium">{activeProjects}</span> currently active
-            </span>
-          </div>
-          <div className="p-3 bg-slate-100 rounded-xl text-slate-500 border border-slate-200">
-            <FolderKanban size={24} />
-          </div>
-        </div>
-
-        {/* Metric 2 */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex items-center justify-between">
-          <div>
-            <span className="text-slate-500 text-sm font-medium block">Pending Tasks Action</span>
-            <span className="text-2xl font-medium text-slate-800 block mt-1">{pendingTasks}</span>
-            <span className="text-xs text-slate-400 block mt-2">
-              <span className="text-slate-600 font-medium">{completedTasks}</span> closed tasks
-            </span>
-          </div>
-          <div className="p-3 bg-slate-100 rounded-xl text-slate-500 border border-slate-200">
-            <CheckSquare size={24} />
-          </div>
-        </div>
-
-        {/* Metric 3 */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex items-center justify-between sm:col-span-2 lg:col-span-1">
-          <div>
-            <span className="text-slate-500 text-sm font-medium block">Active Directory Members</span>
-            <span className="text-2xl font-medium text-slate-800 block mt-1">{users.length}</span>
-            <span className="text-xs text-slate-400 block mt-2">
-              Assigned across authorization tiers
-            </span>
-          </div>
-          <div className="p-3 bg-slate-100 rounded-xl text-slate-500 border border-slate-200">
-            <Users size={24} />
-          </div>
-        </div>
-      </div>
+      <KpiCardGrid>
+        <KpiCard
+          label="Total Managed Projects"
+          value={totalProjects}
+          tooltip="Total projects across every stage of execution"
+          badge={`${activeProjects} active`}
+        />
+        <KpiCard
+          label="Pending Tasks Action"
+          value={pendingTasks}
+          tooltip="Tasks not yet marked complete"
+          badge={`${completedTasks} closed`}
+        />
+        <KpiCard
+          label="Active Directory Members"
+          value={users.length}
+          tooltip="Staff assigned across authorization tiers"
+        />
+      </KpiCardGrid>
 
       {/* Main Content Layout (Stats + Sequential Indicator Carousel) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

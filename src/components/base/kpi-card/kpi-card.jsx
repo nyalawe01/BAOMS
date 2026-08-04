@@ -4,9 +4,10 @@ import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 // Shared KPI stat tile used across dashboard home pages. `trend` is optional:
 // pass a signed number (e.g. 4.2 or -1.7) to show a green/red delta arrow: -
 // omit it for a plain figure with no trend line.
-export function KpiCard({ label, value, trend, tooltip, badge }) {
+export function KpiCard({ label, value, trend, tooltip, badge, tone = 'default' }) {
   const hasTrend = typeof trend === 'number' && !Number.isNaN(trend);
   const isUp = hasTrend && trend >= 0;
+  const valueClass = tone === 'danger' ? 'text-rose-600' : 'text-slate-800';
 
   return (
     <div className="flex flex-col bg-white border border-slate-200 shadow-sm rounded-xl">
@@ -24,7 +25,7 @@ export function KpiCard({ label, value, trend, tooltip, badge }) {
         </div>
 
         <div className="mt-2 flex items-center justify-between gap-x-2">
-          <h3 className="text-2xl font-bold text-slate-800">{value}</h3>
+          <h3 className={`text-2xl font-bold ${valueClass}`}>{value}</h3>
           {hasTrend && (
             <span className={`flex items-center gap-x-1 text-sm font-semibold ${isUp ? 'text-emerald-600' : 'text-rose-600'}`}>
               {isUp ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
@@ -42,10 +43,17 @@ export function KpiCard({ label, value, trend, tooltip, badge }) {
   );
 }
 
-// Grid wrapper matching the reference layout (2 cols mobile, 4 cols desktop).
-export function KpiCardGrid({ children }) {
+// Grid wrapper matching the reference layout (2 cols mobile, `cols` desktop).
+const DESKTOP_COLS = {
+  3: 'lg:grid-cols-3',
+  4: 'lg:grid-cols-4',
+  5: 'lg:grid-cols-5',
+  6: 'lg:grid-cols-6'
+};
+
+export function KpiCardGrid({ children, cols = 4 }) {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className={`grid grid-cols-2 ${DESKTOP_COLS[cols] || DESKTOP_COLS[4]} gap-4`}>
       {children}
     </div>
   );
