@@ -195,7 +195,7 @@ export default function GlobalSearch({ onNavigate, role }) {
             onClick={closePanel}
           ></div>
 
-          <div className="absolute left-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-slate-200 z-30 animate-fadeIn overflow-hidden">
+          <div className="absolute left-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-lg shadow-xl border border-slate-200 z-30 animate-fadeIn overflow-hidden">
             <div className="max-h-96 overflow-y-auto">
               {!hasAnyResults ? (
                 <div className="px-4 py-10 flex flex-col items-center justify-center text-center gap-2">

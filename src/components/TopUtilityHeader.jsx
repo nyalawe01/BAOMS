@@ -44,30 +44,32 @@ export default function TopUtilityHeader({ activeTab, setActiveTab, toggleSideba
   });
 
   return (
-    <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 z-10 select-none shrink-0">
+    <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 z-10 select-none shrink-0 gap-3">
       {/* View Title & Sidebar Trigger */}
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-2 sm:gap-5 min-w-0">
         {/* Toggle Button */}
         <button
           onClick={toggleSidebar}
-          className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-800"
+          className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-800 shrink-0"
           title={collapsed ? "Expand Navigation" : "Collapse Navigation"}
         >
           <PanelLeft size={22} className="text-slate-600" />
         </button>
 
-        <h2 className="text-lg font-bold text-slate-800 tracking-tight">{getTitle()}</h2>
+        <h2 className="text-lg font-bold text-slate-800 tracking-tight truncate">{getTitle()}</h2>
 
-        <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+        <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
           <CheckCircle2 size={12} />
           <span>System Online</span>
         </div>
       </div>
 
       {/* Utilities */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-2 sm:gap-4 lg:gap-6 shrink-0">
         {/* Global Search */}
-        <GlobalSearch onNavigate={setActiveTab} role={user.role} />
+        <div className="hidden sm:block">
+          <GlobalSearch onNavigate={setActiveTab} role={user.role} />
+        </div>
 
         {/* Date Display */}
         <div className="hidden lg:flex items-center gap-2 text-slate-500 text-base">
@@ -79,7 +81,7 @@ export default function TopUtilityHeader({ activeTab, setActiveTab, toggleSideba
         <NotificationCenter onNavigate={setActiveTab} />
 
         {/* Vertical Divider */}
-        <div className="h-7 w-px bg-slate-200"></div>
+        <div className="hidden sm:block h-7 w-px bg-slate-200"></div>
 
         {/* Profile Dropdown */}
         <div className="relative">
@@ -90,13 +92,13 @@ export default function TopUtilityHeader({ activeTab, setActiveTab, toggleSideba
             <img
               src={user.avatar}
               alt={user.name}
-              className="w-10 h-10 rounded-full object-cover border border-slate-200"
+              className="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0"
             />
-            <div className="hidden sm:block">
+            <div className="hidden md:block">
               <p className="text-base font-semibold text-slate-800 leading-none">{user.name}</p>
               <p className="text-sm text-slate-500 mt-1">{user.email}</p>
             </div>
-            <ChevronDown size={16} className={`text-slate-500 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown size={16} className={`hidden sm:block text-slate-500 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {dropdownOpen && (
@@ -107,7 +109,7 @@ export default function TopUtilityHeader({ activeTab, setActiveTab, toggleSideba
                 onClick={() => setDropdownOpen(false)}
               ></div>
 
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-slate-200 py-1 z-30 animate-fadeIn">
+              <div className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-2rem)] bg-white rounded-lg shadow-xl border border-slate-200 py-1 z-30 animate-fadeIn">
                 <div className="px-4 py-3 border-b border-slate-100">
                   <p className="text-sm text-slate-400 font-semibold uppercase tracking-wider">Access Scope</p>
                   <p className="text-base font-semibold text-slate-700 mt-1">{user.role} Authorization</p>

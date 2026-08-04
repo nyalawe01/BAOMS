@@ -22,12 +22,13 @@ export default function LoginView() {
       <div className="relative w-full max-w-5xl bg-white rounded-2xl border border-slate-200/80 shadow-2xl p-6 sm:p-10 z-10 animate-fadeIn">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           
-          {/* Left Column: Illustration */}
-          <div className="flex justify-center p-4">
-            <img 
-              src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.svg" 
-              className="w-full max-w-md h-auto object-contain" 
-              alt="Phone illustration" 
+          {/* Left Column: Illustration - hidden on small screens so the
+              form is reachable without scrolling past it first */}
+          <div className="hidden md:flex justify-center p-4">
+            <img
+              src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.svg"
+              className="w-full max-w-md h-auto object-contain"
+              alt="Phone illustration"
             />
           </div>
 

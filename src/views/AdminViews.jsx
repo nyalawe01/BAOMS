@@ -147,6 +147,7 @@ export function AdminProjectsView() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
@@ -178,6 +179,7 @@ export function AdminProjectsView() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );
@@ -555,6 +557,7 @@ export function AdminInventoryView() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
@@ -580,6 +583,7 @@ export function AdminInventoryView() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

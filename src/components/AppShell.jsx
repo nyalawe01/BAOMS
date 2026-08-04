@@ -15,6 +15,9 @@ export default function AppShell() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     return localStorage.getItem('baoms_sidebar_collapsed') === 'true';
   });
+  // Below the lg breakpoint the sidebar is an off-canvas drawer instead of
+  // a static column - this tracks whether it's currently slid open.
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   React.useEffect(() => {
     if (user) {
@@ -34,7 +37,15 @@ export default function AppShell() {
     }
   }, [user]);
 
+  // One trigger button (in the header) serves both layouts: below lg it
+  // slides the drawer open/closed, at lg+ it collapses/expands the static
+  // column. Checked at click-time rather than via a resize listener, since
+  // that's all a click handler needs.
   const toggleSidebar = () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setMobileSidebarOpen(prev => !prev);
+      return;
+    }
     setSidebarCollapsed(prev => {
       const newVal = !prev;
       localStorage.setItem('baoms_sidebar_collapsed', String(newVal));
@@ -42,11 +53,13 @@ export default function AppShell() {
     });
   };
 
+  const closeMobileSidebar = () => setMobileSidebarOpen(false);
+
   if (loading) {
     return (
       <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-900 antialiased font-sans">
         {/* Sidebar Wireframe Skeleton */}
-        <div className="w-60 bg-slate-900 border-r border-slate-800 flex flex-col p-4 space-y-6 shrink-0">
+        <div className="hidden lg:flex w-60 bg-slate-900 border-r border-slate-800 flex-col p-4 space-y-6 shrink-0">
           <div className="h-16 flex items-center gap-3 border-b border-slate-800 pb-4">
             <div className="w-9 h-9 bg-slate-800 rounded-lg animate-pulse"></div>
             <div className="space-y-1.5 flex-1">
@@ -110,16 +123,26 @@ export default function AppShell() {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-900 antialiased font-sans">
+      {/* Mobile drawer backdrop - only ever rendered below the lg breakpoint */}
+      {mobileSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-slate-950/60 z-40 lg:hidden"
+          onClick={closeMobileSidebar}
+        ></div>
+      )}
+
       {/* Sidebar Navigation */}
-      <DynamicSidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
+      <DynamicSidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
         collapsed={sidebarCollapsed}
         toggleSidebar={toggleSidebar}
+        mobileOpen={mobileSidebarOpen}
+        onNavigate={closeMobileSidebar}
       />
 
       {/* Main Panel */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top Header */}
         <TopUtilityHeader activeTab={activeTab} setActiveTab={setActiveTab} toggleSidebar={toggleSidebar} collapsed={sidebarCollapsed} />
 

@@ -165,6 +165,7 @@ export function MEProjectsView() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
@@ -191,6 +192,7 @@ export function MEProjectsView() {
             ))}
           </tbody>
         </table>
+      </div>
       </div>
     </div>
   );
@@ -378,6 +380,7 @@ export function METargetsView() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
@@ -414,6 +417,7 @@ export function METargetsView() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );
@@ -695,6 +699,7 @@ export function MECollectionView() {
         </div>
 
         <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden lg:col-span-2">
+          <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
@@ -715,6 +720,7 @@ export function MECollectionView() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </div>
@@ -1042,6 +1048,7 @@ export function MEMapsView() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden text-sm">
+        <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
@@ -1060,6 +1067,7 @@ export function MEMapsView() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

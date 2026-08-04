@@ -112,7 +112,7 @@ export default function NotificationCenter({ onNavigate }) {
             onClick={() => setOpen(false)}
           ></div>
 
-          <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-slate-200 z-30 animate-fadeIn overflow-hidden">
+          <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-lg shadow-xl border border-slate-200 z-30 animate-fadeIn overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-400 font-semibold uppercase tracking-wider">Notifications</p>

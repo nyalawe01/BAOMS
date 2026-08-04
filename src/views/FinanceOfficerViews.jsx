@@ -750,6 +750,7 @@ export function FinanceProjectsView() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
@@ -778,6 +779,7 @@ export function FinanceProjectsView() {
             })}
           </tbody>
         </table>
+      </div>
       </div>
     </div>
   );

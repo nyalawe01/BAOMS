@@ -8,7 +8,7 @@ import {
   Inbox, Contact
 } from 'lucide-react';
 
-export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
+export default function DynamicSidebar({ activeTab, setActiveTab, collapsed, mobileOpen, onNavigate }) {
   const { user, logout } = useAuth();
 
   if (!user) return null;
@@ -197,71 +197,66 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
     ].filter(item => item.roles.includes('*') || item.roles.includes(user.role));
   }
 
+  const handleNavigate = (id) => {
+    setActiveTab(id);
+    // Below lg the sidebar is an overlay drawer - close it once a
+    // destination is picked so it doesn't cover the page it just opened.
+    onNavigate?.();
+  };
+
+  // Collapsed-rail mode only applies at lg+ (a touch drawer should never be
+  // icon-only); `lg:` prefixed classes below drive that, not JS branching,
+  // so the same markup renders correctly at every breakpoint.
   return (
-    <aside className={`bg-slate-900 text-white flex flex-col h-screen border-r border-slate-800 transition-all duration-300 select-none shrink-0 ${collapsed ? 'w-24' : 'w-80'}`}>
+    <aside
+      className={`
+        fixed inset-y-0 left-0 z-50 w-80
+        lg:static lg:z-0 ${collapsed ? 'lg:w-24' : 'lg:w-80'}
+        bg-slate-900 text-white flex flex-col h-screen border-r border-slate-800
+        transform transition-transform duration-300 lg:transform-none
+        ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0
+        select-none shrink-0
+      `}
+    >
       {/* Brand Header (Balanced & Centered) */}
-      {collapsed ? (
-        <div className="h-16 flex items-center justify-center border-b border-slate-800 shrink-0">
-          <div className="p-2 bg-indigo-650 rounded-lg text-white shrink-0">
-            <ShieldAlert size={18} className="animate-pulse" />
-          </div>
+      <div className={`h-16 flex items-center gap-3 border-b border-slate-800 shrink-0 px-5 ${collapsed ? 'lg:justify-center lg:px-0' : ''}`}>
+        <div className="p-2 bg-indigo-650 rounded-lg text-white shrink-0">
+          <ShieldAlert size={18} className="animate-pulse" />
         </div>
-      ) : (
-        <div className="h-16 flex items-center gap-3 px-5 border-b border-slate-800 shrink-0">
-          <div className="p-2 bg-indigo-650 rounded-lg text-white shrink-0">
-            <ShieldAlert size={18} className="animate-pulse" />
-          </div>
-          <div className="animate-fadeIn">
-            <h1 className="font-extrabold text-base leading-none tracking-tight text-slate-100">BAOMS Portal</h1>
-            <span className="text-sm text-slate-400">Org Management</span>
-          </div>
+        <div className={collapsed ? 'lg:hidden' : ''}>
+          <h1 className="font-extrabold text-base leading-none tracking-tight text-slate-100">BAOMS Portal</h1>
+          <span className="text-sm text-slate-400">Org Management</span>
         </div>
-      )}
+      </div>
 
       {/* Navigation Links */}
-      <nav className={`flex-1 py-4 space-y-1.5 overflow-y-auto no-scrollbar ${collapsed ? 'px-2' : 'px-3'}`}>
-        {/* Navigation Group Header (Optional label in expanded state) */}
-        {!collapsed && (
-          <div className="px-3 mb-3">
-            <span className="text-sm font-bold text-slate-500 uppercase tracking-widest block">
-              {user.role === 'HR Officer' ? 'HR Console' : 'Navigation'}
-            </span>
-          </div>
-        )}
+      <nav className={`flex-1 py-4 space-y-1.5 overflow-y-auto no-scrollbar px-3 ${collapsed ? 'lg:px-2' : ''}`}>
+        {/* Navigation Group Header (hidden in the collapsed desktop rail) */}
+        <div className={`px-3 mb-3 ${collapsed ? 'lg:hidden' : ''}`}>
+          <span className="text-sm font-bold text-slate-500 uppercase tracking-widest block">
+            {user.role === 'HR Officer' ? 'HR Console' : 'Navigation'}
+          </span>
+        </div>
 
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
 
-          if (collapsed) {
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-12 h-12 mx-auto flex items-center justify-center rounded-lg transition-all duration-150 ${
-                  isActive
-                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/10'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
-                }`}
-                title={item.label}
-              >
-                <Icon size={20} className="shrink-0" />
-              </button>
-            );
-          }
-
           return (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => handleNavigate(item.id)}
+              title={item.label}
               className={`w-full flex items-center gap-3.5 py-3 px-4 rounded-lg text-base font-medium transition-all duration-150 text-left ${
+                collapsed ? 'lg:w-12 lg:h-12 lg:mx-auto lg:justify-center lg:px-0 lg:py-0' : ''
+              } ${
                 isActive
                   ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/10'
                   : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
               }`}
             >
               <Icon size={19} className="shrink-0" />
-              <span className="truncate">{item.label}</span>
+              <span className={`truncate ${collapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
             </button>
           );
         })}
@@ -269,23 +264,16 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
 
       {/* Logout Action (Balanced & Centered) */}
       <div className="p-4 border-t border-slate-800 shrink-0">
-        {collapsed ? (
-          <button
-            onClick={logout}
-            className="w-12 h-12 mx-auto flex items-center justify-center rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors"
-            title="Log Out"
-          >
-            <LogOut size={20} className="shrink-0" />
-          </button>
-        ) : (
-          <button
-            onClick={logout}
-            className="w-full flex items-center gap-3.5 py-3 px-4 rounded-lg text-base font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-left"
-          >
-            <LogOut size={19} className="shrink-0" />
-            <span>Log Out</span>
-          </button>
-        )}
+        <button
+          onClick={logout}
+          title="Log Out"
+          className={`w-full flex items-center gap-3.5 py-3 px-4 rounded-lg text-base font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-left ${
+            collapsed ? 'lg:w-12 lg:h-12 lg:mx-auto lg:justify-center lg:px-0 lg:py-0' : ''
+          }`}
+        >
+          <LogOut size={19} className="shrink-0" />
+          <span className={collapsed ? 'lg:hidden' : ''}>Log Out</span>
+        </button>
       </div>
     </aside>
   );
