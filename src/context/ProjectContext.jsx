@@ -605,7 +605,7 @@ export const ProjectProvider = ({ children }) => {
   };
 
   // Project File Actions
-  const addProjectFile = async (projectId, fileName, folderPath, size = '1.2 MB') => {
+  const addProjectFile = async (projectId, fileName, folderPath, size = '1.2 MB', downloadUrl = null) => {
     const newFile = {
       projectId,
       fileName,
@@ -613,7 +613,8 @@ export const ProjectProvider = ({ children }) => {
       senderName: user ? user.personalDetails?.name || user.email : 'System',
       senderOriginId: user ? user.id || user.uid : 'System',
       uploadedAt: new Date().toISOString(),
-      size
+      size,
+      ...(downloadUrl ? { downloadUrl } : {})
     };
 
     if (isFirebaseConfigured) {

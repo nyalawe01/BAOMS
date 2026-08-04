@@ -394,10 +394,21 @@ export function AdminBeneficiariesView() {
 // 7. ADMIN MONITORING & EVALUATION VIEW
 // ============================================================================
 export function AdminMEView() {
-  const indicatorsList = [
-    { indicator: 'Children reached through feeding program', target: 500, achieved: 420 },
-    { indicator: 'Youth trained in vocational tech skills', target: 150, achieved: 162 }
-  ];
+  const { indicators, deleteIndicator } = useProject();
+
+  const handleDelete = (ind) => {
+    Swal.fire({
+      title: 'Remove Indicator?',
+      text: `This will permanently remove "${ind.name}" from the performance matrix.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Remove'
+    }).then(res => {
+      if (res.isConfirmed) {
+        deleteIndicator(ind.id);
+      }
+    });
+  };
 
   return (
     <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
@@ -407,13 +418,21 @@ export function AdminMEView() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6 space-y-4">
-        {indicatorsList.map((ind, idx) => {
-          const pct = Math.round((ind.achieved / ind.target) * 100);
+        {indicators.length === 0 && (
+          <p className="text-center text-slate-400 italic py-4">No indicators registered yet.</p>
+        )}
+        {indicators.map((ind) => {
+          const pct = ind.target ? Math.round(((ind.achieved || 0) / ind.target) * 100) : 0;
           return (
-            <div key={idx} className="space-y-1">
-              <div className="flex justify-between text-xs text-slate-700">
-                <span>{ind.indicator}</span>
-                <span>{pct}% ({ind.achieved} / {ind.target})</span>
+            <div key={ind.id} className="space-y-1">
+              <div className="flex justify-between items-center gap-2 text-xs text-slate-700">
+                <span>{ind.name}{ind.unit ? ` (${ind.unit})` : ''}</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span>{pct}% ({ind.achieved || 0} / {ind.target})</span>
+                  <button onClick={() => handleDelete(ind)} className="text-slate-400 hover:text-red-600 transition-colors" title="Remove indicator">
+                    <Trash2 size={13} />
+                  </button>
+                </div>
               </div>
               <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                 <div className="bg-slate-500 h-full" style={{ width: `${Math.min(pct, 100)}%` }}></div>
@@ -667,6 +686,22 @@ export function AdminReportsView() {
 // 13. ADMIN SETTINGS VIEW
 // ============================================================================
 export function AdminSettingsView() {
+  const { orgSettings, updateOrgSettings } = useProject();
+
+  const [expenseApprovalThreshold, setExpenseApprovalThreshold] = useState(orgSettings.expenseApprovalThreshold);
+  const [procurementApprovalThreshold, setProcurementApprovalThreshold] = useState(orgSettings.procurementApprovalThreshold);
+  const [budgetApprovalThreshold, setBudgetApprovalThreshold] = useState(orgSettings.budgetApprovalThreshold);
+
+  const handleSaveThresholds = async (e) => {
+    e.preventDefault();
+    await updateOrgSettings({
+      expenseApprovalThreshold: parseFloat(expenseApprovalThreshold) || 0,
+      procurementApprovalThreshold: parseFloat(procurementApprovalThreshold) || 0,
+      budgetApprovalThreshold: parseFloat(budgetApprovalThreshold) || 0
+    });
+    Swal.fire('Settings Saved', 'Approval thresholds updated successfully.', 'success');
+  };
+
   return (
     <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
@@ -686,6 +721,26 @@ export function AdminSettingsView() {
             <div className="bg-slate-50 p-2.5 rounded border border-slate-200 font-mono">v1.4.2-Production</div>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 font-normal">
+        <span className="text-[11px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Approval Threshold Controls</span>
+        <p className="text-[11px] text-slate-400 -mt-2">Amounts above these thresholds (TZS) require additional approval before processing.</p>
+        <form onSubmit={handleSaveThresholds} className="space-y-3 font-normal">
+          <div>
+            <label className="block text-[11px] text-slate-400 uppercase mb-1">Expense Approval Threshold (TZS)</label>
+            <input type="number" required value={expenseApprovalThreshold} onChange={(e) => setExpenseApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+          </div>
+          <div>
+            <label className="block text-[11px] text-slate-400 uppercase mb-1">Procurement Approval Threshold (TZS)</label>
+            <input type="number" required value={procurementApprovalThreshold} onChange={(e) => setProcurementApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+          </div>
+          <div>
+            <label className="block text-[11px] text-slate-400 uppercase mb-1">Budget Approval Threshold (TZS)</label>
+            <input type="number" required value={budgetApprovalThreshold} onChange={(e) => setBudgetApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+          </div>
+          <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Save Thresholds</button>
+        </form>
       </div>
     </div>
   );

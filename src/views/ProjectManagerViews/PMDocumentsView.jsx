@@ -3,6 +3,7 @@ import { useProject } from '../../context/ProjectContext';
 import { useAuth } from '../../context/AuthContext';
 import { ChevronRight, Eye, Download, BookOpen, FileText } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { FileUpload } from '@/components/application/file-upload/file-upload-base';
 
 // ============================================================================
 // 10. PM DOCUMENTS VIEW (per-project, organizational, position-specific)
@@ -12,7 +13,7 @@ export function PMDocumentsView() {
   const { user } = useAuth();
 
   const [selectedFolder, setSelectedFolder] = useState('Contracts');
-  const [uploadName, setUploadName] = useState('');
+  const [uploadFile, setUploadFile] = useState(null);
   const [selectedProjId, setSelectedProjId] = useState(projects[0]?.id || '');
 
   // Mock document registries for Organization-Wide and Position-Specific tiers
@@ -30,11 +31,12 @@ export function PMDocumentsView() {
 
   const handleUpload = (e) => {
     e.preventDefault();
-    if (!uploadName || !selectedProjId) return;
+    if (!uploadFile || !selectedProjId) return;
 
-    addProjectFile(selectedProjId, uploadName, selectedFolder);
-    setUploadName('');
-    Swal.fire('File Saved!', `Successfully synced document file to directory folder: "/${selectedFolder}/${uploadName}".`, 'success');
+    addProjectFile(selectedProjId, uploadFile.fileName, selectedFolder, uploadFile.fileSize, uploadFile.downloadUrl);
+    const uploadedName = uploadFile.fileName;
+    setUploadFile(null);
+    Swal.fire('File Saved!', `Successfully synced document file to directory folder: "/${selectedFolder}/${uploadedName}".`, 'success');
   };
 
   return (
@@ -136,19 +138,19 @@ export function PMDocumentsView() {
 
           <form onSubmit={handleUpload} className="space-y-3 pt-3 border-t border-slate-200 text-xs font-normal">
             <div>
-              <label className="block text-[11px] text-slate-400 uppercase mb-1 font-normal">Upload File Name</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Project_Audit_Specs.pdf"
-                value={uploadName}
-                onChange={(e) => setUploadName(e.target.value)}
-                className="w-full px-2.5 py-1.5 rounded border border-slate-200 bg-white"
-              />
+              <label className="block text-[11px] text-slate-400 uppercase mb-1 font-normal">Upload File</label>
+              <FileUpload.Root value={uploadFile} onChange={setUploadFile}>
+                <FileUpload.DropZone
+                  label="Attach Project Document"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+                  storagePath={`projects/${selectedProjId}/documents`}
+                />
+              </FileUpload.Root>
             </div>
             <button
               type="submit"
-              className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded font-normal transition-all"
+              disabled={!uploadFile}
+              className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded font-normal transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Upload Project Document
             </button>

@@ -1265,6 +1265,22 @@ export function FinanceApprovalsView() {
 // 12. SETTINGS MODULE
 // ============================================================================
 export function FinanceSettingsView() {
+  const { orgSettings, updateOrgSettings } = useProject();
+
+  const [expenseApprovalThreshold, setExpenseApprovalThreshold] = useState(orgSettings.expenseApprovalThreshold);
+  const [procurementApprovalThreshold, setProcurementApprovalThreshold] = useState(orgSettings.procurementApprovalThreshold);
+  const [budgetApprovalThreshold, setBudgetApprovalThreshold] = useState(orgSettings.budgetApprovalThreshold);
+
+  const handleSaveThresholds = async (e) => {
+    e.preventDefault();
+    await updateOrgSettings({
+      expenseApprovalThreshold: parseFloat(expenseApprovalThreshold) || 0,
+      procurementApprovalThreshold: parseFloat(procurementApprovalThreshold) || 0,
+      budgetApprovalThreshold: parseFloat(budgetApprovalThreshold) || 0
+    });
+    Swal.fire('Settings Saved', 'Approval thresholds updated successfully.', 'success');
+  };
+
   return (
     <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
@@ -1284,6 +1300,26 @@ export function FinanceSettingsView() {
             <span className="font-normal text-slate-700 block bg-slate-50 p-2.5 rounded border border-slate-200">Kenyan Shilling (TZS)</span>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 font-normal">
+        <h3 className="font-normal text-slate-808 text-xs uppercase tracking-wider border-b border-slate-100 pb-2">Approval Threshold Controls</h3>
+        <p className="text-[11px] text-slate-400 -mt-2">Amounts above these thresholds (TZS) require additional approval before processing.</p>
+        <form onSubmit={handleSaveThresholds} className="space-y-3 font-normal">
+          <div>
+            <label className="block text-[11px] text-slate-400 uppercase mb-1">Expense Approval Threshold (TZS)</label>
+            <input type="number" required value={expenseApprovalThreshold} onChange={(e) => setExpenseApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+          </div>
+          <div>
+            <label className="block text-[11px] text-slate-400 uppercase mb-1">Procurement Approval Threshold (TZS)</label>
+            <input type="number" required value={procurementApprovalThreshold} onChange={(e) => setProcurementApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+          </div>
+          <div>
+            <label className="block text-[11px] text-slate-400 uppercase mb-1">Budget Approval Threshold (TZS)</label>
+            <input type="number" required value={budgetApprovalThreshold} onChange={(e) => setBudgetApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+          </div>
+          <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Save Thresholds</button>
+        </form>
       </div>
     </div>
   );

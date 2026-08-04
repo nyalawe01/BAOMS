@@ -21,8 +21,8 @@ export function HrProjectsView() {
     );
   }
 
-  const getStaffOnProject = () => {
-    return users.filter(u => u.officeDetails?.department === 'Program Management' || u.role === 'Project Manager');
+  const getStaffOnProject = (proj) => {
+    return users.filter(u => (proj.assignedStaff || []).includes(u.id));
   };
 
   return (
@@ -35,7 +35,7 @@ export function HrProjectsView() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {projects.map((proj, idx) => {
-          const staff = getStaffOnProject();
+          const staff = getStaffOnProject(proj);
           return (
             <div key={idx} className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4 hover:border-indigo-300 transition-all">
               <div className="flex justify-between items-center border-b border-slate-100 pb-2">
@@ -62,12 +62,15 @@ export function HrProjectsView() {
                       <Avatar size="xs" src={member.avatar} alt={member.name} />
                       <div className="text-xs">
                         <div className="font-bold text-slate-800">{member.name}</div>
-                        <span className="text-[11px] text-slate-400">Task Owner</span>
+                        <span className="text-[11px] text-slate-400">{member.officeDetails?.position || member.role}</span>
                       </div>
                     </div>
                     <span className="text-[11px] bg-slate-100 border border-slate-200 text-slate-750 px-2 py-0.5 rounded font-semibold">Active</span>
                   </div>
                 ))}
+                {staff.length === 0 && (
+                  <p className="text-[11px] text-slate-400 italic p-2">No staff assigned yet.</p>
+                )}
               </div>
             </div>
           );
