@@ -56,5 +56,11 @@ service firebase.storage {
       allow read: if isAuthenticated();
       allow write: if hasAnyRole(['Communications Officer', 'System Administrator']);
     }
+
+    // 6. Avatars: self-serve, owner-only write
+    match /avatars/{userId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
   }
 }

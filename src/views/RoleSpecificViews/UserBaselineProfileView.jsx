@@ -6,12 +6,14 @@ import {
 import Swal from 'sweetalert2';
 import { AvatarProfilePhoto } from "@/components/base/avatar/avatar";
 import { Illustration } from "@/components/shared-assets/illustrations";
+import { storage } from '@/firebase/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export function UserBaselineProfileView() {
   const { user, policyVault, updateProfileDetails } = useAuth();
   const [phone, setPhone] = useState(user?.personalDetails?.phone || '');
   const [success, setSuccess] = useState(false);
-  const [simulateEmptyVault, setSimulateEmptyVault] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
 
   const handleUpdatePersonal = (e) => {
     e.preventDefault();
@@ -20,17 +22,33 @@ export function UserBaselineProfileView() {
     setTimeout(() => setSuccess(false), 2000);
   };
 
-  const handleAvatarUpload = (e) => {
+  const handleAvatarUpload = async (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const simulatedUrl = URL.createObjectURL(file);
-      updateProfileDetails({ avatar: simulatedUrl });
+    if (!file || !user) return;
+
+    setAvatarUploading(true);
+    try {
+      const userId = user.id || user.uid;
+      const destination = ref(storage, `avatars/${userId}/${Date.now()}_${file.name}`);
+      await uploadBytes(destination, file);
+      const downloadUrl = await getDownloadURL(destination);
+      await updateProfileDetails({ avatar: downloadUrl });
       Swal.fire({
         title: 'Avatar Updated!',
-        text: 'Your profile photo has been successfully updated on the server directory.',
+        text: 'Your profile photo has been uploaded and saved.',
         icon: 'success',
         confirmButtonColor: '#4f46e5'
       });
+    } catch (err) {
+      console.error('Avatar upload failed:', err);
+      Swal.fire({
+        title: 'Upload Failed',
+        text: 'Could not upload your photo. Please try again in a moment.',
+        icon: 'error',
+        confirmButtonColor: '#4f46e5'
+      });
+    } finally {
+      setAvatarUploading(false);
     }
   };
 
@@ -41,18 +59,21 @@ export function UserBaselineProfileView() {
       {/* Profile Card & Details (Editable personal, locked office/docs) */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6 lg:col-span-2">
         <div className="flex items-center gap-4 border-b border-slate-100 pb-5">
-          <AvatarProfilePhoto 
-            verified={true} 
-            size="lg" 
-            alt={user.name} 
-            src={user.avatar} 
-            onUpload={handleAvatarUpload}
-          />
+          <div className={`relative ${avatarUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+            <AvatarProfilePhoto
+              verified={true}
+              size="lg"
+              alt={user.name}
+              src={user.avatar}
+              onUpload={handleAvatarUpload}
+            />
+          </div>
           <div>
             <h3 className="text-lg font-bold text-slate-800">{user.name}</h3>
             <span className="inline-block px-2.5 py-0.5 mt-1 text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-full uppercase">
               {user.role}
             </span>
+            {avatarUploading && <p className="text-[11px] text-indigo-500 font-semibold mt-1">Uploading photo...</p>}
           </div>
         </div>
 
@@ -147,25 +168,15 @@ export function UserBaselineProfileView() {
       {/* Read-Only Document Vault */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4 lg:col-span-1 flex flex-col justify-between h-[500px]">
         <div className="space-y-4">
-          <div className="border-b border-slate-100 pb-3 flex justify-between items-center">
-            <div>
-              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                <BookOpen className="text-indigo-500" size={16} />
-                <span>Read-Only Document Vault</span>
-              </h3>
-              <p className="text-[11px] text-slate-400 mt-0.5">Official templates and organization policy manuals.</p>
-            </div>
-            
-            <button 
-              onClick={() => setSimulateEmptyVault(!simulateEmptyVault)}
-              className="text-[11px] text-indigo-650 hover:underline font-bold"
-              title="Toggle view to test vault empty states illustration"
-            >
-              {simulateEmptyVault ? 'Restore' : 'Test Empty State'}
-            </button>
+          <div className="border-b border-slate-100 pb-3">
+            <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <BookOpen className="text-indigo-500" size={16} />
+              <span>Read-Only Document Vault</span>
+            </h3>
+            <p className="text-[11px] text-slate-400 mt-0.5">Official templates and organization policy manuals.</p>
           </div>
 
-          {simulateEmptyVault ? (
+          {policyVault.length === 0 ? (
             <div className="py-12 space-y-3">
               <Illustration type="documents" size="sm" />
               <p className="text-xs text-slate-400 text-center italic">No documents are currently stored in this vault folder.</p>
