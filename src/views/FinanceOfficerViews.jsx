@@ -10,19 +10,7 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { Avatar } from '@/components/base/avatar/avatar';
-
-// Helper to download text reports
-const downloadTxtFile = (filename, content) => {
-  const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.setAttribute("href", url);
-  link.setAttribute("download", filename);
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
+import { AccountSettingsPanel } from '@/components/shared/AccountSettingsPanel';
 
 // ============================================================================
 // 1. FINANCE DASHBOARD VIEW
@@ -1089,60 +1077,6 @@ export function FinanceInvoicesView() {
 // ============================================================================
 // 9. REPORTS MODULE
 // ============================================================================
-export function FinanceReportsView() {
-  const { projects, transactions } = useProject();
-
-  const handleCompileFinancialReport = () => {
-    const approvedTx = transactions.filter(t => t.status === 'Approved');
-    const totalIncome = approvedTx.filter(t => t.type === 'Income').reduce((a, c) => a + c.amount, 0);
-    const totalSpent = approvedTx.filter(t => t.type === 'Expense').reduce((a, c) => a + c.amount, 0);
-
-    const reportContent = `
-BAOMS GENERAL FINANCIAL LEDGER STATEMENT
-Generated On: ${new Date().toLocaleDateString()}
------------------------------------------
-1. INCOME STATEMENT SUMMARY
-Total Grants Received: TZS ${totalIncome.toLocaleString()}
-Total Expenses Approved: TZS ${totalSpent.toLocaleString()}
-Net Cash Reserve: TZS ${(totalIncome - totalSpent).toLocaleString()}
-
-2. EXPENDITURES BREAKDOWN BY PROJECT:
-${projects.map(p => {
-  const projExps = approvedTx.filter(t => t.projectId === p.id && t.type === 'Expense');
-  const spent = projExps.reduce((acc, curr) => acc + (curr.amount || 0), 0);
-  return `- ${p.name}: TZS ${spent.toLocaleString()} spent out of TZS ${p.budget?.toLocaleString() || 0}`;
-}).join('\n')}
------------------------------------------
-EOF
-`;
-    downloadTxtFile(`BAOMS_Financial_Statement_2026.txt`, reportContent);
-    Swal.fire('Financial Statement Compiled', 'Downloading summary text file.', 'success');
-  };
-
-  return (
-    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700">
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-base font-normal text-slate-805">Financial Reports Compiler</h2>
-        <p className="text-sm text-slate-400 font-normal">Generate Income Statements, Balance Sheets, Cash Flow statements, and audit ledgers directly from active project records.</p>
-      </div>
-
-      <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-xl p-8 shadow-sm space-y-4 font-normal">
-        <h3 className="font-normal text-slate-808 text-base border-b border-slate-100 pb-2 flex items-center gap-2">
-          <FileText size={16} className="text-slate-400" />
-          <span>General Ledger Compiler</span>
-        </h3>
-        <p className="text-sm text-slate-500 font-normal font-normal">Compile ledger reports utilizing values currently in the Firestore database.</p>
-        <button
-          onClick={handleCompileFinancialReport}
-          className="w-full py-2.5 bg-slate-900 text-white rounded hover:bg-slate-800 transition-all font-normal"
-        >
-          Compile & Generate Financial Statement
-        </button>
-      </div>
-    </div>
-  );
-}
-
 // ============================================================================
 // 10. BANK ACCOUNTS MODULE (connected to Transaction Engine)
 // ============================================================================
@@ -1297,7 +1231,7 @@ export function FinanceSettingsView() {
           </div>
           <div>
             <span className="text-slate-400 block mb-1">Default Base Currency</span>
-            <span className="font-normal text-slate-700 block bg-slate-50 p-2.5 rounded border border-slate-200">Kenyan Shilling (TZS)</span>
+            <span className="font-normal text-slate-700 block bg-slate-50 p-2.5 rounded border border-slate-200">Tanzanian Shilling (TZS)</span>
           </div>
         </div>
       </div>
@@ -1320,6 +1254,10 @@ export function FinanceSettingsView() {
           </div>
           <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Save Thresholds</button>
         </form>
+      </div>
+
+      <div className="max-w-xl mx-auto">
+        <AccountSettingsPanel />
       </div>
     </div>
   );

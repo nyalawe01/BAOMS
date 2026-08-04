@@ -6,6 +6,5 @@ export { HrRequestsView } from './HrRequestsView';
 export { HrProjectsView } from './HrProjectsView';
 export { HrPayrollsView } from './HrPayrollsView';
 export { HrLeaveView } from './HrLeaveView';
-export { HrReportsView } from './HrReportsView';
 export { HrDocumentsView } from './HrDocumentsView';
 export { HrSettingsView } from './HrSettingsView';

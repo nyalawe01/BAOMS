@@ -62,7 +62,7 @@ export default function DashboardContent({ activeTab, setActiveTab }) {
   };
 
   return (
-    <main className="flex-1 overflow-y-auto bg-slate-50 p-8 md:p-10">
+    <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 p-8 md:p-10 transition-colors">
       <Suspense fallback={<LoadingFallback />}>
         {renderView()}
       </Suspense>

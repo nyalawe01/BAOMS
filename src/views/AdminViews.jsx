@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { Avatar } from '@/components/base/avatar/avatar';
+import { AccountSettingsPanel } from '@/components/shared/AccountSettingsPanel';
 
 // ============================================================================
 // 1. ADMIN DASHBOARD VIEW
@@ -655,33 +656,6 @@ export function AdminDocumentsView() {
 // ============================================================================
 // 12. ADMIN REPORTS VIEW
 // ============================================================================
-export function AdminReportsView() {
-  const handleExport = (reportName) => {
-    Swal.fire('Report Generated', `Compiled "${reportName}" dynamically from active directory values. Downloading CSV format.`, 'success');
-  };
-
-  return (
-    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700 select-none">
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-base font-normal text-slate-808">Executive Reports Center</h2>
-        <p className="text-sm text-slate-400 font-normal font-normal">Generate compiled reports on budgets, active personnel, or M&E metrics.</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-normal">
-        {['Finance Summary', 'HR Attendance', 'Project Progress', 'Beneficiary Enrolments'].map((rep, idx) => (
-          <div key={idx} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-col justify-between hover:border-slate-350 transition-all space-y-4">
-            <div>
-              <h4 className="font-normal text-slate-808 text-base">{rep} Report</h4>
-              <p className="text-xs text-slate-400 mt-1">Consolidated document including current metrics.</p>
-            </div>
-            <button onClick={() => handleExport(rep)} className="w-full py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-sm font-normal">Compile & Export</button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // ============================================================================
 // 13. ADMIN SETTINGS VIEW
 // ============================================================================
@@ -705,22 +679,8 @@ export function AdminSettingsView() {
   return (
     <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-base font-normal text-slate-808">Administrative configurations</h2>
-        <p className="text-sm text-slate-400 font-normal">Tweak registration numbers, corporate address details, and portal configurations.</p>
-      </div>
-
-      <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 font-normal">
-        <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal font-normal">Portal System Parameters</span>
-        <div className="space-y-3 text-sm font-normal">
-          <div>
-            <span className="text-slate-400 block mb-1">Corporate Email Address</span>
-            <div className="bg-slate-50 p-2.5 rounded border border-slate-200 font-mono">admin@oms.com</div>
-          </div>
-          <div>
-            <span className="text-slate-400 block mb-1">System Version Tag</span>
-            <div className="bg-slate-50 p-2.5 rounded border border-slate-200 font-mono">v1.4.2-Production</div>
-          </div>
-        </div>
+        <h2 className="text-base font-normal text-slate-808">Settings</h2>
+        <p className="text-sm text-slate-400 font-normal">Organization-wide approval rules, plus your own account settings.</p>
       </div>
 
       <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 font-normal">
@@ -741,6 +701,10 @@ export function AdminSettingsView() {
           </div>
           <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Save Thresholds</button>
         </form>
+      </div>
+
+      <div className="max-w-xl mx-auto">
+        <AccountSettingsPanel />
       </div>
     </div>
   );

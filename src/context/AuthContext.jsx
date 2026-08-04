@@ -1,11 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth, db, isFirebaseConfigured } from '../firebase/firebase';
-import { 
-  signInWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updatePassword,
+  deleteUser as deleteAuthUser,
+  reauthenticateWithCredential,
+  EmailAuthProvider
 } from 'firebase/auth';
-import { doc, getDoc, updateDoc, collection, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteDoc, collection, onSnapshot } from 'firebase/firestore';
 
 const AuthContext = createContext();
 
@@ -144,6 +148,7 @@ export const AuthProvider = ({ children }) => {
     if (isFirebaseConfigured) {
       try {
         await updateDoc(doc(db, 'users', user.uid), {
+          avatar: newDetails.avatar || user.avatar || '',
           'personalDetails.phone': newDetails.phone || user.personalDetails?.phone || '',
           'personalDetails.avatarUrl': newDetails.avatar || user.personalDetails?.avatarUrl || ''
         });
@@ -155,6 +160,34 @@ export const AuthProvider = ({ children }) => {
       setUser(updatedProfile);
       localStorage.setItem('baoms_user', JSON.stringify(updatedProfile));
     }
+  };
+
+  // Re-authenticates with the user's current password before a sensitive
+  // action (password change, account deletion) - Firebase requires a
+  // recent sign-in for both, and asking for the current password is also
+  // just correct UX for either action.
+  const reauthenticate = async (currentPassword) => {
+    const cred = EmailAuthProvider.credential(auth.currentUser.email, currentPassword);
+    await reauthenticateWithCredential(auth.currentUser, cred);
+  };
+
+  const changePassword = async (currentPassword, newPassword) => {
+    if (!isFirebaseConfigured || !auth.currentUser) {
+      throw new Error('Password changes require a live Firebase session.');
+    }
+    await reauthenticate(currentPassword);
+    await updatePassword(auth.currentUser, newPassword);
+  };
+
+  const deleteMyAccount = async (currentPassword) => {
+    if (!isFirebaseConfigured || !auth.currentUser) {
+      throw new Error('Account deletion requires a live Firebase session.');
+    }
+    await reauthenticate(currentPassword);
+    const uid = auth.currentUser.uid;
+    await deleteDoc(doc(db, 'users', uid));
+    await deleteAuthUser(auth.currentUser);
+    setUser(null);
   };
 
   return (

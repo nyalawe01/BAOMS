@@ -2,7 +2,7 @@ import React from 'react';
 import {
   MEDashboardView, MEProjectsView, MEIndicatorsView,
   METargetsView, MEBeneficiariesView, MECollectionView,
-  MESurveysView, MEVisitsView, MEReportsView,
+  MESurveysView, MEVisitsView,
   MEQualityView, MEMapsView, MEAnalyticsView,
   MEDocumentsView, MESettingsView
 } from '../../views/MEViews';
@@ -21,7 +21,6 @@ export default function MERouter({ activeTab, role }) {
     case 'me_collection': return <MECollectionView />;
     case 'me_surveys': return <MESurveysView />;
     case 'me_visits': return <MEVisitsView />;
-    case 'me_reports': return <MEReportsView />;
     case 'me_quality': return <MEQualityView />;
     case 'me_maps': return <MEMapsView />;
     case 'me_analytics': return <MEAnalyticsView />;

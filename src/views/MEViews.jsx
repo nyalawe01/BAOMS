@@ -9,6 +9,7 @@ import {
   ExternalLink, Layers, Clock, Settings, Package, Activity, Info, TrendingUp
 } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { AccountSettingsPanel } from '@/components/shared/AccountSettingsPanel';
 
 // ============================================================================
 // 1. M&E DASHBOARD VIEW
@@ -980,118 +981,6 @@ export function MEVisitsView() {
 }
 
 // ============================================================================
-// 9. REPORTS
-// ============================================================================
-
-// Helper to escape a CSV cell value
-const escapeCsvCell = (val) => {
-  const str = String(val ?? '');
-  if (/[",\n]/.test(str)) {
-    return `"${str.replace(/"/g, '""')}"`;
-  }
-  return str;
-};
-
-// Helper to build a CSV string from header + row arrays
-const buildCsv = (headers, rows) => {
-  return [headers, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n');
-};
-
-// Helper to download CSV content as a real file
-const downloadCsvFile = (filename, content) => {
-  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.setAttribute("href", url);
-  link.setAttribute("download", filename);
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
-
-export function MEReportsView() {
-  const { indicators, beneficiaries, fieldVisits, projects } = useProject();
-
-  const getProjectName = (id) => projects.find(p => p.id === id)?.name || 'Unassigned';
-
-  const handleDownload = (rep) => {
-    const dateStr = new Date().toISOString().substring(0, 10);
-    let csvContent = '';
-
-    if (rep === 'Annual Impact') {
-      const indicatorRows = indicators.map(ind => {
-        const target = ind.target || 0;
-        const achieved = ind.achieved || 0;
-        const pct = target > 0 ? Math.round((achieved / target) * 100) : 0;
-        return [ind.name, getProjectName(ind.projectId), ind.unit || '', target, achieved, `${pct}%`];
-      });
-
-      const categoryCounts = beneficiaries.reduce((acc, b) => {
-        const cat = b.category || 'Uncategorized';
-        acc[cat] = (acc[cat] || 0) + 1;
-        return acc;
-      }, {});
-      const beneficiaryRows = Object.entries(categoryCounts).map(([cat, count]) => [cat, count]);
-
-      csvContent = buildCsv(
-        ['Indicator', 'Project', 'Unit', 'Target', 'Achieved', 'Achievement %'],
-        indicatorRows
-      ) + '\n\nBeneficiary Category,Count\n' + beneficiaryRows.map(r => r.map(escapeCsvCell).join(',')).join('\n');
-    } else if (rep === 'Quarterly Indicator Progress') {
-      csvContent = buildCsv(
-        ['Indicator', 'Project', 'Target', 'Achieved', 'Variance', 'Progress %'],
-        indicators.map(ind => {
-          const target = ind.target || 0;
-          const achieved = ind.achieved || 0;
-          const variance = achieved - target;
-          const pct = target > 0 ? Math.round((achieved / target) * 100) : 0;
-          return [ind.name, getProjectName(ind.projectId), target, achieved, variance, `${pct}%`];
-        })
-      );
-    } else {
-      csvContent = buildCsv(
-        ['Visit Date', 'Project', 'Officer', 'Notes', 'Status', 'Latitude', 'Longitude'],
-        fieldVisits.map(v => [
-          v.visitDate || '',
-          getProjectName(v.projectId),
-          v.officerName || '',
-          v.notes || '',
-          v.status || '',
-          v.gpsLocation?.latitude ?? '',
-          v.gpsLocation?.longitude ?? ''
-        ])
-      );
-    }
-
-    const slug = rep.toLowerCase().replace(/\s+/g, '-');
-    downloadCsvFile(`me-report-${slug}-${dateStr}.csv`, csvContent);
-    Swal.fire('Outreach Report compiled', `Downloading "${rep}" matrix CSV.`, 'success');
-  };
-
-  return (
-    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700 select-none">
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-base font-normal text-slate-808">M&E Reports Generation</h2>
-        <p className="text-sm text-slate-400 font-normal font-normal">Generate annual outcomes, output lists, and survey statistics.</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-normal">
-        {['Annual Impact', 'Quarterly Indicator Progress', 'Field Evaluation Narrative'].map((rep, idx) => (
-          <div key={idx} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-col justify-between hover:border-slate-350 transition-all space-y-4">
-            <div>
-              <h4 className="font-normal text-slate-808 text-base">{rep} Report</h4>
-              <p className="text-xs text-slate-400 mt-1">Consolidated document containing parsed targets.</p>
-            </div>
-            <button onClick={() => handleDownload(rep)} className="w-full py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-sm font-normal">Download CSV</button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
 // 10. DATA QUALITY
 // ============================================================================
 export function MEQualityView() {
@@ -1263,21 +1152,12 @@ export function MEDocumentsView() {
 // ============================================================================
 export function MESettingsView() {
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700 select-none">
+    <div className="space-y-6 max-w-xl mx-auto animate-fadeIn">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-base font-normal text-slate-808">M&E Configuration Rules</h2>
-        <p className="text-sm text-slate-400 font-normal">Tweak data-quality validations, reporting quarters, and program baseline formulas.</p>
+        <h2 className="text-base font-bold text-slate-800">Account Settings</h2>
+        <p className="text-sm text-slate-400">Manage appearance, password, and account access.</p>
       </div>
-
-      <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 font-normal">
-        <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal font-normal">Data Validation Standard Settings</span>
-        <div className="space-y-3 text-sm">
-          <div>
-            <span className="text-slate-400 block mb-1">Required Household Survey Fields</span>
-            <div className="bg-slate-50 p-2.5 rounded border border-slate-200 font-normal">GPS coordinates, Family head name, intake ID</div>
-          </div>
-        </div>
-      </div>
+      <AccountSettingsPanel />
     </div>
   );
 }

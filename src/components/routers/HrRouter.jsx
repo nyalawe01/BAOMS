@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   HrHomeView, HrStaffView, HrAddStaffView, HrRequestsView, HrProjectsView,
-  HrDepartmentsView, HrPayrollsView, HrLeaveView, HrReportsView, HrDocumentsView,
+  HrDepartmentsView, HrPayrollsView, HrLeaveView, HrDocumentsView,
   HrSettingsView
 } from '../../views/HrOfficerViews';
 import { HrOfficerView } from '../../views/RoleSpecificViews/HrOfficerView';
@@ -20,7 +20,6 @@ export default function HrRouter({ activeTab, setActiveTab, role }) {
     case 'hr_departments': return <HrDepartmentsView />;
     case 'hr_payrolls': return <HrPayrollsView />;
     case 'hr_leave': return <HrLeaveView />;
-    case 'hr_reports': return <HrReportsView />;
     case 'hr_documents': return <HrDocumentsView />;
     case 'hr_settings': return <HrSettingsView />;
     case 'hr_panel': return <HrOfficerView />;

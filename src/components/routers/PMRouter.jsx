@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   PMDashboardView, PMProjectsView, PMTeamMembersView,
-  PMBudgetFinanceView, PMResourcesView, PMDocumentsView, PMReportsView,
+  PMBudgetFinanceView, PMResourcesView, PMDocumentsView,
   PMMEView, PMNotificationsView, PMSettingsView
 } from '../../views/ProjectManagerViews';
 import { ProjectManagerView } from '../../views/RoleSpecificViews/ProjectManagerView';
@@ -18,7 +18,6 @@ export default function PMRouter({ activeTab, role }) {
     case 'pm_budget': return <PMBudgetFinanceView />;
     case 'pm_resources': return <PMResourcesView />;
     case 'pm_documents': return <PMDocumentsView />;
-    case 'pm_reports': return <PMReportsView />;
     case 'pm_me': return <PMMEView />;
     case 'pm_notifications': return <PMNotificationsView />;
     case 'pm_settings': return <PMSettingsView />;

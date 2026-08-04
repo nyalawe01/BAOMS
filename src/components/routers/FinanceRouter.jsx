@@ -3,7 +3,7 @@ import {
   FinanceDashboardView, FinanceTransactionsView, FinanceIncomeView,
   FinanceExpensesView, FinanceAccountsView, FinanceProjectsView,
   FinanceBudgetsView, FinancePayrollView, FinanceInvoicesView,
-  FinanceReportsView, FinanceApprovalsView, FinanceSettingsView
+  FinanceApprovalsView, FinanceSettingsView
 } from '../../views/FinanceOfficerViews';
 import { FinanceOfficerView } from '../../views/RoleSpecificViews/FinanceOfficerView';
 
@@ -22,7 +22,6 @@ export default function FinanceRouter({ activeTab, role }) {
     case 'fin_budgets': return <FinanceBudgetsView />;
     case 'fin_payroll': return <FinancePayrollView />;
     case 'fin_invoices': return <FinanceInvoicesView />;
-    case 'fin_reports': return <FinanceReportsView />;
     case 'fin_approvals': return <FinanceApprovalsView />;
     case 'fin_settings': return <FinanceSettingsView />;
     case 'finance_panel': return <FinanceOfficerView />;

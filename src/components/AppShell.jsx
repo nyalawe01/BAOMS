@@ -109,7 +109,7 @@ export default function AppShell() {
   }
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-900 antialiased font-sans">
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased font-sans transition-colors">
       {/* Sidebar Navigation */}
       <DynamicSidebar 
         activeTab={activeTab} 

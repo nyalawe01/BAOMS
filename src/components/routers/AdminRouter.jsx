@@ -3,7 +3,7 @@ import {
   AdminDashboardView, AdminOrganizationView, AdminProjectsView,
   AdminFinanceView, AdminHRView, AdminBeneficiariesView,
   AdminMEView, AdminEventsView, AdminInventoryView,
-  AdminCommsView, AdminDocumentsView, AdminReportsView,
+  AdminCommsView, AdminDocumentsView,
   AdminSettingsView, AdminLogsView
 } from '../../views/AdminViews';
 import { SystemAdminView } from '../../views/RoleSpecificViews/SystemAdminView';
@@ -25,7 +25,6 @@ export default function AdminRouter({ activeTab, role }) {
     case 'admin_inventory': return <AdminInventoryView />;
     case 'admin_comms': return <AdminCommsView />;
     case 'admin_documents': return <AdminDocumentsView />;
-    case 'admin_reports': return <AdminReportsView />;
     case 'admin_settings': return <AdminSettingsView />;
     case 'admin_logs': return <AdminLogsView />;
     case 'admin_panel': return <SystemAdminView />;

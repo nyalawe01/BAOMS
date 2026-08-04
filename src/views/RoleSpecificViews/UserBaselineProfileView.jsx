@@ -6,8 +6,25 @@ import {
 import Swal from 'sweetalert2';
 import { AvatarProfilePhoto } from "@/components/base/avatar/avatar";
 import { Illustration } from "@/components/shared-assets/illustrations";
+import { AccountSettingsPanel } from '@/components/shared/AccountSettingsPanel';
 import { storage } from '@/firebase/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
+// Label/value row matching the sm:col-span-3 / sm:col-span-9 pattern from the
+// design reference, adapted to BAOMS's slate/indigo palette (no dark mode).
+function ProfileRow({ label, hint, children }) {
+  return (
+    <div className="grid sm:grid-cols-12 gap-2 sm:gap-4 py-5 border-b border-slate-100 last:border-b-0">
+      <div className="sm:col-span-3">
+        <label className="block text-sm font-semibold text-slate-700 sm:mt-2.5">{label}</label>
+        {hint && <p className="text-xs text-slate-400 mt-0.5">{hint}</p>}
+      </div>
+      <div className="sm:col-span-9">{children}</div>
+    </div>
+  );
+}
+
+const inputClass = "w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white";
 
 export function UserBaselineProfileView() {
   const { user, policyVault, updateProfileDetails } = useAuth();
@@ -55,168 +72,146 @@ export function UserBaselineProfileView() {
   if (!user) return null;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {/* Profile Card & Details (Editable personal, locked office/docs) */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6 lg:col-span-2">
-        <div className="flex items-center gap-4 border-b border-slate-100 pb-5">
-          <div className={`relative ${avatarUploading ? 'opacity-50 pointer-events-none' : ''}`}>
-            <AvatarProfilePhoto
-              verified={true}
-              size="lg"
-              alt={user.name}
-              src={user.avatar}
-              onUpload={handleAvatarUpload}
-            />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-slate-800">{user.name}</h3>
-            <span className="inline-block px-2.5 py-0.5 mt-1 text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-full uppercase">
-              {user.role}
-            </span>
-            {avatarUploading && <p className="text-xs text-indigo-500 font-semibold mt-1">Uploading photo...</p>}
-          </div>
-        </div>
-
-        {/* Editable Personal Details */}
-        <div className="space-y-4">
-          <h4 className="font-bold text-slate-800 text-base flex items-center gap-2">
-            <span>Personal Details</span>
-            <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-normal uppercase">User Configurable</span>
-          </h4>
-
-          <form onSubmit={handleUpdatePersonal} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Email Address</label>
-              <input 
-                type="text" 
-                disabled 
-                value={user.email} 
-                className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm bg-slate-50 text-slate-500 cursor-not-allowed font-medium"
+    <div className="max-w-5xl mx-auto space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Profile identity + editable personal details + locked office details */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
+          <div className="flex items-center gap-4 p-6 border-b border-slate-100">
+            <div className={`relative ${avatarUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+              <AvatarProfilePhoto
+                verified={true}
+                size="lg"
+                alt={user.name}
+                src={user.avatar}
+                onUpload={handleAvatarUpload}
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Phone Number</label>
-              <input 
-                type="text" 
-                required 
-                value={phone} 
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
-              />
-            </div>
-            <button 
-              type="submit" 
-              className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-1.5 rounded text-sm transition-colors self-end w-full sm:w-auto px-4"
-            >
-              Update Phone Contact
-            </button>
-            {success && (
-              <span className="text-sm text-emerald-600 font-bold self-center">Profile updated successfully.</span>
-            )}
-          </form>
-        </div>
-
-        {/* Locked Office Details */}
-        <div className="space-y-4 pt-4 border-t border-slate-100">
-          <h4 className="font-bold text-slate-800 text-base flex items-center gap-2">
-            <span>Office Placement Details</span>
-            <span className="text-xs text-rose-600 bg-rose-50 px-2 py-0.5 rounded font-normal uppercase flex items-center gap-1">
-              <Shield size={10} /> Locked Property
-            </span>
-          </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-            <div>
-              <span className="text-slate-450 block text-xs font-bold uppercase">Assigned Position</span>
-              <span className="font-semibold text-slate-700">{user.officeDetails?.position}</span>
-            </div>
-            <div>
-              <span className="text-slate-450 block text-xs font-bold uppercase">Department Unit</span>
-              <span className="font-semibold text-slate-700">{user.officeDetails?.department}</span>
-            </div>
-            <div>
-              <span className="text-slate-450 block text-xs font-bold uppercase">Date of Hire</span>
-              <span className="font-semibold text-slate-700">{user.officeDetails?.hireDate}</span>
+              <h3 className="text-lg font-bold text-slate-800">{user.name}</h3>
+              <span className="inline-block px-2.5 py-0.5 mt-1 text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-full uppercase">
+                {user.role}
+              </span>
+              {avatarUploading && <p className="text-xs text-indigo-500 font-semibold mt-1">Uploading photo...</p>}
             </div>
           </div>
-        </div>
 
-        {/* Locked Supporting Documents */}
-        <div className="space-y-4 pt-4 border-t border-slate-100">
-          <h4 className="font-bold text-slate-800 text-base flex items-center gap-2">
-            <span>Supporting Audited Documents</span>
-            <span className="text-xs text-rose-600 bg-rose-50 px-2 py-0.5 rounded font-normal uppercase flex items-center gap-1">
-              <Shield size={10} /> Locked Property
-            </span>
-          </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm font-mono">
-            <div className="p-3 bg-slate-50 border border-slate-150 rounded flex flex-col justify-between h-14">
-              <span className="text-slate-400 text-xs font-bold uppercase block font-sans">Employment Contract</span>
-              <span className="font-semibold text-xs text-slate-750 truncate">{user.supportingDocuments?.contract}</span>
-            </div>
-            <div className="p-3 bg-slate-50 border border-slate-150 rounded flex flex-col justify-between h-14">
-              <span className="text-slate-400 text-xs font-bold uppercase block font-sans">NSSF Identifier</span>
-              <span className="font-semibold text-xs text-slate-750">{user.supportingDocuments?.nssf}</span>
-            </div>
-            <div className="p-3 bg-slate-50 border border-slate-150 rounded flex flex-col justify-between h-14">
-              <span className="text-slate-400 text-xs font-bold uppercase block font-sans">NHIF Identifier</span>
-              <span className="font-semibold text-xs text-slate-750">{user.supportingDocuments?.nhif}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Read-Only Document Vault */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4 lg:col-span-1 flex flex-col justify-between h-[500px]">
-        <div className="space-y-4">
-          <div className="border-b border-slate-100 pb-3">
-            <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
-              <BookOpen className="text-indigo-500" size={16} />
-              <span>Read-Only Document Vault</span>
-            </h3>
-            <p className="text-xs text-slate-400 mt-0.5">Official templates and organization policy manuals.</p>
-          </div>
-
-          {policyVault.length === 0 ? (
-            <div className="py-12 space-y-3">
-              <Illustration type="documents" size="sm" />
-              <p className="text-sm text-slate-400 text-center italic">No documents are currently stored in this vault folder.</p>
-            </div>
-          ) : (
-            <div className="space-y-3 overflow-y-auto max-h-[340px] pr-1">
-              {policyVault.map(vault => (
-                <div key={vault.id} className="p-2.5 bg-slate-50 border border-slate-150 rounded text-sm flex justify-between items-center hover:bg-slate-100 transition-colors">
-                  <div className="space-y-0.5">
-                    <span className="font-bold text-slate-700 block truncate max-w-[150px]">{vault.title}</span>
-                    <span className="text-xs text-slate-400 uppercase font-mono">{vault.category} • {vault.size}</span>
-                  </div>
-                  <button 
-                    onClick={() => {
-                      Swal.fire({
-                        title: 'Vault Download',
-                        text: `Do you want to download "${vault.title}" (${vault.size})?`,
-                        icon: 'info',
-                        showCancelButton: true,
-                        confirmButtonColor: '#4f46e5',
-                        confirmButtonText: 'Download PDF'
-                      }).then((result) => {
-                        if (result.isConfirmed) {
-                          Swal.fire('Downloaded!', 'File download initiated.', 'success');
-                        }
-                      });
-                    }}
-                    className="p-1 hover:bg-slate-250 rounded border border-slate-200 text-slate-500"
-                    title="Download File"
+          <div className="px-6">
+            <form onSubmit={handleUpdatePersonal}>
+              <ProfileRow label="Email Address" hint="Managed by Administration">
+                <input type="text" disabled value={user.email} className={`${inputClass} bg-slate-50 text-slate-500 cursor-not-allowed`} />
+              </ProfileRow>
+              <ProfileRow label="Phone Number">
+                <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+                  <input
+                    type="text"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+255 7XX XXX XXX"
+                    className={inputClass}
+                  />
+                  <button
+                    type="submit"
+                    className="shrink-0 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
                   >
-                    <Download size={12} />
+                    Save
                   </button>
                 </div>
-              ))}
+                {success && <p className="text-sm text-emerald-600 font-semibold mt-2">Profile updated successfully.</p>}
+              </ProfileRow>
+            </form>
+
+            <ProfileRow label="Position" hint="Locked — set by HR/Admin">
+              <p className="text-sm font-semibold text-slate-700 py-2">{user.officeDetails?.position || '—'}</p>
+            </ProfileRow>
+            <ProfileRow label="Department" hint="Locked — set by HR/Admin">
+              <p className="text-sm font-semibold text-slate-700 py-2">{user.officeDetails?.department || '—'}</p>
+            </ProfileRow>
+            <ProfileRow label="Date of Hire" hint="Locked — set by HR/Admin">
+              <p className="text-sm font-semibold text-slate-700 py-2">{user.officeDetails?.hireDate || '—'}</p>
+            </ProfileRow>
+          </div>
+
+          {/* Locked Supporting Documents */}
+          <div className="p-6 border-t border-slate-100 space-y-3">
+            <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <Shield size={14} className="text-rose-500" />
+              <span>Supporting Audited Documents</span>
+              <span className="text-xs text-rose-600 bg-rose-50 px-2 py-0.5 rounded font-normal uppercase">Locked</span>
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+              <div className="p-3 bg-slate-50 border border-slate-150 rounded-lg flex flex-col justify-between h-14">
+                <span className="text-slate-400 text-xs font-bold uppercase">Employment Contract</span>
+                <span className="font-semibold text-xs text-slate-700 truncate">{user.supportingDocuments?.contract || '—'}</span>
+              </div>
+              <div className="p-3 bg-slate-50 border border-slate-150 rounded-lg flex flex-col justify-between h-14">
+                <span className="text-slate-400 text-xs font-bold uppercase">NSSF Identifier</span>
+                <span className="font-semibold text-xs text-slate-700">{user.supportingDocuments?.nssf || '—'}</span>
+              </div>
+              <div className="p-3 bg-slate-50 border border-slate-150 rounded-lg flex flex-col justify-between h-14">
+                <span className="text-slate-400 text-xs font-bold uppercase">NHIF Identifier</span>
+                <span className="font-semibold text-xs text-slate-700">{user.supportingDocuments?.nhif || '—'}</span>
+              </div>
             </div>
-          )}
+          </div>
         </div>
-        
-        <p className="text-xs text-slate-400 text-center leading-relaxed">Documents are managed by the Administration & HR departments. Editing is restricted.</p>
+
+        {/* Read-Only Document Vault */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4 lg:col-span-1 flex flex-col justify-between h-fit">
+          <div className="space-y-4">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
+                <BookOpen className="text-indigo-500" size={16} />
+                <span>Document Vault</span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">Official templates and organization policy manuals.</p>
+            </div>
+
+            {policyVault.length === 0 ? (
+              <div className="py-12 space-y-3">
+                <Illustration type="documents" size="sm" />
+                <p className="text-sm text-slate-400 text-center italic">No documents are currently stored in this vault folder.</p>
+              </div>
+            ) : (
+              <div className="space-y-3 overflow-y-auto max-h-[340px] pr-1">
+                {policyVault.map(vault => (
+                  <div key={vault.id} className="p-2.5 bg-slate-50 border border-slate-150 rounded-lg text-sm flex justify-between items-center hover:bg-slate-100 transition-colors">
+                    <div className="space-y-0.5">
+                      <span className="font-bold text-slate-700 block truncate max-w-[150px]">{vault.title}</span>
+                      <span className="text-xs text-slate-400 uppercase font-mono">{vault.category} • {vault.size}</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        Swal.fire({
+                          title: 'Vault Download',
+                          text: `Do you want to download "${vault.title}" (${vault.size})?`,
+                          icon: 'info',
+                          showCancelButton: true,
+                          confirmButtonColor: '#4f46e5',
+                          confirmButtonText: 'Download PDF'
+                        }).then((result) => {
+                          if (result.isConfirmed) {
+                            Swal.fire('Downloaded!', 'File download initiated.', 'success');
+                          }
+                        });
+                      }}
+                      className="p-1 hover:bg-slate-250 rounded border border-slate-200 text-slate-500"
+                      title="Download File"
+                    >
+                      <Download size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <p className="text-xs text-slate-400 text-center leading-relaxed">Documents are managed by the Administration & HR departments. Editing is restricted.</p>
+        </div>
       </div>
+
+      {/* Account settings: theme, password, delete account */}
+      <AccountSettingsPanel />
     </div>
   );
 }
