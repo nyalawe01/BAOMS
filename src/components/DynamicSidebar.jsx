@@ -203,7 +203,7 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
   }
 
   return (
-    <aside className={`bg-slate-900 text-white flex flex-col h-screen border-r border-slate-800 transition-all duration-300 select-none shrink-0 ${collapsed ? 'w-20' : 'w-60'}`}>
+    <aside className={`bg-slate-900 text-white flex flex-col h-screen border-r border-slate-800 transition-all duration-300 select-none shrink-0 ${collapsed ? 'w-24' : 'w-80'}`}>
       {/* Brand Header (Balanced & Centered) */}
       {collapsed ? (
         <div className="h-16 flex items-center justify-center border-b border-slate-800 shrink-0">
@@ -217,8 +217,8 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
             <ShieldAlert size={18} className="animate-pulse" />
           </div>
           <div className="animate-fadeIn">
-            <h1 className="font-extrabold text-[13px] leading-none tracking-tight text-slate-100">BAOMS Portal</h1>
-            <span className="text-[11px] text-slate-400">Org Management</span>
+            <h1 className="font-extrabold text-base leading-none tracking-tight text-slate-100">BAOMS Portal</h1>
+            <span className="text-xs text-slate-400">Org Management</span>
           </div>
         </div>
       )}
@@ -227,8 +227,8 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
       <nav className={`flex-1 py-4 space-y-1.5 overflow-y-auto no-scrollbar ${collapsed ? 'px-2' : 'px-3'}`}>
         {/* Navigation Group Header (Optional label in expanded state) */}
         {!collapsed && (
-          <div className="px-3 mb-2">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest block">
+          <div className="px-3 mb-3">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest block">
               {user.role === 'HR Officer' ? 'HR Console' : 'Navigation'}
             </span>
           </div>
@@ -243,14 +243,14 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-10 h-10 mx-auto flex items-center justify-center rounded-lg transition-all duration-150 ${
+                className={`w-12 h-12 mx-auto flex items-center justify-center rounded-lg transition-all duration-150 ${
                   isActive
                     ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/10'
                     : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
                 }`}
                 title={item.label}
               >
-                <Icon size={16} className="shrink-0" />
+                <Icon size={20} className="shrink-0" />
               </button>
             );
           }
@@ -259,13 +259,13 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 py-2 px-3.5 rounded-lg text-[13px] font-medium transition-all duration-150 text-left ${
+              className={`w-full flex items-center gap-3.5 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-150 text-left ${
                 isActive
                   ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/10'
                   : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
               }`}
             >
-              <Icon size={16} className="shrink-0" />
+              <Icon size={19} className="shrink-0" />
               <span className="truncate">{item.label}</span>
             </button>
           );
@@ -277,17 +277,17 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
         {collapsed ? (
           <button
             onClick={logout}
-            className="w-10 h-10 mx-auto flex items-center justify-center rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors"
+            className="w-12 h-12 mx-auto flex items-center justify-center rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors"
             title="Log Out"
           >
-            <LogOut size={16} className="shrink-0" />
+            <LogOut size={20} className="shrink-0" />
           </button>
         ) : (
           <button
             onClick={logout}
-            className="w-full flex items-center gap-3 py-2.5 px-4 rounded-lg text-[13px] font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-left"
+            className="w-full flex items-center gap-3.5 py-3 px-4 rounded-lg text-sm font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-left"
           >
-            <LogOut size={16} className="shrink-0" />
+            <LogOut size={19} className="shrink-0" />
             <span>Log Out</span>
           </button>
         )}
