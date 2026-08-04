@@ -129,7 +129,7 @@ export function HrRequestsView() {
               <select
                 value={selectedStaffId}
                 onChange={(e) => setSelectedStaffId(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 bg-white"
               >
                 <option value="">Select Employee...</option>
                 {users.map(u => (
@@ -143,7 +143,7 @@ export function HrRequestsView() {
               <select
                 value={noticeType}
                 onChange={(e) => setNoticeType(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 bg-white"
               >
                 <option value="Leave Approval Reminder">Leave Approval Reminder</option>
                 <option value="Suspension Letter Dispatch">Suspension Letter Dispatch</option>
@@ -158,13 +158,13 @@ export function HrRequestsView() {
                 value={noticeNotes}
                 onChange={(e) => setNoticeNotes(e.target.value)}
                 placeholder="Type the formal message details..."
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 h-24"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 h-24"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all"
+              className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all"
             >
               <Send size={13} />
               <span>Send Directive</span>

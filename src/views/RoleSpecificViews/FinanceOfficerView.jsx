@@ -82,7 +82,7 @@ export function FinanceOfficerView() {
               <select 
                 value={selectedProjId}
                 onChange={(e) => setSelectedProjId(e.target.value)}
-                className="w-full px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800 bg-white"
+                className="w-full px-2 py-2 border border-slate-200 rounded text-sm text-slate-800 bg-white"
               >
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -97,7 +97,7 @@ export function FinanceOfficerView() {
                 placeholder="e.g. AWS Production Cloud Hosting" 
                 value={budgetDesc}
                 onChange={(e) => setBudgetDesc(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-emerald-500"
+                className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-emerald-500"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -106,7 +106,7 @@ export function FinanceOfficerView() {
                 <select 
                   value={budgetCat} 
                   onChange={(e) => setBudgetCat(e.target.value)}
-                  className="w-full px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800 bg-white"
+                  className="w-full px-2 py-2 border border-slate-200 rounded text-sm text-slate-800 bg-white"
                 >
                   <option value="Operations">Operations</option>
                   <option value="Equipment">Equipment</option>
@@ -122,13 +122,13 @@ export function FinanceOfficerView() {
                   placeholder="TZS" 
                   value={budgetAmount}
                   onChange={(e) => setBudgetAmount(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-emerald-500"
                 />
               </div>
             </div>
             <button 
               type="submit" 
-              className="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-semibold py-2 rounded text-sm transition-colors"
+              className="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-semibold py-2.5 rounded text-sm transition-colors"
             >
               Allocate Budget Line Item
             </button>
@@ -154,22 +154,22 @@ export function FinanceOfficerView() {
                   <thead>
                     <tr className="border-b border-slate-150 text-xs font-bold text-slate-400 uppercase">
                       <th className="pb-2">Details</th>
-                      <th className="pb-2 px-3">Category</th>
-                      <th className="pb-2 px-3">Allocation</th>
+                      <th className="pb-2 px-3.5">Category</th>
+                      <th className="pb-2 px-3.5">Allocation</th>
                       <th className="pb-2 text-right">Spent</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-slate-700">
                     {activeBudget.items.map(item => (
                       <tr key={item.id} className="hover:bg-slate-50/50">
-                        <td className="py-2.5 font-semibold text-slate-900">{item.description}</td>
-                        <td className="py-2.5 px-3">
+                        <td className="py-3 font-semibold text-slate-900">{item.description}</td>
+                        <td className="py-3 px-3.5">
                           <span className="px-1.5 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-600 uppercase border border-slate-200">
                             {item.category}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 font-semibold text-slate-900">TZS {item.allocatedAmount.toLocaleString()}</td>
-                        <td className="py-2.5 text-right font-semibold text-rose-600">TZS {item.spent.toLocaleString()}</td>
+                        <td className="py-3 px-3.5 font-semibold text-slate-900">TZS {item.allocatedAmount.toLocaleString()}</td>
+                        <td className="py-3 text-right font-semibold text-rose-600">TZS {item.spent.toLocaleString()}</td>
                       </tr>
                     ))}
                   </tbody>

@@ -165,7 +165,7 @@ export function Item({
       role="menuitem"
       tabIndex={-1}
       onClick={handleClick}
-      className="w-full flex items-center justify-between px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left focus:outline-none focus-visible:bg-slate-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+      className="w-full flex items-center justify-between px-3.5 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left focus:outline-none focus-visible:bg-slate-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
     >
       <div className="flex items-center gap-2 truncate">
         {selectionIndicator === 'checkbox' && (
@@ -205,7 +205,7 @@ export function Section({ children }) {
 
 export function SectionHeader({ className = '', children }) {
   return (
-    <div className={`px-3.5 py-1 text-xs font-bold text-slate-400 uppercase tracking-widest ${className}`}>
+    <div className={`px-3.5.5 py-1 text-xs font-bold text-slate-400 uppercase tracking-widest ${className}`}>
       {children}
     </div>
   );

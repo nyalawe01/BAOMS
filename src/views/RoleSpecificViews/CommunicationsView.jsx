@@ -51,17 +51,17 @@ export function CommunicationsView() {
               placeholder="Announcement Title" 
               value={annTitle} 
               onChange={(e) => setAnnTitle(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
+              className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800"
             />
             <textarea 
               required 
               placeholder="Content..." 
               value={annContent} 
               onChange={(e) => setAnnContent(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
+              className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800"
               rows="3"
             />
-            <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 rounded text-sm">Publish Broadcast</button>
+            <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded text-sm">Publish Broadcast</button>
           </form>
 
           <div className="space-y-2 max-h-[160px] overflow-y-auto">
@@ -86,20 +86,20 @@ export function CommunicationsView() {
               placeholder="File Name (e.g. logo.png)" 
               value={mediaFile} 
               onChange={(e) => setMediaFile(e.target.value)}
-              className="px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
+              className="px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800"
             />
             <select 
               required
               value={mediaProjTag} 
               onChange={(e) => setMediaProjTag(e.target.value)}
-              className="px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800 bg-white"
+              className="px-2 py-2 border border-slate-200 rounded text-sm text-slate-800 bg-white"
             >
               <option value="">Tag Project...</option>
               {projects.map(p => (
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
             </select>
-            <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm py-1.5 rounded">Tag & Upload</button>
+            <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm py-2 rounded">Tag & Upload</button>
           </form>
 
           <div className="grid grid-cols-2 gap-3 max-h-[220px] overflow-y-auto pr-1">

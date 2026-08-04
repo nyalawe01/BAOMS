@@ -45,7 +45,7 @@ export function VolunteerLoggerView() {
 
         {/* Intern placement countdown timer */}
         {user?.role === 'Intern' && (
-          <div className="bg-indigo-900/50 border border-indigo-500/30 rounded-xl px-4 py-2.5 flex items-center gap-3">
+          <div className="bg-indigo-900/50 border border-indigo-500/30 rounded-xl px-4 py-3 flex items-center gap-3">
             <AlertTriangle className="text-yellow-500 animate-pulse" size={20} />
             <div>
               <span className="text-xs text-slate-300 block font-bold uppercase tracking-wider">Internship placement Countdown</span>
@@ -68,7 +68,7 @@ export function VolunteerLoggerView() {
               <select 
                 value={selectedProj} 
                 onChange={(e) => setSelectedProj(e.target.value)}
-                className="w-full px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800 bg-white"
+                className="w-full px-2 py-2 border border-slate-200 rounded text-sm text-slate-800 bg-white"
               >
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -81,7 +81,7 @@ export function VolunteerLoggerView() {
               <select 
                 value={selectedTask} 
                 onChange={(e) => setSelectedTask(e.target.value)}
-                className="w-full px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800 bg-white"
+                className="w-full px-2 py-2 border border-slate-200 rounded text-sm text-slate-800 bg-white"
               >
                 <option value="">Select Task...</option>
                 {activeProject?.tasks.map(t => (
@@ -100,7 +100,7 @@ export function VolunteerLoggerView() {
                   placeholder="Hrs" 
                   value={logHrs} 
                   onChange={(e) => setLogHrs(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800"
                 />
               </div>
             </div>
@@ -112,12 +112,12 @@ export function VolunteerLoggerView() {
                 placeholder="Details of what was accomplished..." 
                 value={logNotes} 
                 onChange={(e) => setLogNotes(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
+                className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800"
                 rows="2"
               />
             </div>
 
-            <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 rounded text-sm">Log Hours</button>
+            <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded text-sm">Log Hours</button>
           </form>
 
           {success && (

@@ -31,7 +31,7 @@ export function PMBudgetFinanceView() {
           <select
             value={selectedProjId}
             onChange={(e) => setSelectedProjId(e.target.value)}
-            className="border border-slate-200 rounded px-2.5 py-1.5 bg-white text-sm font-normal focus:outline-none"
+            className="border border-slate-200 rounded px-3 py-2 bg-white text-sm font-normal focus:outline-none"
           >
             {projects.map(p => (
               <option key={p.id} value={p.id}>{p.name}</option>

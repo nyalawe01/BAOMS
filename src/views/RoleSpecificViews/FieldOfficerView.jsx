@@ -117,7 +117,7 @@ export function FieldOfficerView() {
               <button
                 type="button"
                 onClick={handleRandomizeGPS}
-                className="w-full sm:w-auto text-sm font-semibold bg-slate-200 text-slate-700 py-2.5 px-3 rounded-md hover:bg-slate-300 active:bg-slate-300 transition-colors"
+                className="w-full sm:w-auto text-sm font-semibold bg-slate-200 text-slate-700 py-3 px-3.5 rounded-md hover:bg-slate-300 active:bg-slate-300 transition-colors"
               >
                 Change Geolocation
               </button>
@@ -130,7 +130,7 @@ export function FieldOfficerView() {
                 placeholder="Log activity details, village counts, or water tower integrity reports..."
                 value={activityNotes}
                 onChange={(e) => setActivityNotes(e.target.value)}
-                className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                className="w-full px-3.5 py-3 border border-slate-200 rounded-lg text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
                 rows="4"
               />
             </div>
@@ -142,7 +142,7 @@ export function FieldOfficerView() {
                 placeholder="e.g. well_mombasa_audit.jpg"
                 value={photoName}
                 onChange={(e) => setPhotoName(e.target.value)}
-                className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                className="w-full px-3.5 py-3 border border-slate-200 rounded-lg text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
               />
             </div>
 
@@ -168,7 +168,7 @@ export function FieldOfficerView() {
               </div>
               <button
                 onClick={handleSyncCache}
-                className="w-full sm:w-auto bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-4 py-2.5 rounded-lg shadow text-base flex items-center justify-center gap-2"
+                className="w-full sm:w-auto bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-4 py-3 rounded-lg shadow text-base flex items-center justify-center gap-2"
                 disabled={offlineMode}
               >
                 <Wifi size={16} /> Synchronize Cloud

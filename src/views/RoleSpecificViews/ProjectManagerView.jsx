@@ -176,7 +176,7 @@ export function ProjectManagerView() {
             <button
               key={tab.id}
               onClick={() => setActivePmTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
+              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all ${
                 activePmTab === tab.id
                   ? 'bg-indigo-650 text-white shadow'
                   : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
@@ -208,7 +208,7 @@ export function ProjectManagerView() {
                   placeholder="e.g. Zanzibar Port Assessment" 
                   value={newProjName}
                   onChange={(e) => setNewProjName(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
                 />
               </div>
               <div>
@@ -217,7 +217,7 @@ export function ProjectManagerView() {
                   placeholder="Objectives..." 
                   value={newProjDesc}
                   onChange={(e) => setNewProjDesc(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
                   rows="2"
                 />
               </div>
@@ -228,7 +228,7 @@ export function ProjectManagerView() {
                   placeholder="e.g. 5000" 
                   value={newProjBudget}
                   onChange={(e) => setNewProjBudget(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -239,7 +239,7 @@ export function ProjectManagerView() {
                     required 
                     value={newProjStart}
                     onChange={(e) => setNewProjStart(e.target.value)}
-                    className="w-full px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-805 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-2 py-2 border border-slate-200 rounded text-sm text-slate-805 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
                 <div>
@@ -249,13 +249,13 @@ export function ProjectManagerView() {
                     required 
                     value={newProjEnd}
                     onChange={(e) => setNewProjEnd(e.target.value)}
-                    className="w-full px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-805 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-2 py-2 border border-slate-200 rounded text-sm text-slate-805 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
               </div>
               <button 
                 type="submit" 
-                className="w-full bg-indigo-650 hover:bg-indigo-600 text-white font-semibold py-2 rounded text-sm transition-colors"
+                className="w-full bg-indigo-650 hover:bg-indigo-600 text-white font-semibold py-2.5 rounded text-sm transition-colors"
               >
                 Initialize Project Workspace
               </button>
@@ -279,7 +279,7 @@ export function ProjectManagerView() {
                 <select 
                   value={selectedProjId}
                   onChange={(e) => setSelectedProjId(e.target.value)}
-                  className="border border-slate-200 rounded px-2.5 py-1 bg-white focus:outline-none focus:border-indigo-500 font-semibold"
+                  className="border border-slate-200 rounded px-3 py-1 bg-white focus:outline-none focus:border-indigo-500 font-semibold"
                 >
                   {projects.map(p => (
                     <option key={p.id} value={p.id}>{p.name}</option>
@@ -294,7 +294,7 @@ export function ProjectManagerView() {
                 <button
                   key={folder}
                   onClick={() => setActiveFolder(folder)}
-                  className={`px-4 py-2 text-sm font-semibold border-b-2 transition-all ${
+                  className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all ${
                     activeFolder === folder 
                       ? 'border-indigo-600 text-indigo-600' 
                       : 'border-transparent text-slate-400 hover:text-slate-600'
@@ -313,11 +313,11 @@ export function ProjectManagerView() {
                 placeholder="e.g. Website_Audit_Specs_v2.pdf" 
                 value={uploadFileName}
                 onChange={(e) => setUploadFileName(e.target.value)}
-                className="flex-1 px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+                className="flex-1 px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
               />
               <button 
                 type="submit" 
-                className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm py-1.5 px-4 rounded flex items-center gap-1.5"
+                className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm py-2 px-4 rounded flex items-center gap-1.5"
               >
                 <Upload size={13} />
                 <span>Upload to /{activeFolder}</span>
@@ -379,7 +379,7 @@ export function ProjectManagerView() {
                       </span>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase border ${
+                      <span className={`px-3 py-0.5 rounded-full text-xs font-bold uppercase border ${
                         proj.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                         proj.status === 'In Progress' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
                         proj.status === 'On Hold' ? 'bg-amber-50 text-amber-700 border-amber-200' :
@@ -405,7 +405,7 @@ export function ProjectManagerView() {
                           <select
                             value={editStatus}
                             onChange={(e) => setEditStatus(e.target.value)}
-                            className="w-full px-2 py-1.5 border border-slate-200 rounded bg-white text-sm"
+                            className="w-full px-2 py-2 border border-slate-200 rounded bg-white text-sm"
                           >
                             <option value="Planning">Planning</option>
                             <option value="In Progress">In Progress</option>
@@ -429,13 +429,13 @@ export function ProjectManagerView() {
                         <button
                           type="button"
                           onClick={() => setEditingProjId(null)}
-                          className="px-2.5 py-1 text-slate-550 hover:bg-slate-200 rounded font-semibold"
+                          className="px-3 py-1 text-slate-550 hover:bg-slate-200 rounded font-semibold"
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
-                          className="px-3 py-1 bg-indigo-650 text-white rounded font-semibold hover:bg-indigo-700"
+                          className="px-3.5 py-1 bg-indigo-650 text-white rounded font-semibold hover:bg-indigo-700"
                         >
                           Save
                         </button>
@@ -449,7 +449,7 @@ export function ProjectManagerView() {
                           setEditStatus(proj.status || 'Planning');
                           setEditProgress(proj.progress || 0);
                         }}
-                        className="px-3 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 rounded font-semibold text-xs"
+                        className="px-3.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 rounded font-semibold text-xs"
                       >
                         Update Status/Progress
                       </button>
@@ -478,7 +478,7 @@ export function ProjectManagerView() {
                         </div>
                       ))}
                       {assignedMembers.length === 0 && (
-                        <p className="text-xs text-slate-400 italic text-center py-2">No team members assigned yet.</p>
+                        <p className="text-xs text-slate-400 italic text-center py-2.5">No team members assigned yet.</p>
                       )}
                     </div>
                   </div>
@@ -491,7 +491,7 @@ export function ProjectManagerView() {
                     <select
                       value={selectedStaffToAssign}
                       onChange={(e) => setSelectedStaffToAssign(e.target.value)}
-                      className="flex-1 px-2.5 py-1.5 rounded border border-slate-200 bg-white"
+                      className="flex-1 px-3 py-2 rounded border border-slate-200 bg-white"
                     >
                       <option value="">Select Employee...</option>
                       {unassignedMembers.map(u => (
@@ -500,7 +500,7 @@ export function ProjectManagerView() {
                     </select>
                     <button
                       onClick={() => handleAssignStaff(proj.id)}
-                      className="bg-indigo-650 hover:bg-indigo-750 text-white px-3 py-1.5 rounded font-semibold text-xs"
+                      className="bg-indigo-650 hover:bg-indigo-750 text-white px-3.5 py-2 rounded font-semibold text-xs"
                     >
                       Assign
                     </button>
@@ -528,7 +528,7 @@ export function ProjectManagerView() {
               placeholder="Search by name, email, or role..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-inner"
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-inner"
             />
           </div>
 
@@ -717,7 +717,7 @@ export function ProjectManagerView() {
                 <div className="px-6 py-3 border-t border-slate-200 bg-slate-50 flex justify-end shrink-0">
                   <button
                     onClick={() => setSelectedUser(null)}
-                    className="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-sm font-semibold rounded-lg transition-all"
+                    className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 text-sm font-semibold rounded-lg transition-all"
                   >
                     Close Profile
                   </button>
@@ -774,7 +774,7 @@ export function ProjectManagerView() {
                 <select 
                   value={selectedStaffId}
                   onChange={(e) => setSelectedStaffId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 bg-white"
                 >
                   <option value="">Select Employee...</option>
                   {users.map(u => (
@@ -788,7 +788,7 @@ export function ProjectManagerView() {
                 <select 
                   value={noticeType}
                   onChange={(e) => setNoticeType(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 bg-white"
                 >
                   <option value="Milestone Delivery Directive">Milestone Delivery Directive</option>
                   <option value="Compliance Disciplinary Warning">Compliance Disciplinary Warning</option>
@@ -803,13 +803,13 @@ export function ProjectManagerView() {
                   value={noticeNotes}
                   onChange={(e) => setNoticeNotes(e.target.value)}
                   placeholder="Type the formal instruction details..."
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 h-24"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 h-24"
                 />
               </div>
 
               <button 
                 type="submit"
-                className="w-full py-2 bg-indigo-650 hover:bg-indigo-750 text-white rounded-lg font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all"
+                className="w-full py-2.5 bg-indigo-650 hover:bg-indigo-750 text-white rounded-lg font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all"
               >
                 <Send size={13} />
                 <span>Send Directive</span>

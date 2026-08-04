@@ -151,7 +151,7 @@ EOF
         </div>
         <button
           onClick={() => setIsDrawerOpen(true)}
-          className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-sm font-normal transition-all"
+          className="flex items-center gap-2 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-sm font-normal transition-all"
         >
           <Plus size={14} />
           <span>Create Project Portfolio</span>
@@ -166,7 +166,7 @@ EOF
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
-              className={`px-3 py-1 rounded-lg border font-normal transition-all ${
+              className={`px-3.5 py-1 rounded-lg border font-normal transition-all ${
                 filterStatus === status
                   ? 'bg-slate-900 border-slate-900 text-white'
                   : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
@@ -322,13 +322,13 @@ EOF
             <div className="px-6 py-3 border-t border-slate-200 bg-slate-50 flex justify-between items-center shrink-0">
               <button
                 onClick={() => handleGenerateProjectReport(selectedProj)}
-                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-sm font-normal transition-all"
+                className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded text-sm font-normal transition-all"
               >
                 Generate Report
               </button>
               <button
                 onClick={() => { setIsModalOpen(false); setSelectedProjId(null); }}
-                className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-sm font-normal transition-all"
+                className="px-3.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-sm font-normal transition-all"
               >
                 Close Details
               </button>
@@ -358,7 +358,7 @@ EOF
                   placeholder="e.g. Website Redesign"
                   value={newProjName}
                   onChange={(e) => setNewProjName(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-200 rounded text-slate-800 bg-slate-50/50"
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded text-slate-800 bg-slate-50/50"
                 />
               </div>
               <div>
@@ -367,7 +367,7 @@ EOF
                   placeholder="Goals & Description..."
                   value={newProjDesc}
                   onChange={(e) => setNewProjDesc(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-200 rounded text-slate-800 bg-slate-50/50"
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded text-slate-800 bg-slate-50/50"
                   rows="2"
                 />
               </div>
@@ -378,7 +378,7 @@ EOF
                     type="text"
                     value={newProjDonor}
                     onChange={(e) => setNewProjDonor(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-200 rounded bg-white"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded bg-white"
                   />
                 </div>
                 <div>
@@ -387,7 +387,7 @@ EOF
                     type="number"
                     value={newProjBudget}
                     onChange={(e) => setNewProjBudget(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-200 rounded bg-white"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded bg-white"
                   />
                 </div>
               </div>
@@ -399,7 +399,7 @@ EOF
                     required
                     value={newProjStart}
                     onChange={(e) => setNewProjStart(e.target.value)}
-                    className="w-full px-2 py-1.5 border border-slate-200 rounded"
+                    className="w-full px-2 py-2 border border-slate-200 rounded"
                   />
                 </div>
                 <div>
@@ -409,14 +409,14 @@ EOF
                     required
                     value={newProjEnd}
                     onChange={(e) => setNewProjEnd(e.target.value)}
-                    className="w-full px-2 py-1.5 border border-slate-200 rounded"
+                    className="w-full px-2 py-2 border border-slate-200 rounded"
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded font-normal transition-all text-sm"
+                className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded font-normal transition-all text-sm"
               >
                 Initialize Project Workspace
               </button>

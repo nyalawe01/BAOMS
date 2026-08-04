@@ -35,7 +35,7 @@ export class ErrorBoundary extends React.Component {
         </p>
         <button
           onClick={this.handleReset}
-          className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-base font-semibold transition-colors"
+          className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-base font-semibold transition-colors"
         >
           Try again
         </button>

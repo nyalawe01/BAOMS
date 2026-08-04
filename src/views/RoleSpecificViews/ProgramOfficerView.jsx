@@ -81,7 +81,7 @@ export function ProgramOfficerView() {
                   required
                   value={reportProjId} 
                   onChange={(e) => setReportProjId(e.target.value)}
-                  className="w-full px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800 bg-white"
+                  className="w-full px-2 py-2 border border-slate-200 rounded text-sm text-slate-800 bg-white"
                 >
                   <option value="">Select Project...</option>
                   {projects.map(p => (
@@ -97,7 +97,7 @@ export function ProgramOfficerView() {
                   placeholder="e.g. 1500" 
                   value={reportAmount} 
                   onChange={(e) => setReportAmount(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none"
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none"
                 />
               </div>
             </div>
@@ -109,7 +109,7 @@ export function ProgramOfficerView() {
                 placeholder="Details of expense, activities, or travel logs..." 
                 value={reportDesc} 
                 onChange={(e) => setReportDesc(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
+                className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800"
                 rows="3"
               />
             </div>
@@ -121,13 +121,13 @@ export function ProgramOfficerView() {
                 placeholder="e.g. receipt_transport_kajiado.jpg" 
                 value={reportFile} 
                 onChange={(e) => setReportFile(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
+                className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800"
               />
             </div>
 
             <button 
               type="submit" 
-              className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-4 rounded text-sm transition-colors"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 px-4 rounded text-sm transition-colors"
             >
               Submit Activity Claim Report
             </button>

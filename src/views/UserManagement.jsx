@@ -70,7 +70,7 @@ export default function UserManagement() {
         </div>
         <button
           onClick={handleOpenAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-base font-semibold transition-colors shadow-lg shadow-brand-600/10"
+          className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-base font-semibold transition-colors shadow-lg shadow-brand-600/10"
         >
           <UserPlus size={16} />
           <span>Add Member</span>
@@ -114,7 +114,7 @@ export default function UserManagement() {
                       </div>
                     </td>
                     <td className="py-4 px-6">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-sm font-semibold border ${roleColor}`}>
+                      <span className={`inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-sm font-semibold border ${roleColor}`}>
                         <Shield size={12} />
                         <span>{u.role}</span>
                       </span>
@@ -179,7 +179,7 @@ export default function UserManagement() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. John Doe"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                 />
               </div>
 
@@ -193,7 +193,7 @@ export default function UserManagement() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="e.g. john@organization.com"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                 />
               </div>
 
@@ -204,7 +204,7 @@ export default function UserManagement() {
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                 >
                   <option value="Admin">Admin</option>
                   <option value="Manager">Manager</option>
@@ -219,7 +219,7 @@ export default function UserManagement() {
                 <select
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                 >
                   <option value="Executive">Executive</option>
                   <option value="Engineering">Engineering</option>
@@ -233,13 +233,13 @@ export default function UserManagement() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-500 hover:bg-slate-50 transition-colors"
+                  className="px-4 py-2.5 border border-slate-200 rounded-lg text-sm font-semibold text-slate-500 hover:bg-slate-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-semibold transition-colors"
+                  className="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-semibold transition-colors"
                 >
                   {isEditing ? 'Apply Changes' : 'Register User'}
                 </button>

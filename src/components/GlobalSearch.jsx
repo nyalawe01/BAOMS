@@ -164,7 +164,7 @@ export default function GlobalSearch({ onNavigate, role }) {
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 w-48 sm:w-56 lg:w-72 focus-within:ring-2 focus-within:ring-indigo-100 focus-within:border-indigo-300 transition-colors">
+      <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 w-48 sm:w-56 lg:w-72 focus-within:ring-2 focus-within:ring-indigo-100 focus-within:border-indigo-300 transition-colors">
         <Search size={14} className="text-slate-400 shrink-0" />
         <input
           ref={inputRef}
@@ -219,7 +219,7 @@ export default function GlobalSearch({ onNavigate, role }) {
                           key={record.id}
                           type="button"
                           onClick={() => handleSelect(category)}
-                          className="w-full flex flex-col items-start gap-0.5 px-4 py-2 text-left hover:bg-slate-50 transition-colors"
+                          className="w-full flex flex-col items-start gap-0.5 px-4 py-2.5 text-left hover:bg-slate-50 transition-colors"
                         >
                           <span className="text-sm font-semibold text-slate-800 leading-snug truncate w-full">
                             {category.title(record)}

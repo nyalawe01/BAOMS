@@ -103,7 +103,7 @@ export function MEDashboardView() {
                 <div
                   key={ind.id}
                   title={`${ind.name}\nTarget: ${targetVal}${unitSuffix}\nAchieved: ${achievedVal}${unitSuffix}\nAchievement: ${displayPct}%`}
-                  className={`aspect-square rounded-md border px-1.5 py-1.5 flex flex-col items-center justify-center text-center gap-0.5 transition-transform hover:scale-105 ${getHeatmapTileClass(rawPct)}`}
+                  className={`aspect-square rounded-md border px-1.5 py-2 flex flex-col items-center justify-center text-center gap-0.5 transition-transform hover:scale-105 ${getHeatmapTileClass(rawPct)}`}
                 >
                   <span className="text-xs font-normal leading-tight line-clamp-2 break-words">{ind.name}</span>
                   <span className="text-xs font-normal">{displayPct}%</span>
@@ -136,11 +136,11 @@ export function MEDashboardView() {
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
           <h3 className="font-normal text-slate-850 text-base border-b border-slate-100 pb-2">Upcoming Performance Reports</h3>
           <div className="divide-y divide-slate-100 text-sm font-normal">
-            <div className="py-2.5 flex justify-between items-center">
+            <div className="py-3 flex justify-between items-center">
               <span>Quarterly Outreach Report</span>
               <span className="text-slate-500">Due in 4 Days</span>
             </div>
-            <div className="py-2.5 flex justify-between items-center">
+            <div className="py-3 flex justify-between items-center">
               <span>Donor Grant Report</span>
               <span className="text-slate-500">Due Tomorrow</span>
             </div>
@@ -270,32 +270,32 @@ export function MEIndicatorsView() {
           <form onSubmit={handleAddIndicator} className="space-y-3 font-normal">
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Indicator Name</label>
-              <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Children receiving educational aid" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Children receiving educational aid" className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
             </div>
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Description</label>
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Definition / notes..." rows="2" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Definition / notes..." rows="2" className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs text-slate-400 uppercase mb-1">Target</label>
-                <input type="number" required min="0" value={target} onChange={(e) => setTarget(e.target.value)} placeholder="e.g. 1500" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+                <input type="number" required min="0" value={target} onChange={(e) => setTarget(e.target.value)} placeholder="e.g. 1500" className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
               </div>
               <div>
                 <label className="block text-xs text-slate-400 uppercase mb-1">Unit</label>
-                <input type="text" value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="e.g. children" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+                <input type="text" value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="e.g. children" className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
               </div>
             </div>
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Project (Optional)</label>
-              <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+              <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white">
                 <option value="">Unassigned</option>
                 {projects.map((p) => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
             </div>
-            <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Add Indicator</button>
+            <button type="submit" className="w-full py-2.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Add Indicator</button>
           </form>
         </div>
 
@@ -481,12 +481,12 @@ export function MEBeneficiariesView() {
           <form onSubmit={handleEnroll} className="space-y-3 font-normal">
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Full Name</label>
-              <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Karanja Mwangi" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Karanja Mwangi" className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs text-slate-400 uppercase mb-1">Gender</label>
-                <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+                <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white">
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                   <option value="Other">Other</option>
@@ -494,16 +494,16 @@ export function MEBeneficiariesView() {
               </div>
               <div>
                 <label className="block text-xs text-slate-400 uppercase mb-1">Age</label>
-                <input type="number" required min="0" value={age} onChange={(e) => setAge(e.target.value)} placeholder="e.g. 15" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+                <input type="number" required min="0" value={age} onChange={(e) => setAge(e.target.value)} placeholder="e.g. 15" className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
               </div>
             </div>
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Location / Region</label>
-              <input type="text" required value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Dar es Salaam" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="text" required value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Dar es Salaam" className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
             </div>
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Category</label>
-              <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+              <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white">
                 <option value="Child">Child</option>
                 <option value="Youth">Youth</option>
                 <option value="Woman">Woman</option>
@@ -513,7 +513,7 @@ export function MEBeneficiariesView() {
             </div>
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Project (Optional)</label>
-              <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+              <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white">
                 <option value="">Unassigned</option>
                 {projects.map((p) => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -532,7 +532,7 @@ export function MEBeneficiariesView() {
                 <span className="text-xs leading-snug">I confirm this individual (or their guardian) has been informed about how their data will be used and has consented to enrollment.</span>
               </label>
             </div>
-            <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Enroll Beneficiary</button>
+            <button type="submit" className="w-full py-2.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Enroll Beneficiary</button>
           </form>
         </div>
 
@@ -646,7 +646,7 @@ export function MECollectionView() {
               <select
                 value={projectId}
                 onChange={(e) => setProjectId(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
+                className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800"
               >
                 <option value="">Select project...</option>
                 {projects.map((p) => (
@@ -662,7 +662,7 @@ export function MECollectionView() {
                 placeholder="Describe the data collected (survey form, submissions, district)..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
+                className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800"
                 rows="3"
               />
             </div>
@@ -687,7 +687,7 @@ export function MECollectionView() {
 
             <button
               type="submit"
-              className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded text-sm font-normal"
+              className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-sm font-normal"
             >
               Submit Collection
             </button>
@@ -785,18 +785,18 @@ export function MESurveysView() {
           <form onSubmit={handleCreateSurvey} className="space-y-3 font-normal">
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Survey Title</label>
-              <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Household Nutrition Assessment" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Household Nutrition Assessment" className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
             </div>
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Linked Project (Optional)</label>
-              <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+              <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white">
                 <option value="">No Project Linked</option>
                 {projects.map((p) => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
             </div>
-            <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Create Survey</button>
+            <button type="submit" className="w-full py-2.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Create Survey</button>
           </form>
         </div>
 
@@ -820,7 +820,7 @@ export function MESurveysView() {
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => handleAddQuestion(survey)} className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-sm font-normal">
+                    <button onClick={() => handleAddQuestion(survey)} className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded text-sm font-normal">
                       + Add Question
                     </button>
                     <button onClick={() => handleDeleteSurvey(survey)} className="p-1.5 hover:bg-slate-100 rounded text-slate-600 border border-slate-200">
@@ -904,7 +904,7 @@ export function MEVisitsView() {
               <select
                 value={projectId}
                 onChange={(e) => setProjectId(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
+                className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800"
               >
                 <option value="">Select project...</option>
                 {projects.map((p) => (
@@ -918,7 +918,7 @@ export function MEVisitsView() {
                 type="date"
                 value={visitDate}
                 onChange={(e) => setVisitDate(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
+                className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800"
               />
             </div>
             <div>
@@ -928,7 +928,7 @@ export function MEVisitsView() {
                 placeholder="Describe the visit activities and observations..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
+                className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800"
                 rows="3"
               />
             </div>
@@ -954,7 +954,7 @@ export function MEVisitsView() {
             </div>
             <button
               type="submit"
-              className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded text-sm font-normal"
+              className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-sm font-normal"
             >
               Record Visit
             </button>

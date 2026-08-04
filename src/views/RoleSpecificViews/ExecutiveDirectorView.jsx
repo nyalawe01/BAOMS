@@ -139,14 +139,14 @@ export function ExecutiveDirectorView() {
             <p className="text-sm text-slate-400">Headcount and open approvals across every department, in one view.</p>
           </div>
           <div className="flex gap-4">
-            <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-lg px-3 py-1.5">
+            <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-lg px-3.5 py-2">
               <Users2 size={14} className="text-indigo-600" />
               <div className="leading-tight">
                 <span className="block text-xs font-bold uppercase tracking-wider text-indigo-500">Total Headcount</span>
                 <span className="block text-base font-extrabold text-indigo-800">{totalHeadcount}</span>
               </div>
             </div>
-            <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5">
+            <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3.5 py-2">
               <ClipboardList size={14} className="text-amber-600" />
               <div className="leading-tight">
                 <span className="block text-xs font-bold uppercase tracking-wider text-amber-500">Open Approvals Org-Wide</span>
@@ -160,17 +160,17 @@ export function ExecutiveDirectorView() {
           <table className="w-full text-left text-sm border-collapse">
             <thead>
               <tr className="border-b border-slate-150 text-xs font-bold text-slate-400 uppercase">
-                <th className="py-2 px-5">Department</th>
-                <th className="py-2 px-3">Headcount (Active)</th>
-                <th className="py-2 px-3 text-right pr-5">Open Approvals</th>
+                <th className="py-2.5 px-5">Department</th>
+                <th className="py-2.5 px-3.5">Headcount (Active)</th>
+                <th className="py-2.5 px-3.5 text-right pr-5">Open Approvals</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {departmentRollup.map(dept => (
                 <tr key={dept.department} className="hover:bg-slate-50/50">
-                  <td className="py-2.5 px-5 font-semibold text-slate-800">{dept.department}</td>
-                  <td className="py-2.5 px-3">{dept.headcount}</td>
-                  <td className="py-2.5 px-3 text-right pr-5">
+                  <td className="py-3 px-5 font-semibold text-slate-800">{dept.department}</td>
+                  <td className="py-3 px-3.5">{dept.headcount}</td>
+                  <td className="py-3 px-3.5 text-right pr-5">
                     {dept.openApprovals > 0 ? (
                       <span className="text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded">
                         {dept.openApprovals} pending

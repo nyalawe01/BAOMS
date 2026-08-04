@@ -199,7 +199,7 @@ export default function OverviewDashboard() {
           <h2 className="text-xl font-medium text-slate-800">Welcome Back, {user.name.split(' ')[0]}!</h2>
           <p className="text-slate-405 text-sm mt-1">Here is a summary of your organization's current status and portfolio activity.</p>
         </div>
-        <div className="flex items-center gap-2 text-slate-650 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg text-sm font-medium self-start sm:self-center">
+        <div className="flex items-center gap-2 text-slate-650 bg-slate-100 border border-slate-200 px-3.5 py-2 rounded-lg text-sm font-medium self-start sm:self-center">
           <TrendingUp size={14} className="text-slate-500" />
           <span>{efficiencyText}</span>
         </div>

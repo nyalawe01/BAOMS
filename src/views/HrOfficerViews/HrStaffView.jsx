@@ -83,7 +83,7 @@ export function HrStaffView({ setActiveTab }) {
         </div>
         <button
           onClick={() => setActiveTab('hr_add_staff')}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-650 hover:bg-indigo-750 text-white rounded-lg text-sm font-semibold shadow-sm transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-650 hover:bg-indigo-750 text-white rounded-lg text-sm font-semibold shadow-sm transition-all"
         >
           <Plus size={14} />
           <span>Add Staff Member</span>
@@ -98,7 +98,7 @@ export function HrStaffView({ setActiveTab }) {
           placeholder="Search by name, email, or role..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-inner"
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-inner"
         />
       </div>
 
@@ -124,15 +124,15 @@ export function HrStaffView({ setActiveTab }) {
                 {activeMenuId === u.id && (
                   <div className="absolute right-0 mt-1 w-32 bg-white border border-slate-200 rounded-lg shadow-lg z-10 py-1 text-left text-sm font-semibold">
                     {uStatus !== 'Active' && (
-                      <button onClick={() => handleActionClick('Activate', u)} className="w-full px-3 py-1.5 hover:bg-slate-50 text-emerald-600 block">Activate</button>
+                      <button onClick={() => handleActionClick('Activate', u)} className="w-full px-3.5 py-2 hover:bg-slate-50 text-emerald-600 block">Activate</button>
                     )}
                     {uStatus !== 'Suspended' && (
-                      <button onClick={() => handleActionClick('Suspend', u)} className="w-full px-3 py-1.5 hover:bg-slate-50 text-rose-600 block">Suspend</button>
+                      <button onClick={() => handleActionClick('Suspend', u)} className="w-full px-3.5 py-2 hover:bg-slate-50 text-rose-600 block">Suspend</button>
                     )}
                     {uStatus !== 'On Leave' && (
-                      <button onClick={() => handleActionClick('Put on Leave', u)} className="w-full px-3 py-1.5 hover:bg-slate-50 text-amber-600 block">Put on Leave</button>
+                      <button onClick={() => handleActionClick('Put on Leave', u)} className="w-full px-3.5 py-2 hover:bg-slate-50 text-amber-600 block">Put on Leave</button>
                     )}
-                    <button onClick={() => handleActionClick('Terminate', u)} className="w-full px-3 py-1.5 hover:bg-slate-50 text-slate-600 block">Terminate</button>
+                    <button onClick={() => handleActionClick('Terminate', u)} className="w-full px-3.5 py-2 hover:bg-slate-50 text-slate-600 block">Terminate</button>
                   </div>
                 )}
               </div>
@@ -149,7 +149,7 @@ export function HrStaffView({ setActiveTab }) {
                 <div className="text-xs font-semibold text-slate-500 truncate">{dept} — {u.role}</div>
               </div>
 
-              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border uppercase ${
+              <span className={`px-3 py-0.5 rounded-full text-xs font-bold border uppercase ${
                 uStatus === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-250' :
                 uStatus === 'On Leave' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-rose-50 text-rose-700 border-rose-250'
               }`}>
@@ -359,13 +359,13 @@ export function HrStaffView({ setActiveTab }) {
             <div className="pt-4 border-t border-slate-100 flex gap-2 shrink-0">
               <button
                 onClick={() => handleActionClick('Suspend', selectedUser)}
-                className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-bold transition-all"
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-bold transition-all"
               >
                 Suspend User
               </button>
               <button
                 onClick={() => handleActionClick('Terminate', selectedUser)}
-                className="flex-1 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-sm font-bold transition-all border border-rose-250"
+                className="flex-1 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-sm font-bold transition-all border border-rose-250"
               >
                 Terminate Staff
               </button>

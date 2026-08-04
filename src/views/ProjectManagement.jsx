@@ -319,7 +319,7 @@ export default function ProjectManagement() {
                 {hasPermission('assign_tasks') && (
                   <button
                     onClick={() => setShowAddTaskModal(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-semibold transition-colors"
+                    className="flex items-center gap-1.5 px-3.5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-semibold transition-colors"
                   >
                     <Plus size={14} />
                     <span>Add Task</span>
@@ -432,7 +432,7 @@ export default function ProjectManagement() {
                   value={newProjectName}
                   onChange={(e) => setNewProjectName(e.target.value)}
                   placeholder="e.g. ERP Integration Phase 2"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                 />
               </div>
 
@@ -444,7 +444,7 @@ export default function ProjectManagement() {
                   value={newProjectDesc}
                   onChange={(e) => setNewProjectDesc(e.target.value)}
                   placeholder="Summary of objectives..."
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                   rows="3"
                 />
               </div>
@@ -459,7 +459,7 @@ export default function ProjectManagement() {
                     required
                     value={newProjectStart}
                     onChange={(e) => setNewProjectStart(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
+                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                   />
                 </div>
                 <div>
@@ -471,7 +471,7 @@ export default function ProjectManagement() {
                     required
                     value={newProjectEnd}
                     onChange={(e) => setNewProjectEnd(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
+                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                   />
                 </div>
               </div>
@@ -483,7 +483,7 @@ export default function ProjectManagement() {
                 <select
                   value={newProjectStatus}
                   onChange={(e) => setNewProjectStatus(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                 >
                   <option value="Planning">Planning</option>
                   <option value="In Progress">In Progress</option>
@@ -496,13 +496,13 @@ export default function ProjectManagement() {
                 <button
                   type="button"
                   onClick={() => setShowAddProjectModal(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-500 hover:bg-slate-50 transition-colors"
+                  className="px-4 py-2.5 border border-slate-200 rounded-lg text-sm font-semibold text-slate-500 hover:bg-slate-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-semibold transition-colors"
+                  className="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-semibold transition-colors"
                 >
                   Create Project
                 </button>
@@ -537,7 +537,7 @@ export default function ProjectManagement() {
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
                   placeholder="e.g. Audit API documentation endpoints"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                 />
               </div>
 
@@ -549,7 +549,7 @@ export default function ProjectManagement() {
                   required
                   value={newTaskAssigneeId}
                   onChange={(e) => setNewTaskAssigneeId(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                 >
                   <option value="">Choose an employee...</option>
                   {users.map((u) => (
@@ -564,13 +564,13 @@ export default function ProjectManagement() {
                 <button
                   type="button"
                   onClick={() => setShowAddTaskModal(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-500 hover:bg-slate-50 transition-colors"
+                  className="px-4 py-2.5 border border-slate-200 rounded-lg text-sm font-semibold text-slate-500 hover:bg-slate-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-semibold transition-colors"
+                  className="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-semibold transition-colors"
                 >
                   Assign Task
                 </button>

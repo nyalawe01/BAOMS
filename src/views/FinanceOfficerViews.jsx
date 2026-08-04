@@ -267,12 +267,12 @@ export function FinanceDashboardView() {
                   type="number" 
                   value={vatAmount}
                   onChange={(e) => setVatAmount(e.target.value)}
-                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white text-sm" 
+                  className="w-full px-3 py-2 border border-slate-200 rounded bg-white text-sm" 
                   placeholder="e.g. 5000"
                 />
               </div>
               <div className="flex gap-2">
-                <button onClick={handleCalculateVat} className="w-full py-1.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Calculate</button>
+                <button onClick={handleCalculateVat} className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Calculate</button>
               </div>
               {vatResult && (
                 <div className="bg-slate-50 p-2.5 border border-slate-200 rounded space-y-1 text-slate-600">
@@ -293,11 +293,11 @@ export function FinanceDashboardView() {
                   type="number" 
                   value={grossSalary}
                   onChange={(e) => setGrossSalary(e.target.value)}
-                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white text-sm" 
+                  className="w-full px-3 py-2 border border-slate-200 rounded bg-white text-sm" 
                   placeholder="e.g. 80000"
                 />
               </div>
-              <button onClick={handleCalculateNetSalary} className="w-full py-1.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Calculate Net</button>
+              <button onClick={handleCalculateNetSalary} className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Calculate Net</button>
               {netSalaryResult && (
                 <div className="bg-slate-50 p-2.5 border border-slate-200 rounded space-y-1 text-slate-600">
                   <div>NSSF (6%): TZS {netSalaryResult.nssf.toFixed(2)}</div>
@@ -327,7 +327,7 @@ export function FinanceDashboardView() {
                 <label className="block text-xs text-slate-400 uppercase mb-1">Period (months)</label>
                 <input type="number" value={loanPeriod} onChange={(e) => setLoanPeriod(e.target.value)} className="w-full px-2 py-1 border border-slate-200 rounded" />
               </div>
-              <button onClick={handleCalculateLoan} className="w-full py-1.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Calculate Monthly</button>
+              <button onClick={handleCalculateLoan} className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Calculate Monthly</button>
               {loanResult && (
                 <div className="bg-slate-50 p-2.5 border border-slate-200 rounded space-y-1 text-slate-600">
                   <div>Monthly Paid: TZS {loanResult.monthly.toFixed(2)}</div>
@@ -369,7 +369,7 @@ export function FinanceTransactionsView() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1 border rounded font-normal transition-all ${
+              className={`px-3.5 py-1 border rounded font-normal transition-all ${
                 filter === f ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
               }`}
             >
@@ -478,7 +478,7 @@ export function FinanceIncomeView() {
           <form onSubmit={handleRecordIncome} className="space-y-3 font-normal">
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Source Type</label>
-              <select value={source} onChange={(e) => setSource(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+              <select value={source} onChange={(e) => setSource(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white">
                 <option value="Grant">Grant</option>
                 <option value="Donation">Donation</option>
                 <option value="Fundraising">Fundraising</option>
@@ -487,16 +487,16 @@ export function FinanceIncomeView() {
             </div>
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Donor / Customer Name</label>
-              <input type="text" required value={donor} onChange={(e) => setDonor(e.target.value)} placeholder="e.g. USAID Africa" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="text" required value={donor} onChange={(e) => setDonor(e.target.value)} placeholder="e.g. USAID Africa" className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs text-slate-400 uppercase mb-1">Amount (TZS)</label>
-                <input type="number" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 50000" className="w-full px-2 py-1.5 border border-slate-200 rounded bg-white" />
+                <input type="number" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 50000" className="w-full px-2 py-2 border border-slate-200 rounded bg-white" />
               </div>
               <div>
                 <label className="block text-xs text-slate-400 uppercase mb-1">Bank Wallet</label>
-                <select value={bankAccount} onChange={(e) => setBankAccount(e.target.value)} className="w-full px-2 py-1.5 border border-slate-200 rounded bg-white">
+                <select value={bankAccount} onChange={(e) => setBankAccount(e.target.value)} className="w-full px-2 py-2 border border-slate-200 rounded bg-white">
                   <option value="CRDB">CRDB</option>
                   <option value="NMB">NMB</option>
                   <option value="M-Pesa">M-Pesa</option>
@@ -507,13 +507,13 @@ export function FinanceIncomeView() {
             </div>
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Link to Project Workspace</label>
-              <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+              <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white">
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
             </div>
-            <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Log Income Transaction</button>
+            <button type="submit" className="w-full py-2.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Log Income Transaction</button>
           </form>
         </div>
 
@@ -587,12 +587,12 @@ export function FinanceExpensesView() {
           <form onSubmit={handleRecordExpense} className="space-y-3 font-normal">
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Expense Item Description</label>
-              <input type="text" required value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="e.g. Travel tickets to Mwanza" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="text" required value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="e.g. Travel tickets to Mwanza" className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs text-slate-400 uppercase mb-1">Category</label>
-                <select value={cat} onChange={(e) => setCat(e.target.value)} className="w-full px-2 py-1.5 border border-slate-200 rounded bg-white">
+                <select value={cat} onChange={(e) => setCat(e.target.value)} className="w-full px-2 py-2 border border-slate-200 rounded bg-white">
                   <option value="Office">Office</option>
                   <option value="Transport">Transport</option>
                   <option value="Fuel">Fuel</option>
@@ -609,7 +609,7 @@ export function FinanceExpensesView() {
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs text-slate-400 uppercase mb-1">Project Link</label>
-                <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+                <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white">
                   {projects.map(p => (
                     <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
@@ -617,7 +617,7 @@ export function FinanceExpensesView() {
               </div>
               <div>
                 <label className="block text-xs text-slate-400 uppercase mb-1">Bank Wallet</label>
-                <select value={bankAccount} onChange={(e) => setBankAccount(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+                <select value={bankAccount} onChange={(e) => setBankAccount(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white">
                   <option value="CRDB">CRDB</option>
                   <option value="NMB">NMB</option>
                   <option value="M-Pesa">M-Pesa</option>
@@ -626,7 +626,7 @@ export function FinanceExpensesView() {
                 </select>
               </div>
             </div>
-            <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Log Expense Voucher</button>
+            <button type="submit" className="w-full py-2.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Log Expense Voucher</button>
           </form>
         </div>
 
@@ -700,7 +700,7 @@ export function FinanceBudgetsView() {
                   <span className="text-xs text-slate-400 block font-normal">Donor: {proj.donor || 'UNICEF'}</span>
                 </div>
                 <div className="text-right">
-                  <span className={`px-2.5 py-0.5 rounded text-[8px] font-normal uppercase border ${
+                  <span className={`px-3 py-0.5 rounded text-[8px] font-normal uppercase border ${
                     isExceeded ? 'bg-slate-200 text-slate-808 border-slate-300' :
                     isWarning ? 'bg-slate-100 text-slate-700 border-slate-200' : 'bg-slate-50 text-slate-500'
                   }`}>
@@ -862,7 +862,7 @@ export function FinancePayrollView() {
           <button
             onClick={handleApprovePayroll}
             disabled={isDisbursing}
-            className="px-3 py-1.5 bg-slate-900 text-white rounded hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3.5 py-2 bg-slate-900 text-white rounded hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isDisbursing ? 'Disbursing...' : 'Approve & Disburse Payroll'}
           </button>
@@ -995,15 +995,15 @@ export function FinanceInvoicesView() {
           <form onSubmit={handleCreateInvoice} className="space-y-3 font-normal">
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Client Organization</label>
-              <input type="text" required value={client} onChange={(e) => setClient(e.target.value)} placeholder="e.g. UNICEF Somalia" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="text" required value={client} onChange={(e) => setClient(e.target.value)} placeholder="e.g. UNICEF Somalia" className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
             </div>
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Total Billing Amount (TZS)</label>
-              <input type="number" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 50000" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="number" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 50000" className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
             </div>
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Related Project (Optional)</label>
-              <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+              <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white">
                 <option value="">None</option>
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -1012,9 +1012,9 @@ export function FinanceInvoicesView() {
             </div>
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Due Date</label>
-              <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
             </div>
-            <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Generate Invoice</button>
+            <button type="submit" className="w-full py-2.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Generate Invoice</button>
           </form>
         </div>
 
@@ -1175,11 +1175,11 @@ export function FinanceApprovalsView() {
                   <button
                     onClick={() => handleAction(exp.id, 'Approved')}
                     disabled={alreadyApprovedByMe}
-                    className="px-3 py-1.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-3.5 py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {needsSecond ? 'Give Second Approval' : 'Approve Clearance'}
                   </button>
-                  <button onClick={() => handleAction(exp.id, 'Rejected')} className="px-3 py-1.5 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 text-sm">Reject Voucher</button>
+                  <button onClick={() => handleAction(exp.id, 'Rejected')} className="px-3.5 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 text-sm">Reject Voucher</button>
                 </div>
               </div>
             );
@@ -1240,17 +1240,17 @@ export function FinanceSettingsView() {
         <form onSubmit={handleSaveThresholds} className="space-y-3 font-normal">
           <div>
             <label className="block text-xs text-slate-400 uppercase mb-1">Expense Approval Threshold (TZS)</label>
-            <input type="number" required value={expenseApprovalThreshold} onChange={(e) => setExpenseApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+            <input type="number" required value={expenseApprovalThreshold} onChange={(e) => setExpenseApprovalThreshold(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
           </div>
           <div>
             <label className="block text-xs text-slate-400 uppercase mb-1">Procurement Approval Threshold (TZS)</label>
-            <input type="number" required value={procurementApprovalThreshold} onChange={(e) => setProcurementApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+            <input type="number" required value={procurementApprovalThreshold} onChange={(e) => setProcurementApprovalThreshold(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
           </div>
           <div>
             <label className="block text-xs text-slate-400 uppercase mb-1">Budget Approval Threshold (TZS)</label>
-            <input type="number" required value={budgetApprovalThreshold} onChange={(e) => setBudgetApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+            <input type="number" required value={budgetApprovalThreshold} onChange={(e) => setBudgetApprovalThreshold(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
           </div>
-          <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Save Thresholds</button>
+          <button type="submit" className="w-full py-2.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Save Thresholds</button>
         </form>
       </div>
 

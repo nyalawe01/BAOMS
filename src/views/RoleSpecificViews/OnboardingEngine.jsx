@@ -113,7 +113,7 @@ export function OnboardingEngine() {
               placeholder="e.g. Samuel Kimani" 
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-805 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+              className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-805 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
             />
           </div>
           <div>
@@ -124,7 +124,7 @@ export function OnboardingEngine() {
               placeholder="e.g. samuel@oms.com" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+              className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
             />
           </div>
         </div>
@@ -137,7 +137,7 @@ export function OnboardingEngine() {
               placeholder="e.g. +255 700 123 456" 
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+              className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
             />
           </div>
           <div>
@@ -148,7 +148,7 @@ export function OnboardingEngine() {
               placeholder="e.g. 34567890" 
               value={personalId}
               onChange={(e) => setPersonalId(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+              className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
             />
           </div>
         </div>
@@ -161,7 +161,7 @@ export function OnboardingEngine() {
               placeholder="e.g. CV_Kimani.pdf" 
               value={cvName}
               onChange={(e) => setCvName(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+              className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
             />
           </div>
           <div>
@@ -172,7 +172,7 @@ export function OnboardingEngine() {
               placeholder="NHIF Number" 
               value={nhif}
               onChange={(e) => setNhif(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+              className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
             />
           </div>
           <div>
@@ -183,7 +183,7 @@ export function OnboardingEngine() {
               placeholder="NSSF Number" 
               value={nssf}
               onChange={(e) => setNssf(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+              className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
             />
           </div>
         </div>
@@ -217,7 +217,7 @@ export function OnboardingEngine() {
 
         <button 
           type="submit" 
-          className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 rounded text-sm transition-colors flex items-center justify-center gap-1.5 shadow-md shadow-indigo-650/10"
+          className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded text-sm transition-colors flex items-center justify-center gap-1.5 shadow-md shadow-indigo-650/10"
         >
           <UserCheck size={14} />
           <span>Execute Onboarding and Credentials Auto-Gen</span>

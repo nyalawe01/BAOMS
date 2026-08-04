@@ -122,7 +122,7 @@ export function PMMEView() {
 
         {/* Excel/CSV File dropzone input */}
         <div>
-          <label className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-sm cursor-pointer font-normal">
+          <label className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded text-sm cursor-pointer font-normal">
             <Upload size={12} />
             <span>Upload Indicator Sheet (.xlsx/.csv)</span>
             <input

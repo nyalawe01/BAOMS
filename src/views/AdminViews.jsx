@@ -261,15 +261,15 @@ export function AdminHRView() {
           <form onSubmit={handleCreateUser} className="space-y-3 font-normal">
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Full Name</label>
-              <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. John Doe" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. John Doe" className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
             </div>
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Email Address</label>
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="e.g. jdoe@gmail.com" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="e.g. jdoe@gmail.com" className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
             </div>
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Authorization Role</label>
-              <select value={role} onChange={(e) => setRole(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
+              <select value={role} onChange={(e) => setRole(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white">
                 <option value="System Administrator">System Administrator</option>
                 <option value="Executive Director">Executive Director</option>
                 <option value="Project Manager">Project Manager</option>
@@ -278,7 +278,7 @@ export function AdminHRView() {
                 <option value="Volunteer">Volunteer</option>
               </select>
             </div>
-            <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Add User Record</button>
+            <button type="submit" className="w-full py-2.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Add User Record</button>
           </form>
         </div>
 
@@ -497,21 +497,21 @@ export function AdminEventsView() {
           <form onSubmit={handleCreateEvent} className="space-y-3 font-normal">
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Event Title</label>
-              <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Donor Annual Meeting" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Donor Annual Meeting" className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
             </div>
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Event Date</label>
-              <input type="date" required value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="date" required value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
             </div>
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Location</label>
-              <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Dar es Salaam HQ" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+              <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Dar es Salaam HQ" className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
             </div>
             <div>
               <label className="block text-xs text-slate-400 uppercase mb-1">Description</label>
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Brief event description..." className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" rows="3" />
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Brief event description..." className="w-full px-3 py-2 border border-slate-200 rounded bg-white" rows="3" />
             </div>
-            <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Schedule Event</button>
+            <button type="submit" className="w-full py-2.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Schedule Event</button>
           </form>
         </div>
 
@@ -610,8 +610,8 @@ export function AdminCommsView() {
       <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
         <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Broadcast Memo Notification</span>
         <form onSubmit={handleBroadcast} className="space-y-3 font-normal text-sm">
-          <textarea required value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Type announcement description here..." className="w-full px-3 py-2 border border-slate-200 rounded" rows="3" />
-          <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Send Announcement</button>
+          <textarea required value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Type announcement description here..." className="w-full px-3.5 py-2.5 border border-slate-200 rounded" rows="3" />
+          <button type="submit" className="w-full py-2.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Send Announcement</button>
         </form>
       </div>
     </div>
@@ -687,17 +687,17 @@ export function AdminSettingsView() {
         <form onSubmit={handleSaveThresholds} className="space-y-3 font-normal">
           <div>
             <label className="block text-xs text-slate-400 uppercase mb-1">Expense Approval Threshold (TZS)</label>
-            <input type="number" required value={expenseApprovalThreshold} onChange={(e) => setExpenseApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+            <input type="number" required value={expenseApprovalThreshold} onChange={(e) => setExpenseApprovalThreshold(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
           </div>
           <div>
             <label className="block text-xs text-slate-400 uppercase mb-1">Procurement Approval Threshold (TZS)</label>
-            <input type="number" required value={procurementApprovalThreshold} onChange={(e) => setProcurementApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+            <input type="number" required value={procurementApprovalThreshold} onChange={(e) => setProcurementApprovalThreshold(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
           </div>
           <div>
             <label className="block text-xs text-slate-400 uppercase mb-1">Budget Approval Threshold (TZS)</label>
-            <input type="number" required value={budgetApprovalThreshold} onChange={(e) => setBudgetApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
+            <input type="number" required value={budgetApprovalThreshold} onChange={(e) => setBudgetApprovalThreshold(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded bg-white" />
           </div>
-          <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Save Thresholds</button>
+          <button type="submit" className="w-full py-2.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Save Thresholds</button>
         </form>
       </div>
 

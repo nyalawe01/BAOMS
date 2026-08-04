@@ -57,7 +57,7 @@ export function DirectoryView() {
           placeholder="Search by name, role, or department..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-slate-300 shadow-inner"
+          className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-slate-300 shadow-inner"
         />
       </div>
 
@@ -67,7 +67,7 @@ export function DirectoryView() {
           <button
             type="button"
             onClick={() => setSelectedDept('All')}
-            className={`px-3 py-1.5 rounded-full text-xs font-normal border transition-all ${
+            className={`px-3.5 py-2 rounded-full text-xs font-normal border transition-all ${
               selectedDept === 'All'
                 ? 'bg-indigo-650 text-white border-indigo-650'
                 : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'
@@ -80,7 +80,7 @@ export function DirectoryView() {
               type="button"
               key={dept}
               onClick={() => setSelectedDept(dept)}
-              className={`px-3 py-1.5 rounded-full text-xs font-normal border transition-all ${
+              className={`px-3.5 py-2 rounded-full text-xs font-normal border transition-all ${
                 selectedDept === dept
                   ? 'bg-indigo-650 text-white border-indigo-650'
                   : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'

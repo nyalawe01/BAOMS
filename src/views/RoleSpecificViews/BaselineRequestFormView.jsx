@@ -51,7 +51,7 @@ export function BaselineRequestFormView() {
               <select 
                 value={requestType} 
                 onChange={(e) => setRequestType(e.target.value)}
-                className="w-full px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800 bg-white"
+                className="w-full px-2 py-2 border border-slate-200 rounded text-sm text-slate-800 bg-white"
               >
                 <option value="Leave">Annual/Sick Leave</option>
                 <option value="Support Document Access">Supporting Documents Access</option>
@@ -93,12 +93,12 @@ export function BaselineRequestFormView() {
                 placeholder="Explain the reason for this submission..." 
                 value={reason} 
                 onChange={(e) => setReason(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
+                className="w-full px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800"
                 rows="3"
               />
             </div>
 
-            <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 rounded text-sm">Submit Request</button>
+            <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded text-sm">Submit Request</button>
           </form>
 
           {success && (

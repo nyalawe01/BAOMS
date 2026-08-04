@@ -156,7 +156,7 @@ export function PMDashboardView() {
 
             <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
               <h4 className="font-normal text-slate-500 text-sm uppercase tracking-wider">Task Completion Rate</h4>
-              <div className="space-y-3 py-2 text-sm">
+              <div className="space-y-3 py-2.5 text-sm">
                 <div className="flex justify-between">
                   <span className="text-slate-500">Completed Tasks:</span>
                   <span className="font-normal text-slate-800">{completedTasks}</span>
@@ -206,7 +206,7 @@ export function PMDashboardView() {
 
             <div className="divide-y divide-slate-100 text-sm">
               {upcomingDeadlines.map((proj, idx) => (
-                <div key={idx} className="py-2.5 flex justify-between items-center">
+                <div key={idx} className="py-3 flex justify-between items-center">
                   <div>
                     <div className="font-normal text-slate-800">{proj.name}</div>
                     <span className="text-xs text-slate-400">Deadline: {proj.endDate}</span>

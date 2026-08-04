@@ -203,7 +203,7 @@ export function HrAddStaffView() {
                   value={formData.firstName}
                   onChange={(e) => handleFormChange('firstName', e.target.value)}
                   placeholder="Olivia"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
@@ -213,7 +213,7 @@ export function HrAddStaffView() {
                   value={formData.middleName}
                   onChange={(e) => handleFormChange('middleName', e.target.value)}
                   placeholder="Lana"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
@@ -223,7 +223,7 @@ export function HrAddStaffView() {
                   value={formData.surname}
                   onChange={(e) => handleFormChange('surname', e.target.value)}
                   placeholder="Rhye"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
             </div>
@@ -236,7 +236,7 @@ export function HrAddStaffView() {
                   value={formData.email}
                   onChange={(e) => handleFormChange('email', e.target.value)}
                   placeholder="olivia@personal.com"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
@@ -246,7 +246,7 @@ export function HrAddStaffView() {
                   value={formData.organizationEmail}
                   onChange={(e) => handleFormChange('organizationEmail', e.target.value)}
                   placeholder="olivia@oms.com"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
@@ -256,7 +256,7 @@ export function HrAddStaffView() {
                   value={formData.phone}
                   onChange={(e) => handleFormChange('phone', e.target.value)}
                   placeholder="+255 711 000 222"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
@@ -266,7 +266,7 @@ export function HrAddStaffView() {
                   value={formData.personalId}
                   onChange={(e) => handleFormChange('personalId', e.target.value)}
                   placeholder="ID-88776655"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
@@ -276,7 +276,7 @@ export function HrAddStaffView() {
                   value={formData.nhif}
                   onChange={(e) => handleFormChange('nhif', e.target.value)}
                   placeholder="NHIF-998811"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
@@ -286,7 +286,7 @@ export function HrAddStaffView() {
                   value={formData.nssf}
                   onChange={(e) => handleFormChange('nssf', e.target.value)}
                   placeholder="NSSF-332211"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
@@ -295,7 +295,7 @@ export function HrAddStaffView() {
                   type="date"
                   value={formData.dob}
                   onChange={(e) => handleFormChange('dob', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
@@ -305,7 +305,7 @@ export function HrAddStaffView() {
                   value={formData.placeOfBirth}
                   onChange={(e) => handleFormChange('placeOfBirth', e.target.value)}
                   placeholder="Zanzibar"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
@@ -315,7 +315,7 @@ export function HrAddStaffView() {
                   value={formData.placeOfLiving}
                   onChange={(e) => handleFormChange('placeOfLiving', e.target.value)}
                   placeholder="Masaki, Dar es Salaam"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
@@ -325,7 +325,7 @@ export function HrAddStaffView() {
                   value={formData.nationality}
                   onChange={(e) => handleFormChange('nationality', e.target.value)}
                   placeholder="Kenyan"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
@@ -333,7 +333,7 @@ export function HrAddStaffView() {
                 <select
                   value={formData.gender}
                   onChange={(e) => handleFormChange('gender', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 >
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
@@ -345,7 +345,7 @@ export function HrAddStaffView() {
                 <select
                   value={formData.disability}
                   onChange={(e) => handleFormChange('disability', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 >
                   <option value="No">No</option>
                   <option value="Yes">Yes</option>
@@ -361,7 +361,7 @@ export function HrAddStaffView() {
                   value={formData.disabilityDescription}
                   onChange={(e) => handleFormChange('disabilityDescription', e.target.value)}
                   placeholder="Specify details..."
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
             )}
@@ -380,7 +380,7 @@ export function HrAddStaffView() {
                   value={formData.officeLocation}
                   onChange={(e) => handleFormChange('officeLocation', e.target.value)}
                   placeholder="e.g. HQ Annex, Dar es Salaam"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
@@ -388,7 +388,7 @@ export function HrAddStaffView() {
                 <select
                   value={formData.department}
                   onChange={(e) => handleFormChange('department', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 >
                   <option value="Engineering">Engineering</option>
                   <option value="Operations">Operations</option>
@@ -404,7 +404,7 @@ export function HrAddStaffView() {
                   value={formData.position}
                   onChange={(e) => handleFormChange('position', e.target.value)}
                   placeholder="Junior Software Engineer"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
@@ -413,7 +413,7 @@ export function HrAddStaffView() {
                   type="date"
                   value={formData.hireDate}
                   onChange={(e) => handleFormChange('hireDate', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
@@ -421,7 +421,7 @@ export function HrAddStaffView() {
                 <select
                   value={formData.role}
                   onChange={(e) => handleFormChange('role', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 >
                   <option value="System Administrator">System Administrator</option>
                   <option value="Executive Director">Executive Director</option>
@@ -511,7 +511,7 @@ export function HrAddStaffView() {
               </div>
               <button
                 onClick={handleCopyCredentials}
-                className="w-full py-2 bg-white hover:bg-slate-100 border border-slate-350 rounded text-center text-sm font-semibold font-sans mt-2"
+                className="w-full py-2.5 bg-white hover:bg-slate-100 border border-slate-350 rounded text-center text-sm font-semibold font-sans mt-2"
               >
                 Copy Credentials Card
               </button>
@@ -525,7 +525,7 @@ export function HrAddStaffView() {
         {step > 1 && step < 4 ? (
           <button
             onClick={prevStep}
-            className="px-4 py-2 border border-slate-250 hover:bg-slate-100 rounded-lg text-sm font-bold text-slate-600 transition-all"
+            className="px-4 py-2.5 border border-slate-250 hover:bg-slate-100 rounded-lg text-sm font-bold text-slate-600 transition-all"
           >
             Previous
           </button>
@@ -534,21 +534,21 @@ export function HrAddStaffView() {
         {step < 3 ? (
           <button
             onClick={nextStep}
-            className="px-4 py-2 bg-indigo-650 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold transition-all shadow-sm"
+            className="px-4 py-2.5 bg-indigo-650 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold transition-all shadow-sm"
           >
             Next Step
           </button>
         ) : step === 3 ? (
           <button
             onClick={handleCreateStaff}
-            className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold transition-all shadow-sm"
+            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold transition-all shadow-sm"
           >
             Create Staff & Generate Account
           </button>
         ) : (
           <button
             onClick={() => { setStep(1); setGeneratedAccount(null); setFormData({ firstName: '', middleName: '', surname: '', email: '', organizationEmail: '', phone: '', personalId: '', nhif: '', nssf: '', dob: '', placeOfBirth: '', placeOfLiving: '', gender: 'Male', disability: 'No', disabilityDescription: '', nationality: '', officeLocation: '', department: 'Engineering', position: '', role: 'Intern', hireDate: new Date().toISOString().substring(0, 10), avatarFile: null, supportingDocuments: { cv: null, certificates: null, contract: null, insurance: null, others: null } }); }}
-            className="px-5 py-2 bg-indigo-650 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold transition-all shadow-sm"
+            className="px-5 py-2.5 bg-indigo-650 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold transition-all shadow-sm"
           >
             Onboard Another User
           </button>

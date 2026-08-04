@@ -46,7 +46,7 @@ export function PMResourcesView() {
           <select
             value={selectedProjId}
             onChange={(e) => setSelectedProjId(e.target.value)}
-            className="border border-slate-200 rounded px-2.5 py-1.5 bg-white text-sm font-normal focus:outline-none"
+            className="border border-slate-200 rounded px-3 py-2 bg-white text-sm font-normal focus:outline-none"
           >
             {projects.map(p => (
               <option key={p.id} value={p.id}>{p.name}</option>
@@ -68,7 +68,7 @@ export function PMResourcesView() {
             placeholder="Resource Name (e.g. Dell XPS Laptop)"
             value={assetName}
             onChange={(e) => setAssetName(e.target.value)}
-            className="px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
+            className="px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800"
           />
           <input
             type="text"
@@ -76,18 +76,18 @@ export function PMResourcesView() {
             placeholder="Code (e.g. OMS-ASSET-05)"
             value={assetCode}
             onChange={(e) => setAssetCode(e.target.value)}
-            className="px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
+            className="px-3.5 py-2 border border-slate-200 rounded text-sm text-slate-800"
           />
           <select
             value={assetStatus}
             onChange={(e) => setAssetStatus(e.target.value)}
-            className="px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800 bg-white"
+            className="px-2 py-2 border border-slate-200 rounded text-sm text-slate-800 bg-white"
           >
             <option value="Available">Available</option>
             <option value="Assigned">Assigned</option>
             <option value="Maintenance">Maintenance</option>
           </select>
-          <button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm py-1.5 rounded">Register Resource</button>
+          <button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm py-2 rounded">Register Resource</button>
         </form>
       </div>
 

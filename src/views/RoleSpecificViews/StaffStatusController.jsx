@@ -90,16 +90,16 @@ export function StaffStatusController() {
         <table className="w-full text-left text-sm border-collapse">
           <thead>
             <tr className="border-b border-slate-150 text-xs font-bold text-slate-450 uppercase tracking-wider bg-slate-50/50">
-              <th className="pb-2.5 pt-1.5 px-3">Name</th>
+              <th className="pb-2.5 pt-1.5 px-3.5">Name</th>
               <th className="pb-2.5 pt-1.5">Role</th>
               <th className="pb-2.5 pt-1.5">Department</th>
-              <th className="pb-2.5 pt-1.5 text-right px-3">Status</th>
+              <th className="pb-2.5 pt-1.5 text-right px-3.5">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-slate-700">
             {filteredUsers.map(u => (
               <tr key={u.id} className="hover:bg-slate-50/30">
-                <td className="py-2 px-3 font-semibold text-slate-900">
+                <td className="py-2.5 px-3.5 font-semibold text-slate-900">
                   <div className="flex items-center gap-2">
                     <Avatar 
                       size="xs" 
@@ -113,8 +113,8 @@ export function StaffStatusController() {
                     </div>
                   </div>
                 </td>
-                <td className="py-2 font-medium text-slate-500 truncate max-w-[100px]" title={u.role}>{u.role}</td>
-                <td className="py-2">
+                <td className="py-2.5 font-medium text-slate-500 truncate max-w-[100px]" title={u.role}>{u.role}</td>
+                <td className="py-2.5">
                   <select 
                     value={u.department}
                     onChange={(e) => handleDeptChange(u.id, e.target.value)}
@@ -130,7 +130,7 @@ export function StaffStatusController() {
                     <option value="Field Operations">Field Operations</option>
                   </select>
                 </td>
-                <td className="py-2 text-right px-3">
+                <td className="py-2.5 text-right px-3.5">
                   <select 
                     value={u.status || 'Active'}
                     onChange={(e) => handleStatusChange(u.id, e.target.value)}

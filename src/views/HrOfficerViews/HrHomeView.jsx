@@ -85,7 +85,7 @@ export function HrHomeView() {
             </h2>
             <p className="text-slate-400 text-sm mt-1">Review workforce stats, monitor leave pipelines, and inspect organizational activity feeds.</p>
           </div>
-          <span className="bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20 px-3 py-1 rounded-full uppercase tracking-wider animate-pulse">
+          <span className="bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20 px-3.5 py-1 rounded-full uppercase tracking-wider animate-pulse">
             Live Database Sync
           </span>
         </div>
@@ -202,7 +202,7 @@ export function HrHomeView() {
                     <p className="font-bold text-slate-800 truncate">{u.name}</p>
                     <p className="text-slate-500 text-xs">{u.role}</p>
                   </div>
-                  <span className={`shrink-0 text-xs font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${badge.className}`}>
+                  <span className={`shrink-0 text-xs font-bold px-3 py-1 rounded-full border uppercase tracking-wider ${badge.className}`}>
                     {badge.label}
                   </span>
                 </div>

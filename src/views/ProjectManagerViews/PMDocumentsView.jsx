@@ -110,7 +110,7 @@ export function PMDocumentsView() {
               <select
                 value={selectedProjId}
                 onChange={(e) => setSelectedProjId(e.target.value)}
-                className="w-full px-2.5 py-1.5 rounded border border-slate-200 bg-white"
+                className="w-full px-3 py-2 rounded border border-slate-200 bg-white"
               >
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -123,7 +123,7 @@ export function PMDocumentsView() {
                 <button
                   key={folder}
                   onClick={() => setSelectedFolder(folder)}
-                  className={`w-full flex items-center justify-between py-2 px-3 rounded-lg font-normal transition-all ${
+                  className={`w-full flex items-center justify-between py-2.5 px-3.5 rounded-lg font-normal transition-all ${
                     selectedFolder === folder
                       ? 'bg-slate-900 text-white'
                       : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100'
@@ -150,7 +150,7 @@ export function PMDocumentsView() {
             <button
               type="submit"
               disabled={!uploadFile}
-              className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded font-normal transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded font-normal transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Upload Project Document
             </button>
