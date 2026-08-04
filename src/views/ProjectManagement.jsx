@@ -142,8 +142,8 @@ export default function ProjectManagement() {
       <div key={idx} className="h-full flex flex-col justify-between p-2">
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Milestone Stage</span>
-            <span className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase border ${
+            <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Milestone Stage</span>
+            <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase border ${
               phase.status === 'Completed' 
                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
                 : phase.status === 'Active'
@@ -155,10 +155,10 @@ export default function ProjectManagement() {
           </div>
           
           <h4 className="text-base font-bold text-slate-800">{phase.title}</h4>
-          <p className="text-xs text-slate-500 leading-relaxed">{phase.desc}</p>
+          <p className="text-sm text-slate-500 leading-relaxed">{phase.desc}</p>
         </div>
 
-        <div className="flex items-center gap-2 pt-4 border-t border-slate-100 text-xs text-slate-500 font-medium">
+        <div className="flex items-center gap-2 pt-4 border-t border-slate-100 text-sm text-slate-500 font-medium">
           <Calendar size={14} />
           <span>Timeline Target: {phase.date}</span>
         </div>
@@ -174,7 +174,7 @@ export default function ProjectManagement() {
         <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
           <div className="flex items-center gap-2">
             <FileText size={18} className="text-slate-500" />
-            <h3 className="font-bold text-slate-800 text-sm">Projects List</h3>
+            <h3 className="font-bold text-slate-800 text-base">Projects List</h3>
           </div>
           {hasPermission('manage_projects') && (
             <button
@@ -207,27 +207,27 @@ export default function ProjectManagement() {
                 }`}
               >
                 <div className="flex justify-between items-start">
-                  <h4 className="font-bold text-sm text-slate-800 truncate max-w-[70%]">{p.name}</h4>
+                  <h4 className="font-bold text-base text-slate-800 truncate max-w-[70%]">{p.name}</h4>
                   <div className="flex items-center gap-1.5">
                     <span className={`w-2 h-2 rounded-full ${statusDot}`}></span>
-                    <span className="text-[11px] font-semibold text-slate-500 uppercase">{p.status}</span>
+                    <span className="text-xs font-semibold text-slate-500 uppercase">{p.status}</span>
                   </div>
                 </div>
-                <p className="text-xs text-slate-400 mt-1 line-clamp-1">{p.description}</p>
+                <p className="text-sm text-slate-400 mt-1 line-clamp-1">{p.description}</p>
                 
                 {/* Progress bar info */}
                 <div className="flex items-center justify-between gap-3 mt-3">
                   <div className="flex-1 bg-slate-200 h-1 rounded-full overflow-hidden">
                     <div style={{ width: `${p.progress}%` }} className="bg-brand-500 h-full"></div>
                   </div>
-                  <span className="text-[11px] font-bold text-slate-600">{p.progress}%</span>
+                  <span className="text-xs font-bold text-slate-600">{p.progress}%</span>
                 </div>
               </button>
             );
           })}
 
           {projects.length === 0 && (
-            <div className="p-8 text-center text-slate-400 text-xs">
+            <div className="p-8 text-center text-slate-400 text-sm">
               No projects available. Click the plus icon to add one.
             </div>
           )}
@@ -244,7 +244,7 @@ export default function ProjectManagement() {
                 <div>
                   <div className="flex items-center gap-3">
                     <h2 className="text-xl font-bold text-slate-800">{selectedProject.name}</h2>
-                    <span className={`px-2 py-0.5 text-[11px] font-bold uppercase rounded border ${
+                    <span className={`px-2 py-0.5 text-xs font-bold uppercase rounded border ${
                       selectedProject.status === 'In Progress' 
                         ? 'bg-blue-50 text-blue-700 border-blue-200' 
                         : selectedProject.status === 'Completed'
@@ -256,7 +256,7 @@ export default function ProjectManagement() {
                       {selectedProject.status}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-500 mt-2 leading-relaxed">{selectedProject.description}</p>
+                  <p className="text-base text-slate-500 mt-2 leading-relaxed">{selectedProject.description}</p>
                 </div>
                 
                 {/* Admin Delete Action */}
@@ -272,24 +272,24 @@ export default function ProjectManagement() {
               </div>
 
               {/* Stats Footer */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-100 text-xs text-slate-500 font-medium">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-100 text-sm text-slate-500 font-medium">
                 <div className="flex items-center gap-2">
                   <Calendar size={16} className="text-slate-400" />
                   <div>
-                    <span className="text-[11px] text-slate-400 block font-semibold uppercase">Start Date</span>
+                    <span className="text-xs text-slate-400 block font-semibold uppercase">Start Date</span>
                     <span className="text-slate-700 font-bold">{selectedProject.startDate}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar size={16} className="text-slate-400" />
                   <div>
-                    <span className="text-[11px] text-slate-400 block font-semibold uppercase">End Date</span>
+                    <span className="text-xs text-slate-400 block font-semibold uppercase">End Date</span>
                     <span className="text-slate-700 font-bold">{selectedProject.endDate}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 col-span-2">
                   <div className="flex-1">
-                    <span className="text-[11px] text-slate-400 block font-semibold uppercase">Overall Completion</span>
+                    <span className="text-xs text-slate-400 block font-semibold uppercase">Overall Completion</span>
                     <div className="flex items-center gap-3 mt-0.5">
                       <div className="flex-1 bg-slate-100 h-2 rounded-full overflow-hidden">
                         <div style={{ width: `${selectedProject.progress}%` }} className="bg-brand-500 h-full"></div>
@@ -319,7 +319,7 @@ export default function ProjectManagement() {
                 {hasPermission('assign_tasks') && (
                   <button
                     onClick={() => setShowAddTaskModal(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-semibold transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-semibold transition-colors"
                   >
                     <Plus size={14} />
                     <span>Add Task</span>
@@ -331,14 +331,14 @@ export default function ProjectManagement() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-100 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                    <tr className="border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-400">
                       <th className="pb-3 pr-4">Task Details</th>
                       <th className="pb-3 px-4">Assigned Resource</th>
                       <th className="pb-3 px-4">Work Status</th>
                       <th className="pb-3 pl-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50 text-xs">
+                  <tbody className="divide-y divide-slate-50 text-sm">
                     {selectedProject.tasks.map((task) => {
                       // Status styling
                       let badge = 'bg-slate-50 text-slate-500 border-slate-200';
@@ -358,7 +358,7 @@ export default function ProjectManagement() {
                             </div>
                           </td>
                           <td className="py-3 px-4">
-                            <span className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase border ${badge}`}>
+                            <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase border ${badge}`}>
                               {task.status}
                             </span>
                           </td>
@@ -372,14 +372,14 @@ export default function ProjectManagement() {
                               <select
                                 value={task.status}
                                 onChange={(e) => updateTaskStatus(selectedProject.id, task.id, e.target.value)}
-                                className="bg-white border border-slate-200 hover:border-slate-300 text-slate-700 text-xs px-2 py-1 rounded outline-none transition-colors"
+                                className="bg-white border border-slate-200 hover:border-slate-300 text-slate-700 text-sm px-2 py-1 rounded outline-none transition-colors"
                               >
                                 <option value="Pending">Pending</option>
                                 <option value="In Progress">In Progress</option>
                                 <option value="Completed">Completed</option>
                               </select>
                             ) : (
-                              <span className="text-[11px] text-slate-400 italic">Read-Only</span>
+                              <span className="text-xs text-slate-400 italic">Read-Only</span>
                             )}
                           </td>
                         </tr>
@@ -402,7 +402,7 @@ export default function ProjectManagement() {
           <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400 shadow-sm">
             <HelpCircle size={48} className="mx-auto text-slate-300 mb-4" />
             <h3 className="font-bold text-slate-700 text-lg">No Project Selected</h3>
-            <p className="text-sm mt-1 text-slate-400">Please select a project from the panel list to view timelines and task status.</p>
+            <p className="text-base mt-1 text-slate-400">Please select a project from the panel list to view timelines and task status.</p>
           </div>
         )}
       </div>
@@ -415,7 +415,7 @@ export default function ProjectManagement() {
               <h3 className="font-bold text-slate-800 text-lg">Initialize New Initiative</h3>
               <button 
                 onClick={() => setShowAddProjectModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-sm font-bold"
+                className="text-slate-400 hover:text-slate-600 text-base font-bold"
               >
                 ✕
               </button>
@@ -423,7 +423,7 @@ export default function ProjectManagement() {
 
             <form onSubmit={handleAddProject} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Project Title
                 </label>
                 <input
@@ -432,26 +432,26 @@ export default function ProjectManagement() {
                   value={newProjectName}
                   onChange={(e) => setNewProjectName(e.target.value)}
                   placeholder="e.g. ERP Integration Phase 2"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Scope Description
                 </label>
                 <textarea
                   value={newProjectDesc}
                   onChange={(e) => setNewProjectDesc(e.target.value)}
                   placeholder="Summary of objectives..."
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                   rows="3"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                     Start Date
                   </label>
                   <input
@@ -459,11 +459,11 @@ export default function ProjectManagement() {
                     required
                     value={newProjectStart}
                     onChange={(e) => setNewProjectStart(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                     Target End Date
                   </label>
                   <input
@@ -471,19 +471,19 @@ export default function ProjectManagement() {
                     required
                     value={newProjectEnd}
                     onChange={(e) => setNewProjectEnd(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   System Status
                 </label>
                 <select
                   value={newProjectStatus}
                   onChange={(e) => setNewProjectStatus(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                 >
                   <option value="Planning">Planning</option>
                   <option value="In Progress">In Progress</option>
@@ -496,13 +496,13 @@ export default function ProjectManagement() {
                 <button
                   type="button"
                   onClick={() => setShowAddProjectModal(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-50 transition-colors"
+                  className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-500 hover:bg-slate-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-semibold transition-colors"
+                  className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-semibold transition-colors"
                 >
                   Create Project
                 </button>
@@ -520,7 +520,7 @@ export default function ProjectManagement() {
               <h3 className="font-bold text-slate-800 text-lg">Assign Project Task</h3>
               <button 
                 onClick={() => setShowAddTaskModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-sm font-bold"
+                className="text-slate-400 hover:text-slate-600 text-base font-bold"
               >
                 ✕
               </button>
@@ -528,7 +528,7 @@ export default function ProjectManagement() {
 
             <form onSubmit={handleAddTask} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Task Title
                 </label>
                 <input
@@ -537,19 +537,19 @@ export default function ProjectManagement() {
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
                   placeholder="e.g. Audit API documentation endpoints"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Assign Resource
                 </label>
                 <select
                   required
                   value={newTaskAssigneeId}
                   onChange={(e) => setNewTaskAssigneeId(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                 >
                   <option value="">Choose an employee...</option>
                   {users.map((u) => (
@@ -564,13 +564,13 @@ export default function ProjectManagement() {
                 <button
                   type="button"
                   onClick={() => setShowAddTaskModal(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-50 transition-colors"
+                  className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-500 hover:bg-slate-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-semibold transition-colors"
+                  className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-semibold transition-colors"
                 >
                   Assign Task
                 </button>

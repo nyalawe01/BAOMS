@@ -96,94 +96,94 @@ export function OnboardingEngine() {
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
       <div className="border-b border-slate-100 pb-3">
-        <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+        <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
           <UserCheck className="text-indigo-650" size={18} />
           <span>Staff Onboarding Engine</span>
         </h3>
-        <p className="text-[11px] text-slate-400">Onboard new organizational talent, record mandatory support files, and auto-initialize security profiles.</p>
+        <p className="text-xs text-slate-400">Onboard new organizational talent, record mandatory support files, and auto-initialize security profiles.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Full Name</label>
+            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Full Name</label>
             <input 
               type="text" 
               required 
               placeholder="e.g. Samuel Kimani" 
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-805 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+              className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-805 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Email Address</label>
+            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Email Address</label>
             <input 
               type="email" 
               required 
               placeholder="e.g. samuel@oms.com" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+              className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Phone Number</label>
+            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Phone Number</label>
             <input 
               type="text" 
               placeholder="e.g. +255 700 123 456" 
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+              className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">National ID Number</label>
+            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">National ID Number</label>
             <input 
               type="text" 
               required
               placeholder="e.g. 34567890" 
               value={personalId}
               onChange={(e) => setPersonalId(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+              className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">CV Document Name</label>
+            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">CV Document Name</label>
             <input 
               type="text" 
               placeholder="e.g. CV_Kimani.pdf" 
               value={cvName}
               onChange={(e) => setCvName(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+              className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">NHIF Identifier</label>
+            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">NHIF Identifier</label>
             <input 
               type="text" 
               required
               placeholder="NHIF Number" 
               value={nhif}
               onChange={(e) => setNhif(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+              className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">PSSF / NSSF Code</label>
+            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">PSSF / NSSF Code</label>
             <input 
               type="text" 
               required
               placeholder="NSSF Number" 
               value={nssf}
               onChange={(e) => setNssf(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+              className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-850 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
             />
           </div>
         </div>
@@ -217,7 +217,7 @@ export function OnboardingEngine() {
 
         <button 
           type="submit" 
-          className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 rounded text-xs transition-colors flex items-center justify-center gap-1.5 shadow-md shadow-indigo-650/10"
+          className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 rounded text-sm transition-colors flex items-center justify-center gap-1.5 shadow-md shadow-indigo-650/10"
         >
           <UserCheck size={14} />
           <span>Execute Onboarding and Credentials Auto-Gen</span>
@@ -229,7 +229,7 @@ export function OnboardingEngine() {
           <BadgeGroup addonText="Success" color="success" theme="light" align="leading" size="md">
             You've successfully created a new staff profile
           </BadgeGroup>
-          <div className="text-[11px] grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-slate-650 font-mono bg-white p-3 rounded-lg border border-indigo-100">
+          <div className="text-xs grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-slate-650 font-mono bg-white p-3 rounded-lg border border-indigo-100">
             <div><strong>Name:</strong> {generatedUser.name}</div>
             <div><strong>Email:</strong> {generatedUser.email}</div>
             <div><strong>Role:</strong> {generatedUser.role}</div>

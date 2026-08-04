@@ -218,7 +218,7 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
           </div>
           <div className="animate-fadeIn">
             <h1 className="font-extrabold text-base leading-none tracking-tight text-slate-100">BAOMS Portal</h1>
-            <span className="text-xs text-slate-400">Org Management</span>
+            <span className="text-sm text-slate-400">Org Management</span>
           </div>
         </div>
       )}
@@ -228,7 +228,7 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
         {/* Navigation Group Header (Optional label in expanded state) */}
         {!collapsed && (
           <div className="px-3 mb-3">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest block">
+            <span className="text-sm font-bold text-slate-500 uppercase tracking-widest block">
               {user.role === 'HR Officer' ? 'HR Console' : 'Navigation'}
             </span>
           </div>
@@ -259,7 +259,7 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3.5 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-150 text-left ${
+              className={`w-full flex items-center gap-3.5 py-3 px-4 rounded-lg text-base font-medium transition-all duration-150 text-left ${
                 isActive
                   ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/10'
                   : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
@@ -285,7 +285,7 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed }) {
         ) : (
           <button
             onClick={logout}
-            className="w-full flex items-center gap-3.5 py-3 px-4 rounded-lg text-sm font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-left"
+            className="w-full flex items-center gap-3.5 py-3 px-4 rounded-lg text-base font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-left"
           >
             <LogOut size={19} className="shrink-0" />
             <span>Log Out</span>

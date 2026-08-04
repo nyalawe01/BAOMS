@@ -75,7 +75,7 @@ export function HrDepartmentsView() {
       {/* Header */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
         <h2 className="text-base font-bold text-slate-800">Departments Hierarchy & Tree structure</h2>
-        <p className="text-xs text-slate-400">Shift workforce resources between operational departments or review department details.</p>
+        <p className="text-sm text-slate-400">Shift workforce resources between operational departments or review department details.</p>
       </div>
 
       {/* Departments Grid */}
@@ -89,11 +89,11 @@ export function HrDepartmentsView() {
               onClick={() => setSelectedDept(dept)}
             >
               <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                <h4 className="font-extrabold text-slate-800 text-sm flex items-center gap-2">
+                <h4 className="font-extrabold text-slate-800 text-base flex items-center gap-2">
                   <Building size={16} className="text-indigo-500" />
                   <span>{dept} Department</span>
                 </h4>
-                <span className="text-[11px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-semibold">{staff.length} Members</span>
+                <span className="text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-semibold">{staff.length} Members</span>
               </div>
 
               {/* Hierarchy Tree (Top to Bottom List) */}
@@ -111,16 +111,16 @@ export function HrDepartmentsView() {
                           src={s.avatar || "https://www.untitledui.com/images/avatars/olivia-rhye?fm=webp&q=80"}
                           alt={s.name}
                         />
-                        <div className="text-xs">
+                        <div className="text-sm">
                           <div className="font-bold text-slate-800">{s.name}</div>
-                          <div className="text-[11px] text-slate-400">{s.role}</div>
+                          <div className="text-xs text-slate-400">{s.role}</div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => handleShiftDepartment(s.id, dept)}
-                          className="px-2 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-[11px] font-bold text-slate-655"
+                          className="px-2 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-xs font-bold text-slate-655"
                         >
                           Shift
                         </button>
@@ -136,7 +136,7 @@ export function HrDepartmentsView() {
                   );
                 })}
                 {staff.length === 0 && (
-                  <div className="text-center py-6 text-slate-400 text-xs">No employees assigned.</div>
+                  <div className="text-center py-6 text-slate-400 text-sm">No employees assigned.</div>
                 )}
               </div>
             </div>
@@ -155,13 +155,13 @@ export function HrDepartmentsView() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-slate-800 text-sm">{selectedDept} Overview description</h3>
+              <h3 className="font-bold text-slate-800 text-base">{selectedDept} Overview description</h3>
               <button onClick={() => setSelectedDept(null)} className="p-1 hover:bg-slate-100 rounded text-slate-455">
                 <X size={16} />
               </button>
             </div>
 
-            <div className="space-y-3 text-xs text-slate-600">
+            <div className="space-y-3 text-sm text-slate-600">
               <div>
                 <span className="font-bold block text-slate-700">Department Mission Description:</span>
                 <p className="mt-1 leading-relaxed">Operates as the primary execution engine for all {selectedDept.toLowerCase()} workflows, managing allocated staff projects and compliance frameworks.</p>
@@ -184,7 +184,7 @@ export function HrDepartmentsView() {
             <div className="pt-3 border-t border-slate-100 flex justify-end">
               <button
                 onClick={() => setSelectedDept(null)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold"
               >
                 Close Summary
               </button>

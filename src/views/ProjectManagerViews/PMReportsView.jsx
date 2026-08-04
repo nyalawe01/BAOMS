@@ -115,17 +115,17 @@ EOF
     <div className="space-y-6 animate-fadeIn">
       {/* Header */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-800">NGO Reports Center</h2>
-        <p className="text-xs text-slate-400 font-normal">Generate and export project progress, monthly activities, budgets, donor, or completion reports.</p>
+        <h2 className="text-base font-normal text-slate-800">NGO Reports Center</h2>
+        <p className="text-sm text-slate-400 font-normal">Generate and export project progress, monthly activities, budgets, donor, or completion reports.</p>
       </div>
 
       <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
-        <h3 className="font-normal text-slate-808 text-sm border-b border-slate-100 pb-2 flex items-center gap-2">
+        <h3 className="font-normal text-slate-808 text-base border-b border-slate-100 pb-2 flex items-center gap-2">
           <FileText size={16} className="text-slate-400" />
           <span>Report Generator</span>
         </h3>
 
-        <form onSubmit={handleGenerate} className="space-y-4 text-xs font-normal">
+        <form onSubmit={handleGenerate} className="space-y-4 text-sm font-normal">
           <div className="space-y-1">
             <label className="font-normal text-slate-500 block">Select Report Classification</label>
             <select

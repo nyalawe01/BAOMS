@@ -45,8 +45,8 @@ export function DirectoryView() {
     <div className="space-y-6 animate-fadeIn">
       {/* Header */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-800">Organization Directory</h2>
-        <p className="text-xs text-slate-400 font-normal">Browse every staff member across the organization and view their contact details.</p>
+        <h2 className="text-base font-normal text-slate-800">Organization Directory</h2>
+        <p className="text-sm text-slate-400 font-normal">Browse every staff member across the organization and view their contact details.</p>
       </div>
 
       {/* Search */}
@@ -57,7 +57,7 @@ export function DirectoryView() {
           placeholder="Search by name, role, or department..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-slate-300 shadow-inner"
+          className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-slate-300 shadow-inner"
         />
       </div>
 
@@ -67,7 +67,7 @@ export function DirectoryView() {
           <button
             type="button"
             onClick={() => setSelectedDept('All')}
-            className={`px-3 py-1.5 rounded-full text-[11px] font-normal border transition-all ${
+            className={`px-3 py-1.5 rounded-full text-xs font-normal border transition-all ${
               selectedDept === 'All'
                 ? 'bg-indigo-650 text-white border-indigo-650'
                 : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'
@@ -80,7 +80,7 @@ export function DirectoryView() {
               type="button"
               key={dept}
               onClick={() => setSelectedDept(dept)}
-              className={`px-3 py-1.5 rounded-full text-[11px] font-normal border transition-all ${
+              className={`px-3 py-1.5 rounded-full text-xs font-normal border transition-all ${
                 selectedDept === dept
                   ? 'bg-indigo-650 text-white border-indigo-650'
                   : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'
@@ -96,12 +96,12 @@ export function DirectoryView() {
       {(users || []).length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border border-slate-200 shadow-sm">
           <Users className="mx-auto text-slate-300" size={32} />
-          <p className="text-xs text-slate-400 font-normal mt-3">No staff members have been added to the organization yet.</p>
+          <p className="text-sm text-slate-400 font-normal mt-3">No staff members have been added to the organization yet.</p>
         </div>
       ) : filteredUsers.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border border-slate-200 shadow-sm">
           <Search className="mx-auto text-slate-300" size={32} />
-          <p className="text-xs text-slate-400 font-normal mt-3">No team members match your search or filter.</p>
+          <p className="text-sm text-slate-400 font-normal mt-3">No team members match your search or filter.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -115,10 +115,10 @@ export function DirectoryView() {
               >
                 <Avatar size="lg" src={u.avatar} alt={u.name} className="ring-1 ring-slate-100" />
                 <div>
-                  <h4 className="font-normal text-slate-808 text-sm leading-tight">{u.name}</h4>
-                  <p className="text-slate-400 text-[11px] mt-0.5 font-normal">{u.officeDetails?.position || u.role}</p>
+                  <h4 className="font-normal text-slate-808 text-base leading-tight">{u.name}</h4>
+                  <p className="text-slate-400 text-xs mt-0.5 font-normal">{u.officeDetails?.position || u.role}</p>
                 </div>
-                <div className="flex flex-col gap-1 w-full text-[11px] border-t border-slate-100 pt-3 font-normal">
+                <div className="flex flex-col gap-1 w-full text-xs border-t border-slate-100 pt-3 font-normal">
                   <div className="flex justify-between text-slate-550">
                     <span>Role</span>
                     <span className="text-slate-700">{u.role || 'N/A'}</span>
@@ -148,16 +148,16 @@ export function DirectoryView() {
               <div className="flex items-center gap-3">
                 <Avatar size="sm" src={selectedUser.avatar} alt={selectedUser.name} />
                 <div>
-                  <h3 className="text-sm font-normal leading-none">{selectedUser.name}</h3>
-                  <span className="text-[11px] text-slate-400 font-normal">{selectedUser.officeDetails?.position || selectedUser.role}</span>
+                  <h3 className="text-base font-normal leading-none">{selectedUser.name}</h3>
+                  <span className="text-xs text-slate-400 font-normal">{selectedUser.officeDetails?.position || selectedUser.role}</span>
                 </div>
               </div>
               <button onClick={() => setSelectedUser(null)} className="p-1 hover:bg-slate-800 rounded text-slate-400"><X size={16} /></button>
             </div>
 
-            <div className="p-6 space-y-4 text-xs bg-slate-50 max-h-[70vh] overflow-y-auto font-normal">
+            <div className="p-6 space-y-4 text-sm bg-slate-50 max-h-[70vh] overflow-y-auto font-normal">
               <div className="space-y-2">
-                <h5 className="text-[11px] font-normal text-slate-400 uppercase tracking-wider">Contact & Role</h5>
+                <h5 className="text-xs font-normal text-slate-400 uppercase tracking-wider">Contact & Role</h5>
                 <div className="grid grid-cols-2 gap-3 bg-white border border-slate-200 rounded-lg p-3">
                   <div className="col-span-2">
                     <span className="text-slate-400 flex items-center gap-1 font-normal"><Mail size={11} /> Email</span>

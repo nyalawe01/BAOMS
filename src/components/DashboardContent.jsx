@@ -17,7 +17,7 @@ const MERouter = lazy(() => import('./routers/MERouter'));
 const OtherRolesRouter = lazy(() => import('./routers/OtherRolesRouter'));
 
 const LoadingFallback = () => (
-  <div className="p-8 flex items-center justify-center text-slate-400 text-sm">Loading...</div>
+  <div className="p-8 flex items-center justify-center text-slate-400 text-base">Loading...</div>
 );
 
 export default function DashboardContent({ activeTab, setActiveTab }) {

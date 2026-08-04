@@ -65,13 +65,13 @@ export function ProcurementView() {
           <Layers className="text-indigo-400" />
           <span>Asset & Vendor Registry Command</span>
         </h2>
-        <p className="text-slate-400 text-xs mt-1">Manage vendor databases, register physical enterprise assets, and execute Purchase, Buy, or Return order workflows.</p>
+        <p className="text-slate-400 text-sm mt-1">Manage vendor databases, register physical enterprise assets, and execute Purchase, Buy, or Return order workflows.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Asset Register Form */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
-          <h3 className="font-bold text-slate-800 text-sm">Physical Asset Registry</h3>
+          <h3 className="font-bold text-slate-800 text-base">Physical Asset Registry</h3>
           <form onSubmit={handleAddAsset} className="grid grid-cols-3 gap-3">
             <input 
               type="text" 
@@ -79,7 +79,7 @@ export function ProcurementView() {
               placeholder="Code (e.g. OMS-ASSET)" 
               value={assetCode} 
               onChange={(e) => setAssetCode(e.target.value)}
-              className="px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-800"
+              className="px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
             />
             <input 
               type="text" 
@@ -87,16 +87,16 @@ export function ProcurementView() {
               placeholder="Asset Name (e.g. Dell Monitor)" 
               value={assetName} 
               onChange={(e) => setAssetName(e.target.value)}
-              className="px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-800"
+              className="px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
             />
-            <button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-1.5 rounded">Register Asset</button>
+            <button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm py-1.5 rounded">Register Asset</button>
           </form>
 
           <div className="space-y-2 max-h-[160px] overflow-y-auto pr-2">
             {assets.map(as => (
-              <div key={as.id} className="p-2 bg-slate-50 border border-slate-150 rounded flex justify-between items-center text-xs">
+              <div key={as.id} className="p-2 bg-slate-50 border border-slate-150 rounded flex justify-between items-center text-sm">
                 <span><strong>{as.details.assetCode}:</strong> {as.details.name}</span>
-                <span className={`px-1.5 py-0.5 rounded text-[11px] font-bold ${
+                <span className={`px-1.5 py-0.5 rounded text-xs font-bold ${
                   as.details.status === 'Operational' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
                 }`}>
                   {as.details.status}
@@ -108,7 +108,7 @@ export function ProcurementView() {
 
         {/* Vendor Register Form */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
-          <h3 className="font-bold text-slate-800 text-sm">Vendor Registry Directory</h3>
+          <h3 className="font-bold text-slate-800 text-base">Vendor Registry Directory</h3>
           <form onSubmit={handleAddVendor} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <input 
               type="text" 
@@ -116,14 +116,14 @@ export function ProcurementView() {
               placeholder="Vendor Name" 
               value={vendorName} 
               onChange={(e) => setVendorName(e.target.value)}
-              className="px-2 py-1.5 border border-slate-200 rounded text-xs text-slate-800"
+              className="px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
             />
             <input 
               type="text" 
               placeholder="Contact Person" 
               value={vendorContact} 
               onChange={(e) => setVendorContact(e.target.value)}
-              className="px-2 py-1.5 border border-slate-200 rounded text-xs text-slate-800"
+              className="px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
             />
             <input 
               type="email" 
@@ -131,16 +131,16 @@ export function ProcurementView() {
               placeholder="Email" 
               value={vendorEmail} 
               onChange={(e) => setVendorEmail(e.target.value)}
-              className="px-2 py-1.5 border border-slate-200 rounded text-xs text-slate-800"
+              className="px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
             />
-            <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs py-1.5 rounded">Register Vendor</button>
+            <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm py-1.5 rounded">Register Vendor</button>
           </form>
 
           <div className="space-y-2 max-h-[160px] overflow-y-auto pr-2">
             {vendors.map(v => (
-              <div key={v.id} className="p-2 bg-slate-50 border border-slate-150 rounded text-xs flex justify-between">
+              <div key={v.id} className="p-2 bg-slate-50 border border-slate-150 rounded text-sm flex justify-between">
                 <span><strong>{v.details.vendorName}</strong> ({v.details.contactPerson})</span>
-                <span className="text-[11px] text-slate-400 font-mono">{v.details.email}</span>
+                <span className="text-xs text-slate-400 font-mono">{v.details.email}</span>
               </div>
             ))}
           </div>
@@ -149,13 +149,13 @@ export function ProcurementView() {
 
       {/* Order Workflow Panel */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
-        <h3 className="font-bold text-slate-800 text-sm">Execute Order Workflow (Purchase / Buy / Return)</h3>
+        <h3 className="font-bold text-slate-800 text-base">Execute Order Workflow (Purchase / Buy / Return)</h3>
         
         <form onSubmit={handleCreateOrder} className="grid grid-cols-2 sm:grid-cols-6 gap-3">
           <select 
             value={orderType} 
             onChange={(e) => setOrderType(e.target.value)}
-            className="px-2 py-1.5 border border-slate-200 rounded text-xs text-slate-800 bg-white"
+            className="px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800 bg-white"
           >
             <option value="Purchase">Purchase Order</option>
             <option value="Buy">Buy Order</option>
@@ -164,7 +164,7 @@ export function ProcurementView() {
           <select 
             value={orderVendor} 
             onChange={(e) => setOrderVendor(e.target.value)}
-            className="px-2 py-1.5 border border-slate-200 rounded text-xs text-slate-800 bg-white"
+            className="px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800 bg-white"
           >
             <option value="">Select Vendor...</option>
             {vendors.map(v => (
@@ -177,7 +177,7 @@ export function ProcurementView() {
             placeholder="Item Description" 
             value={orderItemDesc} 
             onChange={(e) => setOrderItemDesc(e.target.value)}
-            className="px-2 py-1.5 border border-slate-200 rounded text-xs text-slate-800"
+            className="px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
           />
           <input 
             type="number" 
@@ -185,7 +185,7 @@ export function ProcurementView() {
             placeholder="Qty" 
             value={orderItemQty} 
             onChange={(e) => setOrderItemQty(e.target.value)}
-            className="px-2 py-1.5 border border-slate-200 rounded text-xs text-slate-800"
+            className="px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
           />
           <input 
             type="number" 
@@ -193,15 +193,15 @@ export function ProcurementView() {
             placeholder="Price (TZS)" 
             value={orderItemPrice} 
             onChange={(e) => setOrderItemPrice(e.target.value)}
-            className="px-2 py-1.5 border border-slate-200 rounded text-xs text-slate-800"
+            className="px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
           />
-          <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs py-1.5 rounded">Create Order</button>
+          <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm py-1.5 rounded">Create Order</button>
         </form>
 
         <div className="overflow-x-auto pt-2">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="border-b border-slate-150 text-[11px] font-bold text-slate-400 uppercase">
+              <tr className="border-b border-slate-150 text-xs font-bold text-slate-400 uppercase">
                 <th className="pb-2">Order ID</th>
                 <th className="pb-2">Order Type</th>
                 <th className="pb-2">Vendor Name</th>
@@ -220,7 +220,7 @@ export function ProcurementView() {
                   <td className="py-2.5">{ord.items?.[0]?.description} (x{ord.items?.[0]?.quantity})</td>
                   <td className="py-2.5 font-bold text-slate-900">TZS {ord.totalAmount.toLocaleString()}</td>
                   <td className="py-2.5 px-3">
-                    <span className={`inline-block px-1.5 py-0.5 rounded text-[11px] font-bold border ${
+                    <span className={`inline-block px-1.5 py-0.5 rounded text-xs font-bold border ${
                       ord.status === 'Ordered' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'
                     }`}>
                       {ord.status}
@@ -230,7 +230,7 @@ export function ProcurementView() {
                     {ord.status === 'Draft' && (
                       <button 
                         onClick={() => updateOrderStatus(ord.id, 'Ordered')}
-                        className="text-xs bg-slate-900 text-white px-2 py-0.5 rounded hover:bg-slate-800"
+                        className="text-sm bg-slate-900 text-white px-2 py-0.5 rounded hover:bg-slate-800"
                       >
                         Submit Order
                       </button>

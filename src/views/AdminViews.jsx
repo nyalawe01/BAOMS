@@ -44,21 +44,21 @@ export function AdminDashboardView() {
   ];
 
   return (
-    <div className="space-y-8 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-8 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       {/* Header Banner */}
       <div className="bg-slate-900 text-white rounded-2xl p-8 border border-slate-200">
         <h2 className="text-lg font-normal flex items-center gap-2">
           <Shield className="text-slate-400" />
           <span>System Administrative Control Center</span>
         </h2>
-        <p className="text-slate-400 text-xs mt-1 font-normal">Monitor overall organizational indexes, database health parameters, and security clearance logs.</p>
+        <p className="text-slate-400 text-sm mt-1 font-normal">Monitor overall organizational indexes, database health parameters, and security clearance logs.</p>
       </div>
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {kpis.map((kpi, idx) => (
           <div key={idx} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:border-slate-350 transition-all">
-            <span className="text-[11px] font-normal text-slate-400 uppercase tracking-widest">{kpi.label}</span>
+            <span className="text-xs font-normal text-slate-400 uppercase tracking-widest">{kpi.label}</span>
             <span className="text-xl font-normal text-slate-800 mt-4 block">{kpi.value}</span>
           </div>
         ))}
@@ -66,7 +66,7 @@ export function AdminDashboardView() {
 
       {/* Quick Actions */}
       <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
-        <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-normal">Executive Quick Actions</span>
+        <span className="text-xs text-slate-400 uppercase tracking-wider block font-normal">Executive Quick Actions</span>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
             { label: 'Create Project', action: 'Initialize new project workspace' },
@@ -77,7 +77,7 @@ export function AdminDashboardView() {
             <button
               key={idx}
               onClick={() => Swal.fire('Executive action triggered', act.action, 'info')}
-              className="py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-100 transition-all text-center text-xs font-normal"
+              className="py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-100 transition-all text-center text-sm font-normal"
             >
               + {act.label}
             </button>
@@ -95,16 +95,16 @@ export function AdminOrganizationView() {
   const { users } = useProject();
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-808">Organization General Parameters</h2>
-        <p className="text-xs text-slate-400 font-normal">Vision, mission directives, registration parameters, and branch outpost configurations.</p>
+        <h2 className="text-base font-normal text-slate-808">Organization General Parameters</h2>
+        <p className="text-sm text-slate-400 font-normal">Vision, mission directives, registration parameters, and branch outpost configurations.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-normal">
         <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
-          <span className="text-[11px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Corporate Identity</span>
-          <div className="space-y-3 font-normal text-xs text-slate-600">
+          <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Corporate Identity</span>
+          <div className="space-y-3 font-normal text-sm text-slate-600">
             <div>
               <span className="text-slate-400 block mb-1">Organization Name</span>
               <div className="bg-slate-50 p-2.5 rounded border border-slate-200 font-normal">Babawatoto Organization Management System</div>
@@ -117,8 +117,8 @@ export function AdminOrganizationView() {
         </div>
 
         <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
-          <span className="text-[11px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Corporate Registration Details</span>
-          <div className="space-y-3 font-normal text-xs text-slate-600">
+          <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Corporate Registration Details</span>
+          <div className="space-y-3 font-normal text-sm text-slate-600">
             <div>
               <span className="text-slate-400 block mb-1">Registration Number</span>
               <div className="bg-slate-50 p-2.5 rounded border border-slate-200 font-mono">NGO/000282-TZ-OMS</div>
@@ -141,14 +141,14 @@ export function AdminProjectsView() {
   const { projects } = useProject();
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-808">Projects Workspace Portfolio</h2>
-        <p className="text-xs text-slate-400 font-normal">Overall summary tracker for project completion rates and allocated budgets.</p>
+        <h2 className="text-base font-normal text-slate-808">Projects Workspace Portfolio</h2>
+        <p className="text-sm text-slate-400 font-normal">Overall summary tracker for project completion rates and allocated budgets.</p>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full text-left border-collapse text-xs">
+        <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
               <th className="p-3">Project Workspace</th>
@@ -198,21 +198,21 @@ export function AdminFinanceView() {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-808">Executive Financial Oversight</h2>
-        <p className="text-xs text-slate-400 font-normal">Reconciled checking balances distributed across NGO bank accounts.</p>
+        <h2 className="text-base font-normal text-slate-808">Executive Financial Oversight</h2>
+        <p className="text-sm text-slate-400 font-normal">Reconciled checking balances distributed across NGO bank accounts.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-normal">
         {['CRDB', 'NMB', 'M-Pesa'].map((wallet, idx) => (
           <div key={idx} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4 hover:border-slate-350 transition-all">
             <div>
-              <h4 className="font-normal text-slate-800 text-sm">{wallet} Corporate Account</h4>
-              <span className="text-[11px] text-slate-400 block font-normal font-mono">Status: Synced</span>
+              <h4 className="font-normal text-slate-800 text-base">{wallet} Corporate Account</h4>
+              <span className="text-xs text-slate-400 block font-normal font-mono">Status: Synced</span>
             </div>
             <div className="border-t border-slate-100 pt-3">
-              <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-normal font-normal">Available Balance</span>
+              <span className="text-xs text-slate-400 uppercase tracking-wider block font-normal font-normal">Available Balance</span>
               <span className="text-lg font-normal text-slate-800 mt-1 block">TZS {getBalance(wallet).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
             </div>
           </div>
@@ -249,27 +249,27 @@ export function AdminHRView() {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-808">Staff Directory & User Management</h2>
-        <p className="text-xs text-slate-400 font-normal">Add staff accounts, assign authorization roles, and toggle status indexes.</p>
+        <h2 className="text-base font-normal text-slate-808">Staff Directory & User Management</h2>
+        <p className="text-sm text-slate-400 font-normal">Add staff accounts, assign authorization roles, and toggle status indexes.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Form */}
         <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 h-fit">
-          <span className="text-[11px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Create User Account</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Create User Account</span>
           <form onSubmit={handleCreateUser} className="space-y-3 font-normal">
             <div>
-              <label className="block text-[11px] text-slate-400 uppercase mb-1">Full Name</label>
+              <label className="block text-xs text-slate-400 uppercase mb-1">Full Name</label>
               <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. John Doe" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
             </div>
             <div>
-              <label className="block text-[11px] text-slate-400 uppercase mb-1">Email Address</label>
+              <label className="block text-xs text-slate-400 uppercase mb-1">Email Address</label>
               <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="e.g. jdoe@gmail.com" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
             </div>
             <div>
-              <label className="block text-[11px] text-slate-400 uppercase mb-1">Authorization Role</label>
+              <label className="block text-xs text-slate-400 uppercase mb-1">Authorization Role</label>
               <select value={role} onChange={(e) => setRole(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
                 <option value="System Administrator">System Administrator</option>
                 <option value="Executive Director">Executive Director</option>
@@ -285,7 +285,7 @@ export function AdminHRView() {
 
         {/* List */}
         <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
-          <span className="text-[11px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Active System Users</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Active System Users</span>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -301,7 +301,7 @@ export function AdminHRView() {
                   <tr key={u.id || idx}>
                     <td className="p-3 font-normal text-slate-808">{u.name}</td>
                     <td className="p-3 text-slate-500">{u.role}</td>
-                    <td className="p-3 font-mono text-[11px] text-slate-500">{u.email}</td>
+                    <td className="p-3 font-mono text-xs text-slate-500">{u.email}</td>
                     <td className="p-3">
                       <span className="px-2 py-0.5 rounded text-[8px] font-normal border uppercase bg-slate-50 text-slate-655 border-slate-200">
                         {u.status || 'Active'}
@@ -341,15 +341,15 @@ export function AdminBeneficiariesView() {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-808">NGO Beneficiary Enrolments</h2>
-        <p className="text-xs text-slate-400 font-normal font-normal">Demographics list of community members reached through active projects.</p>
+        <h2 className="text-base font-normal text-slate-808">NGO Beneficiary Enrolments</h2>
+        <p className="text-sm text-slate-400 font-normal font-normal">Demographics list of community members reached through active projects.</p>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full text-left border-collapse text-sm">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
                 <th className="p-3">Name</th>
@@ -411,10 +411,10 @@ export function AdminMEView() {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-808">M&E Performance Indicators</h2>
-        <p className="text-xs text-slate-400 font-normal font-normal">Check completion percentages of organizational target metrics.</p>
+        <h2 className="text-base font-normal text-slate-808">M&E Performance Indicators</h2>
+        <p className="text-sm text-slate-400 font-normal font-normal">Check completion percentages of organizational target metrics.</p>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6 space-y-4">
@@ -425,7 +425,7 @@ export function AdminMEView() {
           const pct = ind.target ? Math.round(((ind.achieved || 0) / ind.target) * 100) : 0;
           return (
             <div key={ind.id} className="space-y-1">
-              <div className="flex justify-between items-center gap-2 text-xs text-slate-700">
+              <div className="flex justify-between items-center gap-2 text-sm text-slate-700">
                 <span>{ind.name}{ind.unit ? ` (${ind.unit})` : ''}</span>
                 <div className="flex items-center gap-2 shrink-0">
                   <span>{pct}% ({ind.achieved || 0} / {ind.target})</span>
@@ -485,31 +485,31 @@ export function AdminEventsView() {
   const sortedEvents = [...events].sort((a, b) => new Date(a.date) - new Date(b.date));
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-808">Organization Events Calendar</h2>
-        <p className="text-xs text-slate-400 font-normal">Track campaigns, workshops, meetings, and public forums.</p>
+        <h2 className="text-base font-normal text-slate-808">Organization Events Calendar</h2>
+        <p className="text-sm text-slate-400 font-normal">Track campaigns, workshops, meetings, and public forums.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Form */}
         <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 h-fit">
-          <span className="text-[11px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Schedule New Event</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Schedule New Event</span>
           <form onSubmit={handleCreateEvent} className="space-y-3 font-normal">
             <div>
-              <label className="block text-[11px] text-slate-400 uppercase mb-1">Event Title</label>
+              <label className="block text-xs text-slate-400 uppercase mb-1">Event Title</label>
               <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Donor Annual Meeting" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
             </div>
             <div>
-              <label className="block text-[11px] text-slate-400 uppercase mb-1">Event Date</label>
+              <label className="block text-xs text-slate-400 uppercase mb-1">Event Date</label>
               <input type="date" required value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
             </div>
             <div>
-              <label className="block text-[11px] text-slate-400 uppercase mb-1">Location</label>
+              <label className="block text-xs text-slate-400 uppercase mb-1">Location</label>
               <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Dar es Salaam HQ" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
             </div>
             <div>
-              <label className="block text-[11px] text-slate-400 uppercase mb-1">Description</label>
+              <label className="block text-xs text-slate-400 uppercase mb-1">Description</label>
               <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Brief event description..." className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" rows="3" />
             </div>
             <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Schedule Event</button>
@@ -526,13 +526,13 @@ export function AdminEventsView() {
           {sortedEvents.map((evt) => (
             <div key={evt.id} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-2">
               <div className="flex justify-between items-start gap-2">
-                <h4 className="font-normal text-slate-808 text-sm">{evt.title}</h4>
+                <h4 className="font-normal text-slate-808 text-base">{evt.title}</h4>
                 <button onClick={() => handleDeleteEvent(evt)} className="text-slate-400 hover:text-red-600 transition-colors shrink-0" title="Remove event">
                   <Trash2 size={13} />
                 </button>
               </div>
               {evt.description && <p className="text-slate-550 font-normal">{evt.description}</p>}
-              <div className="text-[11px] text-slate-400 mt-1">Date: {evt.date} • Location: {evt.location || 'TBD'}</div>
+              <div className="text-xs text-slate-400 mt-1">Date: {evt.date} • Location: {evt.location || 'TBD'}</div>
             </div>
           ))}
         </div>
@@ -549,14 +549,14 @@ export function AdminInventoryView() {
   const inventory = assetsAndVendors.filter(av => av.type === 'asset');
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-808">Logistic Assets & Gear Inventory</h2>
-        <p className="text-xs text-slate-400 font-normal font-normal">Catalog register for shared equipment and hardware materials.</p>
+        <h2 className="text-base font-normal text-slate-808">Logistic Assets & Gear Inventory</h2>
+        <p className="text-sm text-slate-400 font-normal font-normal">Catalog register for shared equipment and hardware materials.</p>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full text-left border-collapse text-xs">
+        <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
               <th className="p-3">Asset Item</th>
@@ -602,15 +602,15 @@ export function AdminCommsView() {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-808">Communications Broadcast Center</h2>
-        <p className="text-xs text-slate-400 font-normal">Disseminate organizational memos, directives, or critical system alerts.</p>
+        <h2 className="text-base font-normal text-slate-808">Communications Broadcast Center</h2>
+        <p className="text-sm text-slate-400 font-normal">Disseminate organizational memos, directives, or critical system alerts.</p>
       </div>
 
       <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
-        <span className="text-[11px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Broadcast Memo Notification</span>
-        <form onSubmit={handleBroadcast} className="space-y-3 font-normal text-xs">
+        <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Broadcast Memo Notification</span>
+        <form onSubmit={handleBroadcast} className="space-y-3 font-normal text-sm">
           <textarea required value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Type announcement description here..." className="w-full px-3 py-2 border border-slate-200 rounded" rows="3" />
           <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Send Announcement</button>
         </form>
@@ -629,10 +629,10 @@ export function AdminDocumentsView() {
   ];
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-808">Legal Policies & Compliance Documents</h2>
-        <p className="text-xs text-slate-400 font-normal">Access contracts, grant agreements, policies, and audit statements.</p>
+        <h2 className="text-base font-normal text-slate-808">Legal Policies & Compliance Documents</h2>
+        <p className="text-sm text-slate-400 font-normal">Access contracts, grant agreements, policies, and audit statements.</p>
       </div>
 
       <div className="space-y-2">
@@ -640,7 +640,7 @@ export function AdminDocumentsView() {
           <div key={idx} className="p-3 bg-white border border-slate-200 rounded-xl flex justify-between items-center text-slate-700 font-normal hover:border-slate-350 transition-all">
             <div>
               <span className="block font-normal">{doc.name}</span>
-              <span className="text-[11px] text-slate-400 block mt-0.5">Size: {doc.size} • Type: {doc.type}</span>
+              <span className="text-xs text-slate-400 block mt-0.5">Size: {doc.size} • Type: {doc.type}</span>
             </div>
             <button onClick={() => Swal.fire('Downloaded!', 'Compliance document download initiated.', 'success')} className="p-1 hover:bg-slate-100 rounded text-slate-600 border border-slate-200">
               <Download size={13} />
@@ -661,20 +661,20 @@ export function AdminReportsView() {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-808">Executive Reports Center</h2>
-        <p className="text-xs text-slate-400 font-normal font-normal">Generate compiled reports on budgets, active personnel, or M&E metrics.</p>
+        <h2 className="text-base font-normal text-slate-808">Executive Reports Center</h2>
+        <p className="text-sm text-slate-400 font-normal font-normal">Generate compiled reports on budgets, active personnel, or M&E metrics.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-normal">
         {['Finance Summary', 'HR Attendance', 'Project Progress', 'Beneficiary Enrolments'].map((rep, idx) => (
           <div key={idx} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-col justify-between hover:border-slate-350 transition-all space-y-4">
             <div>
-              <h4 className="font-normal text-slate-808 text-sm">{rep} Report</h4>
-              <p className="text-[11px] text-slate-400 mt-1">Consolidated document including current metrics.</p>
+              <h4 className="font-normal text-slate-808 text-base">{rep} Report</h4>
+              <p className="text-xs text-slate-400 mt-1">Consolidated document including current metrics.</p>
             </div>
-            <button onClick={() => handleExport(rep)} className="w-full py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-xs font-normal">Compile & Export</button>
+            <button onClick={() => handleExport(rep)} className="w-full py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-sm font-normal">Compile & Export</button>
           </div>
         ))}
       </div>
@@ -703,15 +703,15 @@ export function AdminSettingsView() {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-808">Administrative configurations</h2>
-        <p className="text-xs text-slate-400 font-normal">Tweak registration numbers, corporate address details, and portal configurations.</p>
+        <h2 className="text-base font-normal text-slate-808">Administrative configurations</h2>
+        <p className="text-sm text-slate-400 font-normal">Tweak registration numbers, corporate address details, and portal configurations.</p>
       </div>
 
       <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 font-normal">
-        <span className="text-[11px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal font-normal">Portal System Parameters</span>
-        <div className="space-y-3 text-xs font-normal">
+        <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal font-normal">Portal System Parameters</span>
+        <div className="space-y-3 text-sm font-normal">
           <div>
             <span className="text-slate-400 block mb-1">Corporate Email Address</span>
             <div className="bg-slate-50 p-2.5 rounded border border-slate-200 font-mono">admin@oms.com</div>
@@ -724,19 +724,19 @@ export function AdminSettingsView() {
       </div>
 
       <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 font-normal">
-        <span className="text-[11px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Approval Threshold Controls</span>
-        <p className="text-[11px] text-slate-400 -mt-2">Amounts above these thresholds (TZS) require additional approval before processing.</p>
+        <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Approval Threshold Controls</span>
+        <p className="text-xs text-slate-400 -mt-2">Amounts above these thresholds (TZS) require additional approval before processing.</p>
         <form onSubmit={handleSaveThresholds} className="space-y-3 font-normal">
           <div>
-            <label className="block text-[11px] text-slate-400 uppercase mb-1">Expense Approval Threshold (TZS)</label>
+            <label className="block text-xs text-slate-400 uppercase mb-1">Expense Approval Threshold (TZS)</label>
             <input type="number" required value={expenseApprovalThreshold} onChange={(e) => setExpenseApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
           </div>
           <div>
-            <label className="block text-[11px] text-slate-400 uppercase mb-1">Procurement Approval Threshold (TZS)</label>
+            <label className="block text-xs text-slate-400 uppercase mb-1">Procurement Approval Threshold (TZS)</label>
             <input type="number" required value={procurementApprovalThreshold} onChange={(e) => setProcurementApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
           </div>
           <div>
-            <label className="block text-[11px] text-slate-400 uppercase mb-1">Budget Approval Threshold (TZS)</label>
+            <label className="block text-xs text-slate-400 uppercase mb-1">Budget Approval Threshold (TZS)</label>
             <input type="number" required value={budgetApprovalThreshold} onChange={(e) => setBudgetApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
           </div>
           <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Save Thresholds</button>
@@ -753,15 +753,15 @@ export function AdminLogsView() {
   const { auditLogs } = useProject();
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-808">Database Audit Logs</h2>
-        <p className="text-xs text-slate-400 font-normal">General activity timeline tracking logins, updates, and approval transactions.</p>
+        <h2 className="text-base font-normal text-slate-808">Database Audit Logs</h2>
+        <p className="text-sm text-slate-400 font-normal">General activity timeline tracking logins, updates, and approval transactions.</p>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full text-left border-collapse text-sm">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
                 <th className="p-3">Timestamp</th>
@@ -774,10 +774,10 @@ export function AdminLogsView() {
             <tbody className="divide-y divide-slate-150 font-normal">
               {auditLogs.map((log, idx) => (
                 <tr key={log.id || idx} className="hover:bg-slate-50/50">
-                  <td className="p-3 font-mono text-[11px] text-slate-400">{log.timestamp}</td>
+                  <td className="p-3 font-mono text-xs text-slate-400">{log.timestamp}</td>
                   <td className="p-3 font-normal text-slate-800">{log.userName}</td>
                   <td className="p-3 text-slate-500">{log.userRole}</td>
-                  <td className="p-3 font-mono text-[11px] text-slate-500">{log.actionType}</td>
+                  <td className="p-3 font-mono text-xs text-slate-500">{log.actionType}</td>
                   <td className="p-3 text-slate-600 font-normal">{log.description || log.details}</td>
                 </tr>
               ))}

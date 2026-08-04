@@ -143,8 +143,8 @@ export default function AppShell() {
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 shrink-0">
               <div className="flex items-center gap-2">
                 <FileText size={18} className="text-slate-500" />
-                <h3 className="font-extrabold text-slate-800 text-sm">{activePreviewDoc.fileName}</h3>
-                <span className="text-[11px] text-slate-400 font-mono">({activePreviewDoc.fileSize || 'N/A'})</span>
+                <h3 className="font-extrabold text-slate-800 text-base">{activePreviewDoc.fileName}</h3>
+                <span className="text-xs text-slate-400 font-mono">({activePreviewDoc.fileSize || 'N/A'})</span>
               </div>
               <div className="flex items-center gap-3">
                 {(activePreviewDoc.downloadUrl || activePreviewDoc.dataUrl) && (
@@ -159,7 +159,7 @@ export default function AppShell() {
                       link.download = activePreviewDoc.fileName;
                       link.click();
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold shadow-sm transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-sm font-semibold shadow-sm transition-all"
                   >
                     <Download size={13} />
                     <span>Download</span>
@@ -179,7 +179,7 @@ export default function AppShell() {
               {(() => {
                 const previewUrl = activePreviewDoc.downloadUrl || activePreviewDoc.dataUrl;
                 if (!previewUrl) {
-                  return <div className="text-center text-slate-400 text-xs py-8">Document preview content not found.</div>;
+                  return <div className="text-center text-slate-400 text-sm py-8">Document preview content not found.</div>;
                 }
                 const fileType = activePreviewDoc.fileType || '';
                 const isImage = fileType.startsWith('image/') || previewUrl.startsWith('data:image/');
@@ -207,8 +207,8 @@ export default function AppShell() {
                   <div className="flex flex-col items-center justify-center p-12 bg-white border border-slate-200 rounded-xl space-y-4 text-center max-w-md w-full shadow">
                     <FileText size={48} className="text-slate-400" />
                     <div>
-                      <h4 className="font-extrabold text-slate-800 text-sm">{activePreviewDoc.fileName}</h4>
-                      <p className="text-slate-400 text-[11px] mt-1">{activePreviewDoc.fileSize || 'Unknown Size'}</p>
+                      <h4 className="font-extrabold text-slate-800 text-base">{activePreviewDoc.fileName}</h4>
+                      <p className="text-slate-400 text-xs mt-1">{activePreviewDoc.fileSize || 'Unknown Size'}</p>
                     </div>
                     <button
                       onClick={() => {
@@ -221,7 +221,7 @@ export default function AppShell() {
                         link.download = activePreviewDoc.fileName;
                         link.click();
                       }}
-                      className="px-4 py-2 bg-slate-800 text-white text-xs font-semibold rounded-lg hover:bg-slate-900 shadow"
+                      className="px-4 py-2 bg-slate-800 text-white text-sm font-semibold rounded-lg hover:bg-slate-900 shadow"
                     >
                       Download Document File
                     </button>

@@ -25,7 +25,7 @@ export function HrDocumentsView() {
       {/* Header */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
         <h2 className="text-base font-bold text-slate-800">Corporate Documents & Policy Vault</h2>
-        <p className="text-xs text-slate-400">View official organization manuals, compliance guidelines, and contract forms.</p>
+        <p className="text-sm text-slate-400">View official organization manuals, compliance guidelines, and contract forms.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -35,11 +35,11 @@ export function HrDocumentsView() {
               <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600 w-fit">
                 <BookOpen size={20} />
               </div>
-              <h4 className="font-bold text-slate-800 text-sm leading-snug">{doc.title}</h4>
-              <p className="text-slate-400 text-[11px]">Updated: {doc.updated} — Category: {doc.category}</p>
+              <h4 className="font-bold text-slate-800 text-base leading-snug">{doc.title}</h4>
+              <p className="text-slate-400 text-xs">Updated: {doc.updated} — Category: {doc.category}</p>
             </div>
 
-            <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+            <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-sm">
               <span className="text-slate-400 font-mono">{doc.size}</span>
               <button
                 onClick={() => Swal.fire('Downloading document...', doc.title, 'success')}

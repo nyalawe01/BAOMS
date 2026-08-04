@@ -2,10 +2,10 @@ import React from 'react';
 
 export function ProgressBarHalfCircle({ size = 'sm', label = '', min = 0, max = 100, value = 0 }) {
   const sizeMap = {
-    xxs: 'w-16 h-12 text-[11px]',
-    xs: 'w-24 h-16 text-[11px]',
-    sm: 'w-32.5 h-20 text-xs',
-    md: 'w-40 h-24 text-sm',
+    xxs: 'w-16 h-12 text-xs',
+    xs: 'w-24 h-16 text-xs',
+    sm: 'w-32.5 h-20 text-sm',
+    md: 'w-40 h-24 text-base',
     lg: 'w-48 h-32 text-base'
   };
 
@@ -45,8 +45,8 @@ export function ProgressBarHalfCircle({ size = 'sm', label = '', min = 0, max = 
           />
         </svg>
         <div className="z-10 pb-1.5 flex flex-col items-center">
-          <span className="text-sm font-extrabold text-slate-800 leading-none">{value}%</span>
-          {label && <span className="text-[11px] font-bold text-slate-450 uppercase mt-0.5">{label}</span>}
+          <span className="text-base font-extrabold text-slate-800 leading-none">{value}%</span>
+          {label && <span className="text-xs font-bold text-slate-450 uppercase mt-0.5">{label}</span>}
         </div>
       </div>
     </div>

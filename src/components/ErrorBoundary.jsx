@@ -29,13 +29,13 @@ export class ErrorBoundary extends React.Component {
     return (
       <div className="min-h-[300px] flex flex-col items-center justify-center gap-4 p-8 text-center">
         <h2 className="text-lg font-bold text-slate-800">Something went wrong</h2>
-        <p className="text-sm text-slate-500 max-w-md">
+        <p className="text-base text-slate-500 max-w-md">
           This page hit an unexpected error and couldn't render. Your data hasn't been affected -
           try again, or reload the page if the problem continues.
         </p>
         <button
           onClick={this.handleReset}
-          className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-sm font-semibold transition-colors"
+          className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-base font-semibold transition-colors"
         >
           Try again
         </button>

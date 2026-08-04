@@ -86,17 +86,17 @@ export function PMDashboardView() {
           <LayoutDashboard className="text-slate-400" />
           <span>Project Manager Dashboard</span>
         </h2>
-        <p className="text-slate-400 text-xs mt-1 font-normal">System statistics, budget utilization trackers, and logs synced in real-time with the database.</p>
+        <p className="text-slate-400 text-sm mt-1 font-normal">System statistics, budget utilization trackers, and logs synced in real-time with the database.</p>
       </div>
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((kpi, idx) => (
           <div key={idx} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all">
-            <span className="text-[11px] font-normal text-slate-500 uppercase tracking-wider">{kpi.label}</span>
+            <span className="text-xs font-normal text-slate-500 uppercase tracking-wider">{kpi.label}</span>
             <div className="flex justify-between items-center mt-3">
               <span className="text-xl font-normal text-slate-800">{kpi.value}</span>
-              <span className="text-[11px] px-2 py-0.5 rounded-full font-normal border bg-slate-100 text-slate-600 border-slate-200">Database</span>
+              <span className="text-xs px-2 py-0.5 rounded-full font-normal border bg-slate-100 text-slate-600 border-slate-200">Database</span>
             </div>
           </div>
         ))}
@@ -106,7 +106,7 @@ export function PMDashboardView() {
         {/* Left: Charts */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
-            <h3 className="font-normal text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
+            <h3 className="font-normal text-slate-800 text-base flex items-center gap-2 border-b border-slate-100 pb-2">
               <Activity size={16} className="text-slate-500" />
               <span>Project Portfolios Progress & Health</span>
             </h3>
@@ -114,7 +114,7 @@ export function PMDashboardView() {
             <div className="space-y-4">
               {projects.map((p, idx) => (
                 <div key={idx} className="space-y-1.5">
-                  <div className="flex justify-between text-xs font-normal">
+                  <div className="flex justify-between text-sm font-normal">
                     <span className="text-slate-700">{p.name}</span>
                     <span className="text-slate-500">{p.progress || 0}% Complete</span>
                   </div>
@@ -127,16 +127,16 @@ export function PMDashboardView() {
                 </div>
               ))}
               {projects.length === 0 && (
-                <p className="text-xs text-slate-400 italic text-center py-6">No projects found in the database.</p>
+                <p className="text-sm text-slate-400 italic text-center py-6">No projects found in the database.</p>
               )}
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
-              <h4 className="font-normal text-slate-500 text-xs uppercase tracking-wider">Budget Spent vs Remaining</h4>
+              <h4 className="font-normal text-slate-500 text-sm uppercase tracking-wider">Budget Spent vs Remaining</h4>
               <div className="flex items-center justify-between gap-4 py-3">
-                <div className="space-y-1.5 text-xs">
+                <div className="space-y-1.5 text-sm">
                   <div>
                     <span className="w-2 h-2 inline-block rounded-full bg-slate-500 mr-2"></span>
                     <span className="text-slate-500">Allocated Spent:</span>
@@ -154,14 +154,14 @@ export function PMDashboardView() {
                     <path className="text-slate-100" strokeWidth="2.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                     <path className="text-slate-500" strokeDasharray={`${budgetUtilization}, 100`} strokeWidth="2.5" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                   </svg>
-                  <span className="absolute text-xs font-normal text-slate-700">{budgetUtilization}%</span>
+                  <span className="absolute text-sm font-normal text-slate-700">{budgetUtilization}%</span>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
-              <h4 className="font-normal text-slate-500 text-xs uppercase tracking-wider">Task Completion Rate</h4>
-              <div className="space-y-3 py-2 text-xs">
+              <h4 className="font-normal text-slate-500 text-sm uppercase tracking-wider">Task Completion Rate</h4>
+              <div className="space-y-3 py-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-slate-500">Completed Tasks:</span>
                   <span className="font-normal text-slate-800">{completedTasks}</span>
@@ -181,46 +181,46 @@ export function PMDashboardView() {
         {/* Right: Recent Activity & Deadlines */}
         <div className="space-y-6">
           <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
-            <h3 className="font-normal text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
+            <h3 className="font-normal text-slate-800 text-base flex items-center gap-2 border-b border-slate-100 pb-2">
               <FileClock size={16} className="text-slate-500" />
               <span>Database Activity Log</span>
             </h3>
 
             <div className="space-y-3.5 max-h-[300px] overflow-y-auto pr-1">
               {recentActivities.map((act, idx) => (
-                <div key={idx} className="flex gap-3 text-xs">
+                <div key={idx} className="flex gap-3 text-sm">
                   <div className="w-1.5 h-1.5 rounded-full bg-slate-400 mt-1.5 shrink-0"></div>
                   <div className="flex-1 min-w-0">
                     <div className="font-normal text-slate-700 truncate">{act.title}</div>
-                    <p className="text-slate-400 text-[11px] truncate mt-0.5">{act.desc}</p>
+                    <p className="text-slate-400 text-xs truncate mt-0.5">{act.desc}</p>
                   </div>
-                  <span className="text-[11px] text-slate-400 font-mono shrink-0">{act.time}</span>
+                  <span className="text-xs text-slate-400 font-mono shrink-0">{act.time}</span>
                 </div>
               ))}
               {recentActivities.length === 0 && (
-                <p className="text-xs text-slate-400 italic text-center py-6">No recent database operations registered.</p>
+                <p className="text-sm text-slate-400 italic text-center py-6">No recent database operations registered.</p>
               )}
             </div>
           </div>
 
           <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
-            <h3 className="font-normal text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
+            <h3 className="font-normal text-slate-800 text-base flex items-center gap-2 border-b border-slate-100 pb-2">
               <Clock size={16} className="text-slate-400" />
               <span>Upcoming Project Milestones</span>
             </h3>
 
-            <div className="divide-y divide-slate-100 text-xs">
+            <div className="divide-y divide-slate-100 text-sm">
               {upcomingDeadlines.map((proj, idx) => (
                 <div key={idx} className="py-2.5 flex justify-between items-center">
                   <div>
                     <div className="font-normal text-slate-800">{proj.name}</div>
-                    <span className="text-[11px] text-slate-400">Deadline: {proj.endDate}</span>
+                    <span className="text-xs text-slate-400">Deadline: {proj.endDate}</span>
                   </div>
-                  <span className="px-2 py-0.5 rounded text-[11px] font-normal uppercase bg-slate-100 text-slate-600 border border-slate-200">Milestone</span>
+                  <span className="px-2 py-0.5 rounded text-xs font-normal uppercase bg-slate-100 text-slate-600 border border-slate-200">Milestone</span>
                 </div>
               ))}
               {upcomingDeadlines.length === 0 && (
-                <p className="text-xs text-slate-400 italic text-center py-4">No upcoming milestones found.</p>
+                <p className="text-sm text-slate-400 italic text-center py-4">No upcoming milestones found.</p>
               )}
             </div>
           </div>
@@ -229,7 +229,7 @@ export function PMDashboardView() {
 
       {/* Project Timeline (Gantt-style overview of overlapping project windows) */}
       <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
-        <h3 className="font-normal text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
+        <h3 className="font-normal text-slate-800 text-base flex items-center gap-2 border-b border-slate-100 pb-2">
           <Calendar size={16} className="text-slate-500" />
           <span>Project Timeline</span>
         </h3>
@@ -245,7 +245,7 @@ export function PMDashboardView() {
 
                 return (
                   <div key={p.id || idx} className="flex items-center gap-3">
-                    <span className="w-28 md:w-36 shrink-0 truncate text-xs font-normal text-slate-700" title={p.name}>
+                    <span className="w-28 md:w-36 shrink-0 truncate text-sm font-normal text-slate-700" title={p.name}>
                       {p.name}
                     </span>
                     <div className="relative flex-1 h-5 bg-slate-50 rounded-md">
@@ -260,20 +260,20 @@ export function PMDashboardView() {
                         ></div>
                       </div>
                     </div>
-                    <span className="w-9 shrink-0 text-right text-[11px] font-mono text-slate-400">{p.progress || 0}%</span>
+                    <span className="w-9 shrink-0 text-right text-xs font-mono text-slate-400">{p.progress || 0}%</span>
                   </div>
                 );
               })}
             </div>
 
             {/* Date-axis scale reference */}
-            <div className="flex justify-between text-[11px] text-slate-400 font-mono pl-[7.5rem] md:pl-[9.5rem] pr-9 pt-1 border-t border-slate-100">
+            <div className="flex justify-between text-xs text-slate-400 font-mono pl-[7.5rem] md:pl-[9.5rem] pr-9 pt-1 border-t border-slate-100">
               <span>{timelineStart.toLocaleDateString()}</span>
               <span>{timelineEnd.toLocaleDateString()}</span>
             </div>
 
             {/* Status legend */}
-            <div className="flex flex-wrap items-center gap-4 pt-1 text-[11px] text-slate-500">
+            <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-slate-500">
               <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-slate-400 inline-block"></span>Planning</span>
               <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span>In Progress</span>
               <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>Completed</span>
@@ -281,7 +281,7 @@ export function PMDashboardView() {
             </div>
           </div>
         ) : (
-          <p className="text-xs text-slate-400 italic text-center py-6">No project dates available to render a timeline.</p>
+          <p className="text-sm text-slate-400 italic text-center py-6">No project dates available to render a timeline.</p>
         )}
       </div>
     </div>

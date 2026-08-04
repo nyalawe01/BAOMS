@@ -32,11 +32,11 @@ export function HrSettingsView() {
       {/* Header */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
         <h2 className="text-base font-bold text-slate-800">System & Profile Configurations</h2>
-        <p className="text-xs text-slate-400">Review your designated office variables or update personal contacts.</p>
+        <p className="text-sm text-slate-400">Review your designated office variables or update personal contacts.</p>
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
-        <form onSubmit={handleSave} className="space-y-4 text-xs">
+        <form onSubmit={handleSave} className="space-y-4 text-sm">
           <div className="space-y-1">
             <label className="font-bold text-slate-500 block">Avatar Profile Photo Link</label>
             <input
@@ -57,7 +57,7 @@ export function HrSettingsView() {
             />
           </div>
 
-          <div className="pt-2 border-t border-slate-100 grid grid-cols-2 gap-4 text-xs bg-slate-50 p-4 rounded-lg">
+          <div className="pt-2 border-t border-slate-100 grid grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-lg">
             <div>
               <span className="text-slate-400 block">Office Position</span>
               <span className="font-bold text-slate-700">{user?.officeDetails?.position || 'N/A'}</span>

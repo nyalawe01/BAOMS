@@ -79,11 +79,11 @@ export function HrStaffView({ setActiveTab }) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
         <div>
           <h2 className="text-base font-bold text-slate-800">Staff Management Directory</h2>
-          <p className="text-xs text-slate-400">View detailed credentials, shift departments, and update active state flags.</p>
+          <p className="text-sm text-slate-400">View detailed credentials, shift departments, and update active state flags.</p>
         </div>
         <button
           onClick={() => setActiveTab('hr_add_staff')}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-650 hover:bg-indigo-750 text-white rounded-lg text-xs font-semibold shadow-sm transition-all"
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-650 hover:bg-indigo-750 text-white rounded-lg text-sm font-semibold shadow-sm transition-all"
         >
           <Plus size={14} />
           <span>Add Staff Member</span>
@@ -98,7 +98,7 @@ export function HrStaffView({ setActiveTab }) {
           placeholder="Search by name, email, or role..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-inner"
+          className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-inner"
         />
       </div>
 
@@ -122,7 +122,7 @@ export function HrStaffView({ setActiveTab }) {
                   <ChevronDown size={14} />
                 </button>
                 {activeMenuId === u.id && (
-                  <div className="absolute right-0 mt-1 w-32 bg-white border border-slate-200 rounded-lg shadow-lg z-10 py-1 text-left text-xs font-semibold">
+                  <div className="absolute right-0 mt-1 w-32 bg-white border border-slate-200 rounded-lg shadow-lg z-10 py-1 text-left text-sm font-semibold">
                     {uStatus !== 'Active' && (
                       <button onClick={() => handleActionClick('Activate', u)} className="w-full px-3 py-1.5 hover:bg-slate-50 text-emerald-600 block">Activate</button>
                     )}
@@ -144,12 +144,12 @@ export function HrStaffView({ setActiveTab }) {
                 className="ring-2 ring-slate-100"
               />
               <div className="space-y-1 w-full">
-                <h4 className="font-bold text-slate-800 text-sm truncate">{u.name}</h4>
-                <p className="text-slate-400 text-[11px] truncate">{u.email}</p>
-                <div className="text-[11px] font-semibold text-slate-500 truncate">{dept} — {u.role}</div>
+                <h4 className="font-bold text-slate-800 text-base truncate">{u.name}</h4>
+                <p className="text-slate-400 text-xs truncate">{u.email}</p>
+                <div className="text-xs font-semibold text-slate-500 truncate">{dept} — {u.role}</div>
               </div>
 
-              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border uppercase ${
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border uppercase ${
                 uStatus === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-250' :
                 uStatus === 'On Leave' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-rose-50 text-rose-700 border-rose-250'
               }`}>
@@ -159,7 +159,7 @@ export function HrStaffView({ setActiveTab }) {
           );
         })}
         {filteredUsers.length === 0 && (
-          <div className="col-span-full text-center py-12 text-slate-455 text-xs font-semibold bg-white rounded-xl border border-slate-200 shadow-sm">
+          <div className="col-span-full text-center py-12 text-slate-455 text-sm font-semibold bg-white rounded-xl border border-slate-200 shadow-sm">
             No matching staff records found.
           </div>
         )}
@@ -178,7 +178,7 @@ export function HrStaffView({ setActiveTab }) {
             <div className="space-y-6">
               {/* Drawer Header */}
               <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 className="font-bold text-slate-800 text-sm">Staff Detailed Review Card</h3>
+                <h3 className="font-bold text-slate-800 text-base">Staff Detailed Review Card</h3>
                 <button
                   onClick={() => setSelectedUser(null)}
                   className="p-1 hover:bg-slate-100 rounded text-slate-455 hover:text-slate-700"
@@ -196,8 +196,8 @@ export function HrStaffView({ setActiveTab }) {
                 />
                 <div>
                   <h4 className="font-extrabold text-slate-800 text-base">{selectedUser.name}</h4>
-                  <p className="text-slate-400 text-xs">{selectedUser.email}</p>
-                  <span className={`inline-block px-2 py-0.5 mt-1 rounded text-[11px] font-bold border uppercase ${
+                  <p className="text-slate-400 text-sm">{selectedUser.email}</p>
+                  <span className={`inline-block px-2 py-0.5 mt-1 rounded text-xs font-bold border uppercase ${
                     (selectedUser.officeDetails?.status || selectedUser.status || 'Active') === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-250' : 'bg-rose-50 text-rose-700 border-rose-250'
                   }`}>
                     {selectedUser.officeDetails?.status || selectedUser.status || 'Active'}
@@ -209,8 +209,8 @@ export function HrStaffView({ setActiveTab }) {
               <div className="space-y-4">
                 {/* Personal details */}
                 <div className="space-y-2">
-                  <h5 className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Personal details</h5>
-                  <div className="grid grid-cols-2 gap-3 text-xs">
+                  <h5 className="text-xs font-black text-slate-400 uppercase tracking-wider">Personal details</h5>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
                       <span className="text-slate-400 block">Personal Email</span>
                       <span className="font-semibold text-slate-700">{selectedUser.email || 'N/A'}</span>
@@ -273,8 +273,8 @@ export function HrStaffView({ setActiveTab }) {
 
                 {/* Office Details */}
                 <div className="space-y-2 pt-2 border-t border-slate-100">
-                  <h5 className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Office Description</h5>
-                  <div className="grid grid-cols-2 gap-3 text-xs">
+                  <h5 className="text-xs font-black text-slate-400 uppercase tracking-wider">Office Description</h5>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
                       <span className="text-slate-400 block">Department Unit</span>
                       <span className="font-semibold text-slate-700">{selectedUser.officeDetails?.department || selectedUser.department || 'N/A'}</span>
@@ -296,8 +296,8 @@ export function HrStaffView({ setActiveTab }) {
 
                 {/* Attached Supporting Documents */}
                 <div className="space-y-2 pt-2 border-t border-slate-100">
-                  <h5 className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Attached Supporting Documents</h5>
-                  <div className="space-y-2 text-xs">
+                  <h5 className="text-xs font-black text-slate-400 uppercase tracking-wider">Attached Supporting Documents</h5>
+                  <div className="space-y-2 text-sm">
                     {[
                       { key: 'cv', name: 'Curriculum Vitae (CV)' },
                       { key: 'certificates', name: 'Academic Certificates' },
@@ -312,7 +312,7 @@ export function HrStaffView({ setActiveTab }) {
                           <div className="flex items-center gap-1.5">
                             {attachedFile ? (
                               <>
-                                <span className="text-[11px] text-slate-400 font-mono truncate max-w-[100px]">{attachedFile.fileName}</span>
+                                <span className="text-xs text-slate-400 font-mono truncate max-w-[100px]">{attachedFile.fileName}</span>
                                 <button
                                   onClick={() => setActivePreviewDoc({
                                     fileName: attachedFile.fileName,
@@ -344,7 +344,7 @@ export function HrStaffView({ setActiveTab }) {
                                 </button>
                               </>
                             ) : (
-                              <span className="text-[11px] text-slate-400 italic">Not Attached</span>
+                              <span className="text-xs text-slate-400 italic">Not Attached</span>
                             )}
                           </div>
                         </div>
@@ -359,13 +359,13 @@ export function HrStaffView({ setActiveTab }) {
             <div className="pt-4 border-t border-slate-100 flex gap-2 shrink-0">
               <button
                 onClick={() => handleActionClick('Suspend', selectedUser)}
-                className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all"
+                className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-bold transition-all"
               >
                 Suspend User
               </button>
               <button
                 onClick={() => handleActionClick('Terminate', selectedUser)}
-                className="flex-1 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold transition-all border border-rose-250"
+                className="flex-1 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-sm font-bold transition-all border border-rose-250"
               >
                 Terminate Staff
               </button>

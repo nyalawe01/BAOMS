@@ -66,11 +66,11 @@ export default function UserManagement() {
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-lg font-bold text-slate-800">Directory Management</h2>
-          <p className="text-slate-500 text-xs mt-1">Add, update access scopes, and audit profiles across the entire organization directory.</p>
+          <p className="text-slate-500 text-sm mt-1">Add, update access scopes, and audit profiles across the entire organization directory.</p>
         </div>
         <button
           onClick={handleOpenAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-semibold transition-colors shadow-lg shadow-brand-600/10"
+          className="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-base font-semibold transition-colors shadow-lg shadow-brand-600/10"
         >
           <UserPlus size={16} />
           <span>Add Member</span>
@@ -82,7 +82,7 @@ export default function UserManagement() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <tr className="bg-slate-50/50 border-b border-slate-200 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <th className="py-4 px-6">Name & Identifier</th>
                 <th className="py-4 px-6">Email Address</th>
                 <th className="py-4 px-6">Access Scope / Role</th>
@@ -90,7 +90,7 @@ export default function UserManagement() {
                 <th className="py-4 px-6 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
+            <tbody className="divide-y divide-slate-100 text-base text-slate-700">
               {users.map((u) => {
                 // Role badge colors
                 let roleColor = 'bg-slate-50 text-slate-600 border-slate-200';
@@ -101,7 +101,7 @@ export default function UserManagement() {
                   <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="py-4 px-6 font-semibold text-slate-900">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs uppercase select-none">
+                        <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center font-bold text-sm uppercase select-none">
                           {u.name.split(' ').map(n => n[0]).join('')}
                         </div>
                         <span>{u.name}</span>
@@ -114,7 +114,7 @@ export default function UserManagement() {
                       </div>
                     </td>
                     <td className="py-4 px-6">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${roleColor}`}>
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-sm font-semibold border ${roleColor}`}>
                         <Shield size={12} />
                         <span>{u.role}</span>
                       </span>
@@ -162,7 +162,7 @@ export default function UserManagement() {
               </h3>
               <button 
                 onClick={() => setShowModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-sm font-bold"
+                className="text-slate-400 hover:text-slate-600 text-base font-bold"
               >
                 ✕
               </button>
@@ -170,7 +170,7 @@ export default function UserManagement() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Full Name
                 </label>
                 <input
@@ -179,12 +179,12 @@ export default function UserManagement() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. John Doe"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Email Address
                 </label>
                 <input
@@ -193,18 +193,18 @@ export default function UserManagement() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="e.g. john@organization.com"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   System Role
                 </label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                 >
                   <option value="Admin">Admin</option>
                   <option value="Manager">Manager</option>
@@ -213,13 +213,13 @@ export default function UserManagement() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Department
                 </label>
                 <select
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-base focus:outline-none focus:border-brand-500 transition-colors"
                 >
                   <option value="Executive">Executive</option>
                   <option value="Engineering">Engineering</option>
@@ -233,13 +233,13 @@ export default function UserManagement() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-50 transition-colors"
+                  className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-500 hover:bg-slate-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-semibold transition-colors"
+                  className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-semibold transition-colors"
                 >
                   {isEditing ? 'Apply Changes' : 'Register User'}
                 </button>

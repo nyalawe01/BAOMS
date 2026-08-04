@@ -144,8 +144,8 @@ export function HrAddStaffView() {
         </div>
 
         <div className="text-center space-y-2 max-w-sm">
-          <h4 className="font-extrabold text-slate-800 text-sm tracking-tight">Onboarding Staff Member...</h4>
-          <p className="text-slate-400 text-xs font-semibold leading-relaxed animate-pulse">{submittingPhase}</p>
+          <h4 className="font-extrabold text-slate-800 text-base tracking-tight">Onboarding Staff Member...</h4>
+          <p className="text-slate-400 text-sm font-semibold leading-relaxed animate-pulse">{submittingPhase}</p>
         </div>
 
         {/* Multi-step progress bar visual indicator */}
@@ -165,8 +165,8 @@ export function HrAddStaffView() {
       {/* Wizard Steps indicator */}
       <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex justify-between items-center shrink-0">
         <div>
-          <h3 className="font-bold text-slate-800 text-sm">Onboard New Team Member</h3>
-          <p className="text-[11px] text-slate-400">Step {step} of 4: Fill out the details below.</p>
+          <h3 className="font-bold text-slate-800 text-base">Onboard New Team Member</h3>
+          <p className="text-xs text-slate-400">Step {step} of 4: Fill out the details below.</p>
         </div>
         <div className="flex gap-1.5">
           {[1, 2, 3, 4].map(s => (
@@ -185,11 +185,11 @@ export function HrAddStaffView() {
         {/* STEP 1: Personal Details */}
         {step === 1 && (
           <div className="space-y-4 animate-slideRight">
-            <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider">Step 1: Personal Information</h4>
+            <h4 className="text-sm font-black text-slate-400 uppercase tracking-wider">Step 1: Personal Information</h4>
 
             {/* Profile Photo upload */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-slate-500 block">Profile Picture (Manually Uploaded)</label>
+              <label className="text-xs font-bold text-slate-500 block">Profile Picture (Manually Uploaded)</label>
               <FileUpload.Root value={formData.avatarFile} onChange={(file) => handleFormChange('avatarFile', file)}>
                 <FileUpload.DropZone label="Attach Profile Picture Photo" accept="image/*" storagePath={`supportingDocuments/${uploadSessionId}`} />
               </FileUpload.Root>
@@ -197,143 +197,143 @@ export function HrAddStaffView() {
 
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">First Name *</label>
+                <label className="text-xs font-bold text-slate-500 block">First Name *</label>
                 <input
                   type="text"
                   value={formData.firstName}
                   onChange={(e) => handleFormChange('firstName', e.target.value)}
                   placeholder="Olivia"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">Middle Name</label>
+                <label className="text-xs font-bold text-slate-500 block">Middle Name</label>
                 <input
                   type="text"
                   value={formData.middleName}
                   onChange={(e) => handleFormChange('middleName', e.target.value)}
                   placeholder="Lana"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">Surname *</label>
+                <label className="text-xs font-bold text-slate-500 block">Surname *</label>
                 <input
                   type="text"
                   value={formData.surname}
                   onChange={(e) => handleFormChange('surname', e.target.value)}
                   placeholder="Rhye"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">Personal Email *</label>
+                <label className="text-xs font-bold text-slate-500 block">Personal Email *</label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleFormChange('email', e.target.value)}
                   placeholder="olivia@personal.com"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">Organization Email</label>
+                <label className="text-xs font-bold text-slate-500 block">Organization Email</label>
                 <input
                   type="email"
                   value={formData.organizationEmail}
                   onChange={(e) => handleFormChange('organizationEmail', e.target.value)}
                   placeholder="olivia@oms.com"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">Phone number/s</label>
+                <label className="text-xs font-bold text-slate-500 block">Phone number/s</label>
                 <input
                   type="text"
                   value={formData.phone}
                   onChange={(e) => handleFormChange('phone', e.target.value)}
                   placeholder="+255 711 000 222"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">National Identity No (ID)</label>
+                <label className="text-xs font-bold text-slate-500 block">National Identity No (ID)</label>
                 <input
                   type="text"
                   value={formData.personalId}
                   onChange={(e) => handleFormChange('personalId', e.target.value)}
                   placeholder="ID-88776655"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">NHIF Number</label>
+                <label className="text-xs font-bold text-slate-500 block">NHIF Number</label>
                 <input
                   type="text"
                   value={formData.nhif}
                   onChange={(e) => handleFormChange('nhif', e.target.value)}
                   placeholder="NHIF-998811"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">NSSF Number</label>
+                <label className="text-xs font-bold text-slate-500 block">NSSF Number</label>
                 <input
                   type="text"
                   value={formData.nssf}
                   onChange={(e) => handleFormChange('nssf', e.target.value)}
                   placeholder="NSSF-332211"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">Date of Birth (DOB)</label>
+                <label className="text-xs font-bold text-slate-500 block">Date of Birth (DOB)</label>
                 <input
                   type="date"
                   value={formData.dob}
                   onChange={(e) => handleFormChange('dob', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">Place of Birth</label>
+                <label className="text-xs font-bold text-slate-500 block">Place of Birth</label>
                 <input
                   type="text"
                   value={formData.placeOfBirth}
                   onChange={(e) => handleFormChange('placeOfBirth', e.target.value)}
                   placeholder="Zanzibar"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">Place of Living</label>
+                <label className="text-xs font-bold text-slate-500 block">Place of Living</label>
                 <input
                   type="text"
                   value={formData.placeOfLiving}
                   onChange={(e) => handleFormChange('placeOfLiving', e.target.value)}
                   placeholder="Masaki, Dar es Salaam"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">Nationality</label>
+                <label className="text-xs font-bold text-slate-500 block">Nationality</label>
                 <input
                   type="text"
                   value={formData.nationality}
                   onChange={(e) => handleFormChange('nationality', e.target.value)}
                   placeholder="Kenyan"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">Gender</label>
+                <label className="text-xs font-bold text-slate-500 block">Gender</label>
                 <select
                   value={formData.gender}
                   onChange={(e) => handleFormChange('gender', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 >
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
@@ -341,11 +341,11 @@ export function HrAddStaffView() {
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">Any Disability</label>
+                <label className="text-xs font-bold text-slate-500 block">Any Disability</label>
                 <select
                   value={formData.disability}
                   onChange={(e) => handleFormChange('disability', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 >
                   <option value="No">No</option>
                   <option value="Yes">Yes</option>
@@ -355,13 +355,13 @@ export function HrAddStaffView() {
 
             {formData.disability === 'Yes' && (
               <div className="space-y-1 animate-fadeIn">
-                <label className="text-[11px] font-bold text-slate-500 block">Disability Description</label>
+                <label className="text-xs font-bold text-slate-500 block">Disability Description</label>
                 <input
                   type="text"
                   value={formData.disabilityDescription}
                   onChange={(e) => handleFormChange('disabilityDescription', e.target.value)}
                   placeholder="Specify details..."
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
             )}
@@ -371,24 +371,24 @@ export function HrAddStaffView() {
         {/* STEP 2: Job/Office Description */}
         {step === 2 && (
           <div className="space-y-4 animate-slideRight">
-            <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider">Step 2: Office Location & Description</h4>
+            <h4 className="text-sm font-black text-slate-400 uppercase tracking-wider">Step 2: Office Location & Description</h4>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1 col-span-2">
-                <label className="text-[11px] font-bold text-slate-500 block">Office Location *</label>
+                <label className="text-xs font-bold text-slate-500 block">Office Location *</label>
                 <input
                   type="text"
                   value={formData.officeLocation}
                   onChange={(e) => handleFormChange('officeLocation', e.target.value)}
                   placeholder="e.g. HQ Annex, Dar es Salaam"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">Department Unit *</label>
+                <label className="text-xs font-bold text-slate-500 block">Department Unit *</label>
                 <select
                   value={formData.department}
                   onChange={(e) => handleFormChange('department', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 >
                   <option value="Engineering">Engineering</option>
                   <option value="Operations">Operations</option>
@@ -398,30 +398,30 @@ export function HrAddStaffView() {
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">Specific Designation / Title *</label>
+                <label className="text-xs font-bold text-slate-500 block">Specific Designation / Title *</label>
                 <input
                   type="text"
                   value={formData.position}
                   onChange={(e) => handleFormChange('position', e.target.value)}
                   placeholder="Junior Software Engineer"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">Hire/Start Date</label>
+                <label className="text-xs font-bold text-slate-500 block">Hire/Start Date</label>
                 <input
                   type="date"
                   value={formData.hireDate}
                   onChange={(e) => handleFormChange('hireDate', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 block">Authorization Role *</label>
+                <label className="text-xs font-bold text-slate-500 block">Authorization Role *</label>
                 <select
                   value={formData.role}
                   onChange={(e) => handleFormChange('role', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 >
                   <option value="System Administrator">System Administrator</option>
                   <option value="Executive Director">Executive Director</option>
@@ -445,8 +445,8 @@ export function HrAddStaffView() {
         {step === 3 && (
           <div className="space-y-5 animate-slideRight">
             <div className="border-b border-slate-100 pb-1.5">
-              <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider">Step 3: Attach Mandatory Documents</h4>
-              <p className="text-[11px] text-slate-400">All supporting documents are required to complete onboarding registration.</p>
+              <h4 className="text-sm font-black text-slate-400 uppercase tracking-wider">Step 3: Attach Mandatory Documents</h4>
+              <p className="text-xs text-slate-400">All supporting documents are required to complete onboarding registration.</p>
             </div>
 
             <div className="space-y-4">
@@ -496,11 +496,11 @@ export function HrAddStaffView() {
             </div>
             <div className="space-y-1">
               <h4 className="font-extrabold text-slate-800 text-base">Staff Account Created Successfully</h4>
-              <p className="text-xs text-slate-400">Share these login details with {generatedAccount.name} immediately.</p>
+              <p className="text-sm text-slate-400">Share these login details with {generatedAccount.name} immediately.</p>
             </div>
 
             {/* Credentials Card */}
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 max-w-sm mx-auto text-left space-y-3 font-mono text-xs">
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 max-w-sm mx-auto text-left space-y-3 font-mono text-sm">
               <div className="flex justify-between">
                 <span className="text-slate-400">Email Address:</span>
                 <span className="font-bold text-slate-700">{generatedAccount.email}</span>
@@ -511,7 +511,7 @@ export function HrAddStaffView() {
               </div>
               <button
                 onClick={handleCopyCredentials}
-                className="w-full py-2 bg-white hover:bg-slate-100 border border-slate-350 rounded text-center text-xs font-semibold font-sans mt-2"
+                className="w-full py-2 bg-white hover:bg-slate-100 border border-slate-350 rounded text-center text-sm font-semibold font-sans mt-2"
               >
                 Copy Credentials Card
               </button>
@@ -525,7 +525,7 @@ export function HrAddStaffView() {
         {step > 1 && step < 4 ? (
           <button
             onClick={prevStep}
-            className="px-4 py-2 border border-slate-250 hover:bg-slate-100 rounded-lg text-xs font-bold text-slate-600 transition-all"
+            className="px-4 py-2 border border-slate-250 hover:bg-slate-100 rounded-lg text-sm font-bold text-slate-600 transition-all"
           >
             Previous
           </button>
@@ -534,21 +534,21 @@ export function HrAddStaffView() {
         {step < 3 ? (
           <button
             onClick={nextStep}
-            className="px-4 py-2 bg-indigo-650 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm"
+            className="px-4 py-2 bg-indigo-650 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold transition-all shadow-sm"
           >
             Next Step
           </button>
         ) : step === 3 ? (
           <button
             onClick={handleCreateStaff}
-            className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm"
+            className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold transition-all shadow-sm"
           >
             Create Staff & Generate Account
           </button>
         ) : (
           <button
             onClick={() => { setStep(1); setGeneratedAccount(null); setFormData({ firstName: '', middleName: '', surname: '', email: '', organizationEmail: '', phone: '', personalId: '', nhif: '', nssf: '', dob: '', placeOfBirth: '', placeOfLiving: '', gender: 'Male', disability: 'No', disabilityDescription: '', nationality: '', officeLocation: '', department: 'Engineering', position: '', role: 'Intern', hireDate: new Date().toISOString().substring(0, 10), avatarFile: null, supportingDocuments: { cv: null, certificates: null, contract: null, insurance: null, others: null } }); }}
-            className="px-5 py-2 bg-indigo-650 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm"
+            className="px-5 py-2 bg-indigo-650 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold transition-all shadow-sm"
           >
             Onboard Another User
           </button>

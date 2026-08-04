@@ -30,7 +30,7 @@ export function HrProjectsView() {
       {/* Header */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
         <h2 className="text-base font-bold text-slate-800">Projects Hierarchy Portfolios</h2>
-        <p className="text-xs text-slate-400">Review project tasks status assignments and track resource trees.</p>
+        <p className="text-sm text-slate-400">Review project tasks status assignments and track resource trees.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -40,11 +40,11 @@ export function HrProjectsView() {
             <div key={idx} className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4 hover:border-indigo-300 transition-all">
               <div className="flex justify-between items-center border-b border-slate-100 pb-2">
                 <div>
-                  <h4 className="font-extrabold text-slate-800 text-sm">{proj.name}</h4>
-                  <span className="text-[11px] text-slate-400">{proj.status} — TZS {proj.budget?.toLocaleString()} Limit</span>
+                  <h4 className="font-extrabold text-slate-800 text-base">{proj.name}</h4>
+                  <span className="text-xs text-slate-400">{proj.status} — TZS {proj.budget?.toLocaleString()} Limit</span>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs font-bold text-slate-700">{proj.progress}% Done</span>
+                  <span className="text-sm font-bold text-slate-700">{proj.progress}% Done</span>
                 </div>
               </div>
 
@@ -55,21 +55,21 @@ export function HrProjectsView() {
 
               {/* Team Hierarchy Tree list */}
               <div className="space-y-2">
-                <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider block">Assigned Project Personnel</span>
+                <span className="text-xs font-black text-slate-400 uppercase tracking-wider block">Assigned Project Personnel</span>
                 {staff.slice(0, 3).map((member, mIdx) => (
                   <div key={mIdx} className="flex justify-between items-center p-2 bg-slate-50 border border-slate-100 rounded">
                     <div className="flex items-center gap-2">
                       <Avatar size="xs" src={member.avatar} alt={member.name} />
-                      <div className="text-xs">
+                      <div className="text-sm">
                         <div className="font-bold text-slate-800">{member.name}</div>
-                        <span className="text-[11px] text-slate-400">{member.officeDetails?.position || member.role}</span>
+                        <span className="text-xs text-slate-400">{member.officeDetails?.position || member.role}</span>
                       </div>
                     </div>
-                    <span className="text-[11px] bg-slate-100 border border-slate-200 text-slate-750 px-2 py-0.5 rounded font-semibold">Active</span>
+                    <span className="text-xs bg-slate-100 border border-slate-200 text-slate-750 px-2 py-0.5 rounded font-semibold">Active</span>
                   </div>
                 ))}
                 {staff.length === 0 && (
-                  <p className="text-[11px] text-slate-400 italic p-2">No staff assigned yet.</p>
+                  <p className="text-xs text-slate-400 italic p-2">No staff assigned yet.</p>
                 )}
               </div>
             </div>

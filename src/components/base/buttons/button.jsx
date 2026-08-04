@@ -12,10 +12,10 @@ export function Button({
   children 
 }) {
   const sizeClasses = {
-    xs: 'px-2.5 py-1 text-[11px] font-semibold rounded-md',
-    sm: 'px-3 py-1.5 text-xs font-semibold rounded-lg',
-    md: 'px-4 py-2 text-xs font-semibold rounded-lg',
-    lg: 'px-5 py-2.5 text-sm font-semibold rounded-lg'
+    xs: 'px-2.5 py-1 text-xs font-semibold rounded-md',
+    sm: 'px-3 py-1.5 text-sm font-semibold rounded-lg',
+    md: 'px-4 py-2 text-sm font-semibold rounded-lg',
+    lg: 'px-5 py-2.5 text-base font-semibold rounded-lg'
   };
 
   const selectedSize = sizeClasses[size] || sizeClasses.md;

@@ -3,9 +3,9 @@ import React from 'react';
 export function Avatar({ size = 'md', alt = '', className = '', src = '', placeholder = null }) {
   const sizeClasses = {
     xxs: 'w-5 h-5 text-[8px]',
-    xs: 'w-6 h-6 text-[11px]',
-    sm: 'w-8 h-8 text-xs',
-    md: 'w-10 h-10 text-sm',
+    xs: 'w-6 h-6 text-xs',
+    sm: 'w-8 h-8 text-sm',
+    md: 'w-10 h-10 text-base',
     lg: 'w-12 h-12 text-base',
     xl: 'w-16 h-16 text-lg'
   };

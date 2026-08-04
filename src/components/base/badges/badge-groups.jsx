@@ -23,8 +23,8 @@ export function BadgeGroup({ addonText = '', color = 'brand', theme = 'light', a
   const selectedColor = colorMap[color] || colorMap.brand;
   
   const sizeClasses = {
-    md: 'py-0.5 pl-1 pr-2.5 text-xs',
-    lg: 'py-1 pl-1.5 pr-3 text-xs'
+    md: 'py-0.5 pl-1 pr-2.5 text-sm',
+    lg: 'py-1 pl-1.5 pr-3 text-sm'
   };
 
   const selectedSize = sizeClasses[size] || sizeClasses.md;
@@ -32,7 +32,7 @@ export function BadgeGroup({ addonText = '', color = 'brand', theme = 'light', a
   return (
     <div className={`inline-flex items-center gap-2 rounded-full border ${selectedColor.bg} ${selectedSize} font-medium shadow-sm max-w-full truncate`}>
       {addonText && (
-        <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${selectedColor.badge}`}>
+        <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${selectedColor.badge}`}>
           {addonText}
         </span>
       )}

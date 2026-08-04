@@ -59,7 +59,7 @@ export default function TopUtilityHeader({ activeTab, setActiveTab, toggleSideba
 
         <h2 className="text-lg font-bold text-slate-800 tracking-tight">{getTitle()}</h2>
 
-        <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+        <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
           <CheckCircle2 size={12} />
           <span>System Online</span>
         </div>
@@ -71,7 +71,7 @@ export default function TopUtilityHeader({ activeTab, setActiveTab, toggleSideba
         <GlobalSearch onNavigate={setActiveTab} role={user.role} />
 
         {/* Date Display */}
-        <div className="hidden lg:flex items-center gap-2 text-slate-500 text-sm">
+        <div className="hidden lg:flex items-center gap-2 text-slate-500 text-base">
           <Calendar size={16} />
           <span>{currentDate}</span>
         </div>
@@ -94,8 +94,8 @@ export default function TopUtilityHeader({ activeTab, setActiveTab, toggleSideba
               className="w-10 h-10 rounded-full object-cover border border-slate-200"
             />
             <div className="hidden sm:block">
-              <p className="text-sm font-semibold text-slate-800 leading-none">{user.name}</p>
-              <p className="text-xs text-slate-500 mt-1">{user.email}</p>
+              <p className="text-base font-semibold text-slate-800 leading-none">{user.name}</p>
+              <p className="text-sm text-slate-500 mt-1">{user.email}</p>
             </div>
             <ChevronDown size={16} className={`text-slate-500 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
           </button>
@@ -110,7 +110,7 @@ export default function TopUtilityHeader({ activeTab, setActiveTab, toggleSideba
 
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-slate-200 py-1 z-30 animate-fadeIn">
                 <div className="px-4 py-3 border-b border-slate-100">
-                  <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Access Scope</p>
+                  <p className="text-sm text-slate-400 font-semibold uppercase tracking-wider">Access Scope</p>
                   <p className="text-base font-semibold text-slate-700 mt-1">{user.role} Authorization</p>
                 </div>
 
@@ -119,7 +119,7 @@ export default function TopUtilityHeader({ activeTab, setActiveTab, toggleSideba
                     setDropdownOpen(false);
                     setActiveTab('profile');
                   }}
-                  className="w-full flex items-center gap-2 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left font-medium"
+                  className="w-full flex items-center gap-2 px-4 py-3 text-base text-slate-700 hover:bg-slate-50 transition-colors text-left font-medium"
                 >
                   <User size={17} />
                   <span>My Profile</span>
@@ -130,7 +130,7 @@ export default function TopUtilityHeader({ activeTab, setActiveTab, toggleSideba
                     setDropdownOpen(false);
                     logout();
                   }}
-                  className="w-full flex items-center gap-2 px-4 py-3 text-sm text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors text-left font-semibold"
+                  className="w-full flex items-center gap-2 px-4 py-3 text-base text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors text-left font-semibold"
                 >
                   <LogOut size={17} />
                   <span>Sign Out</span>

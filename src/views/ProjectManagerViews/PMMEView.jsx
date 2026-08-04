@@ -112,17 +112,17 @@ export function PMMEView() {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn select-none font-normal text-xs text-slate-700">
+    <div className="space-y-6 animate-fadeIn select-none font-normal text-sm text-slate-700">
       {/* Header */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-sm font-normal text-slate-800">Monitoring & Evaluation (M&E) Trackers</h2>
-          <p className="text-xs text-slate-400 font-normal">Extract indicators and target actual achievements from Excel spreadsheets.</p>
+          <h2 className="text-base font-normal text-slate-800">Monitoring & Evaluation (M&E) Trackers</h2>
+          <p className="text-sm text-slate-400 font-normal">Extract indicators and target actual achievements from Excel spreadsheets.</p>
         </div>
 
         {/* Excel/CSV File dropzone input */}
         <div>
-          <label className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-xs cursor-pointer font-normal">
+          <label className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-sm cursor-pointer font-normal">
             <Upload size={12} />
             <span>Upload Indicator Sheet (.xlsx/.csv)</span>
             <input
@@ -137,12 +137,12 @@ export function PMMEView() {
 
       {/* Indicators Table */}
       <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
-        <h3 className="font-normal text-slate-855 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
+        <h3 className="font-normal text-slate-855 text-base flex items-center gap-2 border-b border-slate-100 pb-2">
           <Activity size={16} className="text-slate-400" />
           <span>Active Program Performance Indicators</span>
         </h3>
 
-        <div className="overflow-x-auto text-xs">
+        <div className="overflow-x-auto text-sm">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
@@ -171,7 +171,7 @@ export function PMMEView() {
                         value={draftValue}
                         onChange={(e) => handleAchievedChange(ind.id, e.target.value)}
                         onBlur={() => handleAchievedCommit(ind)}
-                        className="w-20 px-2 py-1 border border-slate-200 rounded text-center text-xs font-normal"
+                        className="w-20 px-2 py-1 border border-slate-200 rounded text-center text-sm font-normal"
                       />
                     </td>
                     <td className="p-3 font-normal text-slate-655">{prog}%</td>

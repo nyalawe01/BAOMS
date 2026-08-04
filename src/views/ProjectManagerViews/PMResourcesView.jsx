@@ -37,16 +37,16 @@ export function PMResourcesView() {
       {/* Header */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-sm font-normal text-slate-800">Resource Inventory & Logistics</h2>
-          <p className="text-xs text-slate-400 font-normal">Register and track shared equipment and materials from the live asset database.</p>
+          <h2 className="text-base font-normal text-slate-800">Resource Inventory & Logistics</h2>
+          <p className="text-sm text-slate-400 font-normal">Register and track shared equipment and materials from the live asset database.</p>
         </div>
 
         {/* Project Selector (contextual reference only, resources are org-wide) */}
-        <div className="text-xs font-normal">
+        <div className="text-sm font-normal">
           <select
             value={selectedProjId}
             onChange={(e) => setSelectedProjId(e.target.value)}
-            className="border border-slate-200 rounded px-2.5 py-1.5 bg-white text-xs font-normal focus:outline-none"
+            className="border border-slate-200 rounded px-2.5 py-1.5 bg-white text-sm font-normal focus:outline-none"
           >
             {projects.map(p => (
               <option key={p.id} value={p.id}>{p.name}</option>
@@ -57,7 +57,7 @@ export function PMResourcesView() {
 
       {/* Add Resource Form */}
       <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
-        <h3 className="font-normal text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
+        <h3 className="font-normal text-slate-800 text-base flex items-center gap-2 border-b border-slate-100 pb-2">
           <Package size={16} className="text-slate-400" />
           <span>Register New Resource</span>
         </h3>
@@ -68,7 +68,7 @@ export function PMResourcesView() {
             placeholder="Resource Name (e.g. Dell XPS Laptop)"
             value={assetName}
             onChange={(e) => setAssetName(e.target.value)}
-            className="px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-800"
+            className="px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
           />
           <input
             type="text"
@@ -76,29 +76,29 @@ export function PMResourcesView() {
             placeholder="Code (e.g. OMS-ASSET-05)"
             value={assetCode}
             onChange={(e) => setAssetCode(e.target.value)}
-            className="px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-800"
+            className="px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800"
           />
           <select
             value={assetStatus}
             onChange={(e) => setAssetStatus(e.target.value)}
-            className="px-2 py-1.5 border border-slate-200 rounded text-xs text-slate-800 bg-white"
+            className="px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-800 bg-white"
           >
             <option value="Available">Available</option>
             <option value="Assigned">Assigned</option>
             <option value="Maintenance">Maintenance</option>
           </select>
-          <button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-1.5 rounded">Register Resource</button>
+          <button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm py-1.5 rounded">Register Resource</button>
         </form>
       </div>
 
       {/* Resource Table */}
       <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
-        <h3 className="font-normal text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
+        <h3 className="font-normal text-slate-800 text-base flex items-center gap-2 border-b border-slate-100 pb-2">
           <Package size={16} className="text-slate-400" />
           <span>Active Logistics Equipment Register {activeProj ? `(viewing context: ${activeProj.name})` : ''}</span>
         </h3>
 
-        <div className="overflow-x-auto text-xs">
+        <div className="overflow-x-auto text-sm">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">

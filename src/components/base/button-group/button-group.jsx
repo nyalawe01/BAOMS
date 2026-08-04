@@ -57,7 +57,7 @@ export function ButtonGroupItem({ id, iconLeading: IconLeading, children }) {
     <button
       type="button"
       onClick={handleClick}
-      className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none ${
+      className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold transition-colors focus:outline-none ${
         active 
           ? 'bg-slate-100 text-slate-900 font-bold' 
           : 'bg-white text-slate-650 hover:bg-slate-50 hover:text-slate-900'

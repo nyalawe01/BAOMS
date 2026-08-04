@@ -14,9 +14,9 @@ export function InputBase({
   const inputId = label ? (id || generatedId) : id;
 
   const sizeClasses = {
-    sm: 'px-2.5 py-1.5 text-xs rounded-md',
-    md: 'px-3 py-2 text-xs rounded-lg',
-    lg: 'px-4 py-2.5 text-sm rounded-lg'
+    sm: 'px-2.5 py-1.5 text-sm rounded-md',
+    md: 'px-3 py-2 text-sm rounded-lg',
+    lg: 'px-4 py-2.5 text-base rounded-lg'
   };
 
   const selectedSize = sizeClasses[size] || sizeClasses.md;
@@ -24,7 +24,7 @@ export function InputBase({
   return (
     <div className={`w-full text-left font-sans ${className}`}>
       {label && (
-        <label htmlFor={inputId} className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+        <label htmlFor={inputId} className="block text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">
           {label}
         </label>
       )}

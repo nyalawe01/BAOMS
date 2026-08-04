@@ -68,11 +68,11 @@ export function StaffStatusController() {
     <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
       <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+          <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
             <Users className="text-indigo-650" size={18} />
             <span>Staff Status Controller Directory</span>
           </h3>
-          <p className="text-[11px] text-slate-400">View corporate directories, toggle active/leave/suspended permissions, and reallocate departments.</p>
+          <p className="text-xs text-slate-400">View corporate directories, toggle active/leave/suspended permissions, and reallocate departments.</p>
         </div>
 
         {/* Filter buttons */}
@@ -87,9 +87,9 @@ export function StaffStatusController() {
       </div>
 
       <div className="overflow-x-auto max-h-[360px] overflow-y-auto pr-1">
-        <table className="w-full text-left text-xs border-collapse">
+        <table className="w-full text-left text-sm border-collapse">
           <thead>
-            <tr className="border-b border-slate-150 text-[11px] font-bold text-slate-450 uppercase tracking-wider bg-slate-50/50">
+            <tr className="border-b border-slate-150 text-xs font-bold text-slate-450 uppercase tracking-wider bg-slate-50/50">
               <th className="pb-2.5 pt-1.5 px-3">Name</th>
               <th className="pb-2.5 pt-1.5">Role</th>
               <th className="pb-2.5 pt-1.5">Department</th>
@@ -109,7 +109,7 @@ export function StaffStatusController() {
                     />
                     <div className="flex flex-col">
                       <span className="truncate max-w-[120px]">{u.name}</span>
-                      <span className="text-[11px] text-slate-400 font-mono font-normal truncate max-w-[120px]">{u.email}</span>
+                      <span className="text-xs text-slate-400 font-mono font-normal truncate max-w-[120px]">{u.email}</span>
                     </div>
                   </div>
                 </td>
@@ -118,7 +118,7 @@ export function StaffStatusController() {
                   <select 
                     value={u.department}
                     onChange={(e) => handleDeptChange(u.id, e.target.value)}
-                    className="border border-slate-200 rounded px-1.5 py-0.5 text-xs bg-white text-slate-700 focus:outline-none focus:border-indigo-500"
+                    className="border border-slate-200 rounded px-1.5 py-0.5 text-sm bg-white text-slate-700 focus:outline-none focus:border-indigo-500"
                   >
                     <option value="Executive">Executive</option>
                     <option value="Engineering">Engineering</option>
@@ -134,7 +134,7 @@ export function StaffStatusController() {
                   <select 
                     value={u.status || 'Active'}
                     onChange={(e) => handleStatusChange(u.id, e.target.value)}
-                    className={`border border-slate-200 rounded px-1.5 py-0.5 text-[11px] font-bold focus:outline-none focus:border-indigo-500 ${
+                    className={`border border-slate-200 rounded px-1.5 py-0.5 text-xs font-bold focus:outline-none focus:border-indigo-500 ${
                       (u.status || 'Active') === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-250' :
                       (u.status || 'Active') === 'Suspended' ? 'bg-rose-50 text-rose-700 border-rose-250' : 'bg-indigo-50 text-indigo-700 border-indigo-200'
                     }`}

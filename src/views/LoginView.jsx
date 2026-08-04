@@ -40,11 +40,11 @@ export default function LoginView() {
                 <span className="font-extrabold text-lg uppercase tracking-wider">BAOMS Portal</span>
               </div>
               <h2 className="text-2xl font-extrabold text-slate-950">Sign In</h2>
-              <p className="text-slate-500 text-xs">Enter your organizational credentials to access the secure workspace.</p>
+              <p className="text-slate-500 text-sm">Enter your organizational credentials to access the secure workspace.</p>
             </div>
 
             {error && (
-              <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl flex items-center gap-3 text-xs font-semibold animate-shake">
+              <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl flex items-center gap-3 text-sm font-semibold animate-shake">
                 <AlertCircle size={16} className="shrink-0 text-rose-600" />
                 <span>{error}</span>
               </div>
@@ -53,7 +53,7 @@ export default function LoginView() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email */}
               <div className="space-y-1">
-                <label htmlFor="email" className="block text-[11px] font-bold uppercase tracking-wider text-slate-450">
+                <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-slate-450">
                   Email Address
                 </label>
                 <div className="relative">
@@ -67,14 +67,14 @@ export default function LoginView() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="email@organization.com"
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-medium"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-medium"
                   />
                 </div>
               </div>
 
               {/* Password */}
               <div className="space-y-1">
-                <label htmlFor="password" className="block text-[11px] font-bold uppercase tracking-wider text-slate-455">
+                <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-slate-455">
                   Password
                 </label>
                 <div className="relative">
@@ -88,7 +88,7 @@ export default function LoginView() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-medium"
+                    className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-medium"
                   />
                   <button
                     type="button"
@@ -101,7 +101,7 @@ export default function LoginView() {
               </div>
 
               {/* Utilities */}
-              <div className="flex items-center justify-between text-xs pt-1">
+              <div className="flex items-center justify-between text-sm pt-1">
                 <label className="flex items-center gap-2 text-slate-600 cursor-pointer select-none">
                   <input 
                     type="checkbox" 
@@ -122,7 +122,7 @@ export default function LoginView() {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-all shadow-md shadow-indigo-600/10 hover:shadow-lg active:scale-[0.99] text-xs uppercase tracking-wider"
+                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-all shadow-md shadow-indigo-600/10 hover:shadow-lg active:scale-[0.99] text-sm uppercase tracking-wider"
               >
                 Sign In
               </button>

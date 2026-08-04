@@ -98,7 +98,7 @@ export default function NotificationCenter({ onNavigate }) {
       >
         <Bell size={18} />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 flex items-center justify-center bg-indigo-600 text-white text-[11px] font-bold rounded-full border border-white leading-none">
+          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 flex items-center justify-center bg-indigo-600 text-white text-xs font-bold rounded-full border border-white leading-none">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -115,15 +115,15 @@ export default function NotificationCenter({ onNavigate }) {
           <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-slate-200 z-30 animate-fadeIn overflow-hidden">
             <div className="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between">
               <div>
-                <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Notifications</p>
-                <p className="text-sm font-semibold text-slate-700 mt-0.5">
+                <p className="text-sm text-slate-400 font-semibold uppercase tracking-wider">Notifications</p>
+                <p className="text-base font-semibold text-slate-700 mt-0.5">
                   {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
                 </p>
               </div>
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
-                  className="flex items-center gap-1 text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+                  className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
                 >
                   <CheckCheck size={13} />
                   <span>Mark all as read</span>
@@ -135,7 +135,7 @@ export default function NotificationCenter({ onNavigate }) {
               {visibleNotifications.length === 0 ? (
                 <div className="px-4 py-10 flex flex-col items-center justify-center text-center gap-2">
                   <Bell size={22} className="text-slate-300" />
-                  <p className="text-xs text-slate-400 font-medium">No notifications yet</p>
+                  <p className="text-sm text-slate-400 font-medium">No notifications yet</p>
                 </div>
               ) : (
                 visibleNotifications.map((notification) => {
@@ -151,10 +151,10 @@ export default function NotificationCenter({ onNavigate }) {
                     >
                       <Icon size={15} className={`mt-0.5 shrink-0 ${iconClass}`} />
                       <div className="min-w-0 flex-1">
-                        <p className={`text-xs leading-snug ${!notification.read ? 'text-slate-800 font-semibold' : 'text-slate-600 font-medium'}`}>
+                        <p className={`text-sm leading-snug ${!notification.read ? 'text-slate-800 font-semibold' : 'text-slate-600 font-medium'}`}>
                           {notification.message}
                         </p>
-                        <p className="text-[11px] text-slate-400 mt-1">
+                        <p className="text-xs text-slate-400 mt-1">
                           {formatTimeAgo(notification.createdAt)}
                         </p>
                       </div>

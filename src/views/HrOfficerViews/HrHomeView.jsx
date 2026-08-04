@@ -82,9 +82,9 @@ export function HrHomeView() {
               <Users className="text-indigo-400" />
               <span>HR Executive Intelligence Command</span>
             </h2>
-            <p className="text-slate-400 text-xs mt-1">Review workforce stats, monitor leave pipelines, and inspect organizational activity feeds.</p>
+            <p className="text-slate-400 text-sm mt-1">Review workforce stats, monitor leave pipelines, and inspect organizational activity feeds.</p>
           </div>
-          <span className="bg-indigo-500/10 text-indigo-400 text-[11px] font-bold border border-indigo-500/20 px-3 py-1 rounded-full uppercase tracking-wider animate-pulse">
+          <span className="bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20 px-3 py-1 rounded-full uppercase tracking-wider animate-pulse">
             Live Database Sync
           </span>
         </div>
@@ -101,7 +101,7 @@ export function HrHomeView() {
           { label: 'Expiring Contracts', val: expiringContracts, color: 'text-slate-800 bg-slate-50 border-slate-100' }
         ].map((m, idx) => (
           <div key={idx} className={`p-4 rounded-xl border bg-white shadow-sm flex flex-col justify-between ${m.color.split(' ')[2]}`}>
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider leading-tight">{m.label}</span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider leading-tight">{m.label}</span>
             <span className={`text-2xl font-black mt-2 ${m.color.split(' ')[0]}`}>{m.val}</span>
           </div>
         ))}
@@ -112,18 +112,18 @@ export function HrHomeView() {
         {/* Left: Department summary */}
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
           <div className="border-b border-slate-100 pb-2">
-            <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+            <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
               <Building size={16} className="text-indigo-500" />
               <span>Department Resources</span>
             </h3>
-            <p className="text-[11px] text-slate-400">Resource counts across functional units</p>
+            <p className="text-xs text-slate-400">Resource counts across functional units</p>
           </div>
           <div className="space-y-3">
             {Object.entries(deptCounts).map(([dept, count], idx) => {
               const pct = totalStaff > 0 ? Math.round((count / totalStaff) * 100) : 0;
               return (
                 <div key={idx} className="space-y-1">
-                  <div className="flex justify-between text-xs font-semibold">
+                  <div className="flex justify-between text-sm font-semibold">
                     <span className="text-slate-700">{dept}</span>
                     <span className="text-slate-500">{count} staff ({pct}%)</span>
                   </div>
@@ -140,18 +140,18 @@ export function HrHomeView() {
         <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
           <div className="border-b border-slate-100 pb-2 flex justify-between items-center">
             <div>
-              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
                 <Bell size={16} className="text-amber-500" />
                 <span>Real-Time Audit Activity Feed</span>
               </h3>
-              <p className="text-[11px] text-slate-400">Force activity log tracking submissions</p>
+              <p className="text-xs text-slate-400">Force activity log tracking submissions</p>
             </div>
-            <span className="text-[11px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-mono">Immutable</span>
+            <span className="text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-mono">Immutable</span>
           </div>
 
           <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
             {auditLogs.slice(0, 8).map((log, idx) => (
-              <div key={idx} className="flex gap-3 text-xs border-b border-slate-50 pb-2.5 last:border-0 last:pb-0">
+              <div key={idx} className="flex gap-3 text-sm border-b border-slate-50 pb-2.5 last:border-0 last:pb-0">
                 <div className="mt-0.5">
                   <div className={`p-1.5 rounded-lg ${
                     log.actionType === 'USER_MANAGEMENT' ? 'bg-slate-100 text-slate-700' :
@@ -163,14 +163,14 @@ export function HrHomeView() {
                 <div className="flex-1 space-y-0.5">
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-slate-800">{log.userName}</span>
-                    <span className="text-[11px] text-slate-400">{log.timestamp}</span>
+                    <span className="text-xs text-slate-400">{log.timestamp}</span>
                   </div>
-                  <p className="text-slate-655 text-[11px] leading-relaxed">{log.description}</p>
+                  <p className="text-slate-655 text-xs leading-relaxed">{log.description}</p>
                 </div>
               </div>
             ))}
             {auditLogs.length === 0 && (
-              <div className="text-center py-8 text-slate-400 text-xs">No recent actions logged.</div>
+              <div className="text-center py-8 text-slate-400 text-sm">No recent actions logged.</div>
             )}
           </div>
         </div>
@@ -179,19 +179,19 @@ export function HrHomeView() {
       {/* Contract & Placement Expiry Radar */}
       <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div className="border-b border-slate-100 pb-2">
-          <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+          <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
             <AlarmClock size={16} className="text-rose-500" />
             <span>Contract & Placement Expiry Radar</span>
           </h3>
-          <p className="text-[11px] text-slate-400">Active intern/placement end dates expiring in the next 90 days</p>
+          <p className="text-xs text-slate-400">Active intern/placement end dates expiring in the next 90 days</p>
         </div>
 
         {usersWithPlacementDates.length === 0 ? (
-          <div className="text-center py-8 text-slate-400 text-xs">
+          <div className="text-center py-8 text-slate-400 text-sm">
             No placement end dates on record. This list will populate once HR onboarding captures an internship/placement end date for active staff.
           </div>
         ) : placementRadar.length === 0 ? (
-          <div className="text-center py-8 text-slate-400 text-xs">
+          <div className="text-center py-8 text-slate-400 text-sm">
             No contracts or placements expiring in the next 90 days.
           </div>
         ) : (
@@ -199,12 +199,12 @@ export function HrHomeView() {
             {placementRadar.map((u) => {
               const badge = getExpiryBadge(u.daysRemaining);
               return (
-                <div key={u.id} className="flex justify-between items-center gap-3 text-xs border-b border-slate-50 pb-2.5 last:border-0 last:pb-0">
+                <div key={u.id} className="flex justify-between items-center gap-3 text-sm border-b border-slate-50 pb-2.5 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <p className="font-bold text-slate-800 truncate">{u.name}</p>
-                    <p className="text-slate-500 text-[11px]">{u.role}</p>
+                    <p className="text-slate-500 text-xs">{u.role}</p>
                   </div>
-                  <span className={`shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${badge.className}`}>
+                  <span className={`shrink-0 text-xs font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${badge.className}`}>
                     {badge.label}
                   </span>
                 </div>

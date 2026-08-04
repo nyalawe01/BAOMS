@@ -119,14 +119,14 @@ export function FinanceDashboardView() {
   };
 
   return (
-    <div className="space-y-8 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-8 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       {/* Header Banner */}
       <div className="bg-slate-900 text-white rounded-2xl p-8 border border-slate-200">
         <h2 className="text-lg font-normal flex items-center gap-2">
           <FileSpreadsheet className="text-slate-400" />
           <span>NGO Finance Console</span>
         </h2>
-        <p className="text-slate-400 text-xs mt-1 font-normal">Derive transactions, ledger sheets, expected donor grants, and approval routing from the database.</p>
+        <p className="text-slate-400 text-sm mt-1 font-normal">Derive transactions, ledger sheets, expected donor grants, and approval routing from the database.</p>
       </div>
 
       {/* KPI Cards Grid */}
@@ -141,7 +141,7 @@ export function FinanceDashboardView() {
           { label: 'Available Bank Balance', value: `TZS ${cashOnHand.toLocaleString()}` }
         ].map((kpi, idx) => (
           <div key={idx} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:border-slate-350 transition-all">
-            <span className="text-[11px] font-normal text-slate-400 uppercase tracking-widest">{kpi.label}</span>
+            <span className="text-xs font-normal text-slate-400 uppercase tracking-widest">{kpi.label}</span>
             <span className="text-2xl font-normal text-slate-800 mt-4 block">{kpi.value}</span>
           </div>
         ))}
@@ -149,7 +149,7 @@ export function FinanceDashboardView() {
 
       {/* Quick Action Buttons */}
       <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
-        <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-normal">Dashboard Quick Actions</span>
+        <span className="text-xs text-slate-400 uppercase tracking-wider block font-normal">Dashboard Quick Actions</span>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
             { label: 'Record Expense', action: 'Route to Expenses module to request spending approval.' },
@@ -162,7 +162,7 @@ export function FinanceDashboardView() {
             <button
               key={idx}
               onClick={() => Swal.fire('Operational Router', act.action, 'info')}
-              className="py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-100 transition-all text-center text-xs font-normal"
+              className="py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-100 transition-all text-center text-sm font-normal"
             >
               + {act.label}
             </button>
@@ -174,19 +174,19 @@ export function FinanceDashboardView() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-            <h3 className="font-normal text-slate-850 text-sm">Cash Flow Forecast &mdash; Upcoming Invoices</h3>
-            <span className="text-[11px] text-slate-400 uppercase tracking-wider">{unpaidInvoices.length} unpaid</span>
+            <h3 className="font-normal text-slate-850 text-base">Cash Flow Forecast &mdash; Upcoming Invoices</h3>
+            <span className="text-xs text-slate-400 uppercase tracking-wider">{unpaidInvoices.length} unpaid</span>
           </div>
           <div className="space-y-2 font-normal">
             {visibleInvoices.map((inv, idx) => (
               <div key={inv.id || idx} className="flex items-center justify-between p-3 bg-slate-50 border border-slate-150 rounded-lg">
                 <div>
-                  <span className="text-xs font-normal text-slate-808 block">{inv.clientName}</span>
-                  <span className="text-[11px] text-slate-400 block mt-0.5">Due {inv.dueDate || 'N/A'}</span>
+                  <span className="text-sm font-normal text-slate-808 block">{inv.clientName}</span>
+                  <span className="text-xs text-slate-400 block mt-0.5">Due {inv.dueDate || 'N/A'}</span>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs font-normal text-slate-700 block">TZS {(inv.amount || 0).toLocaleString()}</span>
-                  <span className={`text-[11px] block mt-0.5 ${inv.daysUntilDue < 0 ? 'text-slate-600 font-semibold' : 'text-slate-400'}`}>
+                  <span className="text-sm font-normal text-slate-700 block">TZS {(inv.amount || 0).toLocaleString()}</span>
+                  <span className={`text-xs block mt-0.5 ${inv.daysUntilDue < 0 ? 'text-slate-600 font-semibold' : 'text-slate-400'}`}>
                     {inv.daysUntilDue < 0
                       ? `Overdue by ${Math.abs(inv.daysUntilDue)} day${Math.abs(inv.daysUntilDue) === 1 ? '' : 's'}`
                       : inv.daysUntilDue === 0
@@ -204,7 +204,7 @@ export function FinanceDashboardView() {
             )}
           </div>
           <div className="border-t border-slate-100 pt-3">
-            <span className="text-xs font-normal text-slate-700">
+            <span className="text-sm font-normal text-slate-700">
               TZS {next30DaysTotal.toLocaleString()} expected from unpaid invoices in the next 30 days
             </span>
           </div>
@@ -212,15 +212,15 @@ export function FinanceDashboardView() {
 
         {/* Pending Budget Commitments */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
-          <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-normal border-b border-slate-100 pb-1.5">Pending Budget Commitments</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider block font-normal border-b border-slate-100 pb-1.5">Pending Budget Commitments</span>
           <div className="space-y-2 font-normal">
             {pendingBudgetItems.slice(0, 6).map((item, idx) => (
               <div key={item.id || idx} className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-150 rounded">
                 <div>
-                  <span className="text-xs font-normal text-slate-808 block">{item.description}</span>
-                  <span className="text-[11px] text-slate-400 block mt-0.5">{item.projectName}</span>
+                  <span className="text-sm font-normal text-slate-808 block">{item.description}</span>
+                  <span className="text-xs text-slate-400 block mt-0.5">{item.projectName}</span>
                 </div>
-                <span className="text-xs font-normal text-slate-700">TZS {(item.allocatedAmount || 0).toLocaleString()}</span>
+                <span className="text-sm font-normal text-slate-700">TZS {(item.allocatedAmount || 0).toLocaleString()}</span>
               </div>
             ))}
             {pendingBudgetItems.length > 6 && (
@@ -231,7 +231,7 @@ export function FinanceDashboardView() {
             )}
           </div>
           <div className="border-t border-slate-100 pt-3">
-            <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-normal">Total Committed, Not Yet Allocated</span>
+            <span className="text-xs text-slate-400 uppercase tracking-wider block font-normal">Total Committed, Not Yet Allocated</span>
             <span className="text-lg font-normal text-slate-800 mt-1 block">TZS {pendingBudgetTotal.toLocaleString()}</span>
           </div>
         </div>
@@ -241,7 +241,7 @@ export function FinanceDashboardView() {
         {/* Left: Top Spending & Lists */}
         <div className="lg:col-span-2 space-y-8">
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
-            <h3 className="font-normal text-slate-850 text-sm border-b border-slate-100 pb-2">
+            <h3 className="font-normal text-slate-850 text-base border-b border-slate-100 pb-2">
               Top Spending Projects
             </h3>
             <div className="space-y-4 font-normal">
@@ -252,7 +252,7 @@ export function FinanceDashboardView() {
                 
                 return (
                   <div key={idx} className="space-y-1">
-                    <div className="flex justify-between text-xs font-normal text-slate-700">
+                    <div className="flex justify-between text-sm font-normal text-slate-700">
                       <span>{p.name}</span>
                       <span>TZS {spent.toLocaleString()} spent ({percent}%)</span>
                     </div>
@@ -273,15 +273,15 @@ export function FinanceDashboardView() {
         <div className="space-y-8">
           {/* VAT Calculator */}
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4 font-normal">
-            <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-normal border-b border-slate-100 pb-1.5">VAT Calculator</span>
+            <span className="text-xs text-slate-400 uppercase tracking-wider block font-normal border-b border-slate-100 pb-1.5">VAT Calculator</span>
             <div className="space-y-3">
               <div>
-                <label className="block text-[11px] text-slate-400 uppercase mb-1">Amount</label>
+                <label className="block text-xs text-slate-400 uppercase mb-1">Amount</label>
                 <input 
                   type="number" 
                   value={vatAmount}
                   onChange={(e) => setVatAmount(e.target.value)}
-                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white text-xs" 
+                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white text-sm" 
                   placeholder="e.g. 5000"
                 />
               </div>
@@ -299,15 +299,15 @@ export function FinanceDashboardView() {
 
           {/* Salary Calculator */}
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4 font-normal">
-            <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-normal border-b border-slate-100 pb-1.5">Salary Tax Calculator</span>
+            <span className="text-xs text-slate-400 uppercase tracking-wider block font-normal border-b border-slate-100 pb-1.5">Salary Tax Calculator</span>
             <div className="space-y-3">
               <div>
-                <label className="block text-[11px] text-slate-400 uppercase mb-1">Gross Salary</label>
+                <label className="block text-xs text-slate-400 uppercase mb-1">Gross Salary</label>
                 <input 
                   type="number" 
                   value={grossSalary}
                   onChange={(e) => setGrossSalary(e.target.value)}
-                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white text-xs" 
+                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white text-sm" 
                   placeholder="e.g. 80000"
                 />
               </div>
@@ -325,20 +325,20 @@ export function FinanceDashboardView() {
 
           {/* Loan Calculator */}
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4 font-normal">
-            <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-normal border-b border-slate-100 pb-1.5">Loan Repayment Calculator</span>
+            <span className="text-xs text-slate-400 uppercase tracking-wider block font-normal border-b border-slate-100 pb-1.5">Loan Repayment Calculator</span>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[11px] text-slate-400 uppercase mb-1">Principal</label>
+                  <label className="block text-xs text-slate-400 uppercase mb-1">Principal</label>
                   <input type="number" value={loanPrincipal} onChange={(e) => setLoanPrincipal(e.target.value)} className="w-full px-2 py-1 border border-slate-200 rounded" />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-slate-400 uppercase mb-1">Interest %</label>
+                  <label className="block text-xs text-slate-400 uppercase mb-1">Interest %</label>
                   <input type="number" value={loanInterest} onChange={(e) => setLoanInterest(e.target.value)} className="w-full px-2 py-1 border border-slate-200 rounded" />
                 </div>
               </div>
               <div>
-                <label className="block text-[11px] text-slate-400 uppercase mb-1">Period (months)</label>
+                <label className="block text-xs text-slate-400 uppercase mb-1">Period (months)</label>
                 <input type="number" value={loanPeriod} onChange={(e) => setLoanPeriod(e.target.value)} className="w-full px-2 py-1 border border-slate-200 rounded" />
               </div>
               <button onClick={handleCalculateLoan} className="w-full py-1.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Calculate Monthly</button>
@@ -372,11 +372,11 @@ export function FinanceTransactionsView() {
     : transactions.filter(t => t.status === filter);
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700">
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-sm font-normal text-slate-805">Master General Ledger Transactions</h2>
-          <p className="text-xs text-slate-400 font-normal">Spreadsheet-like record of all incoming grants and outgoing expense allocations.</p>
+          <h2 className="text-base font-normal text-slate-805">Master General Ledger Transactions</h2>
+          <p className="text-sm text-slate-400 font-normal">Spreadsheet-like record of all incoming grants and outgoing expense allocations.</p>
         </div>
         <div className="flex gap-2">
           {['All', 'Income', 'Expense', 'Pending', 'Approved'].map(f => (
@@ -411,12 +411,12 @@ export function FinanceTransactionsView() {
             <tbody className="divide-y divide-slate-150">
               {filtered.map((t, idx) => (
                 <tr key={t.id || idx} className="hover:bg-slate-50/50">
-                  <td className="p-3 font-mono text-[11px] text-slate-400">{t.date}</td>
-                  <td className="p-3 font-mono text-[11px] text-slate-500">{t.ref}</td>
+                  <td className="p-3 font-mono text-xs text-slate-400">{t.date}</td>
+                  <td className="p-3 font-mono text-xs text-slate-500">{t.ref}</td>
                   <td className="p-3 font-normal text-slate-808">{t.description}</td>
                   <td className="p-3 text-slate-600">{t.category}</td>
                   <td className="p-3 text-slate-600">{t.projectName}</td>
-                  <td className="p-3 text-slate-600 font-mono text-[11px]">{t.bankAccount || 'CRDB'}</td>
+                  <td className="p-3 text-slate-600 font-mono text-xs">{t.bankAccount || 'CRDB'}</td>
                   <td className="p-3 font-normal text-slate-800">
                     {t.type === 'Income' ? `+` : `-`} TZS {t.amount?.toLocaleString()}
                   </td>
@@ -479,19 +479,19 @@ export function FinanceIncomeView() {
   };
 
   return (
-    <div className="space-y-8 animate-fadeIn font-normal text-xs text-slate-700">
+    <div className="space-y-8 animate-fadeIn font-normal text-sm text-slate-700">
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-800">Income Ledger Register</h2>
-        <p className="text-xs text-slate-400 font-normal">Record incoming sponsorships, donations, grants, and fundraising returns.</p>
+        <h2 className="text-base font-normal text-slate-800">Income Ledger Register</h2>
+        <p className="text-sm text-slate-400 font-normal">Record incoming sponsorships, donations, grants, and fundraising returns.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Income Form */}
         <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 h-fit">
-          <span className="text-[11px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5">Record Incoming Funds</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5">Record Incoming Funds</span>
           <form onSubmit={handleRecordIncome} className="space-y-3 font-normal">
             <div>
-              <label className="block text-[11px] text-slate-400 uppercase mb-1">Source Type</label>
+              <label className="block text-xs text-slate-400 uppercase mb-1">Source Type</label>
               <select value={source} onChange={(e) => setSource(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
                 <option value="Grant">Grant</option>
                 <option value="Donation">Donation</option>
@@ -500,16 +500,16 @@ export function FinanceIncomeView() {
               </select>
             </div>
             <div>
-              <label className="block text-[11px] text-slate-400 uppercase mb-1">Donor / Customer Name</label>
+              <label className="block text-xs text-slate-400 uppercase mb-1">Donor / Customer Name</label>
               <input type="text" required value={donor} onChange={(e) => setDonor(e.target.value)} placeholder="e.g. USAID Africa" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[11px] text-slate-400 uppercase mb-1">Amount (TZS)</label>
+                <label className="block text-xs text-slate-400 uppercase mb-1">Amount (TZS)</label>
                 <input type="number" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 50000" className="w-full px-2 py-1.5 border border-slate-200 rounded bg-white" />
               </div>
               <div>
-                <label className="block text-[11px] text-slate-400 uppercase mb-1">Bank Wallet</label>
+                <label className="block text-xs text-slate-400 uppercase mb-1">Bank Wallet</label>
                 <select value={bankAccount} onChange={(e) => setBankAccount(e.target.value)} className="w-full px-2 py-1.5 border border-slate-200 rounded bg-white">
                   <option value="CRDB">CRDB</option>
                   <option value="NMB">NMB</option>
@@ -520,7 +520,7 @@ export function FinanceIncomeView() {
               </div>
             </div>
             <div>
-              <label className="block text-[11px] text-slate-400 uppercase mb-1">Link to Project Workspace</label>
+              <label className="block text-xs text-slate-400 uppercase mb-1">Link to Project Workspace</label>
               <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -533,7 +533,7 @@ export function FinanceIncomeView() {
 
         {/* Income List */}
         <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
-          <span className="text-[11px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5">Logged Deposits</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5">Logged Deposits</span>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -548,10 +548,10 @@ export function FinanceIncomeView() {
               <tbody className="divide-y divide-slate-150">
                 {incomes.map((inc, idx) => (
                   <tr key={inc.id || idx}>
-                    <td className="p-3 font-mono text-[11px] text-slate-400">{inc.date}</td>
+                    <td className="p-3 font-mono text-xs text-slate-400">{inc.date}</td>
                     <td className="p-3 font-normal text-slate-808">{inc.description} ({inc.category})</td>
                     <td className="p-3 text-slate-600">{inc.projectName}</td>
-                    <td className="p-3 font-mono text-[11px] text-slate-500">{inc.bankAccount || 'CRDB'}</td>
+                    <td className="p-3 font-mono text-xs text-slate-500">{inc.bankAccount || 'CRDB'}</td>
                     <td className="p-3 font-normal text-slate-700">TZS {inc.amount.toLocaleString()}</td>
                   </tr>
                 ))}
@@ -588,24 +588,24 @@ export function FinanceExpensesView() {
   };
 
   return (
-    <div className="space-y-8 animate-fadeIn font-normal text-xs text-slate-700">
+    <div className="space-y-8 animate-fadeIn font-normal text-sm text-slate-700">
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-800">Operational Expenses Router</h2>
-        <p className="text-xs text-slate-400 font-normal">Log operational costs, upload receipts, and check transaction clearance.</p>
+        <h2 className="text-base font-normal text-slate-800">Operational Expenses Router</h2>
+        <p className="text-sm text-slate-400 font-normal">Log operational costs, upload receipts, and check transaction clearance.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Expense Form */}
         <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 h-fit">
-          <span className="text-[11px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5">Record Operational Expense</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5">Record Operational Expense</span>
           <form onSubmit={handleRecordExpense} className="space-y-3 font-normal">
             <div>
-              <label className="block text-[11px] text-slate-400 uppercase mb-1">Expense Item Description</label>
+              <label className="block text-xs text-slate-400 uppercase mb-1">Expense Item Description</label>
               <input type="text" required value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="e.g. Travel tickets to Mwanza" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[11px] text-slate-400 uppercase mb-1">Category</label>
+                <label className="block text-xs text-slate-400 uppercase mb-1">Category</label>
                 <select value={cat} onChange={(e) => setCat(e.target.value)} className="w-full px-2 py-1.5 border border-slate-200 rounded bg-white">
                   <option value="Office">Office</option>
                   <option value="Transport">Transport</option>
@@ -616,13 +616,13 @@ export function FinanceExpensesView() {
                 </select>
               </div>
               <div>
-                <label className="block text-[11px] text-slate-400 uppercase mb-1">Amount (TZS)</label>
+                <label className="block text-xs text-slate-400 uppercase mb-1">Amount (TZS)</label>
                 <input type="number" required value={amt} onChange={(e) => setAmt(e.target.value)} placeholder="e.g. 1500" className="w-full px-2 py-1 border border-slate-200 rounded bg-white" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[11px] text-slate-400 uppercase mb-1">Project Link</label>
+                <label className="block text-xs text-slate-400 uppercase mb-1">Project Link</label>
                 <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
                   {projects.map(p => (
                     <option key={p.id} value={p.id}>{p.name}</option>
@@ -630,7 +630,7 @@ export function FinanceExpensesView() {
                 </select>
               </div>
               <div>
-                <label className="block text-[11px] text-slate-400 uppercase mb-1">Bank Wallet</label>
+                <label className="block text-xs text-slate-400 uppercase mb-1">Bank Wallet</label>
                 <select value={bankAccount} onChange={(e) => setBankAccount(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
                   <option value="CRDB">CRDB</option>
                   <option value="NMB">NMB</option>
@@ -646,7 +646,7 @@ export function FinanceExpensesView() {
 
         {/* Expenses List */}
         <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
-          <span className="text-[11px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5">Registered Transactions</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5">Registered Transactions</span>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -664,7 +664,7 @@ export function FinanceExpensesView() {
                     <td className="p-3 font-normal text-slate-808">{exp.description}</td>
                     <td className="p-3 text-slate-500 font-normal">{exp.category || 'Operations'}</td>
                     <td className="p-3 font-normal text-slate-707">TZS {exp.amount.toLocaleString()}</td>
-                    <td className="p-3 font-mono text-[11px] text-slate-500">{exp.bankAccount || 'CRDB'}</td>
+                    <td className="p-3 font-mono text-xs text-slate-500">{exp.bankAccount || 'CRDB'}</td>
                     <td className="p-3">
                       <span className="px-2 py-0.5 rounded text-[8px] font-normal border uppercase bg-slate-50 text-slate-600 border-slate-200">
                         {exp.status || 'Pending'}
@@ -688,10 +688,10 @@ export function FinanceBudgetsView() {
   const { projects, transactions } = useProject();
 
   return (
-    <div className="space-y-8 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-8 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-805">Budget Limit Control Dashboard</h2>
-        <p className="text-xs text-slate-400 font-normal font-normal">Compare project allocations vs actual spent expenditures. Flags warnings at 80%, 90%, and exceeded targets.</p>
+        <h2 className="text-base font-normal text-slate-805">Budget Limit Control Dashboard</h2>
+        <p className="text-sm text-slate-400 font-normal font-normal">Compare project allocations vs actual spent expenditures. Flags warnings at 80%, 90%, and exceeded targets.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -710,8 +710,8 @@ export function FinanceBudgetsView() {
             <div key={proj.id} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
               <div className="flex justify-between items-start border-b border-slate-100 pb-2.5">
                 <div>
-                  <h4 className="font-normal text-slate-800 text-sm">{proj.name}</h4>
-                  <span className="text-[11px] text-slate-400 block font-normal">Donor: {proj.donor || 'UNICEF'}</span>
+                  <h4 className="font-normal text-slate-800 text-base">{proj.name}</h4>
+                  <span className="text-xs text-slate-400 block font-normal">Donor: {proj.donor || 'UNICEF'}</span>
                 </div>
                 <div className="text-right">
                   <span className={`px-2.5 py-0.5 rounded text-[8px] font-normal uppercase border ${
@@ -720,7 +720,7 @@ export function FinanceBudgetsView() {
                   }`}>
                     {isExceeded ? 'Exceeded limit' : isWarning ? 'Warning 80%+' : 'Within limit'}
                   </span>
-                  <span className="block text-[11px] font-normal text-slate-600 mt-1">{ratio}% utilized</span>
+                  <span className="block text-xs font-normal text-slate-600 mt-1">{ratio}% utilized</span>
                 </div>
               </div>
 
@@ -728,17 +728,17 @@ export function FinanceBudgetsView() {
                 <div className="bg-slate-500 h-full" style={{ width: `${Math.min(ratio, 100)}%` }}></div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 text-center text-xs font-normal">
+              <div className="grid grid-cols-3 gap-3 text-center text-sm font-normal">
                 <div className="p-2.5 bg-slate-50 border border-slate-150 rounded">
-                  <span className="text-[11px] text-slate-400 uppercase font-normal block">Allocated Limit</span>
+                  <span className="text-xs text-slate-400 uppercase font-normal block">Allocated Limit</span>
                   <span className="font-normal text-slate-750">TZS {totalBudget.toLocaleString()}</span>
                 </div>
                 <div className="p-2.5 bg-slate-50 border border-slate-150 rounded">
-                  <span className="text-[11px] text-slate-400 uppercase font-normal block">Total Spent</span>
+                  <span className="text-xs text-slate-400 uppercase font-normal block">Total Spent</span>
                   <span className="font-normal text-slate-750">TZS {totalSpent.toLocaleString()}</span>
                 </div>
                 <div className="p-2.5 bg-slate-50 border border-slate-150 rounded">
-                  <span className="text-[11px] text-slate-400 uppercase font-normal block">Remaining</span>
+                  <span className="text-xs text-slate-400 uppercase font-normal block">Remaining</span>
                   <span className="font-normal text-slate-750">TZS {remaining.toLocaleString()}</span>
                 </div>
               </div>
@@ -757,14 +757,14 @@ export function FinanceProjectsView() {
   const { projects, transactions } = useProject();
 
   return (
-    <div className="space-y-8 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-8 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-800">Project Workspace Portfolios</h2>
-        <p className="text-xs text-slate-400 font-normal">Consolidated budget, expense allocations, and net balances categorized per project.</p>
+        <h2 className="text-base font-normal text-slate-800">Project Workspace Portfolios</h2>
+        <p className="text-sm text-slate-400 font-normal">Consolidated budget, expense allocations, and net balances categorized per project.</p>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full text-left border-collapse text-xs">
+        <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
               <th className="p-3">Project Workspace</th>
@@ -866,13 +866,13 @@ export function FinancePayrollView() {
   };
 
   return (
-    <div className="space-y-8 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-8 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-sm font-normal text-slate-808">Staff Directory Payroll ledgers</h2>
-          <p className="text-xs text-slate-400 font-normal">Generate base salary calculations, allocate allowances, and deduct tax/social security contributions.</p>
+          <h2 className="text-base font-normal text-slate-808">Staff Directory Payroll ledgers</h2>
+          <p className="text-sm text-slate-400 font-normal">Generate base salary calculations, allocate allowances, and deduct tax/social security contributions.</p>
         </div>
-        <div className="flex flex-col items-end gap-1 text-xs">
+        <div className="flex flex-col items-end gap-1 text-sm">
           <button
             onClick={handleApprovePayroll}
             disabled={isDisbursing}
@@ -881,7 +881,7 @@ export function FinancePayrollView() {
             {isDisbursing ? 'Disbursing...' : 'Approve & Disburse Payroll'}
           </button>
           {alreadyDisbursedCount > 0 && (
-            <span className="text-[11px] text-amber-600 font-semibold">
+            <span className="text-xs text-amber-600 font-semibold">
               {alreadyDisbursedCount} payment(s) already recorded for {currentPeriod}
             </span>
           )}
@@ -890,7 +890,7 @@ export function FinancePayrollView() {
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full text-left border-collapse text-sm">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
                 <th className="p-3">Staff Name</th>
@@ -994,29 +994,29 @@ export function FinanceInvoicesView() {
   };
 
   return (
-    <div className="space-y-8 animate-fadeIn font-normal text-xs text-slate-700">
+    <div className="space-y-8 animate-fadeIn font-normal text-sm text-slate-700">
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-sm font-normal text-slate-808">Client Invoicing ledgers</h2>
-          <p className="text-xs text-slate-400 font-normal">Generate invoices, track expected donor disbursements, and update payment balances.</p>
+          <h2 className="text-base font-normal text-slate-808">Client Invoicing ledgers</h2>
+          <p className="text-sm text-slate-400 font-normal">Generate invoices, track expected donor disbursements, and update payment balances.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Form */}
         <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 h-fit">
-          <span className="text-[11px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Create New Invoice</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5 font-normal">Create New Invoice</span>
           <form onSubmit={handleCreateInvoice} className="space-y-3 font-normal">
             <div>
-              <label className="block text-[11px] text-slate-400 uppercase mb-1">Client Organization</label>
+              <label className="block text-xs text-slate-400 uppercase mb-1">Client Organization</label>
               <input type="text" required value={client} onChange={(e) => setClient(e.target.value)} placeholder="e.g. UNICEF Somalia" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
             </div>
             <div>
-              <label className="block text-[11px] text-slate-400 uppercase mb-1">Total Billing Amount (TZS)</label>
+              <label className="block text-xs text-slate-400 uppercase mb-1">Total Billing Amount (TZS)</label>
               <input type="number" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 50000" className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
             </div>
             <div>
-              <label className="block text-[11px] text-slate-400 uppercase mb-1">Related Project (Optional)</label>
+              <label className="block text-xs text-slate-400 uppercase mb-1">Related Project (Optional)</label>
               <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white">
                 <option value="">None</option>
                 {projects.map(p => (
@@ -1025,7 +1025,7 @@ export function FinanceInvoicesView() {
               </select>
             </div>
             <div>
-              <label className="block text-[11px] text-slate-400 uppercase mb-1">Due Date</label>
+              <label className="block text-xs text-slate-400 uppercase mb-1">Due Date</label>
               <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
             </div>
             <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Generate Invoice</button>
@@ -1034,7 +1034,7 @@ export function FinanceInvoicesView() {
 
         {/* List */}
         <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
-          <span className="text-[11px] text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5">Dispatched Invoices</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider block border-b border-slate-100 pb-1.5">Dispatched Invoices</span>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -1050,9 +1050,9 @@ export function FinanceInvoicesView() {
               <tbody className="divide-y divide-slate-150">
                 {invoices.map((inv, idx) => (
                   <tr key={inv.id || idx}>
-                    <td className="p-3 font-mono text-[11px] text-slate-400">{inv.invoiceNumber}</td>
+                    <td className="p-3 font-mono text-xs text-slate-400">{inv.invoiceNumber}</td>
                     <td className="p-3 font-normal text-slate-808">{inv.clientName}</td>
-                    <td className="p-3 font-mono text-[11px] text-slate-400">{inv.issuedDate}</td>
+                    <td className="p-3 font-mono text-xs text-slate-400">{inv.issuedDate}</td>
                     <td className="p-3 font-normal text-slate-700">TZS {(inv.amount || 0).toLocaleString()}</td>
                     <td className="p-3">
                       <span className="px-2 py-0.5 rounded text-[8px] font-normal border uppercase bg-slate-50 text-slate-600 border-slate-200">
@@ -1063,14 +1063,14 @@ export function FinanceInvoicesView() {
                       {inv.status !== 'Paid' && (
                         <button
                           onClick={() => handlePayInvoice(inv.id)}
-                          className="px-2 py-1 bg-slate-900 text-white rounded hover:bg-slate-800 font-normal text-[11px]"
+                          className="px-2 py-1 bg-slate-900 text-white rounded hover:bg-slate-800 font-normal text-xs"
                         >
                           Receive Payment
                         </button>
                       )}
                       <button
                         onClick={() => handleVoidInvoice(inv.id)}
-                        className="px-2 py-1 bg-white text-red-600 border border-red-200 rounded hover:bg-red-50 font-normal text-[11px]"
+                        className="px-2 py-1 bg-white text-red-600 border border-red-200 rounded hover:bg-red-50 font-normal text-xs"
                       >
                         Void
                       </button>
@@ -1120,18 +1120,18 @@ EOF
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700">
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-805">Financial Reports Compiler</h2>
-        <p className="text-xs text-slate-400 font-normal">Generate Income Statements, Balance Sheets, Cash Flow statements, and audit ledgers directly from active project records.</p>
+        <h2 className="text-base font-normal text-slate-805">Financial Reports Compiler</h2>
+        <p className="text-sm text-slate-400 font-normal">Generate Income Statements, Balance Sheets, Cash Flow statements, and audit ledgers directly from active project records.</p>
       </div>
 
       <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-xl p-8 shadow-sm space-y-4 font-normal">
-        <h3 className="font-normal text-slate-808 text-sm border-b border-slate-100 pb-2 flex items-center gap-2">
+        <h3 className="font-normal text-slate-808 text-base border-b border-slate-100 pb-2 flex items-center gap-2">
           <FileText size={16} className="text-slate-400" />
           <span>General Ledger Compiler</span>
         </h3>
-        <p className="text-xs text-slate-500 font-normal font-normal">Compile ledger reports utilizing values currently in the Firestore database.</p>
+        <p className="text-sm text-slate-500 font-normal font-normal">Compile ledger reports utilizing values currently in the Firestore database.</p>
         <button
           onClick={handleCompileFinancialReport}
           className="w-full py-2.5 bg-slate-900 text-white rounded hover:bg-slate-800 transition-all font-normal"
@@ -1165,21 +1165,21 @@ export function FinanceAccountsView() {
   ];
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700 select-none">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700 select-none">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-800">Operational Bank Accounts & Reconciliations</h2>
-        <p className="text-xs text-slate-400 font-normal">Track deposits, withdrawals, and ledger allocations across multiple checking accounts.</p>
+        <h2 className="text-base font-normal text-slate-800">Operational Bank Accounts & Reconciliations</h2>
+        <p className="text-sm text-slate-400 font-normal">Track deposits, withdrawals, and ledger allocations across multiple checking accounts.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-normal">
         {bankAccountsList.map((acc, idx) => (
           <div key={idx} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4 hover:border-slate-350 transition-all">
             <div>
-              <h4 className="font-normal text-slate-800 text-sm">{acc.name}</h4>
-              <span className="text-[11px] text-slate-400 block font-normal font-mono">Code: {acc.code}</span>
+              <h4 className="font-normal text-slate-800 text-base">{acc.name}</h4>
+              <span className="text-xs text-slate-400 block font-normal font-mono">Code: {acc.code}</span>
             </div>
             <div className="border-t border-slate-100 pt-3">
-              <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-normal">Available Balance</span>
+              <span className="text-xs text-slate-400 uppercase tracking-wider block font-normal">Available Balance</span>
               <span className="text-lg font-normal text-slate-800 mt-1 block">
                 TZS {acc.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
@@ -1206,14 +1206,14 @@ export function FinanceApprovalsView() {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-850">Operational Approvals Queue</h2>
-        <p className="text-xs text-slate-400 font-normal">Verify operational expenses, check receipt uploads, and clear budget items.</p>
+        <h2 className="text-base font-normal text-slate-850">Operational Approvals Queue</h2>
+        <p className="text-sm text-slate-400 font-normal">Verify operational expenses, check receipt uploads, and clear budget items.</p>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6 space-y-4">
-        <h3 className="font-normal text-slate-808 text-sm border-b border-slate-100 pb-2">
+        <h3 className="font-normal text-slate-808 text-base border-b border-slate-100 pb-2">
           Vouchers Pending Financial Clearance
         </h3>
 
@@ -1227,27 +1227,27 @@ export function FinanceApprovalsView() {
               <div key={exp.id || idx} className="p-4 bg-slate-50 border border-slate-200 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-normal text-slate-808 text-xs">{exp.description}</span>
+                    <span className="font-normal text-slate-808 text-sm">{exp.description}</span>
                     {needsSecond && (
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
                         Awaiting 2nd approval
                       </span>
                     )}
                   </div>
-                  <span className="text-[11px] text-slate-400 block mt-0.5">Amount requested: TZS {exp.amount.toLocaleString()} • Category: {exp.category || 'Operations'} • Wallet: {exp.bankAccount || 'CRDB'}</span>
+                  <span className="text-xs text-slate-400 block mt-0.5">Amount requested: TZS {exp.amount.toLocaleString()} • Category: {exp.category || 'Operations'} • Wallet: {exp.bankAccount || 'CRDB'}</span>
                   {alreadyApprovedByMe && (
-                    <span className="text-[11px] text-slate-400 italic block mt-0.5">You already gave the first approval — a different approver is needed for the second.</span>
+                    <span className="text-xs text-slate-400 italic block mt-0.5">You already gave the first approval — a different approver is needed for the second.</span>
                   )}
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleAction(exp.id, 'Approved')}
                     disabled={alreadyApprovedByMe}
-                    className="px-3 py-1.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800 text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-3 py-1.5 bg-slate-900 text-white rounded font-normal hover:bg-slate-800 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {needsSecond ? 'Give Second Approval' : 'Approve Clearance'}
                   </button>
-                  <button onClick={() => handleAction(exp.id, 'Rejected')} className="px-3 py-1.5 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 text-xs">Reject Voucher</button>
+                  <button onClick={() => handleAction(exp.id, 'Rejected')} className="px-3 py-1.5 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 text-sm">Reject Voucher</button>
                 </div>
               </div>
             );
@@ -1282,15 +1282,15 @@ export function FinanceSettingsView() {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn font-normal text-xs text-slate-700">
+    <div className="space-y-6 animate-fadeIn font-normal text-sm text-slate-700">
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-normal text-slate-805">Finance Configurations</h2>
-        <p className="text-xs text-slate-400 font-normal">Manage tax rates, currency conversion ratios, and transaction rules.</p>
+        <h2 className="text-base font-normal text-slate-805">Finance Configurations</h2>
+        <p className="text-sm text-slate-400 font-normal">Manage tax rates, currency conversion ratios, and transaction rules.</p>
       </div>
 
       <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 font-normal">
-        <h3 className="font-normal text-slate-808 text-xs uppercase tracking-wider border-b border-slate-100 pb-2">VAT & Corporate Tax Defaults</h3>
-        <div className="space-y-3 font-normal text-xs">
+        <h3 className="font-normal text-slate-808 text-sm uppercase tracking-wider border-b border-slate-100 pb-2">VAT & Corporate Tax Defaults</h3>
+        <div className="space-y-3 font-normal text-sm">
           <div>
             <span className="text-slate-400 block mb-1">Standard VAT Rate</span>
             <span className="font-normal text-slate-700 block bg-slate-50 p-2.5 rounded border border-slate-200">16% (Applicable on local invoices)</span>
@@ -1303,19 +1303,19 @@ export function FinanceSettingsView() {
       </div>
 
       <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4 font-normal">
-        <h3 className="font-normal text-slate-808 text-xs uppercase tracking-wider border-b border-slate-100 pb-2">Approval Threshold Controls</h3>
-        <p className="text-[11px] text-slate-400 -mt-2">Amounts above these thresholds (TZS) require additional approval before processing.</p>
+        <h3 className="font-normal text-slate-808 text-sm uppercase tracking-wider border-b border-slate-100 pb-2">Approval Threshold Controls</h3>
+        <p className="text-xs text-slate-400 -mt-2">Amounts above these thresholds (TZS) require additional approval before processing.</p>
         <form onSubmit={handleSaveThresholds} className="space-y-3 font-normal">
           <div>
-            <label className="block text-[11px] text-slate-400 uppercase mb-1">Expense Approval Threshold (TZS)</label>
+            <label className="block text-xs text-slate-400 uppercase mb-1">Expense Approval Threshold (TZS)</label>
             <input type="number" required value={expenseApprovalThreshold} onChange={(e) => setExpenseApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
           </div>
           <div>
-            <label className="block text-[11px] text-slate-400 uppercase mb-1">Procurement Approval Threshold (TZS)</label>
+            <label className="block text-xs text-slate-400 uppercase mb-1">Procurement Approval Threshold (TZS)</label>
             <input type="number" required value={procurementApprovalThreshold} onChange={(e) => setProcurementApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
           </div>
           <div>
-            <label className="block text-[11px] text-slate-400 uppercase mb-1">Budget Approval Threshold (TZS)</label>
+            <label className="block text-xs text-slate-400 uppercase mb-1">Budget Approval Threshold (TZS)</label>
             <input type="number" required value={budgetApprovalThreshold} onChange={(e) => setBudgetApprovalThreshold(e.target.value)} className="w-full px-2.5 py-1.5 border border-slate-200 rounded bg-white" />
           </div>
           <button type="submit" className="w-full py-2 bg-slate-900 text-white rounded font-normal hover:bg-slate-800">Save Thresholds</button>

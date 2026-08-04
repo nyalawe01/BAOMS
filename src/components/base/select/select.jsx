@@ -84,7 +84,7 @@ export function Select({
   return (
     <div className="relative space-y-1 w-full text-left font-sans" ref={containerRef}>
       {label && (
-        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+        <label className="block text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
           <span>{label}</span>
           {isRequired && <span className="text-rose-500">*</span>}
           {tooltip && (
@@ -103,7 +103,7 @@ export function Select({
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-controls={listboxId}
-        className="w-full flex items-center justify-between px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 hover:border-slate-350 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 focus:border-indigo-500 shadow-sm transition-all"
+        className="w-full flex items-center justify-between px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 hover:border-slate-350 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 focus:border-indigo-500 shadow-sm transition-all"
       >
         <div className="flex items-center gap-2 truncate">
           {Icon && <Icon size={16} className="text-slate-400 shrink-0" />}
@@ -143,7 +143,7 @@ export function Select({
                 tabIndex={-1}
                 onClick={() => handleSelect(item.id)}
                 onKeyDown={(event) => handleOptionKeyDown(event, index)}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-slate-50 transition-colors text-left text-xs focus:outline-none focus-visible:bg-slate-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-slate-50 transition-colors text-left text-sm focus:outline-none focus-visible:bg-slate-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${
                   isSelected ? 'bg-indigo-50/50 text-indigo-900 font-bold' : 'text-slate-700'
                 }`}
               >
@@ -154,7 +154,7 @@ export function Select({
                   <div className="truncate">
                     <span className="block font-semibold">{item.label}</span>
                     {supportingText && (
-                      <span className="block text-[11px] text-slate-400 font-medium truncate">{supportingText}</span>
+                      <span className="block text-xs text-slate-400 font-medium truncate">{supportingText}</span>
                     )}
                   </div>
                 </div>
@@ -169,7 +169,7 @@ export function Select({
         </div>
       )}
 
-      {hint && <p className="text-[11px] text-slate-400 font-medium mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-slate-400 font-medium mt-1">{hint}</p>}
     </div>
   );
 }

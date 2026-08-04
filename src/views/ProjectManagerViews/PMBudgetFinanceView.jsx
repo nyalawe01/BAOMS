@@ -22,16 +22,16 @@ export function PMBudgetFinanceView() {
       {/* Header */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-sm font-normal text-slate-800">Financial Ledger Tracker</h2>
-          <p className="text-xs text-slate-400 font-normal">Review allocated budgets and expenses categorized per project.</p>
+          <h2 className="text-base font-normal text-slate-800">Financial Ledger Tracker</h2>
+          <p className="text-sm text-slate-400 font-normal">Review allocated budgets and expenses categorized per project.</p>
         </div>
 
         {/* Project Selector */}
-        <div className="text-xs font-normal">
+        <div className="text-sm font-normal">
           <select
             value={selectedProjId}
             onChange={(e) => setSelectedProjId(e.target.value)}
-            className="border border-slate-200 rounded px-2.5 py-1.5 bg-white text-xs font-normal focus:outline-none"
+            className="border border-slate-200 rounded px-2.5 py-1.5 bg-white text-sm font-normal focus:outline-none"
           >
             {projects.map(p => (
               <option key={p.id} value={p.id}>{p.name}</option>
@@ -49,7 +49,7 @@ export function PMBudgetFinanceView() {
           { label: 'Pending Approvals', value: `TZS ${pending.toLocaleString()}`, color: 'border-l-slate-200' }
         ].map((card, idx) => (
           <div key={idx} className={`bg-white border border-slate-200 rounded-xl p-4 shadow-sm border-l-4 ${card.color} flex flex-col justify-between`}>
-            <span className="text-[11px] font-normal text-slate-500 uppercase tracking-widest">{card.label}</span>
+            <span className="text-xs font-normal text-slate-500 uppercase tracking-widest">{card.label}</span>
             <span className="text-base font-normal text-slate-800 mt-2 block">{card.value}</span>
           </div>
         ))}
@@ -57,12 +57,12 @@ export function PMBudgetFinanceView() {
 
       {/* Expenses Table */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
-        <h3 className="font-normal text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
+        <h3 className="font-normal text-slate-800 text-base flex items-center gap-2 border-b border-slate-100 pb-2">
           <FileSpreadsheet size={16} className="text-slate-400" />
           <span>Operational Expenses Log Ledger ({activeProj ? activeProj.name : 'Selected Project'})</span>
         </h3>
 
-        <div className="overflow-x-auto text-xs select-none">
+        <div className="overflow-x-auto text-sm select-none">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">

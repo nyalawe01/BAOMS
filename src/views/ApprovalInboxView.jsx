@@ -192,14 +192,14 @@ export function ApprovalInboxView() {
           <Inbox className="text-indigo-400" />
           <span>Approval Inbox</span>
         </h2>
-        <p className="text-slate-400 text-xs mt-1">Everything currently waiting on your decision, across expenses, staff requests, and beneficiary verifications.</p>
+        <p className="text-slate-400 text-sm mt-1">Everything currently waiting on your decision, across expenses, staff requests, and beneficiary verifications.</p>
       </div>
 
       {noSectionsVisible && (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-10 text-center space-y-2">
           <ShieldCheck className="mx-auto text-slate-300" size={32} />
-          <h3 className="font-bold text-slate-800 text-sm">No Approval Actions For Your Role</h3>
-          <p className="text-xs text-slate-400 max-w-md mx-auto">
+          <h3 className="font-bold text-slate-800 text-base">No Approval Actions For Your Role</h3>
+          <p className="text-sm text-slate-400 max-w-md mx-auto">
             This page shows approvals relevant to your role ({role || 'your account'}). You don't currently have any pending action types assigned to you.
           </p>
         </div>
@@ -209,13 +209,13 @@ export function ApprovalInboxView() {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
                 <FileText size={15} className="text-indigo-500" />
                 <span>Pending Expenses</span>
               </h3>
-              <p className="text-xs text-slate-400">Expense claims awaiting your sign-off.</p>
+              <p className="text-sm text-slate-400">Expense claims awaiting your sign-off.</p>
             </div>
-            <span className="text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
+            <span className="text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
               {pendingExpenses.length} Pending
             </span>
           </div>
@@ -230,14 +230,14 @@ export function ApprovalInboxView() {
                 <div key={ex.id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-bold text-slate-800">{ex.description}</span>
+                      <span className="text-sm font-bold text-slate-800">{ex.description}</span>
                       {needsSecond && (
-                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
                           Awaiting 2nd approval
                         </span>
                       )}
                     </div>
-                    <div className="text-[11px] text-slate-400 flex items-center gap-2 flex-wrap">
+                    <div className="text-xs text-slate-400 flex items-center gap-2 flex-wrap">
                       <span>Project: {ex.projectName}</span>
                       <span>&bull;</span>
                       <span>Category: {ex.category}</span>
@@ -245,12 +245,12 @@ export function ApprovalInboxView() {
                       <span>Submitted by: {ex.submittedByName}</span>
                     </div>
                     {alreadyApprovedByMe && (
-                      <p className="text-[11px] text-slate-400 italic">You already gave the first approval — a different approver is needed for the second.</p>
+                      <p className="text-xs text-slate-400 italic">You already gave the first approval — a different approver is needed for the second.</p>
                     )}
                   </div>
 
                   <div className="flex items-center gap-4">
-                    <span className="text-sm font-extrabold text-slate-900">TZS {Number(ex.amount || 0).toLocaleString()}</span>
+                    <span className="text-base font-extrabold text-slate-900">TZS {Number(ex.amount || 0).toLocaleString()}</span>
                     <div className="flex gap-1.5">
                       <button
                         onClick={() => handleApproveExpense(ex.id, ex.description, ex.amount)}
@@ -274,7 +274,7 @@ export function ApprovalInboxView() {
             })}
 
             {pendingExpenses.length === 0 && (
-              <div className="p-8 text-center text-slate-400 text-xs italic flex flex-col items-center gap-2">
+              <div className="p-8 text-center text-slate-400 text-sm italic flex flex-col items-center gap-2">
                 <Clock size={20} className="text-slate-300" />
                 Nothing pending.
               </div>
@@ -287,13 +287,13 @@ export function ApprovalInboxView() {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
                 <Users size={15} className="text-indigo-500" />
                 <span>Pending Staff Requests</span>
               </h3>
-              <p className="text-xs text-slate-400">Leave and staff requests awaiting your decision.</p>
+              <p className="text-sm text-slate-400">Leave and staff requests awaiting your decision.</p>
             </div>
-            <span className="text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
+            <span className="text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
               {pendingRequests.length} Pending
             </span>
           </div>
@@ -302,21 +302,21 @@ export function ApprovalInboxView() {
             {pendingRequests.map(req => (
               <div key={req.id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="space-y-1">
-                  <span className="text-xs font-bold text-slate-800">{req.userName} &mdash; {req.requestType} Request</span>
-                  <p className="text-[11px] text-slate-400">Department: {req.department}</p>
-                  <p className="text-[11px] text-slate-400">Reason: {req.details?.reason}</p>
+                  <span className="text-sm font-bold text-slate-800">{req.userName} &mdash; {req.requestType} Request</span>
+                  <p className="text-xs text-slate-400">Department: {req.department}</p>
+                  <p className="text-xs text-slate-400">Reason: {req.details?.reason}</p>
                 </div>
 
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleApproveRequest(req)}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs py-1 px-3.5 rounded flex items-center gap-1"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm py-1 px-3.5 rounded flex items-center gap-1"
                   >
                     <Check size={12} /> Approve
                   </button>
                   <button
                     onClick={() => handleRejectRequest(req)}
-                    className="bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs py-1 px-3.5 rounded flex items-center gap-1"
+                    className="bg-rose-600 hover:bg-rose-500 text-white font-semibold text-sm py-1 px-3.5 rounded flex items-center gap-1"
                   >
                     <X size={12} /> Reject
                   </button>
@@ -325,7 +325,7 @@ export function ApprovalInboxView() {
             ))}
 
             {pendingRequests.length === 0 && (
-              <div className="p-8 text-center text-slate-400 text-xs italic flex flex-col items-center gap-2">
+              <div className="p-8 text-center text-slate-400 text-sm italic flex flex-col items-center gap-2">
                 <Clock size={20} className="text-slate-300" />
                 Nothing pending.
               </div>
@@ -338,13 +338,13 @@ export function ApprovalInboxView() {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
                 <Package size={15} className="text-indigo-500" />
                 <span>Pending Asset Requests</span>
               </h3>
-              <p className="text-xs text-slate-400">Equipment/asset requests awaiting fulfillment sign-off.</p>
+              <p className="text-sm text-slate-400">Equipment/asset requests awaiting fulfillment sign-off.</p>
             </div>
-            <span className="text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
+            <span className="text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
               {pendingAssetRequests.length} Pending
             </span>
           </div>
@@ -353,21 +353,21 @@ export function ApprovalInboxView() {
             {pendingAssetRequests.map(req => (
               <div key={req.id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="space-y-1">
-                  <span className="text-xs font-bold text-slate-800">{req.userName} &mdash; Asset Request</span>
-                  <p className="text-[11px] text-slate-400">Department: {req.department}</p>
-                  <p className="text-[11px] text-slate-400">Reason: {req.details?.reason}</p>
+                  <span className="text-sm font-bold text-slate-800">{req.userName} &mdash; Asset Request</span>
+                  <p className="text-xs text-slate-400">Department: {req.department}</p>
+                  <p className="text-xs text-slate-400">Reason: {req.details?.reason}</p>
                 </div>
 
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleApproveAssetRequest(req)}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs py-1 px-3.5 rounded flex items-center gap-1"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm py-1 px-3.5 rounded flex items-center gap-1"
                   >
                     <Check size={12} /> Approve
                   </button>
                   <button
                     onClick={() => handleRejectAssetRequest(req)}
-                    className="bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs py-1 px-3.5 rounded flex items-center gap-1"
+                    className="bg-rose-600 hover:bg-rose-500 text-white font-semibold text-sm py-1 px-3.5 rounded flex items-center gap-1"
                   >
                     <X size={12} /> Reject
                   </button>
@@ -376,7 +376,7 @@ export function ApprovalInboxView() {
             ))}
 
             {pendingAssetRequests.length === 0 && (
-              <div className="p-8 text-center text-slate-400 text-xs italic flex flex-col items-center gap-2">
+              <div className="p-8 text-center text-slate-400 text-sm italic flex flex-col items-center gap-2">
                 <Clock size={20} className="text-slate-300" />
                 Nothing pending.
               </div>
@@ -389,13 +389,13 @@ export function ApprovalInboxView() {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
                 <Package size={15} className="text-indigo-500" />
                 <span>Pending Purchase Orders</span>
               </h3>
-              <p className="text-xs text-slate-400">Orders over the procurement threshold, awaiting sign-off before they're placed.</p>
+              <p className="text-sm text-slate-400">Orders over the procurement threshold, awaiting sign-off before they're placed.</p>
             </div>
-            <span className="text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
+            <span className="text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
               {pendingOrders.length} Pending
             </span>
           </div>
@@ -404,14 +404,14 @@ export function ApprovalInboxView() {
             {pendingOrders.map(order => (
               <div key={order.id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="space-y-1">
-                  <span className="text-xs font-bold text-slate-800">{order.orderType} &mdash; {order.vendorName}</span>
-                  <p className="text-[11px] text-slate-400">Requested {order.createdAt}</p>
+                  <span className="text-sm font-bold text-slate-800">{order.orderType} &mdash; {order.vendorName}</span>
+                  <p className="text-xs text-slate-400">Requested {order.createdAt}</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-sm font-extrabold text-slate-900">TZS {Number(order.totalAmount || 0).toLocaleString()}</span>
+                  <span className="text-base font-extrabold text-slate-900">TZS {Number(order.totalAmount || 0).toLocaleString()}</span>
                   <button
                     onClick={() => handleApproveOrder(order)}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs py-1 px-3.5 rounded flex items-center gap-1"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm py-1 px-3.5 rounded flex items-center gap-1"
                   >
                     <Check size={12} /> Approve
                   </button>
@@ -420,7 +420,7 @@ export function ApprovalInboxView() {
             ))}
 
             {pendingOrders.length === 0 && (
-              <div className="p-8 text-center text-slate-400 text-xs italic flex flex-col items-center gap-2">
+              <div className="p-8 text-center text-slate-400 text-sm italic flex flex-col items-center gap-2">
                 <Clock size={20} className="text-slate-300" />
                 Nothing pending.
               </div>
@@ -433,13 +433,13 @@ export function ApprovalInboxView() {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
                 <DollarSign size={15} className="text-indigo-500" />
                 <span>Pending Budget Items</span>
               </h3>
-              <p className="text-xs text-slate-400">Line items over the budget threshold, proposed but not yet allocated.</p>
+              <p className="text-sm text-slate-400">Line items over the budget threshold, proposed but not yet allocated.</p>
             </div>
-            <span className="text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
+            <span className="text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
               {pendingBudgetItems.length} Pending
             </span>
           </div>
@@ -448,14 +448,14 @@ export function ApprovalInboxView() {
             {pendingBudgetItems.map(item => (
               <div key={item.id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="space-y-1">
-                  <span className="text-xs font-bold text-slate-800">{item.description}</span>
-                  <p className="text-[11px] text-slate-400">Project: {item.projectName} &bull; Category: {item.category}</p>
+                  <span className="text-sm font-bold text-slate-800">{item.description}</span>
+                  <p className="text-xs text-slate-400">Project: {item.projectName} &bull; Category: {item.category}</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-sm font-extrabold text-slate-900">TZS {Number(item.allocatedAmount || 0).toLocaleString()}</span>
+                  <span className="text-base font-extrabold text-slate-900">TZS {Number(item.allocatedAmount || 0).toLocaleString()}</span>
                   <button
                     onClick={() => handleApproveBudgetItem(item)}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs py-1 px-3.5 rounded flex items-center gap-1"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm py-1 px-3.5 rounded flex items-center gap-1"
                   >
                     <Check size={12} /> Approve
                   </button>
@@ -464,7 +464,7 @@ export function ApprovalInboxView() {
             ))}
 
             {pendingBudgetItems.length === 0 && (
-              <div className="p-8 text-center text-slate-400 text-xs italic flex flex-col items-center gap-2">
+              <div className="p-8 text-center text-slate-400 text-sm italic flex flex-col items-center gap-2">
                 <Clock size={20} className="text-slate-300" />
                 Nothing pending.
               </div>
@@ -477,13 +477,13 @@ export function ApprovalInboxView() {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
                 <ShieldCheck size={15} className="text-indigo-500" />
                 <span>Pending Beneficiary Verifications</span>
               </h3>
-              <p className="text-xs text-slate-400">Beneficiary records awaiting field verification sign-off.</p>
+              <p className="text-sm text-slate-400">Beneficiary records awaiting field verification sign-off.</p>
             </div>
-            <span className="text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
+            <span className="text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">
               {pendingBeneficiaries.length} Pending
             </span>
           </div>
@@ -492,13 +492,13 @@ export function ApprovalInboxView() {
             {pendingBeneficiaries.map(ben => (
               <div key={ben.id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="space-y-1">
-                  <span className="text-xs font-bold text-slate-800">{ben.name}</span>
-                  <p className="text-[11px] text-slate-400">Status: {ben.status}</p>
+                  <span className="text-sm font-bold text-slate-800">{ben.name}</span>
+                  <p className="text-xs text-slate-400">Status: {ben.status}</p>
                 </div>
 
                 <button
                   onClick={() => handleVerifyBeneficiary(ben)}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs py-1 px-3.5 rounded flex items-center gap-1"
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm py-1 px-3.5 rounded flex items-center gap-1"
                 >
                   <Check size={12} /> Verify
                 </button>
@@ -506,7 +506,7 @@ export function ApprovalInboxView() {
             ))}
 
             {pendingBeneficiaries.length === 0 && (
-              <div className="p-8 text-center text-slate-400 text-xs italic flex flex-col items-center gap-2">
+              <div className="p-8 text-center text-slate-400 text-sm italic flex flex-col items-center gap-2">
                 <Clock size={20} className="text-slate-300" />
                 Nothing pending.
               </div>

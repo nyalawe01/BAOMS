@@ -34,7 +34,7 @@ export default function Carousel({ slides, title }) {
             <ChevronLeft size={18} />
           </button>
           
-          <span className="text-xs font-semibold text-slate-500 min-w-[40px] text-center">
+          <span className="text-sm font-semibold text-slate-500 min-w-[40px] text-center">
             {currentIndex + 1} / {slides.length}
           </span>
           

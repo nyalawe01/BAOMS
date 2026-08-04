@@ -146,12 +146,12 @@ EOF
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
         <div>
-          <h2 className="text-sm font-normal text-slate-800">Projects Portfolios Hierarchy</h2>
-          <p className="text-xs text-slate-400 font-normal">Initialize workspaces, allocate budgets, track progress indicators, and assign personnel.</p>
+          <h2 className="text-base font-normal text-slate-800">Projects Portfolios Hierarchy</h2>
+          <p className="text-sm text-slate-400 font-normal">Initialize workspaces, allocate budgets, track progress indicators, and assign personnel.</p>
         </div>
         <button
           onClick={() => setIsDrawerOpen(true)}
-          className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-normal transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-sm font-normal transition-all"
         >
           <Plus size={14} />
           <span>Create Project Portfolio</span>
@@ -159,7 +159,7 @@ EOF
       </div>
 
       {/* Filters & Actions */}
-      <div className="flex flex-wrap gap-2 items-center justify-between bg-white border border-slate-200 rounded-xl p-3 shadow-sm text-xs">
+      <div className="flex flex-wrap gap-2 items-center justify-between bg-white border border-slate-200 rounded-xl p-3 shadow-sm text-sm">
         <div className="flex items-center gap-2">
           <span className="font-normal text-slate-400">Filter Status:</span>
           {['All', 'Planning', 'In Progress', 'Completed', 'On Hold'].map(status => (
@@ -181,7 +181,7 @@ EOF
       {/* Main Table Grid */}
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden select-none">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-sm border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 font-normal text-slate-400 uppercase tracking-wider">
                 <th className="p-3">Project ID</th>
@@ -200,7 +200,7 @@ EOF
                   className={`hover:bg-slate-50/50 cursor-pointer transition-colors ${selectedProjId === proj.id ? 'bg-slate-50' : ''}`}
                   onClick={() => { setSelectedProjId(proj.id); setIsModalOpen(true); }}
                 >
-                  <td className="p-3 font-mono text-[11px] text-slate-400">#{proj.id.substring(0,6) || idx+1}</td>
+                  <td className="p-3 font-mono text-xs text-slate-400">#{proj.id.substring(0,6) || idx+1}</td>
                   <td className="p-3 font-normal text-slate-800">{proj.name}</td>
                   <td className="p-3 text-slate-550 font-normal">{proj.program || 'Field Program'}</td>
                   <td className="p-3 font-normal text-slate-700">TZS {proj.budget?.toLocaleString() || '0'}</td>
@@ -247,8 +247,8 @@ EOF
             {/* Header */}
             <div className="px-6 py-4 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-white">
               <div>
-                <h3 className="text-sm font-normal">{selectedProj.name}</h3>
-                <span className="text-[11px] text-slate-400 font-normal">Project workspace overview</span>
+                <h3 className="text-base font-normal">{selectedProj.name}</h3>
+                <span className="text-xs text-slate-400 font-normal">Project workspace overview</span>
               </div>
               <button
                 onClick={() => { setIsModalOpen(false); setSelectedProjId(null); }}
@@ -259,60 +259,60 @@ EOF
             </div>
 
             {/* Scrollable Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-5 select-none bg-slate-50 text-xs text-slate-700">
+            <div className="flex-1 overflow-y-auto p-6 space-y-5 select-none bg-slate-50 text-sm text-slate-700">
               <div>
-                <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-normal mb-1">Project Objectives</span>
+                <span className="text-xs text-slate-400 uppercase tracking-wider block font-normal mb-1">Project Objectives</span>
                 <p className="text-slate-600 leading-relaxed font-normal">{selectedProj.description || 'No description provided.'}</p>
               </div>
 
               {/* Data fields grid */}
               <div className="grid grid-cols-2 gap-3 bg-white border border-slate-200 rounded-lg p-3 font-normal">
                 <div>
-                  <span className="text-slate-400 block text-[11px] uppercase font-normal">Timeline Limit</span>
+                  <span className="text-slate-400 block text-xs uppercase font-normal">Timeline Limit</span>
                   <span className="text-slate-700 block font-normal">{selectedProj.startDate} to {selectedProj.endDate}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px] uppercase font-normal">Overall Progress</span>
+                  <span className="text-slate-400 block text-xs uppercase font-normal">Overall Progress</span>
                   <span className="text-slate-700 block font-normal">{selectedProj.progress || 0}% Complete</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px] uppercase font-normal">Authorized Budget Limit</span>
+                  <span className="text-slate-400 block text-xs uppercase font-normal">Authorized Budget Limit</span>
                   <span className="text-slate-700 block font-normal">TZS {selectedProj.budget?.toLocaleString() || 0}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px] uppercase font-normal">Donor Sponsors</span>
+                  <span className="text-slate-400 block text-xs uppercase font-normal">Donor Sponsors</span>
                   <span className="text-slate-700 block font-normal">{selectedProj.donor || 'UNICEF'}</span>
                 </div>
               </div>
 
               {/* Team Members List */}
               <div className="space-y-2 pt-2 border-t border-slate-200">
-                <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-normal">Team Members Allocated</span>
+                <span className="text-xs text-slate-400 uppercase tracking-wider block font-normal">Team Members Allocated</span>
                 <div className="space-y-1.5">
                   {users.filter(u => (selectedProj.assignedStaff || []).includes(u.id)).map(member => (
                     <div key={member.id} className="flex justify-between items-center p-2 bg-white border border-slate-200 rounded">
                       <span className="text-slate-700 font-normal">{member.name}</span>
-                      <span className="text-[11px] text-slate-400 font-normal">{member.officeDetails?.position || member.role}</span>
+                      <span className="text-xs text-slate-400 font-normal">{member.officeDetails?.position || member.role}</span>
                     </div>
                   ))}
                   {users.filter(u => (selectedProj.assignedStaff || []).includes(u.id)).length === 0 && (
-                    <p className="text-slate-400 italic font-normal text-[11px]">No staff allocated to this project workspace.</p>
+                    <p className="text-slate-400 italic font-normal text-xs">No staff allocated to this project workspace.</p>
                   )}
                 </div>
               </div>
 
               {/* Files / Folder Documents (Resources) */}
               <div className="space-y-2 pt-2 border-t border-slate-200">
-                <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-normal">Linked Folder Documents</span>
+                <span className="text-xs text-slate-400 uppercase tracking-wider block font-normal">Linked Folder Documents</span>
                 <div className="space-y-1.5">
                   {projectFiles.filter(f => f.projectId === selectedProj.id).map(file => (
                     <div key={file.id} className="p-2 bg-white border border-slate-200 rounded flex justify-between items-center text-slate-700 font-normal">
                       <span>{file.fileName}</span>
-                      <span className="text-[11px] text-slate-400 font-mono">/{file.folderPath}</span>
+                      <span className="text-xs text-slate-400 font-mono">/{file.folderPath}</span>
                     </div>
                   ))}
                   {projectFiles.filter(f => f.projectId === selectedProj.id).length === 0 && (
-                    <p className="text-slate-400 italic font-normal text-[11px]">No synced document attachments linked.</p>
+                    <p className="text-slate-400 italic font-normal text-xs">No synced document attachments linked.</p>
                   )}
                 </div>
               </div>
@@ -322,13 +322,13 @@ EOF
             <div className="px-6 py-3 border-t border-slate-200 bg-slate-50 flex justify-between items-center shrink-0">
               <button
                 onClick={() => handleGenerateProjectReport(selectedProj)}
-                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-xs font-normal transition-all"
+                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-sm font-normal transition-all"
               >
                 Generate Report
               </button>
               <button
                 onClick={() => { setIsModalOpen(false); setSelectedProjId(null); }}
-                className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-xs font-normal transition-all"
+                className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-sm font-normal transition-all"
               >
                 Close Details
               </button>
@@ -342,16 +342,16 @@ EOF
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full border border-slate-200 p-6 space-y-4 animate-scaleUp">
             <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-              <h3 className="font-normal text-slate-800 text-sm flex items-center gap-2">
+              <h3 className="font-normal text-slate-800 text-base flex items-center gap-2">
                 <Plus className="text-slate-500" size={16} />
                 <span>Initialize Workspace</span>
               </h3>
               <button onClick={() => setIsDrawerOpen(false)} className="p-1 hover:bg-slate-150 rounded text-slate-400"><X size={16} /></button>
             </div>
 
-            <form onSubmit={(e) => { handleCreateProj(e); setIsDrawerOpen(false); }} className="space-y-3 text-xs font-normal">
+            <form onSubmit={(e) => { handleCreateProj(e); setIsDrawerOpen(false); }} className="space-y-3 text-sm font-normal">
               <div>
-                <label className="block text-[11px] font-normal text-slate-400 uppercase mb-1">Project Name</label>
+                <label className="block text-xs font-normal text-slate-400 uppercase mb-1">Project Name</label>
                 <input
                   type="text"
                   required
@@ -362,7 +362,7 @@ EOF
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-normal text-slate-400 uppercase mb-1">Description / Objectives</label>
+                <label className="block text-xs font-normal text-slate-400 uppercase mb-1">Description / Objectives</label>
                 <textarea
                   placeholder="Goals & Description..."
                   value={newProjDesc}
@@ -373,7 +373,7 @@ EOF
               </div>
               <div className="grid grid-cols-2 gap-3 font-normal">
                 <div>
-                  <label className="block text-[11px] font-normal text-slate-400 uppercase mb-1">Donor Sponsor</label>
+                  <label className="block text-xs font-normal text-slate-400 uppercase mb-1">Donor Sponsor</label>
                   <input
                     type="text"
                     value={newProjDonor}
@@ -382,7 +382,7 @@ EOF
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-normal text-slate-400 uppercase mb-1">Budget Limit (TZS)</label>
+                  <label className="block text-xs font-normal text-slate-400 uppercase mb-1">Budget Limit (TZS)</label>
                   <input
                     type="number"
                     value={newProjBudget}
@@ -393,7 +393,7 @@ EOF
               </div>
               <div className="grid grid-cols-2 gap-3 font-normal">
                 <div>
-                  <label className="block text-[11px] font-normal text-slate-400 uppercase mb-1">Start Date</label>
+                  <label className="block text-xs font-normal text-slate-400 uppercase mb-1">Start Date</label>
                   <input
                     type="date"
                     required
@@ -403,7 +403,7 @@ EOF
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-normal text-slate-400 uppercase mb-1">End Date</label>
+                  <label className="block text-xs font-normal text-slate-400 uppercase mb-1">End Date</label>
                   <input
                     type="date"
                     required
@@ -416,7 +416,7 @@ EOF
 
               <button
                 type="submit"
-                className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded font-normal transition-all text-xs"
+                className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded font-normal transition-all text-sm"
               >
                 Initialize Project Workspace
               </button>

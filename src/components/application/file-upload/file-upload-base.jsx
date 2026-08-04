@@ -118,15 +118,15 @@ export function FileUploadDropZone({ label = "Click to attach document", accept 
       {uploading ? (
         <div className="flex flex-col items-center justify-center space-y-1 py-1">
           <Loader2 size={16} className="text-indigo-500 animate-spin" />
-          <span className="text-[11px] font-bold text-slate-500">Uploading...</span>
+          <span className="text-xs font-bold text-slate-500">Uploading...</span>
         </div>
       ) : value ? (
-        <div className="flex items-center justify-between bg-white border border-slate-200 rounded p-1.5 text-xs text-left" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between bg-white border border-slate-200 rounded p-1.5 text-sm text-left" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center gap-2 truncate">
             <FileText size={16} className="text-slate-400 shrink-0" />
             <div className="truncate">
               <p className="font-bold text-slate-800 truncate leading-tight">{value.fileName}</p>
-              <p className="text-[11px] text-slate-400">{value.fileSize}</p>
+              <p className="text-xs text-slate-400">{value.fileSize}</p>
             </div>
           </div>
           {!disabled && (
@@ -142,12 +142,12 @@ export function FileUploadDropZone({ label = "Click to attach document", accept 
       ) : (
         <div className="flex flex-col items-center justify-center space-y-1 py-1">
           <Paperclip size={16} className="text-slate-400" />
-          <span className="text-[11px] font-bold text-slate-500">{label}</span>
-          <span className="text-[11px] text-slate-400">PDF, PNG, JPG up to 10MB</span>
+          <span className="text-xs font-bold text-slate-500">{label}</span>
+          <span className="text-xs text-slate-400">PDF, PNG, JPG up to 10MB</span>
         </div>
       )}
       {uploadError && (
-        <p className="text-[11px] text-rose-600 font-semibold mt-1">{uploadError}</p>
+        <p className="text-xs text-rose-600 font-semibold mt-1">{uploadError}</p>
       )}
     </div>
   );

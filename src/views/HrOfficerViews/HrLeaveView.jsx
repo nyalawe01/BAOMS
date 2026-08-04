@@ -46,28 +46,28 @@ export function HrLeaveView() {
       {/* Header */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
         <h2 className="text-base font-bold text-slate-800">Leave Pipelines & Timeline Logs</h2>
-        <p className="text-xs text-slate-400">Inspect active leaves, dispatch timeline expiration alerts, or recall employees.</p>
+        <p className="text-sm text-slate-400">Inspect active leaves, dispatch timeline expiration alerts, or recall employees.</p>
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
-        <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
+        <h4 className="font-bold text-slate-800 text-base flex items-center gap-2 border-b border-slate-100 pb-2">
           <Calendar size={16} className="text-indigo-500" />
           <span>Active Staff Leaves Timeline</span>
         </h4>
 
         <div className="space-y-4">
           {onLeaveStaff.map((s, idx) => (
-            <div key={idx} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-3 bg-slate-50 border border-slate-150 rounded-xl text-xs">
+            <div key={idx} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-3 bg-slate-50 border border-slate-150 rounded-xl text-sm">
               <div className="space-y-1">
-                <div className="font-extrabold text-slate-800 text-sm">{s.name}</div>
+                <div className="font-extrabold text-slate-800 text-base">{s.name}</div>
                 <div className="text-slate-500">Department: {s.officeDetails?.department || s.department} — Position: {s.officeDetails?.position || s.role}</div>
                 {/* Timeline Bar */}
                 <div className="flex items-center gap-2 pt-1.5">
-                  <span className="text-[11px] text-slate-400 font-mono">Starts: 2026-07-01</span>
+                  <span className="text-xs text-slate-400 font-mono">Starts: 2026-07-01</span>
                   <div className="w-32 bg-slate-200 h-2 rounded-full overflow-hidden">
                     <div className="bg-indigo-600 h-full w-[65%]"></div>
                   </div>
-                  <span className="text-[11px] text-slate-400 font-mono">Ends: 2026-07-30 (16 Days Remaining)</span>
+                  <span className="text-xs text-slate-400 font-mono">Ends: 2026-07-30 (16 Days Remaining)</span>
                 </div>
               </div>
 
@@ -88,7 +88,7 @@ export function HrLeaveView() {
             </div>
           ))}
           {onLeaveStaff.length === 0 && (
-            <div className="text-center py-12 text-slate-400 text-xs">No employees currently registered on leave.</div>
+            <div className="text-center py-12 text-slate-400 text-sm">No employees currently registered on leave.</div>
           )}
         </div>
       </div>

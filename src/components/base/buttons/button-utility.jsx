@@ -28,7 +28,7 @@ export function ButtonUtility({ size = 'sm', color = 'tertiary', tooltip = '', i
       {Icon && <Icon size={size === 'xs' ? 12 : size === 'sm' ? 15 : 18} />}
       
       {tooltip && (
-        <span className="absolute bottom-full mb-1.5 hidden group-hover:block bg-slate-900 text-white text-[11px] font-bold py-0.5 px-1.5 rounded uppercase tracking-wider whitespace-nowrap shadow z-50">
+        <span className="absolute bottom-full mb-1.5 hidden group-hover:block bg-slate-900 text-white text-xs font-bold py-0.5 px-1.5 rounded uppercase tracking-wider whitespace-nowrap shadow z-50">
           {tooltip}
         </span>
       )}

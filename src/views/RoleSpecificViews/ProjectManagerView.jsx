@@ -176,7 +176,7 @@ export function ProjectManagerView() {
             <button
               key={tab.id}
               onClick={() => setActivePmTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
                 activePmTab === tab.id
                   ? 'bg-indigo-650 text-white shadow'
                   : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
@@ -194,68 +194,68 @@ export function ProjectManagerView() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Workspace Creator */}
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4 lg:col-span-1">
-            <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+            <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
               <Plus className="text-indigo-500" size={16} />
               <span>Workspace Creator</span>
             </h3>
 
             <form onSubmit={handleCreateProj} className="space-y-3">
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Project Name</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Project Name</label>
                 <input 
                   type="text" 
                   required 
                   placeholder="e.g. Zanzibar Port Assessment" 
                   value={newProjName}
                   onChange={(e) => setNewProjName(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+                  className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Brief Objectives</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Brief Objectives</label>
                 <textarea 
                   placeholder="Objectives..." 
                   value={newProjDesc}
                   onChange={(e) => setNewProjDesc(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+                  className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
                   rows="2"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Starting Budget Limit (TZS)</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Starting Budget Limit (TZS)</label>
                 <input 
                   type="number" 
                   placeholder="e.g. 5000" 
                   value={newProjBudget}
                   onChange={(e) => setNewProjBudget(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+                  className="w-full px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Start Date</label>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Start Date</label>
                   <input 
                     type="date" 
                     required 
                     value={newProjStart}
                     onChange={(e) => setNewProjStart(e.target.value)}
-                    className="w-full px-2 py-1.5 border border-slate-200 rounded text-xs text-slate-805 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-805 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">End Date</label>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-1">End Date</label>
                   <input 
                     type="date" 
                     required 
                     value={newProjEnd}
                     onChange={(e) => setNewProjEnd(e.target.value)}
-                    className="w-full px-2 py-1.5 border border-slate-200 rounded text-xs text-slate-805 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-2 py-1.5 border border-slate-200 rounded text-sm text-slate-805 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
               </div>
               <button 
                 type="submit" 
-                className="w-full bg-indigo-650 hover:bg-indigo-600 text-white font-semibold py-2 rounded text-xs transition-colors"
+                className="w-full bg-indigo-650 hover:bg-indigo-600 text-white font-semibold py-2 rounded text-sm transition-colors"
               >
                 Initialize Project Workspace
               </button>
@@ -265,12 +265,12 @@ export function ProjectManagerView() {
           {/* Structured File Browser */}
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5 lg:col-span-2">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
                 <FileCheck className="text-indigo-500" size={16} />
                 <span>Advanced Structured File Browser</span>
               </h3>
               
-              <div className="flex items-center gap-4 text-xs">
+              <div className="flex items-center gap-4 text-sm">
                 {selectedProj && (
                   <div className="scale-75 origin-right translate-y-1.5">
                     <ProgressBarHalfCircle size="xxs" label="Done" value={progressVal} />
@@ -294,7 +294,7 @@ export function ProjectManagerView() {
                 <button
                   key={folder}
                   onClick={() => setActiveFolder(folder)}
-                  className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all ${
+                  className={`px-4 py-2 text-sm font-semibold border-b-2 transition-all ${
                     activeFolder === folder 
                       ? 'border-indigo-600 text-indigo-600' 
                       : 'border-transparent text-slate-400 hover:text-slate-600'
@@ -313,11 +313,11 @@ export function ProjectManagerView() {
                 placeholder="e.g. Website_Audit_Specs_v2.pdf" 
                 value={uploadFileName}
                 onChange={(e) => setUploadFileName(e.target.value)}
-                className="flex-1 px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
+                className="flex-1 px-3 py-1.5 border border-slate-200 rounded text-sm text-slate-800 focus:outline-none focus:border-indigo-500 bg-slate-50/50"
               />
               <button 
                 type="submit" 
-                className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-1.5 px-4 rounded flex items-center gap-1.5"
+                className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm py-1.5 px-4 rounded flex items-center gap-1.5"
               >
                 <Upload size={13} />
                 <span>Upload to /{activeFolder}</span>
@@ -327,13 +327,13 @@ export function ProjectManagerView() {
             {/* Files List */}
             <div className="space-y-2">
               {currentFiles.map(file => (
-                <div key={file.id} className="p-3 bg-slate-50 border border-slate-150 rounded flex justify-between items-center text-xs">
+                <div key={file.id} className="p-3 bg-slate-50 border border-slate-150 rounded flex justify-between items-center text-sm">
                   <div className="space-y-1">
                     <div className="font-bold text-slate-800 flex items-center gap-2">
                       <FileText size={14} className="text-slate-400" />
                       <span>{file.fileName}</span>
                     </div>
-                    <div className="text-[11px] text-slate-400 flex items-center gap-2">
+                    <div className="text-xs text-slate-400 flex items-center gap-2">
                       <Avatar 
                         size="xxs" 
                         src="https://www.untitledui.com/images/avatars/olivia-rhye?fm=webp&q=80" 
@@ -343,12 +343,12 @@ export function ProjectManagerView() {
                       <span>Sender: {file.senderName} ({file.senderOriginId}) • Uploaded: {new Date(file.uploadedAt).toLocaleString()}</span>
                     </div>
                   </div>
-                  <span className="text-[11px] text-slate-500 font-mono">{file.size}</span>
+                  <span className="text-xs text-slate-500 font-mono">{file.size}</span>
                 </div>
               ))}
 
               {currentFiles.length === 0 && (
-                <div className="py-8 text-center text-slate-400 text-xs">
+                <div className="py-8 text-center text-slate-400 text-sm">
                   <Illustration type="documents" size="xs" />
                   <p className="mt-2 italic">No files found in folder project "/{activeFolder}".</p>
                 </div>
@@ -372,14 +372,14 @@ export function ProjectManagerView() {
                 <div className="space-y-3">
                   <div className="flex justify-between items-start border-b border-slate-100 pb-2">
                     <div>
-                      <h4 className="font-extrabold text-slate-800 text-sm">{proj.name}</h4>
-                      <p className="text-slate-500 text-[11px] mt-1 leading-relaxed">{proj.description}</p>
-                      <span className="text-[11px] text-slate-400 font-semibold block mt-1">
+                      <h4 className="font-extrabold text-slate-800 text-base">{proj.name}</h4>
+                      <p className="text-slate-500 text-xs mt-1 leading-relaxed">{proj.description}</p>
+                      <span className="text-xs text-slate-400 font-semibold block mt-1">
                         Budget: TZS {proj.budget?.toLocaleString()} Limit • {proj.startDate} to {proj.endDate}
                       </span>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase border ${
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase border ${
                         proj.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                         proj.status === 'In Progress' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
                         proj.status === 'On Hold' ? 'bg-amber-50 text-amber-700 border-amber-200' :
@@ -387,7 +387,7 @@ export function ProjectManagerView() {
                       }`}>
                         {proj.status}
                       </span>
-                      <span className="block text-xs font-extrabold text-slate-700 mt-1">{proj.progress}% Done</span>
+                      <span className="block text-sm font-extrabold text-slate-700 mt-1">{proj.progress}% Done</span>
                     </div>
                   </div>
 
@@ -398,14 +398,14 @@ export function ProjectManagerView() {
 
                   {/* Edit status/progress */}
                   {isEditing ? (
-                    <form onSubmit={(e) => handleUpdateProjectSettings(e, proj.id)} className="bg-slate-50 border border-slate-150 rounded-lg p-3 space-y-3 text-xs">
+                    <form onSubmit={(e) => handleUpdateProjectSettings(e, proj.id)} className="bg-slate-50 border border-slate-150 rounded-lg p-3 space-y-3 text-sm">
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Status</label>
+                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Status</label>
                           <select
                             value={editStatus}
                             onChange={(e) => setEditStatus(e.target.value)}
-                            className="w-full px-2 py-1.5 border border-slate-200 rounded bg-white text-xs"
+                            className="w-full px-2 py-1.5 border border-slate-200 rounded bg-white text-sm"
                           >
                             <option value="Planning">Planning</option>
                             <option value="In Progress">In Progress</option>
@@ -414,14 +414,14 @@ export function ProjectManagerView() {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Progress (%)</label>
+                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Progress (%)</label>
                           <input
                             type="number"
                             min="0"
                             max="100"
                             value={editProgress}
                             onChange={(e) => setEditProgress(e.target.value)}
-                            className="w-full px-2 py-1 border border-slate-200 rounded bg-white text-xs"
+                            className="w-full px-2 py-1 border border-slate-200 rounded bg-white text-sm"
                           />
                         </div>
                       </div>
@@ -449,7 +449,7 @@ export function ProjectManagerView() {
                           setEditStatus(proj.status || 'Planning');
                           setEditProgress(proj.progress || 0);
                         }}
-                        className="px-3 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 rounded font-semibold text-[11px]"
+                        className="px-3 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 rounded font-semibold text-xs"
                       >
                         Update Status/Progress
                       </button>
@@ -458,35 +458,35 @@ export function ProjectManagerView() {
 
                   {/* Team Assignment List */}
                   <div className="space-y-2 pt-2 border-t border-slate-100">
-                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider block">Assigned Project Personnel</span>
+                    <span className="text-xs font-black text-slate-400 uppercase tracking-wider block">Assigned Project Personnel</span>
                     <div className="space-y-1.5 max-h-[180px] overflow-y-auto pr-1">
                       {assignedMembers.map((member) => (
                         <div key={member.id} className="flex justify-between items-center p-2 bg-slate-50 border border-slate-100 rounded">
                           <div className="flex items-center gap-2">
                             <Avatar size="xs" src={member.avatar || 'https://www.untitledui.com/images/avatars/olivia-rhye?fm=webp&q=80'} alt={member.name} />
-                            <div className="text-xs">
+                            <div className="text-sm">
                               <div className="font-bold text-slate-800">{member.name}</div>
-                              <span className="text-[11px] text-slate-400">{member.officeDetails?.position || member.role}</span>
+                              <span className="text-xs text-slate-400">{member.officeDetails?.position || member.role}</span>
                             </div>
                           </div>
                           <button
                             onClick={() => handleUnassignStaff(proj.id, member.id)}
-                            className="text-[11px] text-rose-500 hover:bg-rose-50 border border-rose-100 px-2 py-0.5 rounded font-semibold"
+                            className="text-xs text-rose-500 hover:bg-rose-50 border border-rose-100 px-2 py-0.5 rounded font-semibold"
                           >
                             Remove
                           </button>
                         </div>
                       ))}
                       {assignedMembers.length === 0 && (
-                        <p className="text-[11px] text-slate-400 italic text-center py-2">No team members assigned yet.</p>
+                        <p className="text-xs text-slate-400 italic text-center py-2">No team members assigned yet.</p>
                       )}
                     </div>
                   </div>
                 </div>
 
                 {/* Assign Personnel Form */}
-                <div className="pt-3 mt-3 border-t border-slate-100 text-xs">
-                  <label className="block text-[11px] font-black text-slate-400 uppercase tracking-wider mb-1">Assign Team Member</label>
+                <div className="pt-3 mt-3 border-t border-slate-100 text-sm">
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Assign Team Member</label>
                   <div className="flex gap-2">
                     <select
                       value={selectedStaffToAssign}
@@ -500,7 +500,7 @@ export function ProjectManagerView() {
                     </select>
                     <button
                       onClick={() => handleAssignStaff(proj.id)}
-                      className="bg-indigo-650 hover:bg-indigo-750 text-white px-3 py-1.5 rounded font-semibold text-[11px]"
+                      className="bg-indigo-650 hover:bg-indigo-750 text-white px-3 py-1.5 rounded font-semibold text-xs"
                     >
                       Assign
                     </button>
@@ -528,7 +528,7 @@ export function ProjectManagerView() {
               placeholder="Search by name, email, or role..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-inner"
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-inner"
             />
           </div>
 
@@ -549,10 +549,10 @@ export function ProjectManagerView() {
                 >
                   <Avatar size="lg" src={u.avatar} alt={u.name} className="ring-2 ring-slate-100" />
                   <div>
-                    <h4 className="font-extrabold text-slate-800 text-sm leading-tight">{u.name}</h4>
-                    <p className="text-slate-400 text-[11px] mt-0.5">{u.officeDetails?.position || u.role}</p>
+                    <h4 className="font-extrabold text-slate-800 text-base leading-tight">{u.name}</h4>
+                    <p className="text-slate-400 text-xs mt-0.5">{u.officeDetails?.position || u.role}</p>
                   </div>
-                  <div className="flex flex-col gap-1 w-full text-[11px]">
+                  <div className="flex flex-col gap-1 w-full text-xs">
                     <div className="flex justify-between border-t border-slate-100 pt-2 text-slate-455">
                       <span>Department</span>
                       <span className="font-bold text-slate-700">{dept}</span>
@@ -588,8 +588,8 @@ export function ProjectManagerView() {
                   <div className="flex items-center gap-3">
                     <Avatar size="sm" src={selectedUser.avatar} alt={selectedUser.name} className="ring-1 ring-slate-700" />
                     <div>
-                      <h3 className="font-extrabold text-sm leading-none">{selectedUser.name}</h3>
-                      <span className="text-[11px] text-slate-400">{selectedUser.email}</span>
+                      <h3 className="font-extrabold text-base leading-none">{selectedUser.name}</h3>
+                      <span className="text-xs text-slate-400">{selectedUser.email}</span>
                     </div>
                   </div>
                   <button 
@@ -604,8 +604,8 @@ export function ProjectManagerView() {
                 <div className="flex-1 overflow-y-auto p-6 space-y-5 select-none no-scrollbar bg-slate-50">
                   {/* Profile Details Grid */}
                   <div className="space-y-2">
-                    <h5 className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Personal Credentials</h5>
-                    <div className="grid grid-cols-2 gap-3 text-xs bg-white border border-slate-200 rounded-lg p-3">
+                    <h5 className="text-xs font-black text-slate-400 uppercase tracking-wider">Personal Credentials</h5>
+                    <div className="grid grid-cols-2 gap-3 text-sm bg-white border border-slate-200 rounded-lg p-3">
                       <div>
                         <span className="text-slate-400 block">Organization Email</span>
                         <span className="font-semibold text-slate-700 truncate block">{selectedUser.organizationEmail || 'N/A'}</span>
@@ -656,8 +656,8 @@ export function ProjectManagerView() {
 
                   {/* Office Details */}
                   <div className="space-y-2 pt-2 border-t border-slate-150">
-                    <h5 className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Office Description</h5>
-                    <div className="grid grid-cols-2 gap-3 text-xs bg-white border border-slate-200 rounded-lg p-3">
+                    <h5 className="text-xs font-black text-slate-400 uppercase tracking-wider">Office Description</h5>
+                    <div className="grid grid-cols-2 gap-3 text-sm bg-white border border-slate-200 rounded-lg p-3">
                       <div>
                         <span className="text-slate-400 block">Department Unit</span>
                         <span className="font-semibold text-slate-700">{selectedUser.officeDetails?.department || selectedUser.department || 'N/A'}</span>
@@ -679,8 +679,8 @@ export function ProjectManagerView() {
 
                   {/* Attached Supporting Documents */}
                   <div className="space-y-2 pt-2 border-t border-slate-150">
-                    <h5 className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Attached Supporting Documents</h5>
-                    <div className="space-y-2 text-xs">
+                    <h5 className="text-xs font-black text-slate-400 uppercase tracking-wider">Attached Supporting Documents</h5>
+                    <div className="space-y-2 text-sm">
                       {[
                         { key: 'cv', name: 'Curriculum Vitae (CV)' },
                         { key: 'certificates', name: 'Academic Certificates' },
@@ -693,7 +693,7 @@ export function ProjectManagerView() {
                             <div className="flex items-center gap-1.5">
                               {attachedFile ? (
                                 <>
-                                  <span className="text-[11px] text-slate-400 font-mono truncate max-w-[100px]">Attachment File</span>
+                                  <span className="text-xs text-slate-400 font-mono truncate max-w-[100px]">Attachment File</span>
                                   <button 
                                     onClick={() => setActivePreviewDoc({ fileName: docItem.name, dataUrl: attachedFile })}
                                     className="p-1 hover:bg-slate-100 rounded text-slate-750 hover:text-slate-900"
@@ -703,7 +703,7 @@ export function ProjectManagerView() {
                                   </button>
                                 </>
                               ) : (
-                                <span className="text-[11px] text-slate-400 italic">Not Attached</span>
+                                <span className="text-xs text-slate-400 italic">Not Attached</span>
                               )}
                             </div>
                           </div>
@@ -717,7 +717,7 @@ export function ProjectManagerView() {
                 <div className="px-6 py-3 border-t border-slate-200 bg-slate-50 flex justify-end shrink-0">
                   <button
                     onClick={() => setSelectedUser(null)}
-                    className="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-semibold rounded-lg transition-all"
+                    className="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-sm font-semibold rounded-lg transition-all"
                   >
                     Close Profile
                   </button>
@@ -734,26 +734,26 @@ export function ProjectManagerView() {
           {/* Left: Project Bulletins */}
           <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
             <div className="border-b border-slate-100 pb-2">
-              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
                 <LayoutDashboard size={16} className="text-indigo-500" />
                 <span>Project Bulletin & Announcements</span>
               </h3>
-              <p className="text-[11px] text-slate-400">Review announcements and board circulars broadcasted to all staff.</p>
+              <p className="text-xs text-slate-400">Review announcements and board circulars broadcasted to all staff.</p>
             </div>
 
             <div className="divide-y divide-slate-100 max-h-[360px] overflow-y-auto pr-1">
               {announcements.map(ann => (
-                <div key={ann.id} className="py-3 text-xs space-y-1">
+                <div key={ann.id} className="py-3 text-sm space-y-1">
                   <div className="flex justify-between items-center">
                     <span className="font-extrabold text-slate-800">{ann.title}</span>
-                    <span className="text-[11px] text-slate-400 font-mono">{new Date(ann.publishedAt || Date.now()).toLocaleDateString()}</span>
+                    <span className="text-xs text-slate-400 font-mono">{new Date(ann.publishedAt || Date.now()).toLocaleDateString()}</span>
                   </div>
-                  <p className="text-slate-650 leading-relaxed text-[11px]">{ann.content}</p>
-                  <div className="text-[11px] text-slate-400">Author: {ann.authorName || 'Management'}</div>
+                  <p className="text-slate-650 leading-relaxed text-xs">{ann.content}</p>
+                  <div className="text-xs text-slate-400">Author: {ann.authorName || 'Management'}</div>
                 </div>
               ))}
               {announcements.length === 0 && (
-                <div className="text-center py-12 text-slate-400 text-xs">No bulletins found.</div>
+                <div className="text-center py-12 text-slate-400 text-sm">No bulletins found.</div>
               )}
             </div>
           </div>
@@ -761,14 +761,14 @@ export function ProjectManagerView() {
           {/* Right: Dispatch Project Directive */}
           <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
             <div className="border-b border-slate-100 pb-2">
-              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
                 <ShieldAlert size={16} className="text-rose-500" />
                 <span>Dispatch Project Directive / Alert Notice</span>
               </h3>
-              <p className="text-[11px] text-slate-400">Issue direct task reminders, milestones alerts, or compliance warnings to resources.</p>
+              <p className="text-xs text-slate-400">Issue direct task reminders, milestones alerts, or compliance warnings to resources.</p>
             </div>
 
-            <form onSubmit={handleSendDirective} className="space-y-4 text-xs">
+            <form onSubmit={handleSendDirective} className="space-y-4 text-sm">
               <div className="space-y-1">
                 <label className="font-bold text-slate-500 block">Select Target Resource</label>
                 <select 
@@ -830,11 +830,11 @@ export function ProjectManagerView() {
                     <BookOpen size={20} />
                   </div>
                   <div className="space-y-0.5">
-                    <h4 className="font-extrabold text-slate-800 text-xs truncate max-w-[180px]">{docItem.title}</h4>
-                    <span className="text-[11px] text-slate-455 block">{docItem.category} • {docItem.size || 'N/A'}</span>
+                    <h4 className="font-extrabold text-slate-800 text-sm truncate max-w-[180px]">{docItem.title}</h4>
+                    <span className="text-xs text-slate-455 block">{docItem.category} • {docItem.size || 'N/A'}</span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center text-[11px] text-slate-400">
+                <div className="flex justify-between items-center text-xs text-slate-400">
                   <span>Updated: {docItem.updated || 'N/A'}</span>
                   <button
                     onClick={() => setActivePreviewDoc({ fileName: docItem.title, fileSize: docItem.size })}
