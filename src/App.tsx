@@ -6,6 +6,7 @@ import { ToastContainer } from '@/components/ui/Toast';
 import { AppRoutes } from '@/routes/AppRoutes';
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 import { useAuth } from '@/features/auth/useAuth';
+import { Analytics } from '@vercel/analytics/react';
 import { useTranslation } from 'react-i18next';
 
 const SessionExpiredDialog: React.FC = () => {
@@ -41,6 +42,7 @@ export const App: React.FC = () => {
           <AppRoutes />
           <SessionExpiredDialog />
           <ToastContainer />
+          <Analytics />
         </AuthProvider>
       </ToastProvider>
     </BrowserRouter>
