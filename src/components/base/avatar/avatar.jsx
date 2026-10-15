@@ -14,7 +14,7 @@ export function Avatar({ size = 'md', alt = '', className = '', src = '', placeh
 
   return (
     <div 
-      className={`relative inline-flex items-center justify-center rounded-full overflow-hidden bg-slate-100 border border-slate-200 object-cover ${selectedSize} ${className}`}
+      className={`relative inline-flex items-center justify-center rounded-full overflow-hidden bg-white border border-slate-200 object-cover ${selectedSize} ${className}`}
       title={alt}
     >
       {src ? (
@@ -50,11 +50,11 @@ export function AvatarProfilePhoto({ verified = false, size = 'md', alt = '', sr
 
   return (
     <div className="relative inline-block">
-      <div className={`rounded-full overflow-hidden bg-slate-100 border-2 border-indigo-150 object-cover ${selectedSize}`}>
+      <div className={`rounded-full overflow-hidden bg-white border border-slate-200 object-cover ${selectedSize}`}>
         {src ? (
           <img src={src} alt={alt} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400 font-bold uppercase text-lg">
+          <div className="w-full h-full flex items-center justify-center bg-white text-slate-500 font-bold uppercase text-lg">
             {alt ? alt.split(' ').map(n => n[0]).join('').substring(0, 2) : 'U'}
           </div>
         )}

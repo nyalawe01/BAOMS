@@ -28,11 +28,33 @@
   75% { transform: translateX(4px); }
 }
 
-/* Reset default Vite styles */
+/* Universal Typography: Enforce Google Sans Flex across all elements including numbers & codes */
+body,
+button,
+input,
+select,
+textarea,
+code,
+pre,
+kbd,
+samp,
+.font-mono {
+  font-family: 'Google Sans Flex', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
   margin: 0;
   padding: 0;
-  background-color: #f8fafc;
+  background-color: #f9fafb;
+  color: #1f2937;
+}
+
+/* Tabular figures for numbers without changing font family */
+.tabular-nums,
+.font-mono {
+  font-variant-numeric: tabular-nums;
 }
 
 #root {
@@ -52,3 +74,20 @@ body {
 *::-webkit-scrollbar {
   display: none !important; /* Chrome, Safari, Opera */
 }
+
+/* Remove all colored highlights, focus rings, and border color changes when clicking on any text box, input, textarea, or select */
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  border-color: #e5e7eb !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-color: transparent !important;
+}
+

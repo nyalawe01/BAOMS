@@ -18,7 +18,7 @@ export function StaffStatusController() {
       text: `Are you sure you want to change the status of ${targetUser?.name} to "${newStatus}"?`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#4f46e5',
+      confirmButtonColor: '#D68904',
       cancelButtonColor: '#64748b',
       confirmButtonText: 'Yes, Confirm'
     }).then((result) => {
@@ -28,7 +28,7 @@ export function StaffStatusController() {
           title: 'Updated!',
           text: `Status updated to ${newStatus}.`,
           icon: 'success',
-          confirmButtonColor: '#4f46e5'
+          confirmButtonColor: '#D68904'
         });
       }
     });
@@ -41,7 +41,7 @@ export function StaffStatusController() {
       text: `Reassign ${targetUser?.name} to the "${newDept}" department?`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#4f46e5',
+      confirmButtonColor: '#D68904',
       cancelButtonColor: '#64748b',
       confirmButtonText: 'Yes, Reassign'
     }).then((result) => {
@@ -51,7 +51,7 @@ export function StaffStatusController() {
           title: 'Reassigned!',
           text: `Department reassigned to ${newDept}.`,
           icon: 'success',
-          confirmButtonColor: '#4f46e5'
+          confirmButtonColor: '#D68904'
         });
       }
     });

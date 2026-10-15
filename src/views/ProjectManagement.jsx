@@ -147,7 +147,7 @@ export default function ProjectManagement() {
               phase.status === 'Completed' 
                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
                 : phase.status === 'Active'
-                  ? 'bg-blue-50 text-blue-700 border-blue-200 animate-pulse'
+                  ? 'bg-amber-50 text-[#D68904] border-amber-200 animate-pulse'
                   : 'bg-slate-100 text-slate-400 border-slate-200'
             }`}>
               {phase.status}
@@ -192,7 +192,7 @@ export default function ProjectManagement() {
           {projects.map((p) => {
             const isSelected = p.id === selectedProjectId;
             let statusDot = 'bg-slate-400';
-            if (p.status === 'In Progress') statusDot = 'bg-blue-500';
+            if (p.status === 'In Progress') statusDot = 'bg-[#F2A507]';
             else if (p.status === 'Completed') statusDot = 'bg-emerald-500';
             else if (p.status === 'On Hold') statusDot = 'bg-amber-500';
 
@@ -246,7 +246,7 @@ export default function ProjectManagement() {
                     <h2 className="text-xl font-bold text-slate-800">{selectedProject.name}</h2>
                     <span className={`px-2 py-0.5 text-xs font-bold uppercase rounded border ${
                       selectedProject.status === 'In Progress' 
-                        ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                        ? 'bg-amber-50 text-[#D68904] border-amber-200' 
                         : selectedProject.status === 'Completed'
                           ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                           : selectedProject.status === 'On Hold'
@@ -342,7 +342,7 @@ export default function ProjectManagement() {
                     {selectedProject.tasks.map((task) => {
                       // Status styling
                       let badge = 'bg-slate-50 text-slate-500 border-slate-200';
-                      if (task.status === 'In Progress') badge = 'bg-blue-50 text-blue-700 border-blue-200';
+                      if (task.status === 'In Progress') badge = 'bg-amber-50 text-[#D68904] border-amber-200';
                       else if (task.status === 'Completed') badge = 'bg-emerald-50 text-emerald-700 border-emerald-200';
 
                       // Check if current user is assignee (Employee rule)

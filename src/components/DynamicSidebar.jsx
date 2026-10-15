@@ -220,8 +220,8 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed, mob
     >
       {/* Brand Header (Balanced & Centered) */}
       <div className={`h-16 flex items-center gap-3 border-b border-slate-800 shrink-0 px-5 ${collapsed ? 'lg:justify-center lg:px-0' : ''}`}>
-        <div className="p-2 bg-indigo-650 rounded-lg text-white shrink-0">
-          <ShieldAlert size={18} className="animate-pulse" />
+        <div className="h-8 w-8 bg-white rounded-lg p-0.5 shrink-0 flex items-center justify-center overflow-hidden">
+          <img src="/logo.png" alt="BAOMS Logo" className="h-full w-full object-contain" />
         </div>
         <div className={collapsed ? 'lg:hidden' : ''}>
           <h1 className="font-extrabold text-base leading-none tracking-tight text-slate-100">BAOMS Portal</h1>
@@ -251,8 +251,8 @@ export default function DynamicSidebar({ activeTab, setActiveTab, collapsed, mob
                 collapsed ? 'lg:w-12 lg:h-12 lg:mx-auto lg:justify-center lg:px-0 lg:py-0' : ''
               } ${
                 isActive
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/10'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
+                  ? 'bg-slate-800 text-white font-semibold shadow-sm'
+                  : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-100'
               }`}
             >
               <Icon size={19} className="shrink-0" />

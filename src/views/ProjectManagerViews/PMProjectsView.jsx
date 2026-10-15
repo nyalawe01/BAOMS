@@ -69,7 +69,7 @@ export function PMProjectsView() {
       text: 'Mark this project workspace as archived?',
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#4f46e5',
+      confirmButtonColor: '#D68904',
       confirmButtonText: 'Yes, Archive'
     }).then((res) => {
       if (res.isConfirmed) {

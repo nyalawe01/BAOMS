@@ -59,7 +59,7 @@ export function SystemAdminView() {
         {/* Roles Distribution */}
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
           <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
-            <Layers className="text-blue-500" size={16} />
+            <Layers className="text-[#F2A507]" size={16} />
             <span>Active Authorization Roles</span>
           </h3>
           <div className="text-sm space-y-1.5">

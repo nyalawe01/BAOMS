@@ -94,8 +94,8 @@ export default function UserManagement() {
               {users.map((u) => {
                 // Role badge colors
                 let roleColor = 'bg-slate-50 text-slate-600 border-slate-200';
-                if (u.role === 'Admin') roleColor = 'bg-indigo-50 text-indigo-700 border-indigo-200';
-                else if (u.role === 'Manager') roleColor = 'bg-sky-50 text-sky-700 border-sky-200';
+                if (u.role === 'Admin') roleColor = 'bg-amber-50 text-[#D68904] border-amber-200';
+                else if (u.role === 'Manager') roleColor = 'bg-amber-50 text-[#F2A507] border-amber-200';
 
                 return (
                   <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">

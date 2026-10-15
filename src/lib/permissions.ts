@@ -1,0 +1,228 @@
+/**
+ * BAOMS Authorization & Permission Layer
+ * Babawatoto Organization Management System
+ * 
+ * Defines permission constants and role matrices mirroring server-side
+ * Row-Level Security policies.
+ */
+
+export const ROLES = {
+  SYSTEM_ADMIN: 'system_admin',
+  EXECUTIVE_DIRECTOR: 'executive_director',
+  FINANCE_OFFICER: 'finance_officer',
+  PROJECT_MANAGER: 'project_manager',
+  PROJECT_COORDINATOR: 'project_coordinator',
+  HR_ADMINISTRATOR: 'hr_administrator',
+  PROCUREMENT_OFFICER: 'procurement_officer',
+} as const;
+
+export type RoleCode = (typeof ROLES)[keyof typeof ROLES];
+
+export const PERMISSIONS = {
+  // User Management
+  USERS_VIEW: 'users.view',
+  USERS_CREATE: 'users.create',
+  USERS_UPDATE: 'users.update',
+  USERS_DEACTIVATE: 'users.deactivate',
+
+  // Security & RBAC
+  ROLES_VIEW: 'roles.view',
+  ROLES_MANAGE: 'roles.manage',
+
+  // Departments
+  DEPARTMENTS_VIEW: 'departments.view',
+  DEPARTMENTS_MANAGE: 'departments.manage',
+
+  // Auditing
+  AUDIT_VIEW: 'audit.view',
+
+  // System
+  SYSTEM_CONFIGURE: 'system.configure',
+
+  // Documents
+  DOCUMENTS_VIEW: 'documents.view',
+  DOCUMENTS_UPLOAD: 'documents.upload',
+  DOCUMENTS_APPROVE: 'documents.approve',
+  DOCUMENTS_DELETE: 'documents.delete',
+
+  // Projects
+  PROJECTS_VIEW: 'projects.view',
+  PROJECTS_CREATE: 'projects.create',
+  PROJECTS_MANAGE: 'projects.manage',
+  PROJECTS_REPORT: 'projects.report',
+
+  // Finance
+  FINANCE_VIEW: 'finance.view',
+  FINANCE_REQUEST: 'finance.request',
+  FINANCE_APPROVE: 'finance.approve',
+  FINANCE_DISBURSE: 'finance.disburse',
+
+  // HR & Leave
+  HR_VIEW: 'hr.view',
+  HR_MANAGE: 'hr.manage',
+  LEAVE_REQUEST: 'leave.request',
+  LEAVE_APPROVE: 'leave.approve',
+
+  // Correspondence & Meetings
+  CORRESPONDENCE_VIEW: 'correspondence.view',
+  CORRESPONDENCE_MANAGE: 'correspondence.manage',
+
+  // Procurement & Supply Chain
+  PROCUREMENT_VIEW: 'procurement.view',
+  PROCUREMENT_MANAGE: 'procurement.manage',
+
+  // Reports
+  REPORTS_VIEW: 'reports.view',
+  REPORTS_EXPORT: 'reports.export',
+} as const;
+
+export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
+
+/**
+ * Standard Role-Permission Mapping Matrix (aligned with migration seed)
+ */
+export const ROLE_PERMISSIONS: Record<RoleCode, PermissionCode[]> = {
+  [ROLES.SYSTEM_ADMIN]: [
+    PERMISSIONS.USERS_VIEW,
+    PERMISSIONS.USERS_CREATE,
+    PERMISSIONS.USERS_UPDATE,
+    PERMISSIONS.USERS_DEACTIVATE,
+    PERMISSIONS.ROLES_VIEW,
+    PERMISSIONS.ROLES_MANAGE,
+    PERMISSIONS.DEPARTMENTS_VIEW,
+    PERMISSIONS.DEPARTMENTS_MANAGE,
+    PERMISSIONS.AUDIT_VIEW,
+    PERMISSIONS.SYSTEM_CONFIGURE,
+    PERMISSIONS.DOCUMENTS_VIEW,
+    PERMISSIONS.PROJECTS_VIEW,
+    PERMISSIONS.FINANCE_VIEW,
+    PERMISSIONS.HR_VIEW,
+    PERMISSIONS.CORRESPONDENCE_VIEW,
+    PERMISSIONS.CORRESPONDENCE_MANAGE,
+    PERMISSIONS.PROCUREMENT_VIEW,
+    PERMISSIONS.PROCUREMENT_MANAGE,
+    PERMISSIONS.REPORTS_VIEW,
+    PERMISSIONS.REPORTS_EXPORT,
+  ],
+  [ROLES.EXECUTIVE_DIRECTOR]: [
+    PERMISSIONS.USERS_VIEW,
+    PERMISSIONS.DEPARTMENTS_VIEW,
+    PERMISSIONS.AUDIT_VIEW,
+    PERMISSIONS.DOCUMENTS_VIEW,
+    PERMISSIONS.DOCUMENTS_UPLOAD,
+    PERMISSIONS.DOCUMENTS_APPROVE,
+    PERMISSIONS.PROJECTS_VIEW,
+    PERMISSIONS.PROJECTS_MANAGE,
+    PERMISSIONS.FINANCE_VIEW,
+    PERMISSIONS.FINANCE_APPROVE,
+    PERMISSIONS.HR_VIEW,
+    PERMISSIONS.LEAVE_APPROVE,
+    PERMISSIONS.LEAVE_REQUEST,
+    PERMISSIONS.CORRESPONDENCE_VIEW,
+    PERMISSIONS.CORRESPONDENCE_MANAGE,
+    PERMISSIONS.PROCUREMENT_VIEW,
+    PERMISSIONS.PROCUREMENT_MANAGE,
+    PERMISSIONS.REPORTS_VIEW,
+    PERMISSIONS.REPORTS_EXPORT,
+  ],
+  [ROLES.FINANCE_OFFICER]: [
+    PERMISSIONS.USERS_VIEW,
+    PERMISSIONS.DEPARTMENTS_VIEW,
+    PERMISSIONS.DOCUMENTS_VIEW,
+    PERMISSIONS.DOCUMENTS_UPLOAD,
+    PERMISSIONS.PROJECTS_VIEW,
+    PERMISSIONS.FINANCE_VIEW,
+    PERMISSIONS.FINANCE_REQUEST,
+    PERMISSIONS.FINANCE_DISBURSE,
+    PERMISSIONS.LEAVE_REQUEST,
+    PERMISSIONS.CORRESPONDENCE_VIEW,
+    PERMISSIONS.PROCUREMENT_VIEW,
+    PERMISSIONS.REPORTS_VIEW,
+    PERMISSIONS.REPORTS_EXPORT,
+  ],
+  [ROLES.PROJECT_MANAGER]: [
+    PERMISSIONS.USERS_VIEW,
+    PERMISSIONS.DEPARTMENTS_VIEW,
+    PERMISSIONS.DOCUMENTS_VIEW,
+    PERMISSIONS.DOCUMENTS_UPLOAD,
+    PERMISSIONS.PROJECTS_VIEW,
+    PERMISSIONS.PROJECTS_CREATE,
+    PERMISSIONS.PROJECTS_MANAGE,
+    PERMISSIONS.PROJECTS_REPORT,
+    PERMISSIONS.FINANCE_VIEW,
+    PERMISSIONS.FINANCE_REQUEST,
+    PERMISSIONS.LEAVE_REQUEST,
+    PERMISSIONS.CORRESPONDENCE_VIEW,
+    PERMISSIONS.CORRESPONDENCE_MANAGE,
+    PERMISSIONS.PROCUREMENT_VIEW,
+    PERMISSIONS.REPORTS_VIEW,
+    PERMISSIONS.REPORTS_EXPORT,
+  ],
+  [ROLES.PROJECT_COORDINATOR]: [
+    PERMISSIONS.DEPARTMENTS_VIEW,
+    PERMISSIONS.DOCUMENTS_VIEW,
+    PERMISSIONS.DOCUMENTS_UPLOAD,
+    PERMISSIONS.PROJECTS_VIEW,
+    PERMISSIONS.PROJECTS_REPORT,
+    PERMISSIONS.FINANCE_VIEW,
+    PERMISSIONS.FINANCE_REQUEST,
+    PERMISSIONS.LEAVE_REQUEST,
+    PERMISSIONS.CORRESPONDENCE_VIEW,
+    PERMISSIONS.REPORTS_VIEW,
+  ],
+  [ROLES.HR_ADMINISTRATOR]: [
+    PERMISSIONS.USERS_VIEW,
+    PERMISSIONS.USERS_CREATE,
+    PERMISSIONS.USERS_UPDATE,
+    PERMISSIONS.DEPARTMENTS_VIEW,
+    PERMISSIONS.DOCUMENTS_VIEW,
+    PERMISSIONS.DOCUMENTS_UPLOAD,
+    PERMISSIONS.HR_VIEW,
+    PERMISSIONS.HR_MANAGE,
+    PERMISSIONS.LEAVE_REQUEST,
+    PERMISSIONS.LEAVE_APPROVE,
+    PERMISSIONS.CORRESPONDENCE_VIEW,
+    PERMISSIONS.REPORTS_VIEW,
+    PERMISSIONS.REPORTS_EXPORT,
+  ],
+  [ROLES.PROCUREMENT_OFFICER]: [
+    PERMISSIONS.DEPARTMENTS_VIEW,
+    PERMISSIONS.DOCUMENTS_VIEW,
+    PERMISSIONS.DOCUMENTS_UPLOAD,
+    PERMISSIONS.PROCUREMENT_VIEW,
+    PERMISSIONS.PROCUREMENT_MANAGE,
+    PERMISSIONS.FINANCE_VIEW,
+    PERMISSIONS.PROJECTS_VIEW,
+    PERMISSIONS.LEAVE_REQUEST,
+    PERMISSIONS.REPORTS_VIEW,
+    PERMISSIONS.REPORTS_EXPORT,
+  ],
+};
+
+/**
+ * Check if a set of assigned permissions satisfies a requested permission code.
+ * Administrators inherently possess all permissions.
+ */
+export function checkPermission(
+  assignedPermissions: string[],
+  requiredPermission: string,
+  userRoles: string[] = []
+): boolean {
+  if (userRoles.includes(ROLES.SYSTEM_ADMIN)) {
+    return true;
+  }
+  return assignedPermissions.includes(requiredPermission);
+}
+
+/**
+ * Check if a user possesses any of the required roles.
+ */
+export function checkRole(
+  userRoles: string[],
+  requiredRoles: RoleCode[]
+): boolean {
+  if (userRoles.includes(ROLES.SYSTEM_ADMIN)) {
+    return true;
+  }
+  return requiredRoles.some((role) => userRoles.includes(role));
+}

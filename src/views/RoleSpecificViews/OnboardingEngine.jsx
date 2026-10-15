@@ -51,7 +51,7 @@ export function OnboardingEngine() {
       text: `Are you sure you want to onboard ${name} as a ${role} in the ${department} department?`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#4f46e5',
+      confirmButtonColor: '#D68904',
       cancelButtonColor: '#64748b',
       confirmButtonText: 'Yes, Onboard Resource'
     }).then((result) => {
@@ -87,7 +87,7 @@ export function OnboardingEngine() {
           title: 'Success!',
           text: `Security profile has been successfully initialized and generated for ${onboardedUser.name}.`,
           icon: 'success',
-          confirmButtonColor: '#4f46e5'
+          confirmButtonColor: '#D68904'
         });
       }
     });

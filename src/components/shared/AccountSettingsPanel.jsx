@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { KeyRound, AlertTriangle, Lock } from 'lucide-react';
 import Swal from 'sweetalert2';
 
-const inputClass = "w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white";
+const inputClass = "w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#F2A507]/30 focus:border-[#F2A507] bg-white";
 
 // Standard account-settings block reused across every role's Settings page:
 // change password, delete account. Role-specific org configuration
@@ -23,21 +23,21 @@ export function AccountSettingsPanel() {
   const handleChangePassword = async (e) => {
     e.preventDefault();
     if (newPwd.length < 6) {
-      Swal.fire({ title: 'Password Too Short', text: 'New password must be at least 6 characters.', icon: 'warning', confirmButtonColor: '#4f46e5' });
+      Swal.fire({ title: 'Password Too Short', text: 'New password must be at least 6 characters.', icon: 'warning', confirmButtonColor: '#D68904' });
       return;
     }
     if (newPwd !== confirmPwd) {
-      Swal.fire({ title: 'Passwords Do Not Match', text: 'Confirm the new password correctly.', icon: 'warning', confirmButtonColor: '#4f46e5' });
+      Swal.fire({ title: 'Passwords Do Not Match', text: 'Confirm the new password correctly.', icon: 'warning', confirmButtonColor: '#D68904' });
       return;
     }
     setPwdSaving(true);
     try {
       await changePassword(currentPwd, newPwd);
       setCurrentPwd(''); setNewPwd(''); setConfirmPwd('');
-      Swal.fire({ title: 'Password Updated', text: 'Your password has been changed successfully.', icon: 'success', confirmButtonColor: '#4f46e5' });
+      Swal.fire({ title: 'Password Updated', text: 'Your password has been changed successfully.', icon: 'success', confirmButtonColor: '#D68904' });
     } catch (err) {
       console.error('Password change failed:', err);
-      Swal.fire({ title: 'Could Not Change Password', text: 'Your current password may be incorrect. Please try again.', icon: 'error', confirmButtonColor: '#4f46e5' });
+      Swal.fire({ title: 'Could Not Change Password', text: 'Your current password may be incorrect. Please try again.', icon: 'error', confirmButtonColor: '#D68904' });
     } finally {
       setPwdSaving(false);
     }
@@ -63,7 +63,7 @@ export function AccountSettingsPanel() {
       await deleteMyAccount(deletePwd);
     } catch (err) {
       console.error('Account deletion failed:', err);
-      Swal.fire({ title: 'Could Not Delete Account', text: 'Your password may be incorrect. Please try again.', icon: 'error', confirmButtonColor: '#4f46e5' });
+      Swal.fire({ title: 'Could Not Delete Account', text: 'Your password may be incorrect. Please try again.', icon: 'error', confirmButtonColor: '#D68904' });
       setDeleteBusy(false);
     }
   };
@@ -73,7 +73,7 @@ export function AccountSettingsPanel() {
       {/* Password & Security */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
         <h3 className="font-bold text-slate-800 text-base flex items-center gap-2 mb-1">
-          <KeyRound size={16} className="text-indigo-500" />
+          <KeyRound size={16} className="text-[#D68904]" />
           <span>Password & Security</span>
         </h3>
         <p className="text-xs text-slate-400 mb-4">Change the password used to sign in to BAOMS.</p>
@@ -93,7 +93,7 @@ export function AccountSettingsPanel() {
           <button
             type="submit"
             disabled={pwdSaving}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-semibold py-2 rounded-lg text-sm transition-colors"
+            className="w-full bg-[#D68904] hover:bg-[#F2A507] disabled:opacity-60 text-white font-semibold py-2 rounded-lg text-sm transition-colors"
           >
             {pwdSaving ? 'Updating...' : 'Update Password'}
           </button>

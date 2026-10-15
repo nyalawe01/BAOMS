@@ -8,12 +8,18 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      'lucide-react': path.resolve(__dirname, './src/lib/fontAwesomeIcons.tsx'),
     },
   },
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.js'],
     globals: true,
+    server: {
+      deps: {
+        inline: ['lucide-react'],
+      },
+    },
   },
 })
 

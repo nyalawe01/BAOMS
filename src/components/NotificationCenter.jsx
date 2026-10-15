@@ -92,14 +92,15 @@ export default function NotificationCenter({ onNavigate }) {
   return (
     <div className="relative">
       <button
+        type="button"
         onClick={() => setOpen(!open)}
-        className="relative p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-colors"
+        className="relative inline-flex justify-center items-center size-11 text-sm font-semibold rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 text-gray-800 dark:text-white shadow-2xs hover:bg-gray-50 dark:hover:bg-neutral-700 focus:outline-hidden focus:bg-gray-50 dark:focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none transition-colors"
         title="Notifications"
       >
-        <Bell size={18} />
+        <Bell className="shrink-0 size-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 flex items-center justify-center bg-indigo-600 text-white text-xs font-bold rounded-full border border-white leading-none">
-            {unreadCount > 9 ? '9+' : unreadCount}
+          <span className="absolute top-0 inset-e-0 inline-flex items-center py-0.5 px-1.5 rounded-full text-xs font-medium transform -translate-y-1/2 translate-x-1/2 bg-black text-white">
+            {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </button>

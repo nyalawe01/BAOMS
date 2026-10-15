@@ -90,7 +90,7 @@ export function ProjectManagerView() {
       title: 'File Uploaded!',
       text: `Successfully synced file to database storage path: "/${activeFolder}/${uploadFileName}".`,
       icon: 'success',
-      confirmButtonColor: '#4f46e5'
+      confirmButtonColor: '#D68904'
     });
   };
 

@@ -24,7 +24,7 @@ function ProfileRow({ label, hint, children }) {
   );
 }
 
-const inputClass = "w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white";
+const inputClass = "w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#D68904]/30 focus:border-[#D68904] bg-white";
 
 export function UserBaselineProfileView() {
   const { user, policyVault, updateProfileDetails } = useAuth();
@@ -54,7 +54,7 @@ export function UserBaselineProfileView() {
         title: 'Avatar Updated!',
         text: 'Your profile photo has been uploaded and saved.',
         icon: 'success',
-        confirmButtonColor: '#4f46e5'
+        confirmButtonColor: '#D68904'
       });
     } catch (err) {
       console.error('Avatar upload failed:', err);
@@ -62,7 +62,7 @@ export function UserBaselineProfileView() {
         title: 'Upload Failed',
         text: 'Could not upload your photo. Please try again in a moment.',
         icon: 'error',
-        confirmButtonColor: '#4f46e5'
+        confirmButtonColor: '#D68904'
       });
     } finally {
       setAvatarUploading(false);
@@ -75,7 +75,7 @@ export function UserBaselineProfileView() {
     <div className="max-w-5xl mx-auto space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Profile identity + editable personal details + locked office details */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
+        <div className="bg-white rounded-lg border border-slate-200 lg:col-span-2">
           <div className="flex items-center gap-4 p-6 border-b border-slate-100">
             <div className={`relative ${avatarUploading ? 'opacity-50 pointer-events-none' : ''}`}>
               <AvatarProfilePhoto
@@ -88,10 +88,10 @@ export function UserBaselineProfileView() {
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-800">{user.name}</h3>
-              <span className="inline-block px-2.5 py-0.5 mt-1 text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-full uppercase">
+              <span className="inline-block px-2.5 py-0.5 mt-1 text-xs font-bold text-[#915206] bg-amber-50 border border-amber-200 rounded-full uppercase">
                 {user.role}
               </span>
-              {avatarUploading && <p className="text-xs text-indigo-500 font-semibold mt-1">Uploading photo...</p>}
+              {avatarUploading && <p className="text-xs text-[#D68904] font-semibold mt-1">Uploading photo...</p>}
             </div>
           </div>
 
@@ -112,7 +112,7 @@ export function UserBaselineProfileView() {
                   />
                   <button
                     type="submit"
-                    className="shrink-0 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
+                    className="shrink-0 bg-[#D68904] hover:bg-[#b86e03] text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
                   >
                     Save
                   </button>
@@ -157,11 +157,11 @@ export function UserBaselineProfileView() {
         </div>
 
         {/* Read-Only Document Vault */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4 lg:col-span-1 flex flex-col justify-between h-fit">
+        <div className="bg-white rounded-lg border border-slate-200 p-6 space-y-4 lg:col-span-1 flex flex-col justify-between h-fit">
           <div className="space-y-4">
             <div className="border-b border-slate-100 pb-3">
               <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
-                <BookOpen className="text-indigo-500" size={16} />
+                <BookOpen className="text-[#D68904]" size={16} />
                 <span>Document Vault</span>
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">Official templates and organization policy manuals.</p>
@@ -187,7 +187,7 @@ export function UserBaselineProfileView() {
                           text: `Do you want to download "${vault.title}" (${vault.size})?`,
                           icon: 'info',
                           showCancelButton: true,
-                          confirmButtonColor: '#4f46e5',
+                          confirmButtonColor: '#D68904',
                           confirmButtonText: 'Download PDF'
                         }).then((result) => {
                           if (result.isConfirmed) {

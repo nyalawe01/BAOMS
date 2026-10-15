@@ -89,11 +89,17 @@ export default function TopUtilityHeader({ activeTab, setActiveTab, toggleSideba
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="flex items-center gap-3 hover:bg-slate-50 p-2 rounded-lg transition-colors text-left"
           >
-            <img
-              src={user.avatar}
-              alt={user.name}
-              className="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0"
-            />
+            {user.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.name}
+                className="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-white border border-slate-200 text-slate-500 font-bold flex items-center justify-center text-sm shrink-0">
+                {user.name ? user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() : 'U'}
+              </div>
+            )}
             <div className="hidden md:block">
               <p className="text-base font-semibold text-slate-800 leading-none">{user.name}</p>
               <p className="text-sm text-slate-500 mt-1">{user.email}</p>

@@ -123,14 +123,6 @@ export default function AppShell() {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-900 antialiased font-sans">
-      {/* Mobile drawer backdrop - only ever rendered below the lg breakpoint */}
-      {mobileSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-slate-950/60 z-40 lg:hidden"
-          onClick={closeMobileSidebar}
-        ></div>
-      )}
-
       {/* Sidebar Navigation */}
       <DynamicSidebar
         activeTab={activeTab}
@@ -138,7 +130,6 @@ export default function AppShell() {
         collapsed={sidebarCollapsed}
         toggleSidebar={toggleSidebar}
         mobileOpen={mobileSidebarOpen}
-        onNavigate={closeMobileSidebar}
       />
 
       {/* Main Panel */}
