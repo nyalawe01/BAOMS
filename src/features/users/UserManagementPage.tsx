@@ -107,7 +107,7 @@ async function fetchStaffFromSupabase(): Promise<StaffUser[]> {
       staged_details,
       created_at,
       departments ( code, name_en ),
-      user_roles ( roles ( code ) )
+      user_roles:user_roles!user_roles_user_id_fkey ( roles ( code ) )
     `)
     .order('created_at', { ascending: false });
 

@@ -55,7 +55,7 @@ export const SystemAdminDashboard: React.FC = () => {
             is_active,
             approval_status,
             departments ( name_en ),
-            user_roles ( roles ( code ) )
+            user_roles:user_roles!user_roles_user_id_fkey ( roles ( code ) )
           `)
           .order('created_at', { ascending: false });
 

@@ -154,7 +154,7 @@ export async function getProjects(
       *,
       project_members (
         id, project_id, user_id, project_role, assigned_at, assigned_by,
-        profiles:user_id (display_name, official_email)
+        profiles:profiles!project_members_user_id_fkey (display_name, official_email)
       ),
       project_budgets (
         id, category, allocated_amount, spent_amount, committed_amount, updated_at
@@ -890,7 +890,7 @@ export async function assignProjectMember(
       },
       { onConflict: 'project_id,user_id' }
     )
-    .select('*, profiles:user_id(display_name, official_email)')
+    .select('*, profiles:profiles!project_members_user_id_fkey(display_name, official_email)')
     .single();
 
   if (error || !data) {

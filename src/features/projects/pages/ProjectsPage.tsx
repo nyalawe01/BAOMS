@@ -91,8 +91,8 @@ export const ProjectsPage: React.FC = () => {
     return { total, active, totalBudget, totalActivities };
   }, [projects]);
 
-  const formatCurrency = (amount: number, currency: string = 'TZS') => {
-    return `${currency} ${amount.toLocaleString()}`;
+  const formatCurrency = (amount?: number | null, currency: string = 'TZS') => {
+    return `${currency || 'TZS'} ${(amount ?? 0).toLocaleString()}`;
   };
 
   const getStatusBadge = (status: ProjectStatus) => {
@@ -318,7 +318,7 @@ export const ProjectsPage: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <span className="flex items-center gap-1.5">
                         <Users className="w-3.5 h-3.5" />
-                        {project.members.length} {t('projects.teamMembers', 'Team')}
+                        {(project.members || []).length} {t('projects.teamMembers', 'Team')}
                       </span>
                       <span className="flex items-center gap-1.5">
                         <Activity className="w-3.5 h-3.5" />
@@ -330,7 +330,7 @@ export const ProjectsPage: React.FC = () => {
 
                 <div className="px-5 py-3 bg-surface-muted/30 border-t border-surface-border flex items-center justify-between">
                   <div className="text-xs text-charcoal-muted truncate max-w-[180px]">
-                    {project.members.find((m) => m.projectRole === 'manager')?.userName ||
+                    {(project.members || []).find((m) => m.projectRole === 'manager')?.userName ||
                       t('projects.unassignedManager', 'Unassigned Manager')}
                   </div>
                   <Button

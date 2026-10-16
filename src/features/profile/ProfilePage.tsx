@@ -140,7 +140,7 @@ export const ProfilePage: React.FC = () => {
             is_active,
             department_id,
             departments ( code, name_en ),
-            user_roles ( roles ( code ) )
+            user_roles:user_roles!user_roles_user_id_fkey ( roles ( code ) )
           `)
           .eq('id', staff?.userId || userId)
           .single();
