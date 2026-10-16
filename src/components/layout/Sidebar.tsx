@@ -10,7 +10,6 @@ import {
   UserCog,
   Mail,
   BarChart3,
-  ShieldAlert,
   ShoppingCart,
   Calendar,
   User,
@@ -82,7 +81,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           heading: t('nav.section.accessSecurity', 'Access & Security'),
           items: [
             { to: '/users', label: t('nav.userAccounts', 'Users & Accounts'), icon: UserCog, badge: 'Admin' },
-            { to: '/audit-logs', label: t('nav.auditLogs', 'Audit Logs & Telemetry'), icon: ShieldAlert, badge: 'Security' },
           ],
         },
         {
@@ -119,7 +117,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           items: [
             { to: '/reports', label: t('nav.reports', 'Organization-wide Reports'), icon: BarChart3 },
             { to: '/hr', label: t('nav.staffDirectory', 'Staff Directory'), icon: Users },
-            { to: '/audit-logs', label: t('nav.auditLogs', 'System Audit Trail'), icon: ShieldAlert, badge: 'Audit' },
           ],
         },
       ];

@@ -18,7 +18,6 @@ import { HrPage } from '@/features/hr/pages/HrPage';
 import { RegisterStaffPage } from '@/features/hr/pages/RegisterStaffPage';
 import { CorrespondencePage } from '@/features/correspondence/pages/CorrespondencePage';
 import { ReportsPage } from '@/features/reporting/pages/ReportsPage';
-import { AuditLogsPage } from '@/features/audit/pages/AuditLogsPage';
 import { ProfilePage } from '@/features/profile/ProfilePage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { SampleDashboard } from '@/components/dashboard/SampleDashboard';
@@ -162,14 +161,7 @@ export const AppRoutes: React.FC = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/audit-logs"
-          element={
-            <ProtectedRoute requiredPermissions={['audit.view']}>
-              <AuditLogsPage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/audit-logs" element={<Navigate to="/" replace />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/:userId" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />

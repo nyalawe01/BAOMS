@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  ShieldAlert,
   Users,
   Database,
   Lock,
@@ -10,12 +9,11 @@ import {
   UserPlus,
   RefreshCw,
   Layers,
+  UserCheck,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
-import { getAuditLogs } from '@/features/audit/services/auditService';
-import { AuditLogRecord } from '@/features/audit/types/audit';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 interface AdminStaffUser {
@@ -32,12 +30,10 @@ interface AdminStaffUser {
 export const SystemAdminDashboard: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [auditLogs, setAuditLogs] = useState<AuditLogRecord[]>([]);
   const [users, setUsers] = useState<AdminStaffUser[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [dbLatency, setDbLatency] = useState<number | null>(null);
   const [isLiveConnected, setIsLiveConnected] = useState(false);
-  const [totalAuditCount, setTotalAuditCount] = useState(0);
 
   const loadData = async () => {
     setIsLoading(true);
@@ -96,12 +92,7 @@ export const SystemAdminDashboard: React.FC = () => {
       setUsers([]);
     }
 
-    // 2. Fetch live audit events
-    getAuditLogs().then((res) => {
-      setAuditLogs(res.logs.slice(0, 8));
-      setTotalAuditCount(res.total);
-      setIsLoading(false);
-    });
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -114,7 +105,6 @@ export const SystemAdminDashboard: React.FC = () => {
   const deactivatedCount = users.filter((u) => !u.isActive).length;
   const mfaEnrolledCount = users.filter((u) => u.isMfaEnrolled).length;
   const mfaPercentage = Math.round((mfaEnrolledCount / (totalUsers || 1)) * 100);
-  const securityEventsCount = totalAuditCount || auditLogs.length;
 
   return (
     <div className="space-y-6">
@@ -176,14 +166,14 @@ export const SystemAdminDashboard: React.FC = () => {
 
         <div className="bg-white border border-surface-border rounded-lg p-4">
           <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
-            <span>Security & Auth Events</span>
-            <ShieldAlert className="h-4 w-4 text-charcoal-400" />
+            <span>Pending Approvals</span>
+            <UserCheck className="h-4 w-4 text-charcoal-400" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-charcoal-900 font-mono tabular-nums leading-tight">
-            {securityEventsCount}
+          <div className={`mt-2 text-2xl font-bold font-mono tabular-nums leading-tight ${pendingApprovalsCount > 0 ? 'text-amber-600' : 'text-charcoal-900'}`}>
+            {pendingApprovalsCount}
           </div>
           <p className="mt-1 text-xs text-charcoal-muted truncate">
-            Recorded in immutable audit trail
+            {pendingApprovalsCount > 0 ? 'Awaiting HR or ED authorization' : 'All accounts verified'}
           </p>
         </div>
 
@@ -253,112 +243,57 @@ export const SystemAdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Operational Sections: User Directory & Audit Stream */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* User Directory Overview */}
-        <div className="bg-white border border-surface-border rounded-lg overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-surface-border flex items-center justify-between bg-surface-muted/20">
-            <div>
-              <h3 className="text-sm font-bold text-charcoal-900 flex items-center gap-2">
-                <Users className="h-4 w-4 text-forest-700" />
-                Staff Accounts & Role Assignments
-              </h3>
-              <p className="text-xs text-charcoal-muted mt-0.5">
-                Active organizational accounts with security privileges
-              </p>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/users')}>
-              {t('common.viewAll', 'View All')}
-              <ArrowRight className="h-3.5 w-3.5 ml-1" />
-            </Button>
+      {/* Staff Accounts Management */}
+      <div className="bg-white border border-surface-border rounded-lg overflow-hidden flex flex-col">
+        <div className="p-4 border-b border-surface-border flex items-center justify-between bg-surface-muted/20">
+          <div>
+            <h3 className="text-sm font-bold text-charcoal-900 flex items-center gap-2">
+              <Users className="h-4 w-4 text-forest-700" />
+              Staff Accounts & Role Assignments
+            </h3>
+            <p className="text-xs text-charcoal-muted mt-0.5">
+              Active organizational accounts with security privileges
+            </p>
           </div>
-
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-sm min-w-[500px]">
-              <thead className="bg-surface-muted/60 text-xs font-semibold text-charcoal-600 border-b border-surface-border">
-                <tr>
-                  <th className="py-2.5 px-3">Staff Name</th>
-                  <th className="py-2.5 px-3">Role Code</th>
-                  <th className="py-2.5 px-3">Department</th>
-                  <th className="py-2.5 px-3 text-right">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-surface-border">
-                {users.slice(0, 6).map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="py-2.5 px-3">
-                      <div className="font-semibold text-charcoal-900">{u.displayName}</div>
-                      <div className="text-xs text-charcoal-muted font-mono">{u.email}</div>
-                    </td>
-                    <td className="py-2.5 px-3">
-                      <span className="font-mono text-xs font-semibold text-charcoal-800">
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 text-xs text-charcoal-700">{u.departmentName}</td>
-                    <td className="py-2.5 px-3 text-right">
-                      <StatusIndicator
-                        status={u.isActive ? 'approved' : 'rejected'}
-                        label={u.isActive ? 'ACTIVE' : 'INACTIVE'}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/users')}>
+            {t('common.viewAll', 'View All')}
+            <ArrowRight className="h-3.5 w-3.5 ml-1" />
+          </Button>
         </div>
 
-        {/* Security Audit Trail Stream */}
-        <div className="bg-white border border-surface-border rounded-lg overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-surface-border flex items-center justify-between bg-surface-muted/20">
-            <div>
-              <h3 className="text-sm font-bold text-charcoal-900 flex items-center gap-2">
-                <ShieldAlert className="h-4 w-4 text-amber-600" />
-                Immutable Audit Trail & Telemetry
-              </h3>
-              <p className="text-xs text-charcoal-muted mt-0.5">
-                Cryptographically verifiable event stream
-              </p>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/audit-logs')}>
-              {t('common.viewAll', 'View All')}
-              <ArrowRight className="h-3.5 w-3.5 ml-1" />
-            </Button>
-          </div>
-
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-sm min-w-[500px]">
-              <thead className="bg-surface-muted/60 text-xs font-semibold text-charcoal-600 border-b border-surface-border">
-                <tr>
-                  <th className="py-2.5 px-3">Timestamp</th>
-                  <th className="py-2.5 px-3">Event Code</th>
-                  <th className="py-2.5 px-3">Actor</th>
-                  <th className="py-2.5 px-3">Details</th>
+        <div className="overflow-x-auto flex-1">
+          <table className="w-full text-left text-sm min-w-[500px]">
+            <thead className="bg-surface-muted/60 text-xs font-semibold text-charcoal-600 border-b border-surface-border">
+              <tr>
+                <th className="py-2.5 px-3">Staff Name</th>
+                <th className="py-2.5 px-3">Role Code</th>
+                <th className="py-2.5 px-3">Department</th>
+                <th className="py-2.5 px-3 text-right">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-surface-border">
+              {users.slice(0, 8).map((u) => (
+                <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="py-2.5 px-3">
+                    <div className="font-semibold text-charcoal-900">{u.displayName}</div>
+                    <div className="text-xs text-charcoal-muted font-mono">{u.email}</div>
+                  </td>
+                  <td className="py-2.5 px-3">
+                    <span className="font-mono text-xs font-semibold text-charcoal-800">
+                      {u.role}
+                    </span>
+                  </td>
+                  <td className="py-2.5 px-3 text-xs text-charcoal-700">{u.departmentName}</td>
+                  <td className="py-2.5 px-3 text-right">
+                    <StatusIndicator
+                      status={u.isActive ? 'approved' : 'rejected'}
+                      label={u.isActive ? 'ACTIVE' : 'INACTIVE'}
+                    />
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-surface-border">
-                {auditLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="py-2.5 px-3 font-mono text-xs text-charcoal-600 whitespace-nowrap">
-                      {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </td>
-                    <td className="py-2.5 px-3">
-                      <span className="font-mono text-xs font-bold text-charcoal-900">
-                        {log.action}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 text-xs text-charcoal-800 whitespace-nowrap">
-                      {log.actorName}
-                    </td>
-                    <td className="py-2.5 px-3 text-xs text-charcoal-600 max-w-[200px] truncate">
-                      {log.details}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
