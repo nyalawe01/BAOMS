@@ -8,7 +8,6 @@ import {
   ArrowRight,
   UserPlus,
   RefreshCw,
-  Layers,
   UserCheck,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -188,58 +187,6 @@ export const SystemAdminDashboard: React.FC = () => {
           <p className="mt-1 text-xs text-charcoal-muted truncate">
             {isLiveConnected ? `PostgreSQL 17 • Latency ${dbLatency !== null ? dbLatency + 'ms' : 'Live'}` : 'Offline Mode • Cache'}
           </p>
-        </div>
-      </div>
-
-      {/* System Infrastructure Health Panel */}
-      <div className="bg-white border border-surface-border rounded-lg p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4 text-forest-700" />
-            <h3 className="text-sm font-bold text-charcoal-900">
-              Infrastructure Diagnostics & Node Status
-            </h3>
-          </div>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/foundation')}>
-            <span>{t('admin.viewArchitecture', 'Architecture Specs')}</span>
-            <ArrowRight className="h-3.5 w-3.5 ml-1" />
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div className="p-3 bg-slate-50/70 border border-surface-border rounded-lg space-y-1">
-            <div className="flex items-center justify-between text-xs text-charcoal-muted">
-              <span>Database Connection</span>
-              <StatusIndicator 
-                status={isLiveConnected ? 'approved' : 'warning'} 
-                label={isLiveConnected ? 'ONLINE (SUPABASE)' : 'OFFLINE CACHE'} 
-              />
-            </div>
-            <div className="font-semibold text-charcoal-900">PostgreSQL (Supabase Engine)</div>
-            <div className="text-xs text-charcoal-muted">
-              {isLiveConnected ? `Live round-trip: ${dbLatency !== null ? dbLatency + 'ms' : '<50ms'} • RLS enforced` : 'Operating in offline cache mode'}
-            </div>
-          </div>
-
-          <div className="p-3 bg-slate-50/70 border border-surface-border rounded-lg space-y-1">
-            <div className="flex items-center justify-between text-xs text-charcoal-muted">
-              <span>Encrypted Storage Pool</span>
-              <span className="font-mono text-xs font-semibold text-charcoal-800">1.2 GB / 10 GB (12%)</span>
-            </div>
-            <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-              <div className="bg-emerald-600 h-full w-[12%]" />
-            </div>
-            <div className="text-xs text-charcoal-muted">S3-Compatible Object Store • SHA-256 Verified</div>
-          </div>
-
-          <div className="p-3 bg-slate-50/70 border border-surface-border rounded-lg space-y-1">
-            <div className="flex items-center justify-between text-xs text-charcoal-muted">
-              <span>Security Protocols</span>
-              <span className="font-mono text-xs font-semibold text-charcoal-800">TLS 1.3 • AES-256</span>
-            </div>
-            <div className="font-semibold text-charcoal-900">CWE-1236 Formula Neutralization</div>
-            <div className="text-xs text-charcoal-muted">Strict session lifetime • Brute-force throttling</div>
-          </div>
         </div>
       </div>
 
