@@ -82,16 +82,16 @@ export const NotificationsDropdown: React.FC = () => {
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="relative inline-flex justify-center items-center size-11 text-sm font-semibold rounded-lg bg-white border border-gray-200 text-gray-800 hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
+        className="relative inline-flex justify-center items-center h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-md text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-transparent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#D68904] transition-colors"
         aria-label="Notifications"
         aria-expanded={isOpen}
       >
-        <Bell className="shrink-0 size-5" />
+        <Bell className="shrink-0 h-4 w-4" />
         {unreadCount > 0 && (
           <span
             className={cn(
-              'absolute top-0 inset-e-0 inline-flex items-center py-0.5 px-1.5 rounded-full text-xs font-medium transform -translate-y-1/2 translate-x-1/2 text-white',
-              hasAlertOrEmergency ? 'bg-red-500' : 'bg-black'
+              'absolute -top-0.5 -right-0.5 inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold text-white',
+              hasAlertOrEmergency ? 'bg-rose-500' : 'bg-charcoal-900'
             )}
           >
             {unreadCount > 99 ? '99+' : unreadCount}
