@@ -39,7 +39,7 @@ import { ROLES, RoleCode } from '@/lib/permissions';
 import { getPersistentItem, setPersistentItem } from '@/lib/storageSync';
 import { createStaffFromUserCreation } from '@/features/hr/services/hrService';
 import { createNotification } from '@/services/notificationsService';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured, supabaseUrl } from '@/lib/supabase';
 import { useAuth } from '@/features/auth/useAuth';
 import { UserOnboardingReviewModal, PendingUserCandidate } from './components/UserOnboardingReviewModal';
 import { ExecutiveApprovalModal } from './components/ExecutiveApprovalModal';
@@ -366,7 +366,6 @@ export const UserManagementPage: React.FC = () => {
           return;
         }
 
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
         const response = await fetch(`${supabaseUrl}/functions/v1/create-staff-user`, {
           method: 'POST',
           headers: {
