@@ -291,6 +291,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const allSections = getRoleSections();
 
+  const navItems = React.useMemo(() => {
+    const items = allSections.flatMap((s) => s.items);
+    const seen = new Set<string>();
+    return items.filter((item) => {
+      if (seen.has(item.to)) return false;
+      seen.add(item.to);
+      return true;
+    });
+  }, [allSections]);
+
   const handleSignOutConfirm = async () => {
     setShowSignOutDialog(false);
     await signOut();
@@ -363,90 +373,78 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         </div>
 
-        {/* Navigation Items (Interactive Icon Rail when collapsed, Full Menu when expanded) */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-3 sidebar-nav">
-          {allSections.map((section, idx) => (
-            <div key={section.heading || idx} className="space-y-1">
-              {isExpanded ? (
-                <span className="px-3 text-[10.5px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                  {section.heading}
-                </span>
-              ) : (
-                <div className="my-1.5 mx-auto w-8 border-t border-slate-100" />
-              )}
+        {/* Navigation Items (Clean Nav Links Only - No Category Titles) */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 sidebar-nav">
+          <ul className="space-y-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li key={`${item.to}-${item.label}`}>
+                  <NavLink
+                    to={item.to}
+                    end={item.to === '/'}
+                    title={item.label}
+                    className={({ isActive }) =>
+                      cn(
+                        'flex items-center rounded-md transition-all duration-150 group select-none relative',
+                        isExpanded
+                          ? 'w-full px-3 py-2 gap-3 text-xs sm:text-sm font-medium'
+                          : 'w-10 h-10 mx-auto justify-center p-0',
+                        isActive
+                          ? 'bg-amber-500/10 text-charcoal-900 font-semibold border-l-2 border-[#D68904]'
+                          : 'text-charcoal-muted hover:bg-slate-50 hover:text-charcoal-900 border-l-2 border-transparent'
+                      )
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        {/* Restrained icon size & brand color when active */}
+                        <Icon
+                          className={cn(
+                            'w-[18px] h-[18px] shrink-0 transition-transform group-hover:scale-105',
+                            isActive ? 'text-[#D68904]' : 'text-slate-400 group-hover:text-charcoal-700'
+                          )}
+                        />
 
-              <ul className="space-y-1">
-                {section.items.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <li key={`${section.heading}-${item.to}-${item.label}`}>
-                      <NavLink
-                        to={item.to}
-                        end={item.to === '/'}
-                        title={item.label}
-                        className={({ isActive }) =>
-                          cn(
-                            'flex items-center rounded-md transition-all duration-150 group select-none relative',
-                            isExpanded
-                              ? 'w-full px-3 py-2 gap-3 text-xs sm:text-sm font-medium'
-                              : 'w-10 h-10 mx-auto justify-center p-0',
-                            isActive
-                              ? 'bg-amber-500/10 text-charcoal-900 font-semibold border-l-2 border-[#D68904]'
-                              : 'text-charcoal-muted hover:bg-slate-50 hover:text-charcoal-900 border-l-2 border-transparent'
-                          )
-                        }
-                      >
-                        {({ isActive }) => (
-                          <>
-                            {/* Restrained icon size & brand color when active */}
-                            <Icon
-                              className={cn(
-                                'w-[18px] h-[18px] shrink-0 transition-transform group-hover:scale-105',
-                                isActive ? 'text-[#D68904]' : 'text-slate-400 group-hover:text-charcoal-700'
-                              )}
-                            />
-
-                            {/* Label displayed when expanded */}
-                            {isExpanded && (
-                              <span
-                                className={cn(
-                                  'truncate flex-1 text-xs',
-                                  isActive
-                                    ? 'font-semibold text-charcoal-900'
-                                    : 'font-medium text-charcoal-muted group-hover:text-charcoal-900'
-                                )}
-                              >
-                                {item.label}
-                              </span>
+                        {/* Label displayed when expanded */}
+                        {isExpanded && (
+                          <span
+                            className={cn(
+                              'truncate flex-1 text-xs',
+                              isActive
+                                ? 'font-semibold text-charcoal-900'
+                                : 'font-medium text-charcoal-muted group-hover:text-charcoal-900'
                             )}
-
-                            {/* Badge displayed as pill when expanded, or notification pip when collapsed */}
-                            {isExpanded && item.badge ? (
-                              <span
-                                className={cn(
-                                  'ml-auto rounded px-1.5 py-0.5 text-[9px] font-mono font-semibold uppercase',
-                                  isActive
-                                    ? 'bg-[#D68904]/10 text-[#D68904] border border-[#D68904]/20'
-                                    : 'bg-slate-100 text-slate-600 border border-surface-border'
-                                )}
-                              >
-                                {item.badge}
-                              </span>
-                            ) : !isExpanded && item.badge ? (
-                              <span
-                                className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white"
-                                title={item.badge}
-                              />
-                            ) : null}
-                          </>
+                          >
+                            {item.label}
+                          </span>
                         )}
-                      </NavLink>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
+
+                        {/* Badge displayed as pill when expanded, or notification pip when collapsed */}
+                        {isExpanded && item.badge ? (
+                          <span
+                            className={cn(
+                              'ml-auto rounded px-1.5 py-0.5 text-[9px] font-mono font-semibold uppercase',
+                              isActive
+                                ? 'bg-[#D68904]/10 text-[#D68904] border border-[#D68904]/20'
+                                : 'bg-slate-100 text-slate-600 border border-surface-border'
+                            )}
+                          >
+                            {item.badge}
+                          </span>
+                        ) : !isExpanded && item.badge ? (
+                          <span
+                            className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white"
+                            title={item.badge}
+                          />
+                        ) : null}
+                      </>
+                    )}
+                  </NavLink>
+                </li>
+              );
+            })}
+          </ul>
         </div>
 
         {/* Sidebar Footer: Interactive Profile & Settings Controls */}
