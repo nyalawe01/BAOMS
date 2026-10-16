@@ -326,8 +326,8 @@ export const SignInPage: React.FC = () => {
                       Offline Ready
                     </Badge>
                   </div>
-                  <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-1">
-                    {DEMO_ACCOUNTS.filter((acc) => acc.isActive && !acc.isMfaEnrolled).map((acc) => (
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {DEMO_ACCOUNTS.filter((acc) => acc.isActive && !acc.isMfaEnrolled && acc.role === 'SYSTEM_ADMIN').map((acc) => (
                       <button
                         key={acc.id}
                         type="button"
