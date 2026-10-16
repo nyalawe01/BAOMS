@@ -805,45 +805,33 @@ export const UserManagementPage: React.FC = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1.5">
-                            {staff.approvalStatus === 'pending_hr' && (
-                              canHRReview ? (
-                                <Button
-                                  size="xs"
-                                  variant="primary"
-                                  onClick={() => {
-                                    setSelectedCandidate(staff);
-                                    setIsOnboardingModalOpen(true);
-                                  }}
-                                  className="bg-charcoal-900 hover:bg-black text-white text-[11px] py-1 px-2.5 h-auto flex items-center gap-1 shrink-0"
-                                >
-                                  <span>Review & Onboard</span>
-                                </Button>
-                              ) : (
-                                <span className="text-[11px] text-charcoal-muted whitespace-nowrap">
-                                  Awaiting HR Vetting
-                                </span>
-                              )
+                            {staff.approvalStatus === 'pending_hr' && canHRReview && (
+                              <Button
+                                size="xs"
+                                variant="primary"
+                                onClick={() => {
+                                  setSelectedCandidate(staff);
+                                  setIsOnboardingModalOpen(true);
+                                }}
+                                className="bg-charcoal-900 hover:bg-black text-white text-[11px] py-1 px-2.5 h-auto flex items-center gap-1 shrink-0"
+                              >
+                                <span>Review & Onboard</span>
+                              </Button>
                             )}
 
-                            {staff.approvalStatus === 'pending_ed' && (
-                              canEDAuthorize ? (
-                                <Button
-                                  size="xs"
-                                  variant="primary"
-                                  onClick={() => {
-                                    setSelectedCandidate(staff);
-                                    setIsExecutiveModalOpen(true);
-                                  }}
-                                  className="bg-charcoal-900 hover:bg-black text-white text-[11px] py-1 px-2.5 h-auto flex items-center gap-1 shrink-0"
-                                >
-                                  <ShieldCheck className="w-3 h-3" />
-                                  <span>Authorize</span>
-                                </Button>
-                              ) : (
-                                <span className="text-[11px] text-charcoal-muted px-2 py-0.5 border border-surface-border rounded bg-surface-muted/40 whitespace-nowrap">
-                                  Awaiting ED Authorization
-                                </span>
-                              )
+                            {staff.approvalStatus === 'pending_ed' && canEDAuthorize && (
+                              <Button
+                                size="xs"
+                                variant="primary"
+                                onClick={() => {
+                                  setSelectedCandidate(staff);
+                                  setIsExecutiveModalOpen(true);
+                                }}
+                                className="bg-charcoal-900 hover:bg-black text-white text-[11px] py-1 px-2.5 h-auto flex items-center gap-1 shrink-0"
+                              >
+                                <ShieldCheck className="w-3 h-3" />
+                                <span>Authorize</span>
+                              </Button>
                             )}
 
                             <DropdownMenu
