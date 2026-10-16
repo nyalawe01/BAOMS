@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, Link } from 'react-router-dom';
-import { Menu, Search, ChevronRight, PanelLeft } from 'lucide-react';
+import { Search, ChevronRight } from 'lucide-react';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { GlobalSearchModal } from './GlobalSearchModal';
 
@@ -63,31 +63,9 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <>
       <header className="sticky top-0 z-30 flex h-14 sm:h-16 w-full items-center justify-between border-b border-slate-200/80 bg-white px-3 sm:px-6 shrink-0 transition-colors">
-        {/* Left: Sidebar Toggle & AdminCN Breadcrumbs */}
-        <div className="flex items-center gap-3 min-w-0">
-          {/* Mobile drawer toggle */}
-          <button
-            type="button"
-            onClick={onOpenMobileNav || handleToggle}
-            className="lg:hidden p-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#D68904]"
-            aria-label="Toggle mobile menu"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-
-          {/* Desktop collapse toggle */}
-          <button
-            type="button"
-            onClick={handleToggle}
-            className="hidden lg:inline-flex p-1.5 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#D68904]"
-            aria-label={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-            title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-          >
-            <PanelLeft className="h-4 w-4" />
-          </button>
-
-          {/* Breadcrumb Context (AdminCN style) */}
-          <nav aria-label="Breadcrumb" className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500">
+        {/* Left: AdminCN Breadcrumbs */}
+        <div className="flex items-center min-w-0">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-slate-500">
             <Link to="/" className="hover:text-slate-900 transition-colors font-medium">
               Dashboard
             </Link>
