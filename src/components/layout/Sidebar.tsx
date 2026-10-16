@@ -3,8 +3,6 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard,
-  Palette,
-  Layers,
   FileText,
   Briefcase,
   Wallet,
@@ -92,13 +90,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           items: [
             { to: '/hr', label: t('nav.departments', 'Organization Structure'), icon: Users },
             { to: '/documents', label: t('nav.documents', 'Document Registry & Storage'), icon: FileText },
-          ],
-        },
-        {
-          heading: t('nav.section.infrastructure', 'Infrastructure & Specs'),
-          items: [
-            { to: '/foundation', label: t('nav.foundation', 'System Architecture & Health'), icon: Layers },
-            { to: '/design-system', label: t('nav.designSystem', 'Design System Preview'), icon: Palette, badge: 'Preview' },
           ],
         },
       ];
