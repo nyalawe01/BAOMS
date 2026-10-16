@@ -1,29 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Briefcase,
   Wallet,
-  Calendar,
-  CheckCircle2,
   Clock,
   ArrowRight,
   Check,
   X,
   FileCheck,
-  AlertTriangle,
+  ShieldCheck,
+  Search,
+  ExternalLink,
+  ChevronRight,
+  TrendingUp,
 } from 'lucide-react';
 import Swal from 'sweetalert2';
-import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
+import { KPICard } from '@/components/ui/KPICard';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
+import { AnalyticsVisualizer, AnalyticsDataPoint } from '@/components/ui/AnalyticsVisualizer';
 import { getProjects } from '@/features/projects/services/projectService';
 import { ProjectRecord } from '@/features/projects/types/project';
 import { getRequisitions, reviewFinancialRequest } from '@/features/finance/services/financeService';
 import { FinancialRequestRecord } from '@/features/finance/types/finance';
-import { getMeetingActions } from '@/features/correspondence/services/correspondenceService';
-import { MeetingActionRecord } from '@/features/correspondence/types/correspondence';
 import { useAuth } from '@/features/auth/useAuth';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { ExecutiveApprovalModal } from '@/features/users/components/ExecutiveApprovalModal';
+import { PendingUserCandidate } from '@/features/users/components/UserOnboardingReviewModal';
 
 export const ExecutiveDirectorDashboard: React.FC = () => {
   const { t } = useTranslation();
@@ -32,18 +36,43 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
 
   const [projects, setProjects] = useState<ProjectRecord[]>([]);
   const [requisitions, setRequisitions] = useState<FinancialRequestRecord[]>([]);
-  const [actions, setActions] = useState<MeetingActionRecord[]>([]);
+  const [pendingStaffAuth, setPendingStaffAuth] = useState<PendingUserCandidate[]>([]);
+  const [selectedStaffCandidate, setSelectedStaffCandidate] = useState<PendingUserCandidate | null>(null);
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+
+  // Table filtering and pagination state
+  const [tableSearch, setTableSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
   const loadData = async () => {
     try {
-      const [pList, rList, aList] = await Promise.all([
+      const [pList, rList] = await Promise.all([
         getProjects(),
         getRequisitions(),
-        getMeetingActions(),
       ]);
       setProjects(pList);
       setRequisitions(rList);
-      setActions(aList);
+
+      if (isSupabaseConfigured) {
+        const { data: staffData } = await supabase
+          .from('profiles')
+          .select('id, display_name, official_email, phone_number, approval_status, staged_details, created_at')
+          .eq('approval_status', 'pending_ed')
+          .order('created_at', { ascending: false });
+
+        setPendingStaffAuth(
+          (staffData || []).map((row: any) => ({
+            id: row.id,
+            email: row.official_email || '',
+            displayName: row.display_name || '',
+            phoneNumber: row.phone_number || '',
+            approvalStatus: row.approval_status,
+            stagedDetails: row.staged_details || {},
+            createdAt: row.created_at,
+          }))
+        );
+      }
     } catch (e) {
       console.error('Failed loading director telemetry:', e);
     }
@@ -53,14 +82,14 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
     loadData();
   }, []);
 
-  // Strategic approvals: items requiring Director authorization (Pending and amount >= 1,000,000 or status submitted/under_review)
+  // Strategic approvals: items requiring Director authorization
   const pendingApprovals = requisitions.filter(
     (r) => r.status === 'submitted' || r.status === 'under_review'
   );
 
   const totalPortfolioBudget = projects.reduce((acc, p) => acc + p.totalBudget, 0);
+  const totalSpentBudget = projects.reduce((acc, p) => acc + (p.budgetSummary?.totalSpent || 0), 0);
   const activeProjectsCount = projects.filter((p) => p.status === 'active').length;
-  const overdueActions = actions.filter((a) => a.isOverdue);
 
   const handleApprove = async (req: FinancialRequestRecord) => {
     if (req.requesterId === user?.id) {
@@ -163,234 +192,276 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
     }
   };
 
+  // Chart data: Budget allocation per project
+  const chartData: AnalyticsDataPoint[] = useMemo(() => {
+    return projects.slice(0, 6).map((p) => ({
+      label: p.projectCode || p.name.substring(0, 12),
+      value: Math.round(p.totalBudget / 1000000),
+      description: `${p.name} (${p.currency} ${(p.totalBudget / 1000000).toFixed(1)}M)`,
+    }));
+  }, [projects]);
+
+  // Filtered projects for table
+  const filteredProjects = useMemo(() => {
+    if (!tableSearch.trim()) return projects;
+    const q = tableSearch.toLowerCase();
+    return projects.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.projectCode.toLowerCase().includes(q) ||
+        p.funder.toLowerCase().includes(q)
+    );
+  }, [projects, tableSearch]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProjects.length / pageSize));
+  const paginatedProjects = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredProjects.slice(start, start + pageSize);
+  }, [filteredProjects, currentPage, pageSize]);
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title={t('director.dashboardTitle', 'Executive Director Command & Governance')}
-        subtitle={t(
-          'director.dashboardSubtitle',
-          'Strategic portfolio oversight, organizational approval queue, governance follow-ups, and risk management.'
-        )}
-        breadcrumbs={[
-          { label: t('nav.dashboard', 'Dashboard'), href: '/' },
-          { label: t('director.overview', 'Executive Overview') },
-        ]}
-        actions={
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => navigate('/reports')}>
-              <Briefcase className="h-4 w-4 mr-1.5" />
-              {t('director.viewReports', 'Institutional Reports')}
-            </Button>
-            <Button variant="primary" size="sm" onClick={() => navigate('/correspondence')}>
-              <Calendar className="h-4 w-4 mr-1.5" />
-              {t('director.viewMeetings', 'Governance & Meetings')}
-            </Button>
-          </div>
-        }
-      />
+      {/* Top Header - AdminCN Title & Action Row */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-slate-200/80">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            {t('director.overview', 'Executive Overview')}
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Institutional portfolio oversight, strategic approval queue, and program health.
+          </p>
+        </div>
 
-      {/* Strategic Portfolio Health KPIs */}
+        <div className="flex items-center gap-2">
+          <span className="hidden sm:inline-block text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+            Fiscal Year 2026
+          </span>
+          <Button variant="outline" size="sm" onClick={() => navigate('/reports')}>
+            <Briefcase className="h-3.5 w-3.5 mr-1.5" />
+            {t('director.viewReports', 'Reports')}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => navigate('/correspondence')}>
+            {t('director.viewLetters', 'Correspondence')}
+          </Button>
+        </div>
+      </div>
+
+      {/* Row 1: Four Compact KPI Cards (AdminCN Style) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Active Project Portfolio
-            </span>
-            <div className="text-[28px] font-bold text-charcoal-900 leading-tight font-mono tabular-nums">
-              {activeProjectsCount} <span className="text-sm font-normal text-charcoal-muted">/ {projects.length}</span>
+        <KPICard
+          label="Active Projects"
+          value={activeProjectsCount}
+          subValue={`/ ${projects.length} Total`}
+          change={{
+            value: `${projects.length > 0 ? Math.round((activeProjectsCount / projects.length) * 100) : 0}% Active`,
+            isPositive: true,
+            label: 'in field execution',
+          }}
+          icon={Briefcase}
+        />
+
+        <KPICard
+          label="Budget Portfolio"
+          value={`TZS ${(totalPortfolioBudget / 1000000).toFixed(1)}M`}
+          change={{
+            value: totalSpentBudget > 0 ? `${((totalSpentBudget / totalPortfolioBudget) * 100).toFixed(1)}% spent` : 'Allocated',
+            isPositive: true,
+            label: 'donor grant pool',
+          }}
+          icon={Wallet}
+        />
+
+        <KPICard
+          label="Pending Approvals"
+          value={pendingApprovals.length}
+          change={{
+            value: pendingApprovals.length > 0 ? `${pendingApprovals.length} Queue` : 'Clear',
+            isPositive: pendingApprovals.length === 0,
+            label: pendingApprovals.length > 0 ? 'requisitions awaiting sign-off' : 'all items approved',
+          }}
+          icon={Clock}
+        />
+
+        <KPICard
+          label="Staff Clearances"
+          value={pendingStaffAuth.length}
+          change={{
+            value: pendingStaffAuth.length > 0 ? `${pendingStaffAuth.length} Vetted` : 'Clear',
+            isPositive: pendingStaffAuth.length === 0,
+            label: pendingStaffAuth.length > 0 ? 'awaiting ED clearance' : 'all staff cleared',
+          }}
+          icon={ShieldCheck}
+        />
+      </div>
+
+      {/* Row 2: Analytics Panel (2/3 width) + Strategic Approvals Queue (1/3 width) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        {/* Project Performance Panel */}
+        <div className="lg:col-span-7 xl:col-span-8 bg-white border border-slate-200/80 rounded-lg overflow-hidden flex flex-col shadow-xs">
+          <div className="p-4 sm:px-5 sm:py-3.5 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/50">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-[#D68904]" />
+                Approved Project Budget Allocations (Millions TZS)
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Relative financial commitment per donor-funded program
+              </p>
             </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              Programs in active field execution
-            </span>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/projects')}>
+              Details <ChevronRight className="h-3 w-3 ml-0.5" />
+            </Button>
           </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-forest-50 text-forest-700 flex items-center justify-center">
-            <Briefcase className="h-5 w-5" />
+
+          <div className="p-4 flex-1 flex flex-col justify-center">
+            {chartData.length > 0 ? (
+              <AnalyticsVisualizer
+                data={chartData}
+                valuePrefix="TZS "
+                valueSuffix="M"
+                defaultMode="bar"
+                availableModes={['bar', 'line', 'table']}
+                height={230}
+              />
+            ) : (
+              <div className="py-12 text-center text-xs text-slate-400">
+                No active project financial records available to display.
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Committed Grants & Budget
-            </span>
-            <div className="text-[28px] font-bold text-charcoal-900 leading-tight font-mono tabular-nums">
-              {(totalPortfolioBudget / 1000000).toFixed(1)}M
+        {/* Strategic Approvals Attention-Required Panel */}
+        <div className="lg:col-span-5 xl:col-span-4 bg-white border border-slate-200/80 rounded-lg overflow-hidden flex flex-col shadow-xs">
+          <div className="p-4 sm:px-5 sm:py-3.5 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/50">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-1.5">
+                <FileCheck className="h-4 w-4 text-slate-700" />
+                Strategic Approvals Queue
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Awaiting your executive sign-off
+              </p>
             </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              TZS across all approved donor grants
-            </span>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/finance')}>
+              All <ChevronRight className="h-3 w-3 ml-0.5" />
+            </Button>
           </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-            <Wallet className="h-5 w-5" />
-          </div>
-        </div>
 
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Pending Executive Approvals
-            </span>
-            <div className={`text-[28px] font-bold leading-tight font-mono tabular-nums ${pendingApprovals.length > 0 ? 'text-amber-600' : 'text-charcoal-900'}`}>
-              {pendingApprovals.length}
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              Strategic requisitions awaiting sign-off
-            </span>
-          </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
-            <Clock className="h-5 w-5" />
-          </div>
-        </div>
+          <div className="divide-y divide-slate-100 flex-1 overflow-y-auto max-h-[320px]">
+            {pendingApprovals.length === 0 ? (
+              <div className="p-8 text-center text-xs text-slate-400">
+                No requisitions currently awaiting executive authorization.
+              </div>
+            ) : (
+              pendingApprovals.slice(0, 5).map((req) => (
+                <div key={req.id} className="p-3.5 hover:bg-slate-50/60 transition-colors">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold text-xs text-slate-900 truncate">
+                        {req.title}
+                      </div>
+                      <div className="text-[11px] font-mono text-slate-500 mt-0.5">
+                        {req.requestNumber} • {req.requesterName}
+                      </div>
+                      <div className="text-xs font-mono font-bold text-slate-800 mt-1">
+                        {req.currency} {req.totalAmount.toLocaleString()}
+                      </div>
+                    </div>
 
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Overdue Governance Actions
-            </span>
-            <div className={`text-[28px] font-bold leading-tight font-mono tabular-nums ${overdueActions.length > 0 ? 'text-rose-600' : 'text-charcoal-900'}`}>
-              {overdueActions.length}
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              Action items past statutory deadline
-            </span>
-          </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center">
-            <AlertTriangle className="h-5 w-5" />
+                    <div className="flex items-center gap-1 shrink-0">
+                      {req.requesterId === user?.id ? (
+                        <span className="text-[10px] text-slate-400 italic">
+                          Self-initiated
+                        </span>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleApprove(req)}
+                            className="p-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
+                            title="Approve"
+                            aria-label="Approve"
+                          >
+                            <Check className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleReject(req)}
+                            className="p-1 rounded bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
+                            title="Reject"
+                            aria-label="Reject"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
 
-      {/* Main Operational Queues: Executive Approvals & Governance Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Executive Approval Queue */}
-        <div className="bg-white border border-surface-border rounded-lg overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-surface-border flex items-center justify-between bg-surface-muted/20">
+      {/* Row 3: Staff Clearances Awaiting Authorization (AdminCN Card Panel) */}
+      {pendingStaffAuth.length > 0 && (
+        <div className="bg-white border border-slate-200/80 rounded-lg overflow-hidden shadow-xs">
+          <div className="p-4 sm:px-5 sm:py-3.5 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/50">
             <div>
-              <h3 className="text-sm font-bold text-charcoal-900 flex items-center gap-2">
-                <FileCheck className="h-4 w-4 text-forest-700" />
-                Strategic Approvals Requiring Executive Sign-Off
-              </h3>
-              <p className="text-xs text-charcoal-muted mt-0.5">
-                Financial requests and agreements awaiting your authorization
+              <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-1.5">
+                <ShieldCheck className="h-4 w-4 text-[#D68904]" />
+                Staff Registrations Vetted by HR (Awaiting Executive Clearance)
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Human Resources has validated credentials. Click Authorize to activate system access.
               </p>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/finance')}>
-              {t('common.viewAll', 'View All')}
-              <ArrowRight className="h-3.5 w-3.5 ml-1" />
+            <Button variant="ghost" size="sm" onClick={() => navigate('/users')}>
+              Manage All <ChevronRight className="h-3 w-3 ml-0.5" />
             </Button>
           </div>
 
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-sm min-w-[540px]">
-              <thead className="bg-surface-muted/60 text-xs font-semibold text-charcoal-600 border-b border-surface-border">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50/70 text-[11px] font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200/80">
                 <tr>
-                  <th className="py-2.5 px-3">Reference & Title</th>
-                  <th className="py-2.5 px-3">Requester</th>
-                  <th className="py-2.5 px-3 text-right">Amount</th>
-                  <th className="py-2.5 px-3 text-right">Decision</th>
+                  <th className="py-2.5 px-4">Staff Member</th>
+                  <th className="py-2.5 px-4">Official Email</th>
+                  <th className="py-2.5 px-4">Staged Role & Dept</th>
+                  <th className="py-2.5 px-4 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-surface-border">
-                {pendingApprovals.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="py-8 text-center text-charcoal-muted text-xs">
-                      No pending requests currently requiring executive authorization.
+              <tbody className="divide-y divide-slate-100">
+                {pendingStaffAuth.map((candidate) => (
+                  <tr key={candidate.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="py-2.5 px-4 font-semibold text-slate-900">
+                      {candidate.displayName}
                     </td>
-                  </tr>
-                ) : (
-                  pendingApprovals.slice(0, 5).map((req) => (
-                    <tr key={req.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="py-2.5 px-3">
-                        <div className="font-semibold text-charcoal-900 line-clamp-1">{req.title}</div>
-                        <div className="text-xs font-mono text-charcoal-muted">{req.requestNumber} • {req.requestType}</div>
-                      </td>
-                      <td className="py-2.5 px-3 text-xs text-charcoal-700 whitespace-nowrap">
-                        {req.requesterName}
-                      </td>
-                      <td className="py-2.5 px-3 text-right font-mono font-bold text-xs text-charcoal-900 whitespace-nowrap">
-                        {req.currency} {req.totalAmount.toLocaleString()}
-                      </td>
-                      <td className="py-2.5 px-3 text-right whitespace-nowrap">
-                        {req.requesterId === user?.id ? (
-                          <span className="text-xs text-charcoal-muted italic bg-surface-muted px-2 py-0.5 rounded">
-                            Self-initiated (Secondary Sign-off Required)
-                          </span>
-                        ) : (
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => handleApprove(req)}
-                              className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
-                              title="Approve Requisition"
-                            >
-                              <Check className="h-3.5 w-3.5 mr-1" />
-                              Approve
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleReject(req)}
-                              className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
-                              title="Reject Requisition"
-                            >
-                              <X className="h-3.5 w-3.5 mr-1" />
-                              Reject
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Governance Decisions & Overdue Action Items */}
-        <div className="bg-white border border-surface-border rounded-lg overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-surface-border flex items-center justify-between bg-surface-muted/20">
-            <div>
-              <h3 className="text-sm font-bold text-charcoal-900 flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-amber-600" />
-                Board & Governance Follow-up Action Items
-              </h3>
-              <p className="text-xs text-charcoal-muted mt-0.5">
-                Committees and management decisions tracking
-              </p>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/correspondence')}>
-              {t('common.viewAll', 'View All')}
-              <ArrowRight className="h-3.5 w-3.5 ml-1" />
-            </Button>
-          </div>
-
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-sm min-w-[500px]">
-              <thead className="bg-surface-muted/60 text-xs font-semibold text-charcoal-600 border-b border-surface-border">
-                <tr>
-                  <th className="py-2.5 px-3">Action Ref</th>
-                  <th className="py-2.5 px-3">Description</th>
-                  <th className="py-2.5 px-3">Assignee</th>
-                  <th className="py-2.5 px-3 text-right">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-surface-border">
-                {actions.slice(0, 5).map((act) => (
-                  <tr key={act.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="py-2.5 px-3 font-mono font-bold text-xs text-charcoal-800 whitespace-nowrap">
-                      {act.actionNumber}
+                    <td className="py-2.5 px-4 font-mono text-slate-600">
+                      {candidate.email}
                     </td>
-                    <td className="py-2.5 px-3 text-xs text-charcoal-900 max-w-[220px] truncate">
-                      {act.taskDescription}
+                    <td className="py-2.5 px-4 text-slate-700">
+                      <span className="font-medium text-slate-900">
+                        {candidate.stagedDetails?.jobTitle || candidate.stagedDetails?.roleCode?.replace(/_/g, ' ') || 'Staff Member'}
+                      </span>{' '}
+                      <span className="text-slate-400">
+                        ({candidate.stagedDetails?.departmentName || candidate.stagedDetails?.departmentCode || 'BAO'})
+                      </span>
                     </td>
-                    <td className="py-2.5 px-3 text-xs text-charcoal-700 whitespace-nowrap">
-                      {act.assignedToName}
-                    </td>
-                    <td className="py-2.5 px-3 text-right whitespace-nowrap">
-                      <StatusIndicator
-                        status={act.isOverdue ? 'overdue' : act.status}
-                        label={act.isOverdue ? 'OVERDUE' : act.status.toUpperCase()}
-                      />
+                    <td className="py-2.5 px-4 text-right">
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={() => {
+                          setSelectedStaffCandidate(candidate);
+                          setIsApprovalModalOpen(true);
+                        }}
+                      >
+                        <ShieldCheck className="h-3.5 w-3.5 mr-1" />
+                        Authorize
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -398,64 +469,139 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
             </table>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Program Portfolio Breakdown Table */}
-      <div className="bg-white border border-surface-border rounded-lg overflow-hidden">
-        <div className="p-4 border-b border-surface-border flex items-center justify-between bg-surface-muted/20">
+      {/* Row 4: Program Portfolio Table (AdminCN Data Table with Search & Pagination) */}
+      <div className="bg-white border border-slate-200/80 rounded-lg overflow-hidden shadow-xs">
+        <div className="p-4 sm:px-5 sm:py-3.5 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-50/50">
           <div>
-            <h3 className="text-sm font-bold text-charcoal-900 flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-forest-700" />
-              Strategic Program Delivery & Budget Health
-            </h3>
-            <p className="text-xs text-charcoal-muted mt-0.5">
-              Snapshot of high-impact donor-funded initiatives
+            <h2 className="text-sm font-semibold text-slate-900 tracking-tight">
+              Strategic Program Delivery & Budget Portfolio
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Current active donor contracts, implementation status, and allocated funds
             </p>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/projects')}>
-            {t('common.viewAll', 'All Projects')}
-            <ArrowRight className="h-3.5 w-3.5 ml-1" />
-          </Button>
+
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="h-3.5 w-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search programs..."
+                value={tableSearch}
+                onChange={(e) => {
+                  setTableSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="pl-8 pr-3 py-1.5 text-xs rounded-md border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-[#D68904]"
+              />
+            </div>
+            <Button variant="outline" size="sm" onClick={() => navigate('/projects')}>
+              All Projects <ExternalLink className="h-3 w-3 ml-1" />
+            </Button>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm min-w-[700px]">
-            <thead className="bg-surface-muted/60 text-xs font-semibold text-charcoal-600 border-b border-surface-border">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50/70 text-[11px] font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200/80">
               <tr>
                 <th className="py-2.5 px-4">Project Code & Name</th>
                 <th className="py-2.5 px-4">Funding Partner</th>
-                <th className="py-2.5 px-4">Period</th>
+                <th className="py-2.5 px-4">Implementation Period</th>
                 <th className="py-2.5 px-4 text-right">Total Budget</th>
                 <th className="py-2.5 px-4 text-right">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-surface-border">
-              {projects.slice(0, 4).map((p) => (
-                <tr
-                  key={p.id}
-                  className="hover:bg-slate-50/50 transition-colors cursor-pointer"
-                  onClick={() => navigate(`/projects/${p.id}`)}
-                >
-                  <td className="py-3 px-4">
-                    <div className="font-semibold text-charcoal-900">{p.name}</div>
-                    <div className="text-xs font-mono text-charcoal-muted">{p.projectCode}</div>
-                  </td>
-                  <td className="py-3 px-4 text-xs font-semibold text-charcoal-800">{p.funder}</td>
-                  <td className="py-3 px-4 text-xs text-charcoal-600 whitespace-nowrap">
-                    {p.startDate} — {p.endDate}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono font-bold text-xs text-charcoal-900 whitespace-nowrap">
-                    {p.currency} {p.totalBudget.toLocaleString()}
-                  </td>
-                  <td className="py-3 px-4 text-right whitespace-nowrap">
-                    <StatusIndicator status={p.status} label={p.status.toUpperCase()} />
+            <tbody className="divide-y divide-slate-100">
+              {paginatedProjects.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-slate-400">
+                    No programs matched the current query.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                paginatedProjects.map((p) => (
+                  <tr
+                    key={p.id}
+                    className="hover:bg-slate-50/60 transition-colors cursor-pointer"
+                    onClick={() => navigate(`/projects/${p.id}`)}
+                  >
+                    <td className="py-3 px-4">
+                      <div className="font-semibold text-slate-900 leading-snug">{p.name}</div>
+                      <div className="text-[11px] font-mono text-slate-500 mt-0.5">{p.projectCode}</div>
+                    </td>
+                    <td className="py-3 px-4 font-medium text-slate-700">
+                      {p.funder}
+                    </td>
+                    <td className="py-3 px-4 text-slate-600 whitespace-nowrap">
+                      {p.startDate} — {p.endDate}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
+                      {p.currency} {p.totalBudget.toLocaleString()}
+                    </td>
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
+                      <StatusIndicator status={p.status} label={p.status.toUpperCase()} />
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
+
+        {/* Table Pagination Bar (AdminCN Style) */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-slate-200/80 bg-white text-xs text-slate-500">
+          <div>
+            Showing <span className="font-semibold text-slate-800">{filteredProjects.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to{' '}
+            <span className="font-semibold text-slate-800">{Math.min(currentPage * pageSize, filteredProjects.length)}</span> of{' '}
+            <span className="font-semibold text-slate-800">{filteredProjects.length}</span> entries
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              disabled={currentPage <= 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              className="px-2.5 py-1 rounded border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+            >
+              Previous
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
+              <button
+                key={pg}
+                type="button"
+                onClick={() => setCurrentPage(pg)}
+                className={`h-7 w-7 rounded text-xs font-medium transition-colors ${
+                  pg === currentPage
+                    ? 'bg-[#D68904] text-white font-semibold'
+                    : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                {pg}
+              </button>
+            ))}
+            <button
+              type="button"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              className="px-2.5 py-1 rounded border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
+
+      <ExecutiveApprovalModal
+        isOpen={isApprovalModalOpen}
+        onClose={() => setIsApprovalModalOpen(false)}
+        user={selectedStaffCandidate}
+        onSuccess={() => {
+          loadData();
+        }}
+      />
     </div>
   );
 };

@@ -17,7 +17,6 @@ import {
   Upload,
   Archive,
   RotateCcw,
-  Tag,
   Building,
   User,
   Calendar,
@@ -354,26 +353,6 @@ export const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
                 )}
               </div>
             </div>
-
-            {/* Tags */}
-            {doc.tags && doc.tags.length > 0 && (
-              <div className="space-y-1.5">
-                <span className="text-xs font-semibold text-charcoal-muted uppercase tracking-wider flex items-center gap-1">
-                  <Tag className="h-3 w-3" />
-                  {t('documents.tags', 'Subject Tags')}
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {doc.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2 py-0.5 rounded-full text-xs bg-surface-muted text-charcoal-muted border border-surface-border"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
 

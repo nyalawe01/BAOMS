@@ -39,6 +39,7 @@ export const CreateLeaveRequestModal: React.FC<CreateLeaveRequestModalProps> = (
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0] ?? '');
   const [handoverStaffId, setHandoverStaffId] = useState('');
   const [reason, setReason] = useState('');
+  const [customLeaveType, setCustomLeaveType] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -124,7 +125,12 @@ export const CreateLeaveRequestModal: React.FC<CreateLeaveRequestModalProps> = (
       return;
     }
 
-    if (!asDraft && isOverBalance) {
+    if (selectedTypeId === 'other' && !customLeaveType.trim()) {
+      setError('Please specify the custom leave category.');
+      return;
+    }
+
+    if (selectedTypeId !== 'other' && !asDraft && isOverBalance) {
       setError(
         t(
           'hr.errors.insufficientBalance',
@@ -137,12 +143,18 @@ export const CreateLeaveRequestModal: React.FC<CreateLeaveRequestModalProps> = (
 
     setIsSubmitting(true);
     try {
+      const resolvedReason = selectedTypeId === 'other' && customLeaveType.trim()
+        ? `[Category: ${customLeaveType.trim()}]\n\n${reason.trim()}`
+        : reason.trim();
+
+      const fallbackTypeId = leaveTypes[0]?.id || 'lt-unpaid';
+
       const payload: CreateLeaveRequestPayload = {
         staffId: selectedStaffId,
-        leaveTypeId: selectedTypeId,
+        leaveTypeId: selectedTypeId === 'other' ? fallbackTypeId : selectedTypeId,
         startDate,
         endDate,
-        reason: reason.trim(),
+        reason: resolvedReason,
         handoverStaffId: handoverStaffId || null,
         status: asDraft ? 'draft' : 'pending',
       };
@@ -229,7 +241,20 @@ export const CreateLeaveRequestModal: React.FC<CreateLeaveRequestModalProps> = (
                   </option>
                 );
               })}
+              <option value="other">Other (Category not listed)...</option>
             </select>
+            {selectedTypeId === 'other' && (
+              <div className="mt-2">
+                <input
+                  type="text"
+                  required
+                  placeholder="Specify custom leave category..."
+                  value={customLeaveType}
+                  onChange={(e) => setCustomLeaveType(e.target.value)}
+                  className="w-full px-3 py-1.5 text-xs rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-1 focus:ring-forest-600"
+                />
+              </div>
+            )}
             {currentBalance && (
               <div className="mt-1.5 flex items-center gap-2 text-xs text-charcoal-muted">
                 <Info className="h-3.5 w-3.5 text-forest-700" />

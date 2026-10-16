@@ -20,6 +20,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
     return false;
   });
 
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
   const handleToggleSidebar = () => {
     setIsSidebarOpen((prev) => {
       const next = !prev;
@@ -30,35 +32,30 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
     });
   };
 
-  const handleCloseSidebar = () => {
-    setIsSidebarOpen(false);
-    if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem('baoms_sidebar_open', 'false');
-    }
+  const handleToggleMobile = () => {
+    setIsMobileOpen((prev) => !prev);
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-surface-bg text-charcoal">
-      {/* Top Header Navigation - Fixed height, spans full width, stable hamburger anchor */}
-      <Header
-        isSidebarOpen={isSidebarOpen}
-        onToggleSidebar={handleToggleSidebar}
-        onOpenSidebar={handleToggleSidebar}
-        onOpenMobileNav={handleToggleSidebar}
+    <div className="flex h-screen w-screen overflow-hidden bg-[#f9fafb] text-[#1f2937] font-sans antialiased">
+      {/* Sidebar: Fixed/docked on left running full height */}
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onToggleCollapse={handleToggleSidebar}
+        isMobileOpen={isMobileOpen}
+        onMobileClose={() => setIsMobileOpen(false)}
       />
 
-      {/* Main Workspace: Left Sticky In-flow Docked Sidebar + Right Scrollable Main Content */}
-      <div className="flex flex-1 overflow-hidden min-w-0">
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={handleCloseSidebar}
-          onToggleCollapse={handleToggleSidebar}
-          isMobileOpen={isSidebarOpen}
-          onMobileClose={handleCloseSidebar}
+      {/* Main Content Workspace Column: Header at top, scrollable workspace below */}
+      <div className="flex flex-col flex-1 min-w-0 h-full overflow-hidden">
+        <Header
+          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={handleToggleSidebar}
+          onOpenMobileNav={handleToggleMobile}
         />
 
-        {/* Content Workspace - Smoothly adjusts evenly when sidebar expands or collapses */}
-        <main className="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-6 bg-slate-50/70 min-w-0 transition-all duration-300 ease-in-out">
+        {/* Content Workspace: 24px padding on desktop, clean max-w-7xl, no jump */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-6 min-w-0 bg-[#f9fafb]">
           <div className="mx-auto max-w-7xl w-full">
             {children}
           </div>

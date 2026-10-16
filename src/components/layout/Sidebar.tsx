@@ -112,7 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           items: [
             { to: '/', label: t('nav.executiveDashboard', 'Executive Dashboard'), icon: LayoutDashboard },
             { to: '/projects', label: t('nav.projectPortfolio', 'Project Portfolio'), icon: Briefcase },
-            { to: '/correspondence', label: t('nav.governanceMeetings', 'Governance & Decisions'), icon: Calendar },
+            { to: '/correspondence', label: t('nav.officialLetters', 'Official Correspondence'), icon: Mail },
           ],
         },
         {
@@ -128,7 +128,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           items: [
             { to: '/reports', label: t('nav.reports', 'Organization-wide Reports'), icon: BarChart3 },
             { to: '/hr', label: t('nav.staffDirectory', 'Staff Directory'), icon: Users },
-            { to: '/audit-logs', label: t('nav.auditLogs', 'Audit Logs & Governance'), icon: ShieldAlert, badge: 'Audit' },
+            { to: '/audit-logs', label: t('nav.auditLogs', 'System Audit Trail'), icon: ShieldAlert, badge: 'Audit' },
           ],
         },
       ];
@@ -176,7 +176,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           items: [
             { to: '/documents', label: t('nav.projectDocs', 'Project Documents & Evidence'), icon: FileText },
             { to: '/reports', label: t('nav.progressReports', 'Progress Reports & Analytics'), icon: BarChart3 },
-            { to: '/correspondence', label: t('nav.meetingsCalendar', 'Meetings & Governance'), icon: Calendar },
+            { to: '/correspondence', label: t('nav.officialLetters', 'Official Correspondence'), icon: Mail },
           ],
         },
         {
@@ -203,7 +203,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           heading: t('nav.section.documentation', 'Tasks & Documentation'),
           items: [
             { to: '/documents', label: t('nav.evidenceUploads', 'Evidence & Photo Uploads'), icon: FileText },
-            { to: '/correspondence', label: t('nav.fieldMeetings', 'Meetings & Community Calendar'), icon: Calendar },
           ],
         },
         {
@@ -281,9 +280,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           ],
         },
         {
-          heading: t('nav.section.fieldReviews', 'Field Reviews & Learning'),
+          heading: t('nav.section.fieldReviews', 'Field Communications'),
           items: [
-            { to: '/correspondence', label: t('nav.fieldMeetings', 'Reviews & Meetings'), icon: Calendar },
+            { to: '/correspondence', label: t('nav.officialLetters', 'Official Correspondence'), icon: Mail },
           ],
         },
       ];
@@ -347,7 +346,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       >
         {/* Top Header: Brand Identity & Toggle Button */}
-        <div className="h-14 border-b border-surface-border flex items-center justify-between px-3.5 bg-white shrink-0">
+        <div className="h-14 sm:h-16 border-b border-surface-border flex items-center justify-between px-3.5 bg-white shrink-0">
           {isExpanded ? (
             <div className="flex items-center justify-between w-full min-w-0">
               <div className="flex items-center gap-2.5 min-w-0">
@@ -411,23 +410,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         title={item.label}
                         className={({ isActive }) =>
                           cn(
-                            'flex items-center rounded-lg transition-all duration-150 group select-none relative',
+                            'flex items-center rounded-md transition-all duration-150 group select-none relative',
                             isExpanded
-                              ? 'w-full px-3 py-2.5 gap-3.5 text-sm font-medium'
-                              : 'w-11 h-11 mx-auto justify-center p-0',
+                              ? 'w-full px-3 py-2 gap-3 text-xs sm:text-sm font-medium'
+                              : 'w-10 h-10 mx-auto justify-center p-0',
                             isActive
-                              ? 'bg-slate-800 text-white font-semibold'
-                              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent'
+                              ? 'bg-amber-500/10 text-charcoal-900 font-semibold border-l-2 border-[#D68904]'
+                              : 'text-charcoal-muted hover:bg-slate-50 hover:text-charcoal-900 border-l-2 border-transparent'
                           )
                         }
                       >
                         {({ isActive }) => (
                           <>
-                            {/* Prominent, slightly bigger icon */}
+                            {/* Restrained icon size & brand color when active */}
                             <Icon
                               className={cn(
-                                'w-[22px] h-[22px] shrink-0 transition-transform group-hover:scale-105',
-                                isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-900'
+                                'w-[18px] h-[18px] shrink-0 transition-transform group-hover:scale-105',
+                                isActive ? 'text-[#D68904]' : 'text-slate-400 group-hover:text-charcoal-700'
                               )}
                             />
 
@@ -437,8 +436,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                 className={cn(
                                   'truncate flex-1 text-xs',
                                   isActive
-                                    ? 'font-semibold text-white'
-                                    : 'font-medium text-slate-700 group-hover:text-slate-900'
+                                    ? 'font-semibold text-charcoal-900'
+                                    : 'font-medium text-charcoal-muted group-hover:text-charcoal-900'
                                 )}
                               >
                                 {item.label}
@@ -449,9 +448,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             {isExpanded && item.badge ? (
                               <span
                                 className={cn(
-                                  'ml-auto rounded px-1.5 py-0.5 text-[9px] font-mono font-semibold transition-colors uppercase',
+                                  'ml-auto rounded px-1.5 py-0.5 text-[9px] font-mono font-semibold uppercase',
                                   isActive
-                                    ? 'bg-slate-700 text-slate-200'
+                                    ? 'bg-[#D68904]/10 text-[#D68904] border border-[#D68904]/20'
                                     : 'bg-slate-100 text-slate-600 border border-surface-border'
                                 )}
                               >

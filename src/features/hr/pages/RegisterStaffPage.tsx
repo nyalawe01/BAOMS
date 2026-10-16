@@ -152,6 +152,7 @@ export const RegisterStaffPage: React.FC = () => {
 
   const [existingStaff, setExistingStaff] = useState<StaffProfileRecord[]>([]);
   const [formData, setFormData] = useState<StaffDraftState>(INITIAL_DRAFT);
+  const [isCustomEducation, setIsCustomEducation] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [hasDraftRestored, setHasDraftRestored] = useState(false);
   const [saveTimestamp, setSaveTimestamp] = useState<string | null>(null);
@@ -182,6 +183,18 @@ export const RegisterStaffPage: React.FC = () => {
             setFormData(parsed);
             setHasDraftRestored(true);
             setSaveTimestamp(parsed.savedAt);
+            const standardEdu = [
+              "Master's Degree",
+              "Postgraduate Diploma",
+              "Bachelor's Degree",
+              "Advanced Diploma",
+              "Ordinary Diploma",
+              "Certificate",
+              "Secondary Education",
+            ];
+            if (parsed.academic?.highestEducation && !standardEdu.includes(parsed.academic.highestEducation)) {
+              setIsCustomEducation(true);
+            }
             const pastCompleted: number[] = [];
             for (let i = 0; i < parsed.step; i++) pastCompleted.push(i);
             setCompletedSteps(pastCompleted);
@@ -836,13 +849,22 @@ export const RegisterStaffPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select
                   label={`${t('hr.highestEducation', 'Highest Education Level')} *`}
-                  value={formData.academic.highestEducation}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      academic: { ...formData.academic, highestEducation: e.target.value },
-                    })
-                  }
+                  value={isCustomEducation ? 'other' : formData.academic.highestEducation}
+                  onChange={(e) => {
+                    if (e.target.value === 'other') {
+                      setIsCustomEducation(true);
+                      setFormData({
+                        ...formData,
+                        academic: { ...formData.academic, highestEducation: '' },
+                      });
+                    } else {
+                      setIsCustomEducation(false);
+                      setFormData({
+                        ...formData,
+                        academic: { ...formData.academic, highestEducation: e.target.value },
+                      });
+                    }
+                  }}
                   options={[
                     { value: "Master's Degree", label: "Master's Degree (Shahada ya Uzamili)" },
                     { value: "Postgraduate Diploma", label: 'Postgraduate Diploma' },
@@ -851,8 +873,26 @@ export const RegisterStaffPage: React.FC = () => {
                     { value: 'Ordinary Diploma', label: 'Ordinary Diploma (Stashahada)' },
                     { value: 'Certificate', label: 'Certificate (Astashahada)' },
                     { value: 'Secondary Education', label: 'Form IV / Form VI Secondary' },
+                    { value: 'other', label: 'Other (Qualification not listed)...' },
                   ]}
                 />
+
+                {isCustomEducation && (
+                  <div className="md:col-span-2">
+                    <Input
+                      label="Specify Custom Education Level / Qualification *"
+                      placeholder="e.g. Higher National Diploma / Vocational Master"
+                      value={formData.academic.highestEducation}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          academic: { ...formData.academic, highestEducation: e.target.value },
+                        })
+                      }
+                      required
+                    />
+                  </div>
+                )}
 
                 <Input
                   label={t('hr.cvName', 'Curriculum Vitae Document Name')}

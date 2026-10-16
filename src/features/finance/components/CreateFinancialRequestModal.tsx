@@ -41,7 +41,8 @@ export const CreateFinancialRequestModal: React.FC<CreateFinancialRequestModalPr
 }) => {
   const { t } = useTranslation();
 
-  const [requestType, setRequestType] = useState<FinancialRequestType>('activity_expense');
+  const [requestType, setRequestType] = useState<FinancialRequestType | 'other'>('activity_expense');
+  const [customRequestType, setCustomRequestType] = useState('');
   const [title, setTitle] = useState('');
   const [purpose, setPurpose] = useState('');
   const [budgetId, setBudgetId] = useState<string>('');
@@ -131,6 +132,11 @@ export const CreateFinancialRequestModal: React.FC<CreateFinancialRequestModalPr
       return;
     }
 
+    if (requestType === 'other' && !customRequestType.trim()) {
+      setError(t('finance.errors.customTypeRequired', 'Please specify the custom requisition category / type.'));
+      return;
+    }
+
     const validLines = lines.map((l) => ({
       description: l.description.trim(),
       quantity: parseFloat(l.quantity) || 0,
@@ -153,12 +159,16 @@ export const CreateFinancialRequestModal: React.FC<CreateFinancialRequestModalPr
         notes: 'Attached proof of expenditure or supporting quotation',
       }));
 
+      const resolvedPurpose = requestType === 'other' && customRequestType.trim()
+        ? `[Category: ${customRequestType.trim()}]\n\n${purpose.trim()}`
+        : purpose.trim();
+
       await onSubmit({
         projectId: defaultProjectId || selectedBudget?.projectId || null,
         budgetId: budgetId || null,
-        requestType,
+        requestType: requestType === 'other' ? 'operational' : requestType,
         title: title.trim(),
-        purpose: purpose.trim(),
+        purpose: resolvedPurpose,
         priority,
         dueDate: dueDate || null,
         currency: 'TZS',
@@ -169,6 +179,8 @@ export const CreateFinancialRequestModal: React.FC<CreateFinancialRequestModalPr
       // Reset form
       setTitle('');
       setPurpose('');
+      setCustomRequestType('');
+      setRequestType('activity_expense');
       setProofFiles([]);
       setLines([{ description: '', quantity: '1', unitCost: '', budgetCategory: 'General' }]);
       onClose();
@@ -204,7 +216,7 @@ export const CreateFinancialRequestModal: React.FC<CreateFinancialRequestModalPr
             </label>
             <Select
               value={requestType}
-              onChange={(e) => setRequestType(e.target.value as FinancialRequestType)}
+              onChange={(e) => setRequestType(e.target.value as FinancialRequestType | 'other')}
               required
             >
               <option value="activity_expense">{t('finance.types.activity_expense', 'Field Activity Expense')}</option>
@@ -213,7 +225,19 @@ export const CreateFinancialRequestModal: React.FC<CreateFinancialRequestModalPr
               <option value="operational">{t('finance.types.operational', 'Office Operations & Utilities')}</option>
               <option value="petty_cash">{t('finance.types.petty_cash', 'Petty Cash Requisition')}</option>
               <option value="consultancy">{t('finance.types.consultancy', 'Consultancy & Honoraria')}</option>
+              <option value="other">Other (Category not listed)...</option>
             </Select>
+            {requestType === 'other' && (
+              <div className="mt-2">
+                <Input
+                  label="Specify Custom Category *"
+                  placeholder="e.g. Community Emergency Response"
+                  value={customRequestType}
+                  onChange={(e) => setCustomRequestType(e.target.value)}
+                  required
+                />
+              </div>
+            )}
           </div>
 
           <div>

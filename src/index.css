@@ -66,28 +66,48 @@ body {
   display: block !important;
 }
 
-/* Hide scrollbars globally across all components but maintain scroll functionality */
+/* Usable, restrained scrollbars (never hidden, never bloated) */
 * {
-  scrollbar-width: none !important; /* Firefox */
-  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
 }
 *::-webkit-scrollbar {
-  display: none !important; /* Chrome, Safari, Opera */
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
 }
 
-/* Remove all colored highlights, focus rings, and border color changes when clicking on any text box, input, textarea, or select */
-input:focus,
-input:focus-visible,
-textarea:focus,
+/* Keyboard focus indicators with restrained ochre/gold accent */
+:focus-visible {
+  outline: 2px solid #D68904;
+  outline-offset: 1px;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus-visible,
 textarea:focus-visible,
-select:focus,
 select:focus-visible {
-  outline: none !important;
+  outline: none;
+  border-color: #D68904 !important;
+  box-shadow: 0 0 0 1px #D68904 !important;
+}
+
+/* Restrained Checkboxes: minimal neutral box without colored highlight */
+input[type="checkbox"] {
+  accent-color: #1f2937;
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: 1px solid #475569 !important;
+  outline-offset: 1px;
   box-shadow: none !important;
-  -webkit-box-shadow: none !important;
-  border-color: #e5e7eb !important;
-  --tw-ring-offset-shadow: 0 0 #0000 !important;
-  --tw-ring-shadow: 0 0 #0000 !important;
-  --tw-ring-color: transparent !important;
 }
 

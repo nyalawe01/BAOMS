@@ -195,7 +195,9 @@ export const UserManagementPage: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { showToast } = useToast();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, hasRole, isAdmin } = useAuth();
+  const canHRReview = (hasRole('hr_administrator') || isAdmin()) && !hasRole('executive_director');
+  const canEDAuthorize = hasRole('executive_director') || isAdmin();
 
   // Online/offline connectivity state
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -642,53 +644,7 @@ export const UserManagementPage: React.FC = () => {
         </div>
       )}
 
-      {/* Security Architecture & Password Policy Notice */}
-      <div className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50/70 p-4 text-xs text-blue-900">
-        <ShieldCheck className="h-5 w-5 shrink-0 text-blue-600 mt-0.5" />
-        <div className="space-y-1">
-          <p className="font-semibold text-blue-950">
-            Official Access & Credential Governance
-          </p>
-          <p className="text-slate-600 leading-relaxed">
-            In compliance with Supabase Auth zero-knowledge cryptographic standards and ISO security best practices,
-            administrators cannot type or view plaintext user passwords. Staff members register their own secret password
-            via the <strong className="text-slate-800">Self-Registration Portal</strong> (<code className="text-blue-700 font-mono">/register</code>)
-            using their official <code className="bg-white px-1 py-0.5 rounded border border-blue-200 font-mono">@babawatoto.or.tz</code> email.
-            Newly registered accounts enter a waiting state until Human Resources and the Executive Director authorize their role and scopes.
-          </p>
-        </div>
-      </div>
 
-      {/* Pending Approvals Callout Banner */}
-      {pendingCandidates.length > 0 && (
-        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-amber-500/15 text-amber-600 mt-0.5">
-              <Clock className="w-5 h-5 animate-pulse" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-sm text-amber-950">
-                  Pending Staff Registrations ({pendingCandidates.length})
-                </h3>
-                <Badge variant="warning" className="text-[10px]">Action Required</Badge>
-              </div>
-              <p className="text-xs text-amber-800 mt-0.5 max-w-2xl">
-                Staff have registered with official organization emails and are waiting for HR review and Executive Director authorization.
-              </p>
-            </div>
-          </div>
-
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setStatusFilter('pending')}
-            className="border-amber-300 text-amber-900 bg-white hover:bg-amber-100/50 text-xs shrink-0 self-start sm:self-auto"
-          >
-            <span>Filter Pending Queue ({pendingCandidates.length})</span>
-          </Button>
-        </div>
-      )}
 
       {/* Filter and Search Bar */}
       <Card>
@@ -849,32 +805,44 @@ export const UserManagementPage: React.FC = () => {
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             {staff.approvalStatus === 'pending_hr' && (
-                              <Button
-                                size="xs"
-                                variant="primary"
-                                onClick={() => {
-                                  setSelectedCandidate(staff);
-                                  setIsOnboardingModalOpen(true);
-                                }}
-                                className="bg-[#D68904] hover:bg-[#b86e03] text-white text-[11px] py-1 px-2.5 h-auto flex items-center gap-1 shrink-0"
-                              >
-                                <span>Review & Onboard</span>
-                              </Button>
+                              canHRReview ? (
+                                <Button
+                                  size="xs"
+                                  variant="primary"
+                                  onClick={() => {
+                                    setSelectedCandidate(staff);
+                                    setIsOnboardingModalOpen(true);
+                                  }}
+                                  className="bg-charcoal-900 hover:bg-black text-white text-[11px] py-1 px-2.5 h-auto flex items-center gap-1 shrink-0"
+                                >
+                                  <span>Review & Onboard</span>
+                                </Button>
+                              ) : (
+                                <span className="text-[11px] text-charcoal-muted px-2 py-0.5 border border-surface-border rounded bg-surface-muted/40 whitespace-nowrap">
+                                  Awaiting HR Vetting
+                                </span>
+                              )
                             )}
 
                             {staff.approvalStatus === 'pending_ed' && (
-                              <Button
-                                size="xs"
-                                variant="primary"
-                                onClick={() => {
-                                  setSelectedCandidate(staff);
-                                  setIsExecutiveModalOpen(true);
-                                }}
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] py-1 px-2.5 h-auto flex items-center gap-1 shrink-0"
-                              >
-                                <ShieldCheck className="w-3 h-3" />
-                                <span>Authorize</span>
-                              </Button>
+                              canEDAuthorize ? (
+                                <Button
+                                  size="xs"
+                                  variant="primary"
+                                  onClick={() => {
+                                    setSelectedCandidate(staff);
+                                    setIsExecutiveModalOpen(true);
+                                  }}
+                                  className="bg-charcoal-900 hover:bg-black text-white text-[11px] py-1 px-2.5 h-auto flex items-center gap-1 shrink-0"
+                                >
+                                  <ShieldCheck className="w-3 h-3" />
+                                  <span>Authorize</span>
+                                </Button>
+                              ) : (
+                                <span className="text-[11px] text-charcoal-muted px-2 py-0.5 border border-surface-border rounded bg-surface-muted/40 whitespace-nowrap">
+                                  Awaiting ED Authorization
+                                </span>
+                              )
                             )}
 
                             <DropdownMenu

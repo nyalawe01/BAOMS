@@ -144,76 +144,60 @@ export const SystemAdminDashboard: React.FC = () => {
 
       {/* Primary Infrastructure & Security Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Active User Accounts
-            </span>
-            <div className="text-[28px] font-bold text-charcoal-900 leading-tight font-mono tabular-nums">
-              {activeUsers} <span className="text-sm font-normal text-charcoal-muted">/ {totalUsers}</span>
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              {pendingApprovalsCount > 0 ? (
-                <span className="text-amber-600 font-medium">{pendingApprovalsCount} awaiting HR/ED approval</span>
-              ) : (
-                <span>{deactivatedCount} deactivated accounts</span>
-              )}
-            </span>
+        <div className="bg-white border border-surface-border rounded-lg p-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
+            <span>Active User Accounts</span>
+            <Users className="h-4 w-4 text-charcoal-400" />
           </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
-            <Users className="h-5 w-5" />
+          <div className="mt-2 text-2xl font-bold text-charcoal-900 font-mono tabular-nums leading-tight">
+            {activeUsers} <span className="text-sm font-normal text-charcoal-muted">/ {totalUsers}</span>
           </div>
+          <p className="mt-1 text-xs text-charcoal-muted truncate">
+            {pendingApprovalsCount > 0 ? (
+              <span className="text-amber-600 font-medium">{pendingApprovalsCount} awaiting approval</span>
+            ) : (
+              <span>{deactivatedCount} deactivated accounts</span>
+            )}
+          </p>
         </div>
 
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              MFA Enforcement Rate
-            </span>
-            <div className="text-[28px] font-bold text-charcoal-900 leading-tight font-mono tabular-nums">
-              {mfaPercentage}%
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              {mfaEnrolledCount} of {totalUsers} staff enrolled
-            </span>
+        <div className="bg-white border border-surface-border rounded-lg p-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
+            <span>MFA Enforcement</span>
+            <Lock className="h-4 w-4 text-charcoal-400" />
           </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-            <Lock className="h-5 w-5" />
+          <div className="mt-2 text-2xl font-bold text-charcoal-900 font-mono tabular-nums leading-tight">
+            {mfaPercentage}%
           </div>
+          <p className="mt-1 text-xs text-charcoal-muted truncate">
+            {mfaEnrolledCount} of {totalUsers} staff enrolled
+          </p>
         </div>
 
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Security & Auth Events
-            </span>
-            <div className="text-[28px] font-bold text-charcoal-900 leading-tight font-mono tabular-nums">
-              {securityEventsCount}
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              Recorded in immutable audit trail
-            </span>
+        <div className="bg-white border border-surface-border rounded-lg p-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
+            <span>Security & Auth Events</span>
+            <ShieldAlert className="h-4 w-4 text-charcoal-400" />
           </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
-            <ShieldAlert className="h-5 w-5" />
+          <div className="mt-2 text-2xl font-bold text-charcoal-900 font-mono tabular-nums leading-tight">
+            {securityEventsCount}
           </div>
+          <p className="mt-1 text-xs text-charcoal-muted truncate">
+            Recorded in immutable audit trail
+          </p>
         </div>
 
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              System Infrastructure
-            </span>
-            <div className="text-[28px] font-bold text-emerald-700 leading-tight font-mono tabular-nums">
-              {isLiveConnected ? '100%' : '99.98%'}
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              {isLiveConnected ? `PostgreSQL 17 • Latency ${dbLatency !== null ? dbLatency + 'ms' : 'Live'}` : 'Offline Mode • Cache'}
-            </span>
+        <div className="bg-white border border-surface-border rounded-lg p-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
+            <span>System Infrastructure</span>
+            <Database className="h-4 w-4 text-charcoal-400" />
           </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-forest-50 text-forest-700 flex items-center justify-center">
-            <Database className="h-5 w-5" />
+          <div className="mt-2 text-2xl font-bold text-emerald-700 font-mono tabular-nums leading-tight">
+            {isLiveConnected ? '100%' : '99.98%'}
           </div>
+          <p className="mt-1 text-xs text-charcoal-muted truncate">
+            {isLiveConnected ? `PostgreSQL 17 • Latency ${dbLatency !== null ? dbLatency + 'ms' : 'Live'}` : 'Offline Mode • Cache'}
+          </p>
         </div>
       </div>
 

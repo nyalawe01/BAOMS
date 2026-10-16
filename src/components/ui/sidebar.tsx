@@ -9,7 +9,6 @@
  */
 
 import * as React from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useRender } from "@base-ui/react/use-render";
 import {
   IconChevronRight,
@@ -409,24 +408,11 @@ function FadingLabel({
   className?: string;
   children: React.ReactNode;
 }) {
-  const prefersReducedMotion = useReducedMotion();
+  if (!show) return null;
   return (
-    <AnimatePresence initial={false}>
-      {show && (
-        <motion.span
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{
-            duration: prefersReducedMotion ? 0 : 0.12,
-            ease: EASE_OUT,
-          }}
-          className={className}
-        >
-          {children}
-        </motion.span>
-      )}
-    </AnimatePresence>
+    <span className={cn('transition-opacity duration-150', className)}>
+      {children}
+    </span>
   );
 }
 
@@ -550,19 +536,8 @@ SidebarSection.displayName = "SidebarSection";
 
 /* ─── Active pill (glides between items) ────────────────────── */
 
-function ActivePill({ navId }: { navId: string }) {
-  const prefersReducedMotion = useReducedMotion();
-  if (prefersReducedMotion) {
-    return <span aria-hidden="true" className={activePillClasses} />;
-  }
-  return (
-    <motion.span
-      aria-hidden="true"
-      layoutId={`${navId}-active-pill`}
-      transition={{ type: "spring", stiffness: 520, damping: 42 }}
-      className={activePillClasses}
-    />
-  );
+function ActivePill({ navId: _navId }: { navId: string }) {
+  return <span aria-hidden="true" className={activePillClasses} />;
 }
 
 /* ─── <SidebarItem> ─────────────────────────────────────────── */
@@ -763,51 +738,34 @@ export const SidebarNested = React.forwardRef<
             show={!collapsed}
             className="relative z-10 flex shrink-0 items-center"
           >
-            <motion.span
+            <span
               aria-hidden="true"
-              animate={{ rotate: open ? 90 : 0 }}
-              transition={{
-                duration: prefersReducedMotion ? 0 : 0.2,
-                ease: EASE_OUT,
-              }}
-              className="flex items-center justify-center text-slate-400"
+              className={cn(
+                "flex items-center justify-center text-slate-400 transition-transform duration-200",
+                open && "rotate-90"
+              )}
             >
               <IconChevronRight className="size-3.5" stroke={2} />
-            </motion.span>
+            </span>
           </FadingLabel>
         </button>
-        <AnimatePresence initial={false}>
-          {open && !collapsed && (
-            <motion.div
-              id={contentId}
-              data-slot="sidebar-nested-content"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{
-                height: {
-                  duration: prefersReducedMotion ? 0 : 0.24,
-                  ease: EASE_OUT,
-                },
-                opacity: {
-                  duration: prefersReducedMotion ? 0 : 0.16,
-                  ease: EASE_OUT,
-                },
-              }}
-              className="overflow-hidden"
+        {open && !collapsed && (
+          <div
+            id={contentId}
+            data-slot="sidebar-nested-content"
+            className="overflow-hidden"
+          >
+            <div
+              className={cn(
+                "relative ml-[21px] flex flex-col gap-1 py-0.5 pl-2.5",
+                "before:absolute before:inset-y-1 before:left-0 before:w-px",
+                "before:bg-slate-200",
+              )}
             >
-              <div
-                className={cn(
-                  "relative ml-[21px] flex flex-col gap-1 py-0.5 pl-2.5",
-                  "before:absolute before:inset-y-1 before:left-0 before:w-px",
-                  "before:bg-slate-200",
-                )}
-              >
-                {children}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              {children}
+            </div>
+          </div>
+        )}
       </div>
     );
   },

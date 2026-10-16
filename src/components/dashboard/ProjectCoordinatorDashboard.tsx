@@ -14,6 +14,7 @@ import {
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
+import { KPICard } from '@/components/ui/KPICard';
 import {
   getProjects,
   getProjectActivities,
@@ -90,73 +91,36 @@ export const ProjectCoordinatorDashboard: React.FC = () => {
 
       {/* Field Operations KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Assigned Field Projects
-            </span>
-            <div className="text-[28px] font-bold text-charcoal-900 leading-tight font-mono tabular-nums">
-              {projects.length}
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              Community initiatives in Temeke & Mburahati
-            </span>
-          </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-forest-50 text-forest-700 flex items-center justify-center">
-            <Briefcase className="h-5 w-5" />
-          </div>
-        </div>
-
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Beneficiaries Reached
-            </span>
-            <div className="text-[28px] font-bold text-charcoal-900 leading-tight font-mono tabular-nums">
-              {totalBeneficiaries.toLocaleString()}
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              Verified participants & attendees
-            </span>
-          </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-            <Users className="h-5 w-5" />
-          </div>
-        </div>
-
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Activities Conducted
-            </span>
-            <div className="text-[28px] font-bold text-charcoal-900 leading-tight font-mono tabular-nums">
-              {activities.length}
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              Workshops, clinics, & theater forums
-            </span>
-          </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
-            <MapPin className="h-5 w-5" />
-          </div>
-        </div>
-
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Draft Reports to Submit
-            </span>
-            <div className={`text-[28px] font-bold leading-tight font-mono tabular-nums ${draftReportsCount > 0 ? 'text-amber-600' : 'text-charcoal-900'}`}>
-              {draftReportsCount}
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              Pending final submission to PM
-            </span>
-          </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
-            <Clock className="h-5 w-5" />
-          </div>
-        </div>
+        <KPICard
+          title="Assigned Projects"
+          value={projects.length}
+          helperText="Community initiatives in field"
+          icon={<Briefcase className="h-4 w-4" />}
+        />
+        <KPICard
+          title="Beneficiaries Reached"
+          value={totalBeneficiaries.toLocaleString()}
+          helperText="Verified participants & attendees"
+          icon={<Users className="h-4 w-4" />}
+          badge={{ label: 'Reach', variant: 'neutral' }}
+        />
+        <KPICard
+          title="Activities Conducted"
+          value={activities.length}
+          helperText="Workshops, clinics, & theater forums"
+          icon={<MapPin className="h-4 w-4" />}
+        />
+        <KPICard
+          title="Draft Reports"
+          value={draftReportsCount}
+          helperText="Pending final submission to PM"
+          icon={<Clock className="h-4 w-4" />}
+          badge={
+            draftReportsCount > 0
+              ? { label: 'Drafts Pending', variant: 'warning' }
+              : { label: 'All Submitted', variant: 'success' }
+          }
+        />
       </div>
 
       {/* Main Operational Queues: Field Activity Log & Assigned Tasks */}
@@ -166,7 +130,7 @@ export const ProjectCoordinatorDashboard: React.FC = () => {
           <div className="p-4 border-b border-surface-border flex items-center justify-between bg-surface-muted/20">
             <div>
               <h3 className="text-sm font-bold text-charcoal-900 flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-forest-700" />
+                <MapPin className="h-4 w-4 text-charcoal-600" />
                 Recent Field Activities & Outreach Sessions
               </h3>
               <p className="text-xs text-charcoal-muted mt-0.5">

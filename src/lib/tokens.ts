@@ -8,58 +8,58 @@
 
 export const TOKENS = {
   colors: {
-    // Primary Brand Forest Green
-    forest: {
-      50: '#F2F6F4',
-      100: '#E1EBE5',
-      200: '#C3D7CB',
-      300: '#9FBFA9',
-      400: '#659775',
-      500: '#2D5A46',
-      600: '#234938',
-      700: '#1E3A2F', // BAO Authoritative Primary Brand
-      800: '#172E25',
-      900: '#11231C',
+    // Primary Brand Ochre/Gold & Amber
+    brand: {
+      DEFAULT: '#D68904',
+      hover: '#B86E03',
+      light: '#FDF9F0',
+      border: '#F7DEAF',
+      text: '#75410C',
+    },
+    amberGold: {
+      DEFAULT: '#F2A507',
+      hover: '#D68904',
+      light: '#FEFBF3',
     },
     // Surface & Backgrounds (Warm off-white, clean white surfaces)
     surface: {
-      bg: '#FBFBFA',      // Main Page Background
+      bg: '#F9FAFB',      // Main Page Background
       card: '#FFFFFF',    // Content Surface
-      muted: '#F4F5F3',   // Muted Containers / Headers
-      border: '#E2E5E2',  // Subtle Neutral Border
-      hover: '#F7F8F7',   // Table / Item Hover
+      muted: '#F3F4F6',   // Muted Containers / Headers
+      border: '#E5E7EB',  // Subtle Neutral Border
+      hover: '#F9FAFB',   // Table / Item Hover
     },
     // Typography Charcoal
     charcoal: {
-      default: '#1C1E1D', // Primary Text
-      muted: '#545A56',   // Secondary Labels & Descriptions
-      light: '#767D78',   // Placeholders & Inactive States
+      default: '#1F2937', // Primary Text
+      muted: '#4B5563',   // Secondary Labels & Descriptions
+      light: '#6B7280',   // Placeholders & Inactive States
     },
     // Restrained Semantic Status Tokens (Accessible contrast with border & icon)
     status: {
       success: {
-        bg: '#F0F7F2',
-        text: '#1B4725',
-        border: '#CCE4D2',
-        dot: '#234938',
+        bg: '#ECFDF5',
+        text: '#065F46',
+        border: '#A7F3D0',
+        dot: '#10B981',
       },
       warning: {
         bg: '#FFFBEB',
-        text: '#78350F',
+        text: '#92400E',
         border: '#FDE68A',
-        dot: '#D97706',
+        dot: '#F59E0B',
       },
       danger: {
         bg: '#FEF2F2',
         text: '#991B1B',
         border: '#FECACA',
-        dot: '#DC2626',
+        dot: '#EF4444',
       },
       info: {
-        bg: '#F1F5F9',
-        text: '#1E293B',
-        border: '#CBD5E1',
-        dot: '#475569',
+        bg: '#F8FAFC',
+        text: '#334155',
+        border: '#E2E8F0',
+        dot: '#64748B',
       },
     },
   },
@@ -124,7 +124,7 @@ export const TOKENS = {
   },
 
   // Focus Ring
-  focusRing: 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest-700 focus-visible:ring-offset-2',
+  focusRing: 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D68904] focus-visible:ring-offset-1',
 
   // Layout Widths
   contentWidths: {

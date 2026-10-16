@@ -23,7 +23,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-surface-bg">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest-700 border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#D68904] border-t-transparent" />
           <span className="text-xs font-medium text-charcoal-muted">
             Verifying secure session...
           </span>

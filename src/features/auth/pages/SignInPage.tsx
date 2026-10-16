@@ -254,7 +254,7 @@ export const SignInPage: React.FC = () => {
                       name="remember"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="rounded border-gray-300 text-[#D68904] focus:ring-[#D68904]"
+                      className="rounded border-slate-300 text-charcoal-900 focus:ring-slate-400"
                     />
                     <span className="text-sm text-slate-700">
                       {t('auth.rememberMe', 'Remember me')}

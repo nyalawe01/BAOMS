@@ -159,7 +159,7 @@ export const SettingsPage: React.FC = () => {
                 type="checkbox"
                 checked={notificationsEmail}
                 onChange={(e) => setNotificationsEmail(e.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-slate-300 text-forest-700 focus:ring-forest-600"
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-charcoal-900 focus:ring-slate-400"
               />
               <div>
                 <span className="text-xs font-semibold text-charcoal-900 block">
@@ -176,7 +176,7 @@ export const SettingsPage: React.FC = () => {
                 type="checkbox"
                 checked={notificationsApprovals}
                 onChange={(e) => setNotificationsApprovals(e.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-slate-300 text-forest-700 focus:ring-forest-600"
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-charcoal-900 focus:ring-slate-400"
               />
               <div>
                 <span className="text-xs font-semibold text-charcoal-900 block">

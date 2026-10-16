@@ -23,31 +23,31 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest-700 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none select-none';
+      'inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D68904] focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none select-none';
 
     const variantStyles = {
       primary:
-        'bg-forest-700 text-white border border-forest-800 hover:bg-forest-800 active:bg-forest-900 shadow-xs font-medium',
+        'bg-[#D68904] text-white border border-[#b86e03] hover:bg-[#b86e03] active:bg-[#915206] shadow-xs font-medium',
       secondary:
-        'bg-slate-100 text-charcoal border border-surface-border hover:bg-slate-200 hover:text-charcoal-900 active:bg-slate-300 shadow-xs font-medium',
+        'bg-white text-charcoal border border-surface-border hover:bg-slate-50 hover:text-charcoal-900 active:bg-slate-100 shadow-xs font-medium',
       outline:
-        'bg-white text-charcoal border border-surface-border hover:bg-surface-hover hover:text-charcoal-900 hover:border-charcoal-light active:bg-slate-100 shadow-xs font-medium',
+        'bg-white text-charcoal border border-surface-border hover:bg-surface-hover hover:border-slate-300 active:bg-slate-50 shadow-xs font-medium',
       ghost:
-        'bg-slate-100/80 text-charcoal border border-surface-border/60 hover:bg-slate-200/80 hover:text-charcoal-900 active:bg-slate-300 font-medium',
+        'bg-transparent text-charcoal-muted hover:bg-slate-100 hover:text-charcoal-900 active:bg-slate-200 font-medium',
       danger:
         'bg-red-600 text-white border border-red-700 hover:bg-red-700 active:bg-red-800 shadow-xs font-medium',
     };
 
     const sizeStyles = isIconOnly
       ? {
-          sm: 'h-8 w-8 p-0 rounded-md',
-          md: 'h-[38px] w-[38px] p-0 rounded-md',
-          lg: 'h-11 w-11 p-0 rounded-md',
+          sm: 'h-7 w-7 p-0 rounded',
+          md: 'h-9 w-9 p-0 rounded-md',
+          lg: 'h-10 w-10 p-0 rounded-md',
         }
       : {
-          sm: 'h-[30px] text-xs px-2.5 py-1 gap-1.5 rounded-md font-medium',
-          md: 'h-[38px] text-sm px-4 py-2 gap-2 rounded-md font-medium',
-          lg: 'h-11 text-base px-5 py-2.5 gap-2.5 rounded-md font-medium',
+          sm: 'h-7 text-xs px-2.5 py-1 gap-1.5 rounded font-medium',
+          md: 'h-9 text-xs sm:text-sm px-3.5 py-1.5 gap-2 rounded-md font-medium',
+          lg: 'h-10 text-sm sm:text-base px-4.5 py-2 gap-2 rounded-md font-medium',
         };
 
     return (

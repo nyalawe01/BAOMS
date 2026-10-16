@@ -32,7 +32,7 @@ export const Alert: React.FC<AlertProps> = ({
     success: {
       container: 'bg-status-success-bg text-status-success-text border-status-success-border',
       icon: CheckCircle2,
-      iconColor: 'text-forest-700',
+      iconColor: 'text-emerald-700',
     },
     warning: {
       container: 'bg-status-warning-bg text-status-warning-text border-status-warning-border',

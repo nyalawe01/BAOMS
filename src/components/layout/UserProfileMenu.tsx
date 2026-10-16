@@ -41,14 +41,10 @@ export const UserProfileMenu: React.FC = () => {
     },
     {
       id: 'settings',
-      label: t('nav.settings', 'System Settings'),
+      label: t('nav.settings', 'Settings & Preferences'),
       icon: Settings,
       onClick: () => {
-        showToast({
-          title: 'System Settings',
-          message: 'System settings are accessible to System Administrators under /users and /foundation.',
-          variant: 'info',
-        });
+        navigate('/settings');
       },
     },
     {

@@ -388,7 +388,7 @@ export const RegisterPage: React.FC = () => {
                       checked={acceptedSafeguarding}
                       onChange={(e) => setAcceptedSafeguarding(e.target.checked)}
                       required
-                      className="mt-0.5 rounded border-slate-300 text-[#D68904] focus:ring-[#D68904]"
+                      className="mt-0.5 rounded border-slate-300 text-charcoal-900 focus:ring-slate-400"
                     />
                     <span>
                       I declare that I am an appointed staff member/contractor of Babawatoto Organization and agree

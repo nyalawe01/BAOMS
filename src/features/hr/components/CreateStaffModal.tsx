@@ -29,7 +29,8 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
   const [jobTitle, setJobTitle] = useState('');
   const [departmentId, setDepartmentId] = useState('dept-prj');
   const [employmentStatus, setEmploymentStatus] = useState<EmploymentStatus>('active');
-  const [contractType, setContractType] = useState<ContractType>('fixed_term');
+  const [contractType, setContractType] = useState<ContractType | 'other'>('fixed_term');
+  const [customContractType, setCustomContractType] = useState('');
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0] ?? '');
   const [endDate, setEndDate] = useState('');
   const [supervisorId, setSupervisorId] = useState('');
@@ -63,6 +64,11 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
       return;
     }
 
+    if (contractType === 'other' && !customContractType.trim()) {
+      setError('Please specify the custom contract type.');
+      return;
+    }
+
     if (contractType !== 'permanent' && !endDate) {
       setError(t('hr.errors.endDateRequired', 'End date is required for fixed-term contracts.'));
       return;
@@ -75,13 +81,17 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
 
     setIsSubmitting(true);
     try {
+      const resolvedNotes = contractType === 'other' && customContractType.trim()
+        ? (notes.trim() ? `[Contract Type: ${customContractType.trim()}]\n\n${notes.trim()}` : `[Contract Type: ${customContractType.trim()}]`)
+        : (notes.trim() || null);
+
       const payload: CreateStaffProfilePayload = {
         fullName: fullName.trim(),
         staffNumber: staffNumber.trim() || undefined,
         jobTitle: jobTitle.trim(),
         departmentId,
         employmentStatus,
-        contractType,
+        contractType: contractType === 'other' ? 'fixed_term' : contractType,
         startDate,
         endDate: contractType === 'permanent' ? null : endDate || null,
         supervisorId: supervisorId || null,
@@ -89,7 +99,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
         email: email.trim() || null,
         emergencyContactName: emergencyContactName.trim() || null,
         emergencyContactPhone: emergencyContactPhone.trim() || null,
-        notes: notes.trim() || null,
+        notes: resolvedNotes,
       };
 
       const created = await createStaffProfile(payload);
@@ -229,7 +239,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
               </label>
               <select
                 value={contractType}
-                onChange={(e) => setContractType(e.target.value as ContractType)}
+                onChange={(e) => setContractType(e.target.value as ContractType | 'other')}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-forest-600"
               >
                 <option value="fixed_term">Fixed Term (Mkataba wa Muda)</option>
@@ -237,7 +247,20 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
                 <option value="consultant">Consultant (Mshauri)</option>
                 <option value="volunteer">Volunteer (Mjitolea)</option>
                 <option value="intern">Intern (Mwanafunzi)</option>
+                <option value="other">Other (Contract type not listed)...</option>
               </select>
+              {contractType === 'other' && (
+                <div className="mt-2">
+                  <input
+                    type="text"
+                    required
+                    placeholder="Specify custom contract type..."
+                    value={customContractType}
+                    onChange={(e) => setCustomContractType(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-1 focus:ring-forest-600"
+                  />
+                </div>
+              )}
             </div>
 
             <div>

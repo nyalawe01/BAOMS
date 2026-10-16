@@ -6,6 +6,11 @@ import {
   Filter,
   FolderOpen,
   Plus,
+  DollarSign,
+  Briefcase,
+  Users,
+  Clock,
+  TrendingUp,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -25,6 +30,7 @@ import { Alert } from '@/components/ui/Alert';
 import { SkeletonText, SkeletonCard } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { KPICard } from '@/components/ui/KPICard';
 import { useToast } from '@/lib/ToastContext';
 
 export const DesignSystemPreview: React.FC = () => {
@@ -47,11 +53,12 @@ export const DesignSystemPreview: React.FC = () => {
 
   const previewTabs = [
     { id: 'typography', label: '1. Typography & Tokens' },
-    { id: 'buttons', label: '2. Buttons & Badges' },
-    { id: 'forms', label: '3. Form Inputs' },
-    { id: 'tables', label: '4. Tables & Pagination' },
-    { id: 'feedback', label: '5. Alerts, Modals & Toasts' },
-    { id: 'states', label: '6. Loading & Empty States' },
+    { id: 'kpicards', label: '2. AdminCN KPI Cards' },
+    { id: 'buttons', label: '3. Buttons & Badges' },
+    { id: 'forms', label: '4. Form Inputs' },
+    { id: 'tables', label: '5. Tables & Pagination' },
+    { id: 'feedback', label: '6. Alerts, Modals & Toasts' },
+    { id: 'states', label: '7. Loading & Empty States' },
   ];
 
   const filterOptions = [
@@ -88,7 +95,7 @@ export const DesignSystemPreview: React.FC = () => {
             <CardHeader>
               <CardTitle>Typography Scale & Hierarchy</CardTitle>
               <CardDescription>
-                Clean, readable typography hierarchy set in Inter/System Sans with dark charcoal text.
+                Clean, readable typography hierarchy set in Google Sans Flex with dark charcoal text.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -144,16 +151,128 @@ export const DesignSystemPreview: React.FC = () => {
                 <span className="text-[10px] font-mono text-charcoal-light uppercase">
                   Mono & Business Identifiers
                 </span>
-                <p className="font-mono text-xs text-forest-800">
+                <p className="font-mono text-xs text-charcoal-900 font-semibold">
                   REF-2026-TZ-DAR-0042 • UUID: a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
                 </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Color Tokens */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Enterprise Color Tokens & Brand System</CardTitle>
+              <CardDescription>
+                Restrained brand ochre/gold accents paired with calm slate neutrals and high-contrast surfaces.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+                <div className="space-y-1.5">
+                  <div className="h-14 rounded-md bg-[#D68904] border border-amber-600/20 flex items-center justify-center text-white font-mono text-xs font-bold">
+                    #D68904
+                  </div>
+                  <div className="text-xs font-semibold text-charcoal-900">Brand Primary</div>
+                  <div className="text-[11px] text-charcoal-muted">Ochre Gold</div>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="h-14 rounded-md bg-[#F2A507] border border-amber-500/20 flex items-center justify-center text-charcoal-950 font-mono text-xs font-bold">
+                    #F2A507
+                  </div>
+                  <div className="text-xs font-semibold text-charcoal-900">Amber Gold</div>
+                  <div className="text-[11px] text-charcoal-muted">Accent / Hover</div>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="h-14 rounded-md bg-[#1f2937] border border-slate-700 flex items-center justify-center text-white font-mono text-xs font-bold">
+                    #1f2937
+                  </div>
+                  <div className="text-xs font-semibold text-charcoal-900">Charcoal Dark</div>
+                  <div className="text-[11px] text-charcoal-muted">Primary Text</div>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="h-14 rounded-md bg-[#f9fafb] border border-slate-200 flex items-center justify-center text-charcoal-700 font-mono text-xs font-bold">
+                    #f9fafb
+                  </div>
+                  <div className="text-xs font-semibold text-charcoal-900">Neutral Light</div>
+                  <div className="text-[11px] text-charcoal-muted">Canvas Surface</div>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="h-14 rounded-md bg-emerald-600 border border-emerald-700 flex items-center justify-center text-white font-mono text-xs font-bold">
+                    #059669
+                  </div>
+                  <div className="text-xs font-semibold text-charcoal-900">Semantic Success</div>
+                  <div className="text-[11px] text-charcoal-muted">Approved / Cleared</div>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="h-14 rounded-md bg-rose-600 border border-rose-700 flex items-center justify-center text-white font-mono text-xs font-bold">
+                    #e11d48
+                  </div>
+                  <div className="text-xs font-semibold text-charcoal-900">Semantic Danger</div>
+                  <div className="text-[11px] text-charcoal-muted">Destructive / Overdue</div>
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
       )}
 
-      {/* TAB 2: Buttons & Badges */}
+      {/* TAB 2: AdminCN KPI Cards */}
+      {activeTab === 'kpicards' && (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>AdminCN Reusable KPI Cards</CardTitle>
+              <CardDescription>
+                Compact metric summaries with 16–20px padding, 8–10px border radius, 1px subtle neutral border, monospace tabular figures, and optional trend/status badges.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <KPICard
+                  title="Total Budget Utilization"
+                  value="TZS 450.2M"
+                  helperText="68.4% of annual commitment"
+                  badge={{ label: '+12.4%', variant: 'success' }}
+                  icon={<DollarSign className="h-4 w-4" />}
+                />
+                <KPICard
+                  title="Active Donor Projects"
+                  value="14"
+                  helperText="All workplans on schedule"
+                  badge={{ label: 'Active', variant: 'neutral' }}
+                  icon={<Briefcase className="h-4 w-4" />}
+                />
+                <KPICard
+                  title="Beneficiaries Reached"
+                  value="28,450"
+                  helperText="Verified field participants"
+                  badge={{ label: '+5.2%', variant: 'success' }}
+                  icon={<Users className="h-4 w-4" />}
+                />
+                <KPICard
+                  title="Pending Requisitions"
+                  value="7"
+                  helperText="Requires executive clearance"
+                  badge={{ label: 'Action Required', variant: 'warning' }}
+                  icon={<Clock className="h-4 w-4" />}
+                />
+              </div>
+
+              <div className="border-t border-surface-border pt-4">
+                <h4 className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider mb-2">Design Targets & Rules</h4>
+                <ul className="text-xs text-charcoal-600 space-y-1 list-disc pl-4">
+                  <li><strong>Container:</strong> Clean white background, 1px subtle border (slate-200), rounded-lg (8–10px), no oversized shadows.</li>
+                  <li><strong>Header:</strong> Uppercase 11px muted label, aligned with optional small iconography.</li>
+                  <li><strong>Value:</strong> 24–28px semibold tabular figure, aligned left with optional status/percentage pill badge.</li>
+                  <li><strong>Supporting Text:</strong> Muted 12px contextual metadata without decorative gradient overlays.</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* TAB 3: Buttons & Badges */}
       {activeTab === 'buttons' && (
         <div className="space-y-6">
           <Card>
@@ -361,7 +480,7 @@ export const DesignSystemPreview: React.FC = () => {
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell className="font-mono text-xs font-semibold text-forest-800">
+                    <TableCell className="font-mono text-xs font-semibold text-charcoal-900">
                       DOC-2026-001
                     </TableCell>
                     <TableCell className="font-medium text-xs">
@@ -376,7 +495,7 @@ export const DesignSystemPreview: React.FC = () => {
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="font-mono text-xs font-semibold text-forest-800">
+                    <TableCell className="font-mono text-xs font-semibold text-charcoal-900">
                       FIN-2026-084
                     </TableCell>
                     <TableCell className="font-medium text-xs">
@@ -391,7 +510,7 @@ export const DesignSystemPreview: React.FC = () => {
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="font-mono text-xs font-semibold text-forest-800">
+                    <TableCell className="font-mono text-xs font-semibold text-charcoal-900">
                       PRJ-2026-019
                     </TableCell>
                     <TableCell className="font-medium text-xs">

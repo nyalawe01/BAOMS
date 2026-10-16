@@ -32,13 +32,13 @@ export const Stepper: React.FC<StepperProps> = ({
           <span className="font-semibold text-charcoal-700 uppercase tracking-wider">
             Step {currentStep + 1} of {steps.length}
           </span>
-          <span className="font-bold text-forest-800">
+          <span className="font-bold text-[#D68904]">
             {steps[currentStep]?.title}
           </span>
         </div>
         <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-surface-border">
           <div
-            className="bg-forest-700 h-full transition-all duration-300 rounded-full"
+            className="bg-[#D68904] h-full transition-all duration-300 rounded-full"
             style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
           />
         </div>
@@ -81,9 +81,9 @@ export const Stepper: React.FC<StepperProps> = ({
                 className={cn(
                   'w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm transition-all duration-200 border-2 select-none',
                   isCompleted &&
-                    'bg-forest-700 border-forest-700 text-white group-hover:bg-forest-800',
+                    'bg-[#D68904] border-[#D68904] text-white group-hover:bg-[#b86e03]',
                   isCurrent &&
-                    'bg-white border-forest-700 text-forest-700 ring-4 ring-forest-50 font-bold',
+                    'bg-white border-[#D68904] text-[#D68904] ring-4 ring-amber-50 font-bold',
                   isUpcoming &&
                     'bg-slate-50 border-surface-border text-charcoal-muted group-hover:border-charcoal-400'
                 )}
@@ -100,8 +100,8 @@ export const Stepper: React.FC<StepperProps> = ({
                 <span
                   className={cn(
                     'text-xs font-semibold block transition-colors leading-tight',
-                    isCurrent && 'text-forest-900 font-bold',
-                    isCompleted && 'text-charcoal-800 group-hover:text-forest-800',
+                    isCurrent && 'text-charcoal-900 font-bold',
+                    isCompleted && 'text-charcoal-800 group-hover:text-[#D68904]',
                     isUpcoming && 'text-charcoal-muted'
                   )}
                 >

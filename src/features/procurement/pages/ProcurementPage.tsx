@@ -161,48 +161,80 @@ export const ProcurementPage: React.FC = () => {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <Card className="p-4 border-l-4 border-l-[#D68904] bg-white dark:bg-neutral-900 shadow-2xs">
-          <span className="text-[11px] font-semibold uppercase text-slate-500 dark:text-neutral-400">Total Purchase Orders</span>
-          <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{kpis.totalOrdersCount}</div>
-          <span className="text-[10px] text-slate-400">Lifetime logged</span>
-        </Card>
+        <div className="bg-white border border-surface-border rounded-lg p-3 sm:p-3.5">
+          <div className="text-xs font-medium text-charcoal-500 uppercase tracking-wider truncate">
+            Total Purchase Orders
+          </div>
+          <div className="text-xl font-bold text-charcoal-900 font-mono tabular-nums mt-0.5 truncate">
+            {kpis.totalOrdersCount}
+          </div>
+          <div className="text-xs text-charcoal-muted mt-0.5 truncate">
+            Lifetime logged
+          </div>
+        </div>
 
-        <Card className="p-4 border-l-4 border-l-blue-600 bg-white dark:bg-neutral-900 shadow-2xs">
-          <span className="text-[11px] font-semibold uppercase text-slate-500 dark:text-neutral-400">Active Commitments</span>
-          <div className="text-xl font-bold text-blue-700 dark:text-blue-400 mt-1 truncate">
+        <div className="bg-white border border-surface-border rounded-lg p-3 sm:p-3.5">
+          <div className="text-xs font-medium text-charcoal-500 uppercase tracking-wider truncate">
+            Active Commitments
+          </div>
+          <div className="text-xl font-bold text-charcoal-900 font-mono tabular-nums mt-0.5 truncate">
             TZS {(kpis.activeOrdersAmount / 1000).toFixed(0)}k
           </div>
-          <span className="text-[10px] text-slate-400">Pending or in transit</span>
-        </Card>
+          <div className="text-xs text-charcoal-muted mt-0.5 truncate">
+            Pending or in transit
+          </div>
+        </div>
 
-        <Card className="p-4 border-l-4 border-l-emerald-600 bg-white dark:bg-neutral-900 shadow-2xs">
-          <span className="text-[11px] font-semibold uppercase text-slate-500 dark:text-neutral-400">Delivered Orders</span>
-          <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mt-1">{kpis.deliveredOrdersCount}</div>
-          <span className="text-[10px] text-slate-400">Inspected & cleared</span>
-        </Card>
+        <div className="bg-white border border-surface-border rounded-lg p-3 sm:p-3.5">
+          <div className="text-xs font-medium text-charcoal-500 uppercase tracking-wider truncate">
+            Delivered Orders
+          </div>
+          <div className="text-xl font-bold text-charcoal-900 font-mono tabular-nums mt-0.5 truncate">
+            {kpis.deliveredOrdersCount}
+          </div>
+          <div className="text-xs text-charcoal-muted mt-0.5 truncate">
+            Inspected & cleared
+          </div>
+        </div>
 
-        <Card className="p-4 border-l-4 border-l-purple-600 bg-white dark:bg-neutral-900 shadow-2xs">
-          <span className="text-[11px] font-semibold uppercase text-slate-500 dark:text-neutral-400">Approved Vendors</span>
-          <div className="text-2xl font-bold text-purple-700 dark:text-purple-400 mt-1">{kpis.registeredVendorsCount}</div>
-          <span className="text-[10px] text-slate-400">Compliant partners</span>
-        </Card>
+        <div className="bg-white border border-surface-border rounded-lg p-3 sm:p-3.5">
+          <div className="text-xs font-medium text-charcoal-500 uppercase tracking-wider truncate">
+            Approved Vendors
+          </div>
+          <div className="text-xl font-bold text-charcoal-900 font-mono tabular-nums mt-0.5 truncate">
+            {kpis.registeredVendorsCount}
+          </div>
+          <div className="text-xs text-charcoal-muted mt-0.5 truncate">
+            Compliant partners
+          </div>
+        </div>
 
-        <Card className="p-4 border-l-4 border-l-red-500 bg-white dark:bg-neutral-900 shadow-2xs">
-          <span className="text-[11px] font-semibold uppercase text-slate-500 dark:text-neutral-400">Low Stock Alerts</span>
-          <div className="text-2xl font-bold text-red-600 mt-1">{kpis.lowStockItemsCount}</div>
-          <span className="text-[10px] text-red-500 font-medium">Reorder needed</span>
-        </Card>
+        <div className="bg-white border border-surface-border rounded-lg p-3 sm:p-3.5">
+          <div className="text-xs font-medium text-charcoal-500 uppercase tracking-wider truncate">
+            Low Stock Alerts
+          </div>
+          <div className={`text-xl font-bold font-mono tabular-nums mt-0.5 truncate ${kpis.lowStockItemsCount > 0 ? 'text-rose-600' : 'text-charcoal-900'}`}>
+            {kpis.lowStockItemsCount}
+          </div>
+          <div className="text-xs mt-0.5 truncate">
+            {kpis.lowStockItemsCount > 0 ? (
+              <span className="text-rose-600 font-medium">Reorder needed</span>
+            ) : (
+              <span className="text-charcoal-muted">Stock adequate</span>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-neutral-800">
+      <div className="flex items-center gap-2 border-b border-surface-border">
         <button
           type="button"
           onClick={() => setActiveTab('orders')}
           className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
             activeTab === 'orders'
-              ? 'border-[#D68904] text-[#D68904]'
-              : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white'
+              ? 'border-charcoal-900 text-charcoal-900'
+              : 'border-transparent text-charcoal-muted hover:text-charcoal-900'
           }`}
         >
           <ShoppingCart className="w-3.5 h-3.5" />
@@ -214,8 +246,8 @@ export const ProcurementPage: React.FC = () => {
           onClick={() => setActiveTab('vendors')}
           className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
             activeTab === 'vendors'
-              ? 'border-[#D68904] text-[#D68904]'
-              : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white'
+              ? 'border-charcoal-900 text-charcoal-900'
+              : 'border-transparent text-charcoal-muted hover:text-charcoal-900'
           }`}
         >
           <Building2 className="w-3.5 h-3.5" />
@@ -227,8 +259,8 @@ export const ProcurementPage: React.FC = () => {
           onClick={() => setActiveTab('inventory')}
           className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
             activeTab === 'inventory'
-              ? 'border-[#D68904] text-[#D68904]'
-              : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white'
+              ? 'border-charcoal-900 text-charcoal-900'
+              : 'border-transparent text-charcoal-muted hover:text-charcoal-900'
           }`}
         >
           <Package className="w-3.5 h-3.5" />

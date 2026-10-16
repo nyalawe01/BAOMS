@@ -5,10 +5,10 @@ export const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
-  <div className="relative w-full overflow-auto rounded-lg border border-surface-border bg-white shadow-xs">
+  <div className="relative w-full overflow-auto rounded-md border border-surface-border bg-white shadow-xs">
     <table
       ref={ref}
-      className={cn('w-full caption-bottom text-sm', className)}
+      className={cn('w-full caption-bottom text-xs sm:text-sm', className)}
       {...props}
     />
   </div>
@@ -21,7 +21,7 @@ export const TableHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <thead
     ref={ref}
-    className={cn('bg-surface-muted/60 border-b border-surface-border', className)}
+    className={cn('bg-slate-50 border-b border-surface-border', className)}
     {...props}
   />
 ));
@@ -33,7 +33,7 @@ export const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={cn('divide-y divide-surface-border', className)}
+    className={cn('divide-y divide-surface-border text-charcoal', className)}
     {...props}
   />
 ));
@@ -50,8 +50,8 @@ export const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      dense ? 'h-9' : 'h-11',
-      'transition-colors hover:bg-surface-hover/60 data-[state=selected]:bg-surface-muted border-b border-surface-border last:border-b-0',
+      dense ? 'h-8' : 'h-10',
+      'transition-colors hover:bg-slate-50/70 data-[state=selected]:bg-slate-100 border-b border-surface-border last:border-b-0',
       className
     )}
     {...props}
@@ -66,7 +66,7 @@ export const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      'h-9 px-4 text-left align-middle text-[11px] font-semibold uppercase tracking-[0.05em] text-charcoal-muted leading-[1.2] select-none',
+      'h-8 px-3 text-left align-middle text-[11px] font-semibold uppercase tracking-wider text-charcoal-muted leading-tight select-none',
       className
     )}
     {...props}
@@ -86,8 +86,8 @@ export const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      dense ? 'px-3 py-1.5 text-[13px]' : 'px-4 py-2.5 text-[13px]',
-      'align-middle text-charcoal leading-[1.4]',
+      dense ? 'px-2 py-1 text-xs' : 'px-3 py-2 text-xs sm:text-sm',
+      'align-middle text-charcoal leading-normal',
       isNumeric && 'text-right font-mono tabular-nums',
       className
     )}

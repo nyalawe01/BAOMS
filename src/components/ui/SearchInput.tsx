@@ -57,9 +57,9 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           placeholder={placeholder}
           className={cn(
             'w-full rounded-md border border-surface-border bg-white text-charcoal transition-colors',
-            'pl-9 pr-9 placeholder:text-charcoal-light',
-            'focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 focus:border-surface-border',
-            size === 'sm' ? 'h-8 text-xs' : 'h-[38px] text-sm shadow-xs',
+            'pl-9 pr-9 placeholder:text-charcoal-light shadow-xs',
+            'focus:outline-none focus:border-[#D68904] focus:ring-1 focus:ring-[#D68904]',
+            size === 'sm' ? 'h-8 text-xs' : 'h-9 text-xs sm:text-sm',
             className
           )}
           {...props}

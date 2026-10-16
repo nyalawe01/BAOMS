@@ -14,6 +14,7 @@ import {
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
+import { KPICard } from '@/components/ui/KPICard';
 import {
   getProjects,
   getProjectActivities,
@@ -92,73 +93,41 @@ export const ProjectManagerDashboard: React.FC = () => {
 
       {/* Program Delivery KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Managed Projects
-            </span>
-            <div className="text-[28px] font-bold text-charcoal-900 leading-tight font-mono tabular-nums">
-              {activeProjects.length}
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              Active donor programs in delivery
-            </span>
-          </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-forest-50 text-forest-700 flex items-center justify-center">
-            <Briefcase className="h-5 w-5" />
-          </div>
-        </div>
-
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Field Activities Recorded
-            </span>
-            <div className="text-[28px] font-bold text-charcoal-900 leading-tight font-mono tabular-nums">
-              {allActivities.length}
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              Community workshops and forums
-            </span>
-          </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-            <MapPin className="h-5 w-5" />
-          </div>
-        </div>
-
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Field Reports in Review
-            </span>
-            <div className={`text-[28px] font-bold leading-tight font-mono tabular-nums ${pendingReviews.length > 0 ? 'text-amber-600' : 'text-charcoal-900'}`}>
-              {pendingReviews.length}
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              Awaiting manager validation
-            </span>
-          </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
-            <Clock className="h-5 w-5" />
-          </div>
-        </div>
-
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Overdue Milestones & Tasks
-            </span>
-            <div className={`text-[28px] font-bold leading-tight font-mono tabular-nums ${overdueTasks.length > 0 ? 'text-rose-600' : 'text-charcoal-900'}`}>
-              {overdueTasks.length}
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              Tasks past targeted completion date
-            </span>
-          </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center">
-            <AlertTriangle className="h-5 w-5" />
-          </div>
-        </div>
+        <KPICard
+          title="Managed Projects"
+          value={activeProjects.length}
+          helperText="Active donor programs in delivery"
+          icon={<Briefcase className="h-4 w-4" />}
+          badge={{ label: 'Active', variant: 'neutral' }}
+        />
+        <KPICard
+          title="Field Activities"
+          value={allActivities.length}
+          helperText="Community workshops and forums"
+          icon={<MapPin className="h-4 w-4" />}
+        />
+        <KPICard
+          title="Field Reports in Review"
+          value={pendingReviews.length}
+          helperText="Awaiting manager validation"
+          icon={<Clock className="h-4 w-4" />}
+          badge={
+            pendingReviews.length > 0
+              ? { label: 'Action Needed', variant: 'warning' }
+              : { label: 'Up to Date', variant: 'success' }
+          }
+        />
+        <KPICard
+          title="Overdue Tasks"
+          value={overdueTasks.length}
+          helperText="Tasks past targeted completion"
+          icon={<AlertTriangle className="h-4 w-4" />}
+          badge={
+            overdueTasks.length > 0
+              ? { label: 'Overdue', variant: 'danger' }
+              : { label: 'On Schedule', variant: 'success' }
+          }
+        />
       </div>
 
       {/* Main Operational Queues: Reports Awaiting Review & Tasks Matrix */}
@@ -168,7 +137,7 @@ export const ProjectManagerDashboard: React.FC = () => {
           <div className="p-4 border-b border-surface-border flex items-center justify-between bg-surface-muted/20">
             <div>
               <h3 className="text-sm font-bold text-charcoal-900 flex items-center gap-2">
-                <FileText className="h-4 w-4 text-forest-700" />
+                <FileText className="h-4 w-4 text-charcoal-600" />
                 Coordinator Submissions Awaiting Review
               </h3>
               <p className="text-xs text-charcoal-muted mt-0.5">

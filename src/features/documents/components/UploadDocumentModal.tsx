@@ -46,9 +46,8 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
   const [documentDate, setDocumentDate] = useState<string>(
     new Date().toISOString().slice(0, 10)
   );
-  const [tagsInput, setTagsInput] = useState('');
   const [description, setDescription] = useState('');
-  const [changeNotes, setChangeNotes] = useState('');
+  const [customCategory, setCustomCategory] = useState('');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -60,11 +59,10 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
     setFileError(null);
     setTitle('');
     setCategoryId(categories[0]?.id || '');
+    setCustomCategory('');
     setClassification('internal');
     setDocumentDate(new Date().toISOString().slice(0, 10));
-    setTagsInput('');
     setDescription('');
-    setChangeNotes('');
     setSubmitError(null);
   };
 
@@ -102,7 +100,14 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
       return;
     }
 
-    const selectedCategory = categories.find((c) => c.id === categoryId) || categories[0];
+    if (categoryId === 'other' && !customCategory.trim()) {
+      setSubmitError(t('documents.customCategoryRequired', 'Please specify the custom category name.'));
+      return;
+    }
+
+    const selectedCategory = categoryId === 'other'
+      ? (categories[0] || { id: 'other', code: 'GEN' })
+      : (categories.find((c) => c.id === categoryId) || categories[0]);
     if (!selectedCategory) {
       setSubmitError(t('documents.categoryRequired', 'Please select a valid document category.'));
       return;
@@ -112,21 +117,20 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
       setIsSubmitting(true);
       setSubmitError(null);
 
-      const parsedTags = tagsInput
-        .split(',')
-        .map((t) => t.trim().toLowerCase())
-        .filter((t) => t.length > 0);
+      const resolvedDescription = categoryId === 'other'
+        ? (description.trim() ? `[Category: ${customCategory.trim()}] ${description.trim()}` : `[Category: ${customCategory.trim()}]`)
+        : (description.trim() || undefined);
 
       const payload: UploadDocumentPayload = {
         title: title.trim(),
-        description: description.trim() || undefined,
+        description: resolvedDescription,
         category_id: selectedCategory.id,
-        category_code: selectedCategory.code,
+        category_code: categoryId === 'other' ? 'OTHER' : selectedCategory.code,
         classification,
         document_date: documentDate,
-        tags: parsedTags,
+        tags: [],
         file: selectedFile,
-        change_notes: changeNotes.trim() || undefined,
+        change_notes: undefined,
       };
 
       await onSubmit(payload);
@@ -204,6 +208,7 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
                 {cat.code} — {currentLang === 'sw' ? cat.name_sw : cat.name_en}
               </option>
             ))}
+            <option value="other">{t('common.otherCategory', 'Other (Category not listed)...')}</option>
           </Select>
 
           {/* Classification */}
@@ -220,7 +225,17 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
           </Select>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {categoryId === 'other' && (
+          <Input
+            label={t('documents.customCategoryLabel', 'Specify Custom Category *')}
+            placeholder="e.g. Environmental Impact & Field Assessment"
+            value={customCategory}
+            onChange={(e) => setCustomCategory(e.target.value)}
+            required
+          />
+        )}
+
+        <div>
           {/* Document Date */}
           <Input
             type="date"
@@ -228,14 +243,6 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
             value={documentDate}
             onChange={(e) => setDocumentDate(e.target.value)}
             required
-          />
-
-          {/* Tags */}
-          <Input
-            label={t('documents.tagsInput', 'Subject Tags (comma separated)')}
-            placeholder="e.g. audit, bagamoyo, grant, compliance"
-            value={tagsInput}
-            onChange={(e) => setTagsInput(e.target.value)}
           />
         </div>
 
@@ -246,14 +253,6 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
           rows={2}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-        />
-
-        {/* Initial Change Notes */}
-        <Input
-          label={t('documents.initialVersionNotes', 'Initial Version Notes')}
-          placeholder="e.g. Initial signed copy approved by board"
-          value={changeNotes}
-          onChange={(e) => setChangeNotes(e.target.value)}
         />
 
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-surface-border">

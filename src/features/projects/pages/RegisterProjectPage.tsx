@@ -129,6 +129,7 @@ export const RegisterProjectPage: React.FC = () => {
     },
   });
 
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [hasDraftRestored, setHasDraftRestored] = useState(false);
   const [saveTimestamp, setSaveTimestamp] = useState<string | null>(null);
@@ -145,6 +146,16 @@ export const RegisterProjectPage: React.FC = () => {
           setFormData(parsed);
           setHasDraftRestored(true);
           setSaveTimestamp(parsed.savedAt);
+          const standardSectors = [
+            'Youth Empowerment & Education',
+            'Early Childhood Development (ECD)',
+            'Community Arts, Theater & Culture',
+            'Child Safeguarding & Rights',
+            'Civic Engagement & Social Action',
+          ];
+          if (parsed.identity?.category && !standardSectors.includes(parsed.identity.category)) {
+            setIsCustomCategory(true);
+          }
           const pastCompleted: number[] = [];
           for (let i = 0; i < parsed.step; i++) pastCompleted.push(i);
           setCompletedSteps(pastCompleted);
@@ -493,21 +504,46 @@ export const RegisterProjectPage: React.FC = () => {
 
                 <Select
                   label={t('projects.fields.category', 'Program Sector / Category')}
-                  value={formData.identity.category}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      identity: { ...formData.identity, category: e.target.value },
-                    })
-                  }
+                  value={isCustomCategory ? 'other' : formData.identity.category}
+                  onChange={(e) => {
+                    if (e.target.value === 'other') {
+                      setIsCustomCategory(true);
+                      setFormData({
+                        ...formData,
+                        identity: { ...formData.identity, category: '' },
+                      });
+                    } else {
+                      setIsCustomCategory(false);
+                      setFormData({
+                        ...formData,
+                        identity: { ...formData.identity, category: e.target.value },
+                      });
+                    }
+                  }}
                   options={[
                     { value: 'Youth Empowerment & Education', label: 'Youth Empowerment & Education' },
                     { value: 'Early Childhood Development (ECD)', label: 'Early Childhood Development (ECD)' },
                     { value: 'Community Arts, Theater & Culture', label: 'Community Arts, Theater & Culture' },
                     { value: 'Child Safeguarding & Rights', label: 'Child Safeguarding & Rights' },
                     { value: 'Civic Engagement & Social Action', label: 'Civic Engagement & Social Action' },
+                    { value: 'other', label: 'Other (Sector not listed)...' },
                   ]}
                 />
+
+                {isCustomCategory && (
+                  <Input
+                    label="Specify Custom Sector / Category *"
+                    placeholder="e.g. Environmental Conservation & Climate Action"
+                    value={formData.identity.category}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        identity: { ...formData.identity, category: e.target.value },
+                      })
+                    }
+                    required
+                  />
+                )}
 
                 <div className="md:col-span-2">
                   <Input
@@ -755,9 +791,30 @@ export const RegisterProjectPage: React.FC = () => {
                     <MapPin className="w-3.5 h-3.5 text-forest-700" />
                     Target Implementation Districts *
                   </label>
-                  <span className="text-xs text-charcoal-muted">
-                    {formData.governance.targetRegions.length} selected
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-charcoal-muted">
+                      {formData.governance.targetRegions.length} selected
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (formData.governance.targetRegions.length === AVAILABLE_DISTRICTS.length) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            governance: { ...prev.governance, targetRegions: [] },
+                          }));
+                        } else {
+                          setFormData((prev) => ({
+                            ...prev,
+                            governance: { ...prev.governance, targetRegions: [...AVAILABLE_DISTRICTS] },
+                          }));
+                        }
+                      }}
+                      className="text-xs text-charcoal-700 hover:text-charcoal-900 font-semibold underline underline-offset-2 cursor-pointer"
+                    >
+                      {formData.governance.targetRegions.length === AVAILABLE_DISTRICTS.length ? 'Deselect All' : 'Select All'}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">

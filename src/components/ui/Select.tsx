@@ -34,11 +34,11 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             id={selectId}
             ref={ref}
             className={cn(
-              'flex h-[38px] w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2 text-sm text-charcoal leading-[1.5] transition-colors',
+              'flex h-9 w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-1.5 text-xs sm:text-sm text-charcoal transition-colors',
               'border-surface-border shadow-xs',
-              'focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 focus:border-surface-border',
+              'focus:outline-none focus:border-[#D68904] focus:ring-1 focus:ring-[#D68904]',
               'disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-charcoal-light',
-              error && 'border-status-danger-border focus-visible:ring-red-600',
+              error && 'border-red-500 focus:border-red-500 focus:ring-red-500',
               className
             )}
             {...props}

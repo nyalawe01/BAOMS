@@ -40,7 +40,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
               <AlertTriangle className="h-4 w-4" />
             </div>
           ) : (
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-forest-50 text-forest-700 border border-forest-200">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/10 text-[#D68904] border border-[#D68904]/20">
               <HelpCircle className="h-4 w-4" />
             </div>
           )}

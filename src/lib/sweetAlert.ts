@@ -1,4 +1,4 @@
-﻿import Swal, { SweetAlertOptions, SweetAlertResult } from 'sweetalert2';
+import Swal, { SweetAlertOptions, SweetAlertResult } from 'sweetalert2';
 
 /**
  * BAOMS Institutional SweetAlert2 Helpers
@@ -45,7 +45,7 @@ export async function confirmAction(options: {
       ...baseSwalOptions.customClass,
       confirmButton: isDangerous
         ? 'inline-flex items-center justify-center font-semibold text-xs px-4 py-2 rounded-md shadow-sm transition-colors bg-red-600 hover:bg-red-700 text-white border border-red-700'
-        : 'inline-flex items-center justify-center font-semibold text-xs px-4 py-2 rounded-md shadow-sm transition-colors bg-forest-700 hover:bg-forest-800 text-white border border-forest-800',
+        : 'inline-flex items-center justify-center font-semibold text-xs px-4 py-2 rounded-md shadow-sm transition-colors bg-[#D68904] hover:bg-[#b86e03] text-white border border-[#b86e03]',
     },
   });
 

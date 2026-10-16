@@ -180,72 +180,56 @@ export const HrAdministratorDashboard: React.FC = () => {
 
       {/* HR Health KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Active Staff Headcount
-            </span>
-            <div className="text-[28px] font-bold text-charcoal-900 leading-tight font-mono tabular-nums">
-              {activeStaff.length} <span className="text-sm font-normal text-charcoal-muted">/ {staff.length}</span>
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              Registered personnel across departments
-            </span>
+        <div className="bg-white border border-surface-border rounded-lg p-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
+            <span>Staff Headcount</span>
+            <Users className="h-4 w-4 text-charcoal-400" />
           </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-forest-50 text-forest-700 flex items-center justify-center">
-            <Users className="h-5 w-5" />
+          <div className="mt-2 text-2xl font-bold text-charcoal-900 font-mono tabular-nums leading-tight">
+            {activeStaff.length} <span className="text-sm font-normal text-charcoal-muted">/ {staff.length}</span>
           </div>
+          <p className="mt-1 text-xs text-charcoal-muted truncate">
+            Registered personnel across depts
+          </p>
         </div>
 
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Pending Leave Applications
-            </span>
-            <div className={`text-[28px] font-bold leading-tight font-mono tabular-nums ${pendingLeaves.length > 0 ? 'text-amber-600' : 'text-charcoal-900'}`}>
-              {pendingLeaves.length}
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              Applications awaiting supervisor sign-off
-            </span>
+        <div className="bg-white border border-surface-border rounded-lg p-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
+            <span>Pending Leave</span>
+            <Clock className="h-4 w-4 text-charcoal-400" />
           </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
-            <Clock className="h-5 w-5" />
+          <div className={`mt-2 text-2xl font-bold font-mono tabular-nums leading-tight ${pendingLeaves.length > 0 ? 'text-amber-600' : 'text-charcoal-900'}`}>
+            {pendingLeaves.length}
           </div>
+          <p className="mt-1 text-xs text-charcoal-muted truncate">
+            Applications awaiting supervisor sign-off
+          </p>
         </div>
 
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Expiring Contracts (&lt;60d)
-            </span>
-            <div className={`text-[28px] font-bold leading-tight font-mono tabular-nums ${expiringContracts.length > 0 ? 'text-rose-600' : 'text-charcoal-900'}`}>
-              {expiringContracts.length}
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              Personnel contracts nearing renewal
-            </span>
+        <div className="bg-white border border-surface-border rounded-lg p-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
+            <span>Expiring Contracts</span>
+            <AlertCircle className="h-4 w-4 text-charcoal-400" />
           </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center">
-            <AlertCircle className="h-5 w-5" />
+          <div className={`mt-2 text-2xl font-bold font-mono tabular-nums leading-tight ${expiringContracts.length > 0 ? 'text-rose-600' : 'text-charcoal-900'}`}>
+            {expiringContracts.length}
           </div>
+          <p className="mt-1 text-xs text-charcoal-muted truncate">
+            Personnel contracts nearing renewal
+          </p>
         </div>
 
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex items-center justify-between">
-          <div className="space-y-1 min-w-0">
-            <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider block truncate">
-              Statutory File Compliance
-            </span>
-            <div className="text-[28px] font-bold text-emerald-700 leading-tight font-mono tabular-nums">
-              96%
-            </div>
-            <span className="text-xs text-charcoal-muted block truncate">
-              Verified ID, NIDA, TIN & contracts
-            </span>
+        <div className="bg-white border border-surface-border rounded-lg p-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
+            <span>Statutory Compliance</span>
+            <FileCheck className="h-4 w-4 text-charcoal-400" />
           </div>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-            <FileCheck className="h-5 w-5" />
+          <div className="mt-2 text-2xl font-bold text-emerald-700 font-mono tabular-nums leading-tight">
+            96%
           </div>
+          <p className="mt-1 text-xs text-charcoal-muted truncate">
+            Verified ID, NIDA, TIN & contracts
+          </p>
         </div>
       </div>
 
@@ -256,7 +240,7 @@ export const HrAdministratorDashboard: React.FC = () => {
           <div className="p-4 border-b border-surface-border flex items-center justify-between bg-surface-muted/20">
             <div>
               <h3 className="text-sm font-bold text-charcoal-900 flex items-center gap-2">
-                <Clock className="h-4 w-4 text-forest-700" />
+                <Clock className="h-4 w-4 text-charcoal-600" />
                 Leave Applications Approval Queue
               </h3>
               <p className="text-xs text-charcoal-muted mt-0.5">

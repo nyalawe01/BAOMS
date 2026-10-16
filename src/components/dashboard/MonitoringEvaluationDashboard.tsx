@@ -21,6 +21,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { KPICard } from '@/components/ui/KPICard';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
 import { getProjects } from '@/features/projects/services/projectService';
 import { ProjectRecord } from '@/features/projects/types/project';
@@ -201,83 +202,51 @@ export const MonitoringEvaluationDashboard: React.FC = () => {
         }
       />
 
-      {/* Impact & Performance Metrics */}
+      {/* Impact & Performance Metrics (AdminCN Style) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4 border-l-4 border-l-forest-700 bg-white min-w-0">
-          <div className="flex items-center justify-between gap-3 min-w-0">
-            <div className="min-w-0">
-              <span className="text-xs font-semibold text-charcoal-muted uppercase tracking-wider block truncate">
-                Direct Beneficiaries Reached
-              </span>
-              <div className="text-[28px] font-bold text-forest-950 font-mono tabular-nums leading-tight mt-1 truncate">
-                {totalBeneficiaries.toLocaleString()}
-              </div>
-              <span className="text-[11px] text-forest-700 font-medium block truncate">
-                92.4% of annual target reached
-              </span>
-            </div>
-            <div className="p-2.5 bg-forest-50 text-forest-700 rounded-md shrink-0">
-              <Users className="w-5 h-5" />
-            </div>
-          </div>
-        </Card>
+        <KPICard
+          label="Beneficiaries Reached"
+          value={totalBeneficiaries.toLocaleString()}
+          change={{
+            value: '92.4%',
+            isPositive: true,
+            label: 'of annual target reached',
+          }}
+          icon={Users}
+        />
 
-        <Card className="p-4 border-l-4 border-l-emerald-600 bg-white min-w-0">
-          <div className="flex items-center justify-between gap-3 min-w-0">
-            <div className="min-w-0">
-              <span className="text-xs font-semibold text-charcoal-muted uppercase tracking-wider block truncate">
-                Indicators On Track
-              </span>
-              <div className="text-[28px] font-bold text-emerald-700 font-mono tabular-nums leading-tight mt-1 truncate">
-                85%
-              </div>
-              <span className="text-[11px] text-emerald-700 font-medium block truncate">
-                {indicators.filter((i) => i.status !== 'at_risk').length} of {indicators.length} milestones met
-              </span>
-            </div>
-            <div className="p-2.5 bg-emerald-50 text-emerald-700 rounded-md shrink-0">
-              <Target className="w-5 h-5" />
-            </div>
-          </div>
-        </Card>
+        <KPICard
+          label="Indicators On Track"
+          value="85%"
+          change={{
+            value: `${indicators.filter((i) => i.status !== 'at_risk').length}/${indicators.length}`,
+            isPositive: true,
+            label: 'milestones fulfilled',
+          }}
+          icon={Target}
+        />
 
-        <Card className="p-4 border-l-4 border-l-[#D68904] bg-white min-w-0">
-          <div className="flex items-center justify-between gap-3 min-w-0">
-            <div className="min-w-0">
-              <span className="text-xs font-semibold text-charcoal-muted uppercase tracking-wider block truncate">
-                Evidence Verification
-              </span>
-              <div className="text-[28px] font-bold text-amber-900 font-mono tabular-nums leading-tight mt-1 truncate">
-                {verifiedRate}%
-              </div>
-              <span className="text-[11px] text-[#D68904] font-medium block truncate">
-                Field registers & photos verified
-              </span>
-            </div>
-            <div className="p-2.5 bg-amber-50 text-[#D68904] rounded-md shrink-0">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-          </div>
-        </Card>
+        <KPICard
+          label="Evidence Verification"
+          value={`${verifiedRate}%`}
+          change={{
+            value: 'Verified',
+            isPositive: verifiedRate >= 80,
+            label: 'field attendance & registers',
+          }}
+          icon={ShieldCheck}
+        />
 
-        <Card className="p-4 border-l-4 border-l-indigo-600 bg-white min-w-0">
-          <div className="flex items-center justify-between gap-3 min-w-0">
-            <div className="min-w-0">
-              <span className="text-xs font-semibold text-charcoal-muted uppercase tracking-wider block truncate">
-                Data Quality Score
-              </span>
-              <div className="text-[28px] font-bold text-indigo-950 font-mono tabular-nums leading-tight mt-1 truncate">
-                98.8%
-              </div>
-              <span className="text-[11px] text-indigo-700 font-medium block truncate">
-                0 duplicate beneficiaries found
-              </span>
-            </div>
-            <div className="p-2.5 bg-indigo-50 text-indigo-700 rounded-md shrink-0">
-              <Sparkles className="w-5 h-5" />
-            </div>
-          </div>
-        </Card>
+        <KPICard
+          label="Data Quality Score"
+          value="98.8%"
+          change={{
+            value: 'Clean',
+            isPositive: true,
+            label: 'zero duplicate beneficiaries',
+          }}
+          icon={Sparkles}
+        />
       </div>
 
       {/* Main Framework Sections */}

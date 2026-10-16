@@ -61,6 +61,7 @@ const ROLES_LIST: { code: RoleCode; label: string; description: string }[] = [
   { code: ROLES.ME_OFFICER, label: 'Monitoring and Evaluation (M&E) Officer', description: 'Indicators, targets, data verification, donor reporting & impact' },
   { code: ROLES.PROJECT_MANAGER, label: 'Project Manager', description: 'Assigned project delivery, work plans, task assignments & budgets' },
   { code: ROLES.PROJECT_COORDINATOR, label: 'Project Coordinator', description: 'Field activity delivery, attendance, photo evidence & field reports' },
+  { code: ROLES.HR_ADMINISTRATOR, label: 'Human Resources (HR) Administrator', description: 'Staff dossiers, onboarding vetting, statutory compliance & leave records' },
   { code: ROLES.SYSTEM_ADMIN, label: 'System Administrator', description: 'Full system maintenance & technical telemetry' },
 ];
 
@@ -87,8 +88,10 @@ export const UserOnboardingReviewModal: React.FC<UserOnboardingReviewModalProps>
   onSuccess,
 }) => {
   const { t } = useTranslation();
-  const { user: currentActor } = useAuth();
+  const { user: currentActor, hasRole, isAdmin } = useAuth();
   const { showToast } = useToast();
+
+  const isExecutiveDirectorOnly = hasRole('executive_director') && !hasRole('hr_administrator') && !isAdmin();
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -133,7 +136,7 @@ export const UserOnboardingReviewModal: React.FC<UserOnboardingReviewModalProps>
     }
   }, [user]);
 
-  if (!isOpen || !user) return null;
+  if (!isOpen || !user || isExecutiveDirectorOnly) return null;
 
   const toggleDocScope = (id: string) => {
     setSelectedDocScopes((prev) =>
@@ -276,12 +279,12 @@ export const UserOnboardingReviewModal: React.FC<UserOnboardingReviewModalProps>
                 key={s.num}
                 type="button"
                 onClick={() => setStep(s.num)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition ${
                   step === s.num
-                    ? 'bg-[#D68904] text-white shadow-xs'
+                    ? 'bg-charcoal-900 text-white'
                     : step > s.num
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                    : 'bg-slate-100 text-slate-500'
+                    ? 'bg-surface-muted text-charcoal-800 border border-surface-border'
+                    : 'bg-surface-muted/50 text-charcoal-400'
                 }`}
               >
                 {step > s.num ? <Check className="w-3 h-3" /> : <span>{s.num}.</span>}
@@ -290,7 +293,7 @@ export const UserOnboardingReviewModal: React.FC<UserOnboardingReviewModalProps>
             ))}
           </div>
 
-          <Badge variant="warning" className="text-xs">
+          <Badge variant="default" className="text-xs">
             Status: Pending HR
           </Badge>
         </div>
@@ -298,8 +301,8 @@ export const UserOnboardingReviewModal: React.FC<UserOnboardingReviewModalProps>
         {/* STEP 1: Personal Information */}
         {step === 1 && (
           <div className="space-y-4 animate-fadeIn">
-            <div className="bg-amber-50/60 border border-amber-200 rounded-lg p-3 text-xs text-amber-900 flex items-center gap-2">
-              <User className="w-4 h-4 text-amber-600 shrink-0" />
+            <div className="bg-surface-muted/50 border border-surface-border rounded p-3 text-xs text-charcoal-700 flex items-center gap-2">
+              <User className="w-4 h-4 text-charcoal-500 shrink-0" />
               <span>
                 Verify the candidate's legal identity against official records before assigning system privileges.
               </span>
@@ -475,9 +478,24 @@ export const UserOnboardingReviewModal: React.FC<UserOnboardingReviewModalProps>
 
             {/* Documentation Access */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                Allowed Documentation Categories
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Allowed Documentation Categories
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (selectedDocScopes.length === AVAILABLE_DOCUMENT_SCOPES.length) {
+                      setSelectedDocScopes([]);
+                    } else {
+                      setSelectedDocScopes(AVAILABLE_DOCUMENT_SCOPES.map((s) => s.id));
+                    }
+                  }}
+                  className="text-xs text-charcoal-700 hover:text-charcoal-900 font-semibold underline underline-offset-2 cursor-pointer"
+                >
+                  {selectedDocScopes.length === AVAILABLE_DOCUMENT_SCOPES.length ? 'Deselect All' : 'Select All'}
+                </button>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {AVAILABLE_DOCUMENT_SCOPES.map((scope) => {
                   const isChecked = selectedDocScopes.includes(scope.id);
@@ -485,17 +503,13 @@ export const UserOnboardingReviewModal: React.FC<UserOnboardingReviewModalProps>
                     <label
                       key={scope.id}
                       onClick={() => toggleDocScope(scope.id)}
-                      className={`flex items-center gap-2.5 p-2.5 rounded-lg border text-xs cursor-pointer transition ${
-                        isChecked
-                          ? 'bg-amber-50/70 border-[#D68904] text-slate-900 font-semibold'
-                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                      }`}
+                      className="flex items-center gap-2.5 p-2.5 rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-xs cursor-pointer text-charcoal-900 transition-colors"
                     >
                       <input
                         type="checkbox"
                         checked={isChecked}
                         onChange={() => {}}
-                        className="rounded border-slate-300 text-[#D68904] focus:ring-[#D68904]"
+                        className="rounded border-slate-300 text-charcoal-900 focus:ring-slate-400"
                       />
                       <span>{scope.label}</span>
                     </label>
@@ -506,9 +520,24 @@ export const UserOnboardingReviewModal: React.FC<UserOnboardingReviewModalProps>
 
             {/* Project Access */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                Assigned Projects & Field Programs
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Assigned Projects & Field Programs
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (selectedProjectIds.length === AVAILABLE_PROJECTS.length) {
+                      setSelectedProjectIds([]);
+                    } else {
+                      setSelectedProjectIds(AVAILABLE_PROJECTS.map((p) => p.id));
+                    }
+                  }}
+                  className="text-xs text-charcoal-700 hover:text-charcoal-900 font-semibold underline underline-offset-2 cursor-pointer"
+                >
+                  {selectedProjectIds.length === AVAILABLE_PROJECTS.length ? 'Deselect All' : 'Select All'}
+                </button>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {AVAILABLE_PROJECTS.map((proj) => {
                   const isChecked = selectedProjectIds.includes(proj.id);
@@ -516,17 +545,13 @@ export const UserOnboardingReviewModal: React.FC<UserOnboardingReviewModalProps>
                     <label
                       key={proj.id}
                       onClick={() => toggleProject(proj.id)}
-                      className={`flex items-center gap-2.5 p-2.5 rounded-lg border text-xs cursor-pointer transition ${
-                        isChecked
-                          ? 'bg-emerald-50/70 border-emerald-500 text-emerald-950 font-semibold'
-                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                      }`}
+                      className="flex items-center gap-2.5 p-2.5 rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-xs cursor-pointer text-charcoal-900 transition-colors"
                     >
                       <input
                         type="checkbox"
                         checked={isChecked}
                         onChange={() => {}}
-                        className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                        className="rounded border-slate-300 text-charcoal-900 focus:ring-slate-400"
                       />
                       <span className="truncate">{proj.name}</span>
                     </label>
@@ -554,12 +579,12 @@ export const UserOnboardingReviewModal: React.FC<UserOnboardingReviewModalProps>
         {/* STEP 4: Summary & Submit */}
         {step === 4 && (
           <div className="space-y-4 animate-fadeIn">
-            <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-4 text-xs text-emerald-900">
-              <div className="flex items-center gap-2 font-bold text-sm mb-1">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+            <div className="bg-surface-muted/50 border border-surface-border rounded p-3 text-xs text-charcoal-800">
+              <div className="flex items-center gap-2 font-bold text-sm mb-1 text-charcoal-900">
+                <CheckCircle2 className="w-4 h-4 text-charcoal-600" />
                 HR Dossier Ready for Executive Approval
               </div>
-              <p className="text-slate-600">
+              <p className="text-charcoal-muted">
                 Please verify all configured details below before forwarding this request to the Executive Director.
               </p>
             </div>

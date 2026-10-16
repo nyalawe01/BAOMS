@@ -21,16 +21,16 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
             type="checkbox"
             checked={checked}
             className={cn(
-              'peer h-4 w-4 shrink-0 appearance-none rounded border border-surface-border bg-white transition-colors',
-              'checked:bg-[#D68904] checked:border-[#D68904]',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D68904] focus-visible:ring-offset-2',
+              'peer h-4 w-4 shrink-0 appearance-none rounded border border-slate-300 bg-white transition-colors',
+              'checked:bg-white checked:border-charcoal-700 hover:border-slate-400',
+              'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-charcoal-400 focus-visible:ring-offset-1',
               'disabled:cursor-not-allowed disabled:opacity-50',
               className
             )}
             {...props}
           />
           <Check
-            className="pointer-events-none absolute left-0 top-0.5 h-4 w-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity p-0.5"
+            className="pointer-events-none absolute left-0 top-0.5 h-4 w-4 text-charcoal-900 opacity-0 peer-checked:opacity-100 transition-opacity p-0.5 stroke-[2.5]"
             aria-hidden="true"
           />
         </div>

@@ -26,7 +26,7 @@ const ToastCard: React.FC<{ toast: ToastItem; onDismiss: () => void }> = ({
 }) => {
   const icons = {
     info: <Info className="h-4 w-4 text-slate-700 shrink-0 mt-0.5" />,
-    success: <CheckCircle2 className="h-4 w-4 text-forest-700 shrink-0 mt-0.5" />,
+    success: <CheckCircle2 className="h-4 w-4 text-emerald-700 shrink-0 mt-0.5" />,
     warning: <AlertTriangle className="h-4 w-4 text-amber-700 shrink-0 mt-0.5" />,
     error: <AlertOctagon className="h-4 w-4 text-red-700 shrink-0 mt-0.5" />,
   };

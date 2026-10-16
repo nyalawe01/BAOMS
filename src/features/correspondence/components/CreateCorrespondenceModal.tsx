@@ -37,7 +37,8 @@ export const CreateCorrespondenceModal: React.FC<CreateCorrespondenceModalProps>
   const [correspondenceDate, setCorrespondenceDate] = useState(
     new Date().toISOString().split('T')[0] ?? ''
   );
-  const [category, setCategory] = useState<CorrespondenceCategory>('government');
+  const [category, setCategory] = useState<CorrespondenceCategory | 'other'>('government');
+  const [customCategory, setCustomCategory] = useState('');
   const [confidentialityLevel, setConfidentialityLevel] = useState<ConfidentialityLevel>('internal');
   const [notes, setNotes] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
@@ -53,17 +54,26 @@ export const CreateCorrespondenceModal: React.FC<CreateCorrespondenceModalProps>
       return;
     }
 
+    if (category === 'other' && !customCategory.trim()) {
+      setError(t('correspondence.errors.customCategoryRequired', 'Please specify the custom category name.'));
+      return;
+    }
+
     setIsSubmitting(true);
     try {
+      const resolvedNotes = category === 'other' && customCategory.trim()
+        ? (notes.trim() ? `[Category: ${customCategory.trim()}]\n\n${notes.trim()}` : `[Category: ${customCategory.trim()}]`)
+        : (notes.trim() || null);
+
       const payload: CreateCorrespondencePayload = {
         direction,
         sender: sender.trim(),
         recipient: recipient.trim(),
         subject: subject.trim(),
         correspondenceDate,
-        category,
+        category: category === 'other' ? 'general' : category,
         confidentialityLevel,
-        notes: notes.trim() || null,
+        notes: resolvedNotes,
       };
 
       const newItem = await createCorrespondence(payload, {
@@ -193,7 +203,7 @@ export const CreateCorrespondenceModal: React.FC<CreateCorrespondenceModalProps>
               </label>
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value as CorrespondenceCategory)}
+                onChange={(e) => setCategory(e.target.value as CorrespondenceCategory | 'other')}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-forest-600"
               >
                 <option value="government">Government / Ministry</option>
@@ -202,7 +212,20 @@ export const CreateCorrespondenceModal: React.FC<CreateCorrespondenceModalProps>
                 <option value="partner">Partner NGO</option>
                 <option value="community">Community / Local Ward</option>
                 <option value="general">General Administrative</option>
+                <option value="other">Other (Category not listed)...</option>
               </select>
+              {category === 'other' && (
+                <div className="mt-2">
+                  <input
+                    type="text"
+                    required
+                    placeholder="Specify custom category..."
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-1 focus:ring-forest-600"
+                  />
+                </div>
+              )}
             </div>
 
             <div>

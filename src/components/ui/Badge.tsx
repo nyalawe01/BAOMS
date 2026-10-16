@@ -15,11 +15,11 @@ export const Badge: React.FC<BadgeProps> = ({
   ...props
 }) => {
   const variantStyles = {
-    default: 'text-charcoal-700 font-medium',
-    success: 'text-emerald-700 font-semibold',
-    warning: 'text-amber-700 font-semibold',
-    danger: 'text-rose-700 font-semibold',
-    info: 'text-blue-700 font-semibold',
+    default: 'bg-slate-100 text-charcoal-700 border border-slate-200',
+    success: 'bg-emerald-50 text-emerald-800 border border-emerald-200',
+    warning: 'bg-amber-50 text-amber-800 border border-amber-200',
+    danger: 'bg-rose-50 text-rose-800 border border-rose-200',
+    info: 'bg-slate-100 text-slate-700 border border-slate-200',
   };
 
   const dotColors = {
@@ -27,13 +27,13 @@ export const Badge: React.FC<BadgeProps> = ({
     success: 'bg-emerald-600',
     warning: 'bg-amber-600',
     danger: 'bg-rose-600',
-    info: 'bg-blue-600',
+    info: 'bg-slate-500',
   };
 
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 text-xs select-none',
+        'inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium leading-none select-none',
         variantStyles[variant],
         className
       )}

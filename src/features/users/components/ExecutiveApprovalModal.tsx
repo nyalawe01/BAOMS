@@ -36,14 +36,15 @@ export const ExecutiveApprovalModal: React.FC<ExecutiveApprovalModalProps> = ({
   onSuccess,
 }) => {
   const { t } = useTranslation();
-  const { user: currentActor } = useAuth();
+  const { user: currentActor, hasRole, isAdmin } = useAuth();
   const { showToast } = useToast();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
 
-  if (!isOpen || !user) return null;
+  const isNonExecutive = hasRole('hr_administrator') && !hasRole('executive_director') && !isAdmin();
+  if (!isOpen || !user || isNonExecutive) return null;
 
   const staged = user.stagedDetails || {};
   const assignedRoleCode: RoleCode = staged.roleCode || ROLES.PROJECT_COORDINATOR;
@@ -193,11 +194,11 @@ export const ExecutiveApprovalModal: React.FC<ExecutiveApprovalModalProps> = ({
       size="lg"
     >
       <div className="space-y-6">
-        <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200 text-xs text-amber-950 flex items-start gap-3">
-          <ShieldCheck className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+        <div className="p-3.5 rounded-lg bg-surface-muted/50 border border-surface-border text-xs text-charcoal-800 flex items-start gap-3">
+          <ShieldCheck className="w-5 h-5 text-charcoal-600 shrink-0 mt-0.5" />
           <div>
-            <h4 className="font-bold text-sm text-amber-900">Executive Clearance Gate</h4>
-            <p className="mt-1 text-slate-600 leading-relaxed">
+            <h4 className="font-bold text-sm text-charcoal-900">Executive Clearance Gate</h4>
+            <p className="mt-1 text-charcoal-muted leading-relaxed">
               Human Resources has vetted this staff registration and submitted the recommended role and access scopes.
               Granting approval will activate the user's login and provision their respective dashboard.
             </p>

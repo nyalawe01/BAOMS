@@ -18,6 +18,7 @@ export const RegisterVendorModal: React.FC<RegisterVendorModalProps> = ({
 }) => {
   const [businessName, setBusinessName] = useState('');
   const [category, setCategory] = useState<VendorCategory>('stationery_printing');
+  const [customCategory, setCustomCategory] = useState('');
   const [contactPerson, setContactPerson] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -38,11 +39,16 @@ export const RegisterVendorModal: React.FC<RegisterVendorModalProps> = ({
       return;
     }
 
+    if (category === 'other' && !customCategory.trim()) {
+      setError('Please specify the vendor custom category.');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await onSubmit({
         businessName: businessName.trim(),
-        category,
+        category: category === 'other' ? customCategory.trim() : category,
         contactPerson: contactPerson.trim(),
         email: email.trim(),
         phone: phone.trim(),
@@ -92,7 +98,19 @@ export const RegisterVendorModal: React.FC<RegisterVendorModalProps> = ({
               <option value="transport_logistics">Transport & Passenger Logistics</option>
               <option value="it_hardware">ICT & Hardware Supplies</option>
               <option value="general_services">General Facilities & Services</option>
+              <option value="other">Other (Category not listed)...</option>
             </Select>
+            {category === 'other' && (
+              <div className="mt-2">
+                <Input
+                  label="Specify Custom Category *"
+                  placeholder="e.g. Media, Photography & Audio"
+                  value={customCategory}
+                  onChange={(e) => setCustomCategory(e.target.value)}
+                  required
+                />
+              </div>
+            )}
           </div>
         </div>
 

@@ -37,6 +37,16 @@ export const ExportDossierModal: React.FC<ExportDossierModalProps> = ({
   const [includeProcurement, setIncludeProcurement] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
 
+  const allModulesSelected = includeNarratives && includeQuotes && includeDemographics && includeFinances && includeProcurement;
+  const toggleAllModules = () => {
+    const nextVal = !allModulesSelected;
+    setIncludeNarratives(nextVal);
+    setIncludeQuotes(nextVal);
+    setIncludeDemographics(nextVal);
+    setIncludeFinances(nextVal);
+    setIncludeProcurement(nextVal);
+  };
+
   const handleExecuteExport = async () => {
     setIsExporting(true);
     try {
@@ -139,16 +149,25 @@ export const ExportDossierModal: React.FC<ExportDossierModalProps> = ({
 
         {/* Inclusions checklist */}
         <div>
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-300 block mb-2">
-            Included Analytical Modules
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-300">
+              Included Analytical Modules
+            </label>
+            <button
+              type="button"
+              onClick={toggleAllModules}
+              className="text-xs text-charcoal-700 dark:text-neutral-300 hover:text-black dark:hover:text-white font-semibold underline underline-offset-2 cursor-pointer"
+            >
+              {allModulesSelected ? 'Deselect All' : 'Select All'}
+            </button>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
             <label className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-neutral-800/50 cursor-pointer">
               <input
                 type="checkbox"
                 checked={includeNarratives}
                 onChange={(e) => setIncludeNarratives(e.target.checked)}
-                className="rounded border-slate-300 text-[#D68904] focus:ring-[#D68904]"
+                className="rounded border-slate-300 text-charcoal-900 focus:ring-slate-400"
               />
               <span>Full Field Session Narratives & Methodology</span>
             </label>
@@ -158,7 +177,7 @@ export const ExportDossierModal: React.FC<ExportDossierModalProps> = ({
                 type="checkbox"
                 checked={includeQuotes}
                 onChange={(e) => setIncludeQuotes(e.target.checked)}
-                className="rounded border-slate-300 text-[#D68904] focus:ring-[#D68904]"
+                className="rounded border-slate-300 text-charcoal-900 focus:ring-slate-400"
               />
               <span>Participant Quotes & Community Voices</span>
             </label>
@@ -168,7 +187,7 @@ export const ExportDossierModal: React.FC<ExportDossierModalProps> = ({
                 type="checkbox"
                 checked={includeDemographics}
                 onChange={(e) => setIncludeDemographics(e.target.checked)}
-                className="rounded border-slate-300 text-[#D68904] focus:ring-[#D68904]"
+                className="rounded border-slate-300 text-charcoal-900 focus:ring-slate-400"
               />
               <span>Demographic Tables & Cluster Distribution</span>
             </label>
@@ -178,7 +197,7 @@ export const ExportDossierModal: React.FC<ExportDossierModalProps> = ({
                 type="checkbox"
                 checked={includeFinances}
                 onChange={(e) => setIncludeFinances(e.target.checked)}
-                className="rounded border-slate-300 text-[#D68904] focus:ring-[#D68904]"
+                className="rounded border-slate-300 text-charcoal-900 focus:ring-slate-400"
               />
               <span>Financial Utilization & Burn Rate</span>
             </label>
@@ -188,7 +207,7 @@ export const ExportDossierModal: React.FC<ExportDossierModalProps> = ({
                 type="checkbox"
                 checked={includeProcurement}
                 onChange={(e) => setIncludeProcurement(e.target.checked)}
-                className="rounded border-slate-300 text-[#D68904] focus:ring-[#D68904]"
+                className="rounded border-slate-300 text-charcoal-900 focus:ring-slate-400"
               />
               <span>Procurement & Supplies Fulfillment Register</span>
             </label>

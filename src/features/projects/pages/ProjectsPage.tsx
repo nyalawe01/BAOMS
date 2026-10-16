@@ -147,67 +147,61 @@ export const ProjectsPage: React.FC = () => {
 
       {/* KPI Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4 border-l-4 border-l-forest-700 bg-white min-w-0">
-          <div className="flex items-center justify-between gap-3 min-w-0">
-            <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-wider text-charcoal-muted truncate">
-                {t('projects.metrics.totalProjects', 'Total Projects')}
-              </p>
-              <p className="text-[26px] sm:text-[32px] font-bold text-forest-950 mt-1 font-mono tabular-nums leading-[1.2] truncate">{metrics.total}</p>
-            </div>
-            <div className="p-2.5 bg-forest-50 text-forest-700 rounded-md shrink-0">
-              <Briefcase className="w-5 h-5" />
-            </div>
+        <div className="bg-white border border-surface-border rounded-lg p-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
+            <span>{t('projects.metrics.totalProjects', 'Total Projects')}</span>
+            <Briefcase className="w-4 h-4 text-charcoal-400" />
           </div>
-        </Card>
+          <div className="mt-2 text-2xl font-bold text-charcoal-900 font-mono tabular-nums leading-tight">
+            {metrics.total}
+          </div>
+          <p className="mt-1 text-xs text-charcoal-muted truncate">
+            Registered donor initiatives
+          </p>
+        </div>
 
-        <Card className="p-4 border-l-4 border-l-emerald-600 bg-white min-w-0">
-          <div className="flex items-center justify-between gap-3 min-w-0">
-            <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-wider text-charcoal-muted truncate">
-                {t('projects.metrics.activeProjects', 'Active Programs')}
-              </p>
-              <p className="text-[26px] sm:text-[32px] font-bold text-emerald-700 mt-1 font-mono tabular-nums leading-[1.2] truncate">{metrics.active}</p>
-            </div>
-            <div className="p-2.5 bg-emerald-50 text-emerald-700 rounded-md shrink-0">
-              <TrendingUp className="w-5 h-5" />
-            </div>
+        <div className="bg-white border border-surface-border rounded-lg p-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
+            <span>{t('projects.metrics.activeProjects', 'Active Programs')}</span>
+            <TrendingUp className="w-4 h-4 text-charcoal-400" />
           </div>
-        </Card>
+          <div className="mt-2 text-2xl font-bold text-emerald-700 font-mono tabular-nums leading-tight">
+            {metrics.active}
+          </div>
+          <p className="mt-1 text-xs text-charcoal-muted truncate">
+            In active field execution
+          </p>
+        </div>
 
-        <Card className="p-4 border-l-4 border-l-amber-600 bg-white min-w-0">
-          <div className="flex items-center justify-between gap-3 min-w-0">
-            <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-wider text-charcoal-muted truncate">
-                {t('projects.metrics.totalBudget', 'Allocated Funding')}
-              </p>
-              <p className="text-[24px] sm:text-[28px] font-bold text-amber-900 mt-1 font-mono tabular-nums leading-[1.2] truncate" title={formatCurrency(metrics.totalBudget)}>
-                {formatCurrency(metrics.totalBudget)}
-              </p>
-            </div>
-            <div className="p-2.5 bg-amber-50 text-amber-700 rounded-md shrink-0">
-              <Wallet className="w-5 h-5" />
-            </div>
+        <div className="bg-white border border-surface-border rounded-lg p-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
+            <span>{t('projects.metrics.totalBudget', 'Allocated Funding')}</span>
+            <Wallet className="w-4 h-4 text-charcoal-400" />
           </div>
-        </Card>
+          <div className="mt-2 text-2xl font-bold text-charcoal-900 font-mono tabular-nums leading-tight" title={formatCurrency(metrics.totalBudget)}>
+            {formatCurrency(metrics.totalBudget)}
+          </div>
+          <p className="mt-1 text-xs text-charcoal-muted truncate">
+            Committed across all grants
+          </p>
+        </div>
 
-        <Card className="p-4 border-l-4 border-l-[#F2A507] bg-white min-w-0">
-          <div className="flex items-center justify-between gap-3 min-w-0">
-            <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-wider text-charcoal-muted truncate">
-                {t('projects.metrics.loggedActivities', 'Field Activities')}
-              </p>
-              <p className="text-[26px] sm:text-[32px] font-bold text-charcoal-900 mt-1 font-mono tabular-nums leading-[1.2] truncate">{metrics.totalActivities}</p>
-            </div>
-            <div className="p-2.5 bg-amber-50 text-[#D68904] rounded-md shrink-0">
-              <Activity className="w-5 h-5" />
-            </div>
+        <div className="bg-white border border-surface-border rounded-lg p-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
+            <span>{t('projects.metrics.loggedActivities', 'Field Activities')}</span>
+            <Activity className="w-4 h-4 text-charcoal-400" />
           </div>
-        </Card>
+          <div className="mt-2 text-2xl font-bold text-charcoal-900 font-mono tabular-nums leading-tight">
+            {metrics.totalActivities}
+          </div>
+          <p className="mt-1 text-xs text-charcoal-muted truncate">
+            Community workshops & sessions
+          </p>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <Card className="p-4 bg-white shadow-sm space-y-4">
+      <Card className="p-4 bg-white shadow-none border border-surface-border space-y-4">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="relative w-full md:w-96">
             <Search className="w-4 h-4 text-charcoal-muted absolute left-3 top-1/2 -translate-y-1/2" />
@@ -216,7 +210,7 @@ export const ProjectsPage: React.FC = () => {
               placeholder={t('projects.searchPlaceholder', 'Search by code, title, funder...')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-surface-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-forest-700 focus:border-forest-700 bg-surface-muted/20"
+              className="w-full pl-9 pr-4 py-2 border border-surface-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[#D68904] focus:border-[#D68904] bg-white"
             />
           </div>
 
@@ -232,7 +226,7 @@ export const ProjectsPage: React.FC = () => {
                 onClick={() => setStatusFilter(status)}
                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                   statusFilter === status
-                    ? 'bg-forest-900 text-white font-semibold'
+                    ? 'bg-charcoal-900 text-white font-semibold'
                     : 'bg-surface-muted text-charcoal hover:bg-surface-border'
                 }`}
               >
@@ -248,7 +242,7 @@ export const ProjectsPage: React.FC = () => {
       {/* Projects Register List */}
       {isLoading ? (
         <div className="p-12 text-center text-charcoal-muted">
-          <div className="inline-block animate-spin w-8 h-8 border-4 border-forest-700 border-t-transparent rounded-full mb-3" />
+          <div className="inline-block animate-spin w-8 h-8 border-4 border-[#D68904] border-t-transparent rounded-full mb-3" />
           <p className="text-sm">{t('projects.loadingProjects', 'Loading projects...')}</p>
         </div>
       ) : projects.length === 0 ? (
@@ -276,11 +270,11 @@ export const ProjectsPage: React.FC = () => {
               .map((project) => (
               <Card
                 key={project.id}
-                className="flex flex-col justify-between hover:shadow-md transition-shadow border border-surface-border bg-white"
+                className="flex flex-col justify-between hover:border-charcoal-300 transition-colors border border-surface-border bg-white"
               >
                 <div className="p-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-forest-800">
+                    <span className="font-mono text-xs font-bold text-[#D68904]">
                       {project.projectCode}
                     </span>
                     {getStatusBadge(project.status)}
@@ -288,7 +282,7 @@ export const ProjectsPage: React.FC = () => {
 
                   <div>
                     <h3
-                      className="font-semibold text-forest-950 text-base leading-snug hover:text-forest-700 cursor-pointer line-clamp-2"
+                      className="font-semibold text-charcoal-900 text-base leading-snug hover:text-[#D68904] cursor-pointer line-clamp-2"
                       onClick={() => navigate(`/projects/${project.id}`)}
                     >
                       {project.name}
@@ -337,7 +331,7 @@ export const ProjectsPage: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate(`/projects/${project.id}`)}
-                    className="text-forest-700 hover:text-forest-900 hover:bg-forest-50 text-xs font-semibold flex items-center gap-1 p-0 h-auto"
+                    className="text-charcoal-700 hover:text-[#D68904] text-xs font-semibold flex items-center gap-1 p-0 h-auto"
                   >
                     <span>{t('projects.openWorkspace', 'Workspace')}</span>
                     <ArrowRight className="w-3.5 h-3.5" />

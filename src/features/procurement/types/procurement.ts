@@ -17,7 +17,9 @@ export type VendorCategory =
   | 'venue_catering'
   | 'transport_logistics'
   | 'it_hardware'
-  | 'general_services';
+  | 'general_services'
+  | 'other'
+  | (string & {});
 
 export type InventoryStatus = 'in_stock' | 'low_stock' | 'out_of_stock';
 

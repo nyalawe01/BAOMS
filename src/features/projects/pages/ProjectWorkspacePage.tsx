@@ -1018,7 +1018,7 @@ export const ProjectWorkspacePage: React.FC = () => {
                           );
                           await loadData();
                         }}
-                        className="w-4 h-4 text-forest-700 rounded border-surface-border focus:ring-forest-700 cursor-pointer"
+                        className="w-4 h-4 text-charcoal-900 rounded border-surface-border focus:ring-slate-400 cursor-pointer"
                       />
                       <h4
                         className={`text-sm font-semibold ${
