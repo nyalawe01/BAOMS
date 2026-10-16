@@ -12,7 +12,6 @@ import {
   BarChart3,
   ShoppingCart,
   Calendar,
-  User,
   Settings,
   LogOut,
   ChevronLeft,
@@ -290,18 +289,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     ];
   };
 
-  const navSections = getRoleSections();
-
-  // Universal Account & Preferences Section (always present across the whole system)
-  const accountSection: NavSection = {
-    heading: t('nav.section.account', 'Account & System'),
-    items: [
-      { to: '/profile', label: t('nav.profile', 'My Profile'), icon: User },
-      { to: '/settings', label: t('nav.settings', 'Settings'), icon: Settings },
-    ],
-  };
-
-  const allSections = [...navSections, accountSection];
+  const allSections = getRoleSections();
 
   const handleSignOutConfirm = async () => {
     setShowSignOutDialog(false);

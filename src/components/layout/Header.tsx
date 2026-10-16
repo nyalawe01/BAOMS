@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, Link } from 'react-router-dom';
 import { Menu, Search, ChevronRight, PanelLeft } from 'lucide-react';
 import { NotificationsDropdown } from './NotificationsDropdown';
-import { UserProfileMenu } from './UserProfileMenu';
 import { GlobalSearchModal } from './GlobalSearchModal';
 
 interface HeaderProps {
@@ -123,11 +122,6 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Notifications dropdown */}
           <NotificationsDropdown />
-
-          <div className="h-5 w-px bg-slate-200 hidden sm:block" />
-
-          {/* User profile dropdown (AdminCN style) */}
-          <UserProfileMenu />
         </div>
       </header>
 
