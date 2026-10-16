@@ -128,6 +128,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           items: [
             { to: '/reports', label: t('nav.reports', 'Organization-wide Reports'), icon: BarChart3 },
             { to: '/hr', label: t('nav.staffDirectory', 'Staff Directory'), icon: Users },
+            { to: '/audit-logs', label: t('nav.auditLogs', 'Audit Logs & Governance'), icon: ShieldAlert, badge: 'Audit' },
           ],
         },
       ];
@@ -257,6 +258,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
             { to: '/finance', label: t('nav.requisitions', 'Financial Requisitions'), icon: Wallet },
             { to: '/documents', label: t('nav.procurementDocs', 'Invoices & Vendor Quotes'), icon: FileText },
             { to: '/reports', label: t('nav.reports', 'Procurement Analytics'), icon: BarChart3 },
+          ],
+        },
+      ];
+    }
+
+    // 8. Monitoring and Evaluation (M&E) Officer
+    if (activeRole === 'me_officer' || hasRole('me_officer')) {
+      return [
+        {
+          heading: t('nav.section.meCommand', 'M&E Results & Indicators'),
+          items: [
+            { to: '/', label: t('nav.meDashboard', 'M&E Performance Dashboard'), icon: LayoutDashboard },
+            { to: '/projects', label: t('nav.projectMonitoring', 'Project Monitoring & Targets'), icon: Briefcase },
+          ],
+        },
+        {
+          heading: t('nav.section.dataQuality', 'Verification & Quality Control'),
+          items: [
+            { to: '/documents', label: t('nav.activityEvidence', 'Activity Evidence & Field Reports'), icon: FileText },
+            { to: '/reports', label: t('nav.donorReports', 'Donor & Impact Reports'), icon: BarChart3 },
+          ],
+        },
+        {
+          heading: t('nav.section.fieldReviews', 'Field Reviews & Learning'),
+          items: [
+            { to: '/correspondence', label: t('nav.fieldMeetings', 'Reviews & Meetings'), icon: Calendar },
           ],
         },
       ];

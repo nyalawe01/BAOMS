@@ -471,6 +471,7 @@ export const FinancePage: React.FC = () => {
                         (req.status === 'submitted' || req.status === 'under_review') &&
                         (hasPermission('finance.approve') || hasRole('finance_officer') || isAdmin());
                       const canDisburseItem =
+                        !isSelf &&
                         (req.status === 'approved' || req.status === 'partially_paid') &&
                         (hasPermission('finance.disburse') || isAdmin());
 

@@ -96,7 +96,7 @@ export const AppRoutes: React.FC = () => {
         <Route
           path="/projects/new"
           element={
-            <ProtectedRoute requiredPermissions={['projects.view']}>
+            <ProtectedRoute requiredPermissions={['projects.create']}>
               <RegisterProjectPage />
             </ProtectedRoute>
           }

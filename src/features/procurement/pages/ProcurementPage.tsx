@@ -39,7 +39,7 @@ import { RegisterVendorModal } from '../components/RegisterVendorModal';
 import { UpdateInventoryModal } from '../components/UpdateInventoryModal';
 
 export const ProcurementPage: React.FC = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, hasRole } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'orders' | 'vendors' | 'inventory' | 'analytics'>('orders');
 
@@ -317,14 +317,20 @@ export const ProcurementPage: React.FC = () => {
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           {po.status === 'pending_approval' && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleUpdateStatus(po.id, 'approved')}
-                              className="text-xs text-emerald-700 hover:bg-emerald-50 h-7 px-2"
-                            >
-                              Approve
-                            </Button>
+                            (hasRole('executive_director') || hasRole('system_admin')) && po.createdBy !== user?.id ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleUpdateStatus(po.id, 'approved')}
+                                className="text-xs text-emerald-700 hover:bg-emerald-50 h-7 px-2"
+                              >
+                                Approve
+                              </Button>
+                            ) : (
+                              <span className="text-[11px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                Awaiting Exec Approval
+                              </span>
+                            )
                           )}
 
                           {po.status === 'approved' && (

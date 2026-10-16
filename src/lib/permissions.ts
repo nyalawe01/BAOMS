@@ -14,6 +14,7 @@ export const ROLES = {
   PROJECT_COORDINATOR: 'project_coordinator',
   HR_ADMINISTRATOR: 'hr_administrator',
   PROCUREMENT_OFFICER: 'procurement_officer',
+  ME_OFFICER: 'me_officer',
 } as const;
 
 export type RoleCode = (typeof ROLES)[keyof typeof ROLES];
@@ -74,6 +75,11 @@ export const PERMISSIONS = {
   // Reports
   REPORTS_VIEW: 'reports.view',
   REPORTS_EXPORT: 'reports.export',
+
+  // Monitoring & Evaluation
+  ME_VIEW: 'me.view',
+  ME_MANAGE: 'me.manage',
+  ME_VALIDATE: 'me.validate',
 } as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -209,6 +215,19 @@ export const ROLE_PERMISSIONS: Record<RoleCode, PermissionCode[]> = {
     PERMISSIONS.LEAVE_REQUEST,
     PERMISSIONS.REPORTS_VIEW,
     PERMISSIONS.REPORTS_EXPORT,
+  ],
+  [ROLES.ME_OFFICER]: [
+    PERMISSIONS.ME_VIEW,
+    PERMISSIONS.ME_MANAGE,
+    PERMISSIONS.ME_VALIDATE,
+    PERMISSIONS.PROJECTS_VIEW,
+    PERMISSIONS.PROJECTS_REPORT,
+    PERMISSIONS.DOCUMENTS_VIEW,
+    PERMISSIONS.DOCUMENTS_UPLOAD,
+    PERMISSIONS.REPORTS_VIEW,
+    PERMISSIONS.REPORTS_EXPORT,
+    PERMISSIONS.CORRESPONDENCE_VIEW,
+    PERMISSIONS.LEAVE_REQUEST,
   ],
 };
 

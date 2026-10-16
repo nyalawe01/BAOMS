@@ -110,6 +110,7 @@ export const ProjectWorkspacePage: React.FC = () => {
   const isSystemManagerOrAbove =
     roles.includes('system_admin') ||
     roles.includes('executive_director') ||
+    roles.includes('project_manager') ||
     userMembership?.projectRole === 'manager';
 
   const canRecordActivity =

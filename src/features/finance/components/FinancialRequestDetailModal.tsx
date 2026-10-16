@@ -48,6 +48,7 @@ export const FinancialRequestDetailModal: React.FC<FinancialRequestDetailModalPr
     (hasPermission('finance.approve') || hasRole('finance_officer') || isAdmin());
 
   const canDisburse =
+    !isSelf &&
     (request.status === 'approved' || request.status === 'partially_paid') &&
     (hasPermission('finance.disburse') || isAdmin());
 

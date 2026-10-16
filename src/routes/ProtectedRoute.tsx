@@ -47,19 +47,19 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <WaitingForApprovalDashboard />;
   }
 
-  // Role requirement check
+  // Role requirement check: silent redirect instead of showing Access Denied
   if (requiredRoles && requiredRoles.length > 0) {
     const isAuthorized = hasRole(requiredRoles);
     if (!isAuthorized) {
-      return <AccessDeniedPage />;
+      return <Navigate to="/" replace />;
     }
   }
 
-  // Permission requirement check
+  // Permission requirement check: silent redirect instead of showing Access Denied
   if (requiredPermissions && requiredPermissions.length > 0) {
     const isAuthorized = requiredPermissions.every((perm) => hasPermission(perm));
     if (!isAuthorized) {
-      return <AccessDeniedPage />;
+      return <Navigate to="/" replace />;
     }
   }
 

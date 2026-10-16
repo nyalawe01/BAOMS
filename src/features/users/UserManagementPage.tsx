@@ -72,19 +72,21 @@ const DEPT_NAMES: Record<string, string> = {
   EXEC: 'Executive Office',
   FIN: 'Finance & Operations',
   PRJ: 'Projects & Programs',
+  ME: 'Monitoring & Evaluation',
+  PROC: 'Procurement & Logistics',
   HR: 'Human Resources & Administration',
   ADMIN: 'IT & System Administration',
-  PROC: 'Procurement & Logistics',
 };
 
 const ROLE_TITLES: Record<string, string> = {
-  [ROLES.PROJECT_COORDINATOR]: 'Project Coordinator',
-  [ROLES.PROJECT_MANAGER]: 'Project Manager',
-  [ROLES.FINANCE_OFFICER]: 'Finance Officer',
-  [ROLES.HR_ADMINISTRATOR]: 'HR Administrator',
   [ROLES.EXECUTIVE_DIRECTOR]: 'Executive Director',
+  [ROLES.PROCUREMENT_OFFICER]: 'Procurement and Supply Officer',
+  [ROLES.FINANCE_OFFICER]: 'Finance Officer',
+  [ROLES.ME_OFFICER]: 'Monitoring and Evaluation (M&E) Officer',
+  [ROLES.PROJECT_MANAGER]: 'Project Manager',
+  [ROLES.PROJECT_COORDINATOR]: 'Project Coordinator',
+  [ROLES.HR_ADMINISTRATOR]: 'HR Administrator',
   [ROLES.SYSTEM_ADMIN]: 'System Administrator',
-  [ROLES.PROCUREMENT_OFFICER]: 'Procurement Officer',
 };
 
 // ---------------------------------------------------------------------------
@@ -1001,13 +1003,14 @@ export const UserManagementPage: React.FC = () => {
             value={inviteRole}
             onChange={(e) => setInviteRole(e.target.value as RoleCode)}
             options={[
-              { value: ROLES.PROJECT_COORDINATOR, label: 'Project Coordinator' },
-              { value: ROLES.PROJECT_MANAGER, label: 'Project Manager' },
-              { value: ROLES.FINANCE_OFFICER, label: 'Finance Officer' },
-              { value: ROLES.HR_ADMINISTRATOR, label: 'HR Administrator' },
               { value: ROLES.EXECUTIVE_DIRECTOR, label: 'Executive Director' },
+              { value: ROLES.PROCUREMENT_OFFICER, label: 'Procurement and Supply Officer' },
+              { value: ROLES.FINANCE_OFFICER, label: 'Finance Officer' },
+              { value: ROLES.ME_OFFICER, label: 'Monitoring and Evaluation (M&E) Officer' },
+              { value: ROLES.PROJECT_MANAGER, label: 'Project Manager' },
+              { value: ROLES.PROJECT_COORDINATOR, label: 'Project Coordinator' },
+              { value: ROLES.HR_ADMINISTRATOR, label: 'HR Administrator' },
               { value: ROLES.SYSTEM_ADMIN, label: 'System Administrator' },
-              { value: ROLES.PROCUREMENT_OFFICER, label: 'Procurement Officer' },
             ]}
             helperText="Determines which dashboard and features the staff member can access."
           />
@@ -1033,13 +1036,14 @@ export const UserManagementPage: React.FC = () => {
             value={editRoleValue}
             onChange={(e) => setEditRoleValue(e.target.value as RoleCode)}
             options={[
-              { value: ROLES.PROJECT_COORDINATOR, label: 'Project Coordinator' },
-              { value: ROLES.PROJECT_MANAGER, label: 'Project Manager' },
-              { value: ROLES.FINANCE_OFFICER, label: 'Finance Officer' },
-              { value: ROLES.HR_ADMINISTRATOR, label: 'HR Administrator' },
               { value: ROLES.EXECUTIVE_DIRECTOR, label: 'Executive Director' },
+              { value: ROLES.PROCUREMENT_OFFICER, label: 'Procurement and Supply Officer' },
+              { value: ROLES.FINANCE_OFFICER, label: 'Finance Officer' },
+              { value: ROLES.ME_OFFICER, label: 'Monitoring and Evaluation (M&E) Officer' },
+              { value: ROLES.PROJECT_MANAGER, label: 'Project Manager' },
+              { value: ROLES.PROJECT_COORDINATOR, label: 'Project Coordinator' },
+              { value: ROLES.HR_ADMINISTRATOR, label: 'HR Administrator' },
               { value: ROLES.SYSTEM_ADMIN, label: 'System Administrator' },
-              { value: ROLES.PROCUREMENT_OFFICER, label: 'Procurement Officer' },
             ]}
             helperText={
               isSupabaseConfigured && isOnline

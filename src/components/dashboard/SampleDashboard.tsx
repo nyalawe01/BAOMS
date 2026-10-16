@@ -7,6 +7,7 @@ import { ProjectManagerDashboard } from './ProjectManagerDashboard';
 import { ProjectCoordinatorDashboard } from './ProjectCoordinatorDashboard';
 import { HrAdministratorDashboard } from './HrAdministratorDashboard';
 import { ProcurementOfficerDashboard } from './ProcurementOfficerDashboard';
+import { MonitoringEvaluationDashboard } from './MonitoringEvaluationDashboard';
 
 export const SampleDashboard: React.FC = () => {
   const { roles, hasRole, isAdmin } = useAuth();
@@ -24,6 +25,10 @@ export const SampleDashboard: React.FC = () => {
 
   if (activeRole === 'finance_officer' || hasRole('finance_officer')) {
     return <FinanceOfficerDashboard />;
+  }
+
+  if (activeRole === 'me_officer' || hasRole('me_officer')) {
+    return <MonitoringEvaluationDashboard />;
   }
 
   if (activeRole === 'project_manager' || hasRole('project_manager')) {

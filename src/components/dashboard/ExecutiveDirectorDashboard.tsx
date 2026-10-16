@@ -63,6 +63,16 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
   const overdueActions = actions.filter((a) => a.isOverdue);
 
   const handleApprove = async (req: FinancialRequestRecord) => {
+    if (req.requesterId === user?.id) {
+      Swal.fire({
+        title: 'Self-Approval Restricted',
+        text: 'Executive Directors cannot authorize their own requests. A designated secondary signatory must review this requisition.',
+        icon: 'warning',
+        confirmButtonColor: '#D68904',
+      });
+      return;
+    }
+
     const result = await Swal.fire({
       title: 'Approve Financial Requisition?',
       text: `Authorize disbursement of ${req.currency} ${req.totalAmount.toLocaleString()} for "${req.title}"?`,
@@ -301,26 +311,32 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
                         {req.currency} {req.totalAmount.toLocaleString()}
                       </td>
                       <td className="py-2.5 px-3 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => handleApprove(req)}
-                            className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
-                            title="Approve Requisition"
-                          >
-                            <Check className="h-3.5 w-3.5 mr-1" />
-                            Approve
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleReject(req)}
-                            className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
-                            title="Reject Requisition"
-                          >
-                            <X className="h-3.5 w-3.5 mr-1" />
-                            Reject
-                          </button>
-                        </div>
+                        {req.requesterId === user?.id ? (
+                          <span className="text-xs text-charcoal-muted italic bg-surface-muted px-2 py-0.5 rounded">
+                            Self-initiated (Secondary Sign-off Required)
+                          </span>
+                        ) : (
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleApprove(req)}
+                              className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
+                              title="Approve Requisition"
+                            >
+                              <Check className="h-3.5 w-3.5 mr-1" />
+                              Approve
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleReject(req)}
+                              className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
+                              title="Reject Requisition"
+                            >
+                              <X className="h-3.5 w-3.5 mr-1" />
+                              Reject
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))

@@ -47,20 +47,21 @@ interface UserOnboardingReviewModalProps {
 const DEPARTMENTS = [
   { id: 'dept-prj', code: 'PRJ', name: 'Projects & Programs' },
   { id: 'dept-fin', code: 'FIN', name: 'Finance & Operations' },
+  { id: 'dept-me', code: 'ME', name: 'Monitoring & Evaluation' },
+  { id: 'dept-proc', code: 'PROC', name: 'Procurement & Logistics' },
   { id: 'dept-hr', code: 'HR', name: 'Human Resources & Administration' },
   { id: 'dept-admin', code: 'ADMIN', name: 'IT & System Administration' },
   { id: 'dept-exec', code: 'EXEC', name: 'Executive Office' },
-  { id: 'dept-proc', code: 'PROC', name: 'Procurement & Logistics' },
 ];
 
 const ROLES_LIST: { code: RoleCode; label: string; description: string }[] = [
-  { code: ROLES.PROJECT_COORDINATOR, label: 'Project Coordinator', description: 'Field delivery, activity evidence & project records' },
-  { code: ROLES.PROJECT_MANAGER, label: 'Project Manager', description: 'Portfolio management, activity approvals & progress analytics' },
-  { code: ROLES.FINANCE_OFFICER, label: 'Finance Officer', description: 'Budget administration, requisitions & financial ledgers' },
-  { code: ROLES.HR_ADMINISTRATOR, label: 'HR Administrator', description: 'Personnel rosters, contract renewals & leave administration' },
-  { code: ROLES.PROCUREMENT_OFFICER, label: 'Procurement Officer', description: 'Purchase orders, vendor vetting & inventory control' },
-  { code: ROLES.EXECUTIVE_DIRECTOR, label: 'Executive Director', description: 'Executive command, governance & financial authorization' },
-  { code: ROLES.SYSTEM_ADMIN, label: 'System Administrator', description: 'Full access, user access control & security telemetry' },
+  { code: ROLES.EXECUTIVE_DIRECTOR, label: 'Executive Director', description: 'Organization-wide oversight, approvals & governance' },
+  { code: ROLES.PROCUREMENT_OFFICER, label: 'Procurement and Supply Officer', description: 'Purchase orders, supplier registry, inventory & quotes' },
+  { code: ROLES.FINANCE_OFFICER, label: 'Finance Officer', description: 'Accounting, ledgers, vouchers, budgets & financial reports' },
+  { code: ROLES.ME_OFFICER, label: 'Monitoring and Evaluation (M&E) Officer', description: 'Indicators, targets, data verification, donor reporting & impact' },
+  { code: ROLES.PROJECT_MANAGER, label: 'Project Manager', description: 'Assigned project delivery, work plans, task assignments & budgets' },
+  { code: ROLES.PROJECT_COORDINATOR, label: 'Project Coordinator', description: 'Field activity delivery, attendance, photo evidence & field reports' },
+  { code: ROLES.SYSTEM_ADMIN, label: 'System Administrator', description: 'Full system maintenance & technical telemetry' },
 ];
 
 const AVAILABLE_DOCUMENT_SCOPES = [

@@ -734,6 +734,7 @@ export const PieChart = createIcon('PieChart', 'chart-pie');
 export const Printer = createIcon('Printer', 'print');
 export const Quote = createIcon('Quote', 'quote-left');
 export const Truck = createIcon('Truck', 'truck');
+export const Target = createIcon('Target', 'chart-simple');
 
 // Generic fallback proxy for any unlisted Lucide icons
 const fallbackIcon = createIcon('FallbackIcon', 'circle-question');
