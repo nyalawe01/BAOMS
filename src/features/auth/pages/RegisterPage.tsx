@@ -89,53 +89,48 @@ export const RegisterPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      if (isSupabaseConfigured) {
-        // Sign up with Supabase Auth
-        const { data, error } = await supabase.auth.signUp({
-          email: cleanEmail,
-          password,
-          options: {
-            data: {
-              full_name: cleanName,
-              phone: cleanPhone,
-              approval_status: 'pending_hr',
-            },
-            emailRedirectTo: `${window.location.origin}/login`,
-          },
-        });
-
-        if (error) {
-          throw error;
-        }
-
-        // Notify HR and Administrators
-        createNotification({
-          title: 'New Staff Self-Registration',
-          message: `${cleanName} (${cleanEmail}) has submitted registration and is waiting for HR onboarding review.`,
-          type: 'hr',
-          targetRole: 'hr_administrator',
-          link: '/users',
-          metadata: {
-            action: 'review_registration',
-            email: cleanEmail,
-            userId: data.user?.id,
-          },
-        });
-
-        setRegisteredEmail(cleanEmail);
-        setRegistrationSuccess(true);
-      } else {
-        // Local offline / preview mode staging
-        createNotification({
-          title: 'New Staff Registration (Offline Staged)',
-          message: `${cleanName} registered offline. Awaiting internet sync & administrative approval.`,
-          type: 'hr',
-          targetRole: 'hr_administrator',
-          link: '/users',
-        });
-        setRegisteredEmail(cleanEmail);
-        setRegistrationSuccess(true);
+      if (!isSupabaseConfigured) {
+        throw new Error('Database connection is not configured.');
       }
+
+      // Sign up with Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password,
+        options: {
+          data: {
+            full_name: cleanName,
+            phone: cleanPhone,
+            approval_status: 'pending_hr',
+          },
+          emailRedirectTo: `${window.location.origin}/login`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data.user) {
+        throw new Error('Registration could not be completed. Please try again.');
+      }
+
+      // Notify HR and Administrators
+      createNotification({
+        title: 'New Staff Self-Registration',
+        message: `${cleanName} (${cleanEmail}) has submitted registration and is waiting for HR onboarding review.`,
+        type: 'hr',
+        targetRole: 'hr_administrator',
+        link: '/users',
+        metadata: {
+          action: 'review_registration',
+          email: cleanEmail,
+          userId: data.user.id,
+        },
+      });
+
+      setRegisteredEmail(cleanEmail);
+      setRegistrationSuccess(true);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Registration failed. Please contact IT support.';
       setErrorMessage(msg);
