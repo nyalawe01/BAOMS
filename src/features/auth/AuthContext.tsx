@@ -321,6 +321,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     const cleanEmail = email.trim().toLowerCase();
 
+    // Domain policy: only @babawatoto.or.tz addresses are permitted
+    if (!cleanEmail.endsWith('@babawatoto.or.tz')) {
+      setIsLoading(false);
+      return {
+        success: false,
+        error: 'Access denied. Only @babawatoto.or.tz email addresses are authorized for this system.',
+      };
+    }
+
     if (isSupabaseConfigured) {
       try {
         const { data, error } = await supabase.auth.signInWithPassword({

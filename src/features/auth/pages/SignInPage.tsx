@@ -223,7 +223,7 @@ export const SignInPage: React.FC = () => {
                       id="email"
                       name="email"
                       aria-label="Email Address"
-                      placeholder="name@babawatoto.org"
+                      placeholder="name@babawatoto.or.tz"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required

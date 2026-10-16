@@ -29,7 +29,7 @@ export interface DemoAccount {
 export const DEMO_ACCOUNTS: DemoAccount[] = [
   {
     id: '00000000-0000-0000-0000-000000000001',
-    email: 'admin@babawatoto.org',
+    email: 'admin@babawatoto.or.tz',
     displayName: 'Amani Bakari',
     phoneNumber: '+255 754 111 001',
     preferredLanguage: 'en',
