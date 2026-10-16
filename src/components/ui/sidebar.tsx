@@ -24,27 +24,15 @@ function cn(...inputs: ClassValue[]) {
 
 const WENSITY_STYLE_ID = "wensity-sidebar-styles";
 const WENSITY_STYLES = `
-/* ── Sidebar nav: idle-hidden, visible while scrolling ─────── */
+/* ── Sidebar nav: scrollbars completely invisible ─────── */
 .sidebar-nav {
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 .sidebar-nav::-webkit-scrollbar {
-  width: 4px;
-}
-.sidebar-nav::-webkit-scrollbar-track {
-  background: transparent;
-}
-.sidebar-nav::-webkit-scrollbar-thumb {
-  background-color: transparent;
-  border-radius: 9999px;
-  transition: background-color 0.45s ease;
-}
-.sidebar-nav.is-scrolling {
-  scrollbar-color: rgba(255, 255, 255, 0.11) transparent;
-}
-.sidebar-nav.is-scrolling::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.11);
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 `;
 

@@ -66,24 +66,23 @@ body {
   display: block !important;
 }
 
-/* Usable, restrained scrollbars (never hidden, never bloated) */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+/* Invisible scrollbars across the entire system (Firefox, WebKit, Edge) */
+html,
+body,
+*,
+*::before,
+*::after {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE and legacy Edge */
 }
-*::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
-*::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: 4px;
-}
-*::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8;
+
+*::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, WebKit, Edge */
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
 }
 
 /* Keyboard focus indicators with restrained ochre/gold accent */
