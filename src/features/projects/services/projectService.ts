@@ -53,7 +53,7 @@ interface SupabaseProjectRow {
     project_role: import('../types/project').ProjectRole;
     assigned_at: string;
     assigned_by: string | null;
-    profiles?: { display_name?: string; email?: string } | null;
+    profiles?: { display_name?: string; official_email?: string } | null;
   }>;
   project_budgets?: Array<{
     id: string;
@@ -154,7 +154,7 @@ export async function getProjects(
       *,
       project_members (
         id, project_id, user_id, project_role, assigned_at, assigned_by,
-        profiles:user_id (display_name, email)
+        profiles:user_id (display_name, official_email)
       ),
       project_budgets (
         id, category, allocated_amount, spent_amount, committed_amount, updated_at
@@ -192,7 +192,7 @@ export async function getProjects(
       projectId: m.project_id,
       userId: m.user_id,
       userName: m.profiles?.display_name || 'Staff Member',
-      userEmail: m.profiles?.email || '',
+      userEmail: m.profiles?.official_email || '',
       projectRole: m.project_role,
       assignedAt: m.assigned_at,
       assignedBy: m.assigned_by,
@@ -890,7 +890,7 @@ export async function assignProjectMember(
       },
       { onConflict: 'project_id,user_id' }
     )
-    .select('*, profiles:user_id(display_name, email)')
+    .select('*, profiles:user_id(display_name, official_email)')
     .single();
 
   if (error || !data) {
@@ -902,7 +902,7 @@ export async function assignProjectMember(
     projectId: data.project_id,
     userId: data.user_id,
     userName: data.profiles?.display_name || 'Staff Member',
-    userEmail: data.profiles?.email || '',
+    userEmail: data.profiles?.official_email || '',
     projectRole: data.project_role,
     assignedAt: data.assigned_at,
     assignedBy: data.assigned_by,
