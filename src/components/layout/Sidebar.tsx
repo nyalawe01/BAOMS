@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  LayoutDashboard,
   FileText,
   Briefcase,
   Wallet,
@@ -15,7 +14,12 @@ import {
   Settings,
   LogOut,
   ChevronLeft,
+  Building2,
+  Target,
+  CheckSquare,
+  ShieldCheck,
 } from 'lucide-react';
+import { BentoDashboardIcon } from '@/components/icons/BentoDashboardIcon';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/features/auth/useAuth';
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
@@ -31,8 +35,8 @@ interface SidebarProps {
 interface NavItem {
   to: string;
   label: string;
+  description?: string;
   icon: any;
-  badge?: string;
 }
 
 interface NavSection {
@@ -73,13 +77,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {
           heading: t('nav.section.overview', 'System Overview'),
           items: [
-            { to: '/', label: t('nav.dashboard', 'System Console'), icon: LayoutDashboard },
+            { to: '/', label: t('nav.dashboard', 'System Console'), icon: BentoDashboardIcon },
           ],
         },
         {
           heading: t('nav.section.accessSecurity', 'Access & Security'),
           items: [
-            { to: '/users', label: t('nav.userAccounts', 'Users & Accounts'), icon: UserCog, badge: 'Admin' },
+            { to: '/users', label: t('nav.userAccounts', 'Users & Accounts'), icon: UserCog },
           ],
         },
         {
@@ -98,24 +102,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {
           heading: t('nav.section.executiveCommand', 'Executive Command'),
           items: [
-            { to: '/', label: t('nav.executiveDashboard', 'Executive Dashboard'), icon: LayoutDashboard },
-            { to: '/projects', label: t('nav.projectPortfolio', 'Project Portfolio'), icon: Briefcase },
-            { to: '/correspondence', label: t('nav.officialLetters', 'Official Correspondence'), icon: Mail },
-          ],
-        },
-        {
-          heading: t('nav.section.approvalsDecisions', 'Approvals & Oversight'),
-          items: [
-            { to: '/finance', label: t('nav.financialApprovals', 'Financial Approvals'), icon: Wallet, badge: 'Finance' },
-            { to: '/documents', label: t('nav.documentsSign', 'Documents & Signatures'), icon: FileText },
-            { to: '/procurement', label: t('nav.procurement', 'Procurement & Logistics'), icon: ShoppingCart },
-          ],
-        },
-        {
-          heading: t('nav.section.strategicOversight', 'Institutional Performance'),
-          items: [
-            { to: '/reports', label: t('nav.reports', 'Organization-wide Reports'), icon: BarChart3 },
-            { to: '/hr', label: t('nav.staffDirectory', 'Staff Directory'), icon: Users },
+            { to: '/', label: 'Dashboard', description: 'Organization-wide overview', icon: BentoDashboardIcon },
+            { to: '/hr?tab=org', label: 'Organization', description: 'Organizational profile, departments and structure', icon: Building2 },
+            { to: '/projects', label: 'Projects & Programs', description: 'All projects, status and performance', icon: Briefcase },
+            { to: '/finance', label: 'Finance', description: 'Budgets, expenditure and financial reports', icon: Wallet },
+            { to: '/reports?tab=impact', label: 'M&E & Impact', description: 'Targets, indicators and beneficiary outcomes', icon: Target },
+            { to: '/hr', label: 'Human Resources', description: 'Staff overview and workforce reports', icon: Users },
+            { to: '/procurement', label: 'Procurement', description: 'Purchases, contracts and procurement status', icon: ShoppingCart },
+            { to: '/finance?tab=approvals', label: 'Approvals', description: "Items requiring the Director's decision", icon: CheckSquare },
+            { to: '/documents', label: 'Documents & Correspondence', description: 'Official records, letters and signatures', icon: FileText },
+            { to: '/reports', label: 'Reports & Analytics', description: 'Consolidated reports and exports', icon: BarChart3 },
+            { to: '/settings?tab=compliance', label: 'Audit & Compliance', description: 'Audit findings, policies and compliance', icon: ShieldCheck },
+            { to: '/settings', label: 'Settings', description: 'Personal preferences and authorized settings', icon: Settings },
           ],
         },
       ];
@@ -127,7 +125,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {
           heading: t('nav.section.financialCommand', 'Financial Command'),
           items: [
-            { to: '/', label: t('nav.financeDashboard', 'Finance Dashboard'), icon: LayoutDashboard },
+            { to: '/', label: t('nav.financeDashboard', 'Finance Dashboard'), icon: BentoDashboardIcon },
             { to: '/finance', label: t('nav.budgetsLedger', 'Budgets & Financial Ledger'), icon: Wallet },
           ],
         },
@@ -154,7 +152,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {
           heading: t('nav.section.projectManagement', 'Project Management'),
           items: [
-            { to: '/', label: t('nav.projectDashboard', 'Project Dashboard'), icon: LayoutDashboard },
+            { to: '/', label: t('nav.projectDashboard', 'Project Dashboard'), icon: BentoDashboardIcon },
             { to: '/projects', label: t('nav.myProjects', 'Projects & Programs'), icon: Briefcase },
           ],
         },
@@ -182,7 +180,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {
           heading: t('nav.section.fieldCoordination', 'Field Operations Desk'),
           items: [
-            { to: '/', label: t('nav.coordinatorDashboard', 'Coordinator Dashboard'), icon: LayoutDashboard },
+            { to: '/', label: t('nav.coordinatorDashboard', 'Coordinator Dashboard'), icon: BentoDashboardIcon },
             { to: '/projects', label: t('nav.assignedProjects', 'Assigned Field Projects'), icon: Briefcase },
           ],
         },
@@ -208,8 +206,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {
           heading: t('nav.section.hrCommand', 'HR & Personnel Command'),
           items: [
-            { to: '/', label: t('nav.hrDashboard', 'HR Dashboard'), icon: LayoutDashboard },
-            { to: '/hr', label: t('nav.staffRoster', 'Staff Directory & Contracts'), icon: Users, badge: 'HR' },
+            { to: '/', label: t('nav.hrDashboard', 'HR Dashboard'), icon: BentoDashboardIcon },
+            { to: '/hr', label: t('nav.staffRoster', 'Staff Directory & Contracts'), icon: Users },
           ],
         },
         {
@@ -234,8 +232,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {
           heading: t('nav.section.procurementCommand', 'Procurement Command'),
           items: [
-            { to: '/', label: t('nav.procurementDashboard', 'Procurement Dashboard'), icon: LayoutDashboard },
-            { to: '/procurement', label: t('nav.ordersVendors', 'Purchase Orders & Inventory'), icon: ShoppingCart, badge: 'Supplies' },
+            { to: '/', label: t('nav.procurementDashboard', 'Procurement Dashboard'), icon: BentoDashboardIcon },
+            { to: '/procurement', label: t('nav.ordersVendors', 'Purchase Orders & Inventory'), icon: ShoppingCart },
           ],
         },
         {
@@ -255,7 +253,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {
           heading: t('nav.section.meCommand', 'M&E Results & Indicators'),
           items: [
-            { to: '/', label: t('nav.meDashboard', 'M&E Performance Dashboard'), icon: LayoutDashboard },
+            { to: '/', label: t('nav.meDashboard', 'M&E Performance Dashboard'), icon: BentoDashboardIcon },
             { to: '/projects', label: t('nav.projectMonitoring', 'Project Monitoring & Targets'), icon: Briefcase },
           ],
         },
@@ -280,7 +278,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         heading: t('nav.section.main', 'General Navigation'),
         items: [
-          { to: '/', label: t('nav.dashboard', 'Dashboard'), icon: LayoutDashboard },
+          { to: '/', label: t('nav.dashboard', 'Dashboard'), icon: BentoDashboardIcon },
           { to: '/projects', label: t('nav.projects', 'Projects & Programs'), icon: Briefcase },
           { to: '/documents', label: t('nav.documents', 'Documents & Records'), icon: FileText },
           { to: '/reports', label: t('nav.reports', 'Reports & Analytics'), icon: BarChart3 },
@@ -295,8 +293,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const items = allSections.flatMap((s) => s.items);
     const seen = new Set<string>();
     return items.filter((item) => {
-      if (seen.has(item.to)) return false;
-      seen.add(item.to);
+      const key = `${item.to}|${item.label}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
       return true;
     });
   }, [allSections]);
@@ -406,38 +405,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           )}
                         />
 
-                        {/* Label displayed when expanded */}
+                        {/* Label and description displayed when expanded */}
                         {isExpanded && (
-                          <span
-                            className={cn(
-                              'truncate flex-1 text-xs',
-                              isActive
-                                ? 'font-semibold text-charcoal-900'
-                                : 'font-medium text-charcoal-muted group-hover:text-charcoal-900'
+                          <div className="flex flex-col min-w-0 flex-1 text-left">
+                            <span
+                              className={cn(
+                                'truncate text-xs',
+                                isActive
+                                  ? 'font-semibold text-charcoal-900'
+                                  : 'font-medium text-charcoal-muted group-hover:text-charcoal-900'
+                              )}
+                            >
+                              {item.label}
+                            </span>
+                            {item.description && (
+                              <span className="text-[10px] text-slate-400 truncate leading-tight group-hover:text-slate-500">
+                                {item.description}
+                              </span>
                             )}
-                          >
-                            {item.label}
-                          </span>
+                          </div>
                         )}
-
-                        {/* Badge displayed as pill when expanded, or notification pip when collapsed */}
-                        {isExpanded && item.badge ? (
-                          <span
-                            className={cn(
-                              'ml-auto rounded px-1.5 py-0.5 text-[9px] font-mono font-semibold uppercase',
-                              isActive
-                                ? 'bg-[#D68904]/10 text-[#D68904] border border-[#D68904]/20'
-                                : 'bg-slate-100 text-slate-600 border border-surface-border'
-                            )}
-                          >
-                            {item.badge}
-                          </span>
-                        ) : !isExpanded && item.badge ? (
-                          <span
-                            className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white"
-                            title={item.badge}
-                          />
-                        ) : null}
                       </>
                     )}
                   </NavLink>
@@ -457,7 +444,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 className="flex items-center gap-2.5 min-w-0 flex-1 text-left hover:opacity-85 transition-opacity"
                 title="View My Profile"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white border border-slate-200 text-slate-500 font-bold text-xs">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 font-bold text-xs">
                   {initials}
                 </div>
                 <div className="min-w-0 flex-1">

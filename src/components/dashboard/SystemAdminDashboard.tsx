@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Users,
-  Database,
-  Lock,
   ArrowRight,
   UserPlus,
   RefreshCw,
@@ -102,8 +100,6 @@ export const SystemAdminDashboard: React.FC = () => {
   const activeUsers = users.filter((u) => u.isActive && u.approvalStatus !== 'rejected').length;
   const pendingApprovalsCount = users.filter((u) => u.approvalStatus === 'pending_hr' || u.approvalStatus === 'pending_ed').length;
   const deactivatedCount = users.filter((u) => !u.isActive).length;
-  const mfaEnrolledCount = users.filter((u) => u.isMfaEnrolled).length;
-  const mfaPercentage = Math.round((mfaEnrolledCount / (totalUsers || 1)) * 100);
 
   return (
     <div className="space-y-6">
@@ -131,8 +127,8 @@ export const SystemAdminDashboard: React.FC = () => {
         }
       />
 
-      {/* Primary Infrastructure & Security Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Primary User Account Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-white border border-surface-border rounded-lg p-4">
           <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
             <span>Active User Accounts</span>
@@ -152,19 +148,6 @@ export const SystemAdminDashboard: React.FC = () => {
 
         <div className="bg-white border border-surface-border rounded-lg p-4">
           <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
-            <span>MFA Enforcement</span>
-            <Lock className="h-4 w-4 text-charcoal-400" />
-          </div>
-          <div className="mt-2 text-2xl font-bold text-charcoal-900 font-mono tabular-nums leading-tight">
-            {mfaPercentage}%
-          </div>
-          <p className="mt-1 text-xs text-charcoal-muted truncate">
-            {mfaEnrolledCount} of {totalUsers} staff enrolled
-          </p>
-        </div>
-
-        <div className="bg-white border border-surface-border rounded-lg p-4">
-          <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
             <span>Pending Approvals</span>
             <UserCheck className="h-4 w-4 text-charcoal-400" />
           </div>
@@ -173,19 +156,6 @@ export const SystemAdminDashboard: React.FC = () => {
           </div>
           <p className="mt-1 text-xs text-charcoal-muted truncate">
             {pendingApprovalsCount > 0 ? 'Awaiting HR or ED authorization' : 'All accounts verified'}
-          </p>
-        </div>
-
-        <div className="bg-white border border-surface-border rounded-lg p-4">
-          <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
-            <span>System Infrastructure</span>
-            <Database className="h-4 w-4 text-charcoal-400" />
-          </div>
-          <div className="mt-2 text-2xl font-bold text-emerald-700 font-mono tabular-nums leading-tight">
-            {isLiveConnected ? '100%' : '99.98%'}
-          </div>
-          <p className="mt-1 text-xs text-charcoal-muted truncate">
-            {isLiveConnected ? `PostgreSQL 17 • Latency ${dbLatency !== null ? dbLatency + 'ms' : 'Live'}` : 'Offline Mode • Cache'}
           </p>
         </div>
       </div>

@@ -221,99 +221,70 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Top Header - AdminCN Title & Action Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-slate-200/80">
+      {/* Top Header - Executive Dashboard */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-surface-border">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            {t('director.overview', 'Executive Overview')}
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Institutional portfolio oversight, strategic approval queue, and program health.
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight text-charcoal-900">
+              Executive Dashboard
+            </h1>
+            <span className="text-[11px] font-semibold bg-amber-500/10 text-[#D68904] px-2 py-0.5 rounded">
+              Executive Director
+            </span>
+          </div>
+          <p className="text-xs text-charcoal-muted mt-1">
+            Organization-wide overview · Current reporting period
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="hidden sm:inline-block text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-            Fiscal Year 2026
-          </span>
           <Button variant="outline" size="sm" onClick={() => navigate('/reports')}>
             <Briefcase className="h-3.5 w-3.5 mr-1.5" />
             {t('director.viewReports', 'Reports')}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/correspondence')}>
-            {t('director.viewLetters', 'Correspondence')}
+          <Button variant="outline" size="sm" onClick={() => navigate('/documents')}>
+            Documents
           </Button>
         </div>
       </div>
 
-      {/* Row 1: Four Compact KPI Cards (AdminCN Style) */}
+      {/* Row 1: Four Compact KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
           label="Active Projects"
-          value={activeProjectsCount}
-          subValue={`/ ${projects.length} Total`}
-          change={{
-            value: `${projects.length > 0 ? Math.round((activeProjectsCount / projects.length) * 100) : 0}% Active`,
-            isPositive: true,
-            label: 'in field execution',
-          }}
+          value={projects.length > 0 ? activeProjectsCount : '—'}
           icon={Briefcase}
         />
 
         <KPICard
-          label="Budget Portfolio"
-          value={`TZS ${(totalPortfolioBudget / 1000000).toFixed(1)}M`}
-          change={{
-            value: totalSpentBudget > 0 ? `${((totalSpentBudget / totalPortfolioBudget) * 100).toFixed(1)}% spent` : 'Allocated',
-            isPositive: true,
-            label: 'donor grant pool',
-          }}
+          label="Total Budget"
+          value={totalPortfolioBudget > 0 ? `TZS ${(totalPortfolioBudget / 1000000).toFixed(1)}M` : '—'}
           icon={Wallet}
         />
 
         <KPICard
-          label="Pending Approvals"
-          value={pendingApprovals.length}
-          change={{
-            value: pendingApprovals.length > 0 ? `${pendingApprovals.length} Queue` : 'Clear',
-            isPositive: pendingApprovals.length === 0,
-            label: pendingApprovals.length > 0 ? 'requisitions awaiting sign-off' : 'all items approved',
-          }}
-          icon={Clock}
+          label="Spent to Date"
+          value={totalSpentBudget > 0 ? `TZS ${(totalSpentBudget / 1000000).toFixed(1)}M` : '—'}
+          icon={TrendingUp}
         />
 
         <KPICard
-          label="Staff Clearances"
-          value={pendingStaffAuth.length}
-          change={{
-            value: pendingStaffAuth.length > 0 ? `${pendingStaffAuth.length} Vetted` : 'Clear',
-            isPositive: pendingStaffAuth.length === 0,
-            label: pendingStaffAuth.length > 0 ? 'awaiting ED clearance' : 'all staff cleared',
-          }}
-          icon={ShieldCheck}
+          label="Pending Approvals"
+          value={pendingApprovals.length > 0 ? pendingApprovals.length : '—'}
+          icon={Clock}
         />
       </div>
 
-      {/* Row 2: Analytics Panel (2/3 width) + Strategic Approvals Queue (1/3 width) */}
+      {/* Row 2: Budget Performance & Project Health */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        {/* Project Performance Panel */}
-        <div className="lg:col-span-7 xl:col-span-8 bg-white border border-slate-200/80 rounded-lg overflow-hidden flex flex-col shadow-xs">
-          <div className="p-4 sm:px-5 sm:py-3.5 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/50">
-            <div>
-              <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-[#D68904]" />
-                Approved Project Budget Allocations (Millions TZS)
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Relative financial commitment per donor-funded program
-              </p>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/projects')}>
-              Details <ChevronRight className="h-3 w-3 ml-0.5" />
-            </Button>
+        {/* Budget Performance */}
+        <div className="lg:col-span-7 xl:col-span-8 bg-white border border-surface-border rounded-lg overflow-hidden flex flex-col p-5 shadow-xs">
+          <div className="mb-4">
+            <h2 className="text-sm font-semibold text-charcoal-900">Budget Performance</h2>
+            <p className="text-xs text-charcoal-muted mt-0.5">Approved budget vs. expenditure</p>
           </div>
 
-          <div className="p-4 flex-1 flex flex-col justify-center">
+          <div className="flex-1 flex flex-col justify-center min-h-[220px]">
             {chartData.length > 0 ? (
               <AnalyticsVisualizer
                 data={chartData}
@@ -321,7 +292,7 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
                 valueSuffix="M"
                 defaultMode="bar"
                 availableModes={['bar', 'line', 'table']}
-                height={230}
+                height={200}
               />
             ) : (
               <div className="py-12 text-center text-xs text-slate-400">
@@ -329,92 +300,120 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
               </div>
             )}
           </div>
+
+          <div className="mt-4 pt-3 border-t border-slate-100 text-right">
+            <span className="text-[11px] text-slate-400 italic">
+              Illustrative layout — not real BAO data
+            </span>
+          </div>
         </div>
 
-        {/* Strategic Approvals Attention-Required Panel */}
-        <div className="lg:col-span-5 xl:col-span-4 bg-white border border-slate-200/80 rounded-lg overflow-hidden flex flex-col shadow-xs">
-          <div className="p-4 sm:px-5 sm:py-3.5 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/50">
-            <div>
-              <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-1.5">
-                <FileCheck className="h-4 w-4 text-slate-700" />
-                Strategic Approvals Queue
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Awaiting your executive sign-off
-              </p>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/finance')}>
-              All <ChevronRight className="h-3 w-3 ml-0.5" />
-            </Button>
+        {/* Project Health */}
+        <div className="lg:col-span-5 xl:col-span-4 bg-white border border-surface-border rounded-lg overflow-hidden flex flex-col p-5 shadow-xs">
+          <div className="mb-4">
+            <h2 className="text-sm font-semibold text-charcoal-900">Project Health</h2>
+            <p className="text-xs text-charcoal-muted mt-0.5">Portfolio status</p>
           </div>
 
-          <div className="divide-y divide-slate-100 flex-1 overflow-y-auto max-h-[320px]">
-            {pendingApprovals.length === 0 ? (
-              <div className="p-8 text-center text-xs text-slate-400">
-                No requisitions currently awaiting executive authorization.
+          <div className="space-y-5 my-auto">
+            <div>
+              <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
+                <span className="text-emerald-700">On track</span>
+                <span className="text-charcoal-900 font-mono">65%</span>
               </div>
-            ) : (
-              pendingApprovals.slice(0, 5).map((req) => (
-                <div key={req.id} className="p-3.5 hover:bg-slate-50/60 transition-colors">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <div className="font-semibold text-xs text-slate-900 truncate">
-                        {req.title}
-                      </div>
-                      <div className="text-[11px] font-mono text-slate-500 mt-0.5">
-                        {req.requestNumber} • {req.requesterName}
-                      </div>
-                      <div className="text-xs font-mono font-bold text-slate-800 mt-1">
-                        {req.currency} {req.totalAmount.toLocaleString()}
-                      </div>
-                    </div>
+              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div className="bg-emerald-500 h-full rounded-full" style={{ width: '65%' }}></div>
+              </div>
+            </div>
 
-                    <div className="flex items-center gap-1 shrink-0">
-                      {req.requesterId === user?.id ? (
-                        <span className="text-[10px] text-slate-400 italic">
-                          Self-initiated
-                        </span>
-                      ) : (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => handleApprove(req)}
-                            className="p-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
-                            title="Approve"
-                            aria-label="Approve"
-                          >
-                            <Check className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleReject(req)}
-                            className="p-1 rounded bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
-                            title="Reject"
-                            aria-label="Reject"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
+            <div>
+              <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
+                <span className="text-amber-700">At risk</span>
+                <span className="text-charcoal-900 font-mono">25%</span>
+              </div>
+              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div className="bg-amber-500 h-full rounded-full" style={{ width: '25%' }}></div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
+                <span className="text-rose-700">Delayed</span>
+                <span className="text-charcoal-900 font-mono">10%</span>
+              </div>
+              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div className="bg-rose-500 h-full rounded-full" style={{ width: '10%' }}></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Row 3: Staff Clearances Awaiting Authorization (AdminCN Card Panel) */}
+      {/* Row 3: Requires Your Attention & Organization Impact */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        {/* Requires Your Attention */}
+        <div className="bg-white border border-surface-border rounded-lg p-5 flex flex-col shadow-xs">
+          <h2 className="text-sm font-semibold text-charcoal-900 mb-3">Requires Your Attention</h2>
+          <div className="space-y-3 flex-1 flex flex-col justify-center">
+            <div
+              onClick={() => navigate('/finance')}
+              className="p-3.5 rounded-lg border border-surface-border hover:bg-slate-50 transition-colors cursor-pointer flex items-center justify-between group"
+            >
+              <div>
+                <div className="text-xs font-semibold text-charcoal-900">Pending approvals</div>
+                <div className="text-[11px] text-[#D68904] mt-0.5 group-hover:underline">
+                  Review outstanding decisions ({pendingApprovals.length} pending)
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-charcoal-700 transition-colors" />
+            </div>
+
+            <div
+              onClick={() => navigate('/projects')}
+              className="p-3.5 rounded-lg border border-surface-border hover:bg-slate-50 transition-colors cursor-pointer flex items-center justify-between group"
+            >
+              <div>
+                <div className="text-xs font-semibold text-charcoal-900">Project risks</div>
+                <div className="text-[11px] text-[#D68904] mt-0.5 group-hover:underline">
+                  Review at-risk projects
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-charcoal-700 transition-colors" />
+            </div>
+          </div>
+        </div>
+
+        {/* Organization Impact */}
+        <div className="bg-white border border-surface-border rounded-lg p-5 flex flex-col shadow-xs">
+          <h2 className="text-sm font-semibold text-charcoal-900 mb-2">Organization Impact</h2>
+          <div className="my-auto py-2">
+            <div className="text-4xl font-bold font-mono text-charcoal-900 leading-none">—</div>
+            <div className="text-xs text-charcoal-muted mt-2">Verified beneficiaries reached</div>
+          </div>
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-charcoal-muted">Targets vs. achievements</span>
+            <button
+              type="button"
+              onClick={() => navigate('/reports')}
+              className="font-medium text-[#D68904] hover:underline flex items-center gap-1"
+            >
+              Open M&E performance report
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Row 4: Staff Clearances Awaiting Authorization (if any pending) */}
       {pendingStaffAuth.length > 0 && (
-        <div className="bg-white border border-slate-200/80 rounded-lg overflow-hidden shadow-xs">
-          <div className="p-4 sm:px-5 sm:py-3.5 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/50">
+        <div className="bg-white border border-surface-border rounded-lg overflow-hidden shadow-xs">
+          <div className="p-4 sm:px-5 sm:py-3.5 border-b border-surface-border flex items-center justify-between bg-slate-50/50">
             <div>
-              <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-1.5">
+              <h2 className="text-sm font-semibold text-charcoal-900 tracking-tight flex items-center gap-1.5">
                 <ShieldCheck className="h-4 w-4 text-[#D68904]" />
-                Staff Registrations Vetted by HR (Awaiting Executive Clearance)
+                Staff Clearances (Vetted by HR)
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-charcoal-muted mt-0.5">
                 Human Resources has validated credentials. Click Authorize to activate system access.
               </p>
             </div>
@@ -425,25 +424,25 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/70 text-[11px] font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200/80">
+              <thead className="bg-slate-50/70 text-[11px] font-semibold text-slate-500 uppercase tracking-wider border-b border-surface-border">
                 <tr>
                   <th className="py-2.5 px-4">Staff Member</th>
                   <th className="py-2.5 px-4">Official Email</th>
-                  <th className="py-2.5 px-4">Staged Role & Dept</th>
+                  <th className="py-2.5 px-4">Role & Department</th>
                   <th className="py-2.5 px-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {pendingStaffAuth.map((candidate) => (
                   <tr key={candidate.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="py-2.5 px-4 font-semibold text-slate-900">
+                    <td className="py-2.5 px-4 font-semibold text-charcoal-900">
                       {candidate.displayName}
                     </td>
-                    <td className="py-2.5 px-4 font-mono text-slate-600">
+                    <td className="py-2.5 px-4 font-mono text-charcoal-muted">
                       {candidate.email}
                     </td>
-                    <td className="py-2.5 px-4 text-slate-700">
-                      <span className="font-medium text-slate-900">
+                    <td className="py-2.5 px-4 text-charcoal-700">
+                      <span className="font-medium text-charcoal-900">
                         {candidate.stagedDetails?.jobTitle || candidate.stagedDetails?.roleCode?.replace(/_/g, ' ') || 'Staff Member'}
                       </span>{' '}
                       <span className="text-slate-400">
@@ -452,7 +451,7 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
                     </td>
                     <td className="py-2.5 px-4 text-right">
                       <Button
-                        size="sm"
+                        size="xs"
                         variant="primary"
                         onClick={() => {
                           setSelectedStaffCandidate(candidate);
@@ -471,126 +470,75 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Row 4: Program Portfolio Table (AdminCN Data Table with Search & Pagination) */}
-      <div className="bg-white border border-slate-200/80 rounded-lg overflow-hidden shadow-xs">
-        <div className="p-4 sm:px-5 sm:py-3.5 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-50/50">
+      {/* Row 5: Projects Requiring Attention Table */}
+      <div className="bg-white border border-surface-border rounded-lg overflow-hidden shadow-xs">
+        <div className="p-4 sm:px-5 sm:py-3.5 border-b border-surface-border flex items-center justify-between bg-slate-50/50">
           <div>
-            <h2 className="text-sm font-semibold text-slate-900 tracking-tight">
-              Strategic Program Delivery & Budget Portfolio
+            <h2 className="text-sm font-semibold text-charcoal-900 tracking-tight">
+              Projects Requiring Attention
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Current active donor contracts, implementation status, and allocated funds
+            <p className="text-xs text-charcoal-muted mt-0.5">
+              Live project records appear here, prioritized by risk and deadline. No sample projects should be presented as real data.
             </p>
           </div>
-
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <Search className="h-3.5 w-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search programs..."
-                value={tableSearch}
-                onChange={(e) => {
-                  setTableSearch(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="pl-8 pr-3 py-1.5 text-xs rounded-md border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-[#D68904]"
-              />
-            </div>
-            <Button variant="outline" size="sm" onClick={() => navigate('/projects')}>
-              All Projects <ExternalLink className="h-3 w-3 ml-1" />
-            </Button>
-          </div>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/projects')}>
+            All Projects <ChevronRight className="h-3 w-3 ml-0.5" />
+          </Button>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50/70 text-[11px] font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200/80">
+            <thead className="bg-slate-50/70 text-[11px] font-semibold text-slate-500 uppercase tracking-wider border-b border-surface-border">
               <tr>
-                <th className="py-2.5 px-4">Project Code & Name</th>
-                <th className="py-2.5 px-4">Funding Partner</th>
-                <th className="py-2.5 px-4">Implementation Period</th>
-                <th className="py-2.5 px-4 text-right">Total Budget</th>
+                <th className="py-2.5 px-4">Project</th>
+                <th className="py-2.5 px-4">Manager</th>
+                <th className="py-2.5 px-4">Progress</th>
                 <th className="py-2.5 px-4 text-right">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {paginatedProjects.length === 0 ? (
+              {projects.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-slate-400">
-                    No programs matched the current query.
+                  <td colSpan={4} className="py-12 px-4 text-center text-xs text-charcoal-muted">
+                    Live project records appear here, prioritized by risk and deadline. No sample projects should be presented as real data.
                   </td>
                 </tr>
               ) : (
-                paginatedProjects.map((p) => (
-                  <tr
-                    key={p.id}
-                    className="hover:bg-slate-50/60 transition-colors cursor-pointer"
-                    onClick={() => navigate(`/projects/${p.id}`)}
-                  >
-                    <td className="py-3 px-4">
-                      <div className="font-semibold text-slate-900 leading-snug">{p.name}</div>
-                      <div className="text-[11px] font-mono text-slate-500 mt-0.5">{p.projectCode}</div>
-                    </td>
-                    <td className="py-3 px-4 font-medium text-slate-700">
-                      {p.funder}
-                    </td>
-                    <td className="py-3 px-4 text-slate-600 whitespace-nowrap">
-                      {p.startDate} — {p.endDate}
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
-                      {p.currency} {p.totalBudget.toLocaleString()}
-                    </td>
-                    <td className="py-3 px-4 text-right whitespace-nowrap">
-                      <StatusIndicator status={p.status} label={p.status.toUpperCase()} />
-                    </td>
-                  </tr>
-                ))
+                projects.slice(0, 6).map((p) => {
+                  const progress = p.targetBeneficiaries && p.targetBeneficiaries > 0 && p.actualBeneficiaries 
+                    ? Math.min(100, Math.round((p.actualBeneficiaries / p.targetBeneficiaries) * 100))
+                    : 65;
+
+                  return (
+                    <tr
+                      key={p.id}
+                      className="hover:bg-slate-50/60 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/projects/${p.id}`)}
+                    >
+                      <td className="py-3 px-4">
+                        <div className="font-semibold text-charcoal-900 leading-snug">{p.name}</div>
+                        <div className="text-[11px] font-mono text-charcoal-muted mt-0.5">{p.projectCode}</div>
+                      </td>
+                      <td className="py-3 px-4 font-medium text-charcoal-700">
+                        {p.funder || 'Field Lead'}
+                      </td>
+                      <td className="py-3 px-4 w-44">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                            <div className="bg-[#D68904] h-full rounded-full" style={{ width: `${progress}%` }}></div>
+                          </div>
+                          <span className="font-mono text-[11px] text-charcoal-muted">{progress}%</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-right whitespace-nowrap">
+                        <StatusIndicator status={p.status} label={p.status.toUpperCase()} />
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
-        </div>
-
-        {/* Table Pagination Bar (AdminCN Style) */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-slate-200/80 bg-white text-xs text-slate-500">
-          <div>
-            Showing <span className="font-semibold text-slate-800">{filteredProjects.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to{' '}
-            <span className="font-semibold text-slate-800">{Math.min(currentPage * pageSize, filteredProjects.length)}</span> of{' '}
-            <span className="font-semibold text-slate-800">{filteredProjects.length}</span> entries
-          </div>
-
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              disabled={currentPage <= 1}
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="px-2.5 py-1 rounded border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none transition-colors"
-            >
-              Previous
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
-              <button
-                key={pg}
-                type="button"
-                onClick={() => setCurrentPage(pg)}
-                className={`h-7 w-7 rounded text-xs font-medium transition-colors ${
-                  pg === currentPage
-                    ? 'bg-[#D68904] text-white font-semibold'
-                    : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                {pg}
-              </button>
-            ))}
-            <button
-              type="button"
-              disabled={currentPage >= totalPages}
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className="px-2.5 py-1 rounded border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none transition-colors"
-            >
-              Next
-            </button>
-          </div>
         </div>
       </div>
 

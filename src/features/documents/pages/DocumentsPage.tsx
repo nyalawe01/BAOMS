@@ -320,8 +320,8 @@ export const DocumentsPage: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="bg-white border-surface-border min-w-0">
           <CardContent className="p-4 flex items-center gap-3 min-w-0">
-            <div className="h-10 w-10 rounded-lg bg-forest-50 border border-forest-200 flex items-center justify-center text-forest-700 shrink-0">
-              <FileText className="h-5 w-5" />
+            <div className="h-10 w-10 rounded-lg bg-forest-50 flex items-center justify-center text-forest-700 shrink-0">
+              <i className="fa-solid fa-file-contract text-lg" aria-hidden="true"></i>
             </div>
             <div className="min-w-0">
               <p className="text-xs font-medium text-charcoal-muted uppercase tracking-wider truncate">
@@ -334,8 +334,8 @@ export const DocumentsPage: React.FC = () => {
 
         <Card className="bg-white border-surface-border min-w-0">
           <CardContent className="p-4 flex items-center gap-3 min-w-0">
-            <div className="h-10 w-10 rounded-lg bg-green-50 border border-green-200 flex items-center justify-center text-green-700 shrink-0">
-              <FileCheck className="h-5 w-5" />
+            <div className="h-10 w-10 rounded-lg bg-green-50 flex items-center justify-center text-green-700 shrink-0">
+              <i className="fa-solid fa-file-circle-check text-lg" aria-hidden="true"></i>
             </div>
             <div className="min-w-0">
               <p className="text-xs font-medium text-charcoal-muted uppercase tracking-wider truncate">
@@ -348,8 +348,8 @@ export const DocumentsPage: React.FC = () => {
 
         <Card className="bg-white border-surface-border min-w-0">
           <CardContent className="p-4 flex items-center gap-3 min-w-0">
-            <div className="h-10 w-10 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0">
-              <Clock className="h-5 w-5" />
+            <div className="h-10 w-10 rounded-lg bg-amber-50 flex items-center justify-center text-amber-700 shrink-0">
+              <i className="fa-solid fa-clock-rotate-left text-lg" aria-hidden="true"></i>
             </div>
             <div className="min-w-0">
               <p className="text-xs font-medium text-charcoal-muted uppercase tracking-wider truncate">
@@ -362,8 +362,8 @@ export const DocumentsPage: React.FC = () => {
 
         <Card className="bg-white border-surface-border min-w-0">
           <CardContent className="p-4 flex items-center gap-3 min-w-0">
-            <div className="h-10 w-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-700 shrink-0">
-              <Lock className="h-5 w-5" />
+            <div className="h-10 w-10 rounded-lg bg-slate-50 flex items-center justify-center text-slate-700 shrink-0">
+              <i className="fa-solid fa-lock text-lg" aria-hidden="true"></i>
             </div>
             <div className="min-w-0">
               <p className="text-xs font-medium text-charcoal-muted uppercase tracking-wider truncate">

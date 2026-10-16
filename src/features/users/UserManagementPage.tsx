@@ -700,8 +700,8 @@ export const UserManagementPage: React.FC = () => {
                 <TableRow>
                   <TableHead>Staff Member</TableHead>
                   <TableHead>Department</TableHead>
-                  <TableHead>Assigned Role</TableHead>
-                  <TableHead>Account Status</TableHead>
+                  <TableHead>Roles</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -753,7 +753,7 @@ export const UserManagementPage: React.FC = () => {
                       <TableRow key={staff.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white border border-slate-200 text-slate-500 font-semibold text-xs">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 font-semibold text-xs">
                               {staff.avatarInitials}
                             </div>
                             <div className="space-y-0.5">
@@ -782,19 +782,20 @@ export const UserManagementPage: React.FC = () => {
                         </TableCell>
                         <TableCell>
                           {staff.approvalStatus === 'pending_hr' ? (
-                            <Badge variant="warning" className="text-[11px] flex items-center gap-1 w-fit bg-amber-50 text-amber-800 border-amber-300">
-                              <Clock className="w-3 h-3 text-amber-600 animate-pulse" />
-                              <span>Pending HR Review</span>
-                            </Badge>
+                            <StatusIndicator
+                              status="pending_review"
+                              label="Pending Review"
+                            />
                           ) : staff.approvalStatus === 'pending_ed' ? (
-                            <Badge variant="warning" className="text-[11px] flex items-center gap-1 w-fit bg-blue-50 text-blue-800 border-blue-300">
-                              <ShieldCheck className="w-3 h-3 text-blue-600" />
-                              <span>Pending ED Approval</span>
-                            </Badge>
+                            <StatusIndicator
+                              status="pending_ed"
+                              label="Pending ED Approval"
+                            />
                           ) : staff.approvalStatus === 'rejected' ? (
-                            <Badge variant="danger" className="text-[11px] w-fit">
-                              Rejected
-                            </Badge>
+                            <StatusIndicator
+                              status="rejected"
+                              label="Rejected"
+                            />
                           ) : (
                             <StatusIndicator
                               status={staff.isActive ? 'active' : 'deactivated'}
@@ -818,7 +819,7 @@ export const UserManagementPage: React.FC = () => {
                                   <span>Review & Onboard</span>
                                 </Button>
                               ) : (
-                                <span className="text-[11px] text-charcoal-muted px-2 py-0.5 border border-surface-border rounded bg-surface-muted/40 whitespace-nowrap">
+                                <span className="text-[11px] text-charcoal-muted whitespace-nowrap">
                                   Awaiting HR Vetting
                                 </span>
                               )

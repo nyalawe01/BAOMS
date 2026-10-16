@@ -194,8 +194,8 @@ export const HrPage: React.FC = () => {
                 {staffList.filter((s) => !s.userId).length} {t('hr.fieldStaffWithoutLogin', 'field / non-login')}
               </span>
             </div>
-            <div className="h-10 w-10 shrink-0 rounded-lg bg-forest-50 text-forest-700 flex items-center justify-center">
-              <Users className="h-5 w-5" />
+            <div className="h-10 w-10 shrink-0 rounded-lg bg-forest-50 text-forest-700 flex items-center justify-center border-none">
+              <i className="fa-solid fa-users-line text-lg" aria-hidden="true"></i>
             </div>
           </CardContent>
         </Card>
@@ -213,8 +213,8 @@ export const HrPage: React.FC = () => {
                 {staffList.filter((s) => s.employmentStatus === 'probation').length} {t('hr.onProbation', 'on probation')}
               </span>
             </div>
-            <div className="h-10 w-10 shrink-0 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-              <CheckCircle2 className="h-5 w-5" />
+            <div className="h-10 w-10 shrink-0 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center border-none">
+              <i className="fa-solid fa-user-check text-lg" aria-hidden="true"></i>
             </div>
           </CardContent>
         </Card>
@@ -230,8 +230,8 @@ export const HrPage: React.FC = () => {
                 {leaveRequests.filter((r) => r.status === 'approved').length} {t('hr.approvedThisYear', 'approved')}
               </span>
             </div>
-            <div className="h-10 w-10 shrink-0 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
-              <Calendar className="h-5 w-5" />
+            <div className="h-10 w-10 shrink-0 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center border-none">
+              <i className="fa-solid fa-calendar-minus text-lg" aria-hidden="true"></i>
             </div>
           </CardContent>
         </Card>
@@ -250,8 +250,8 @@ export const HrPage: React.FC = () => {
                 {t('hr.criticalExpiring', 'require urgent action')}
               </span>
             </div>
-            <div className="h-10 w-10 shrink-0 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center">
-              <AlertTriangle className="h-5 w-5" />
+            <div className="h-10 w-10 shrink-0 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center border-none">
+              <i className="fa-regular fa-circle-xmark text-lg" aria-hidden="true"></i>
             </div>
           </CardContent>
         </Card>
