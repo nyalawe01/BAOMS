@@ -339,7 +339,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const isAdmin = (): boolean => {
-    return roles.includes('system_admin');
+    return roles.includes('system_admin') || roles.includes('executive_director');
   };
 
   const reloadProfile = useCallback(async () => {

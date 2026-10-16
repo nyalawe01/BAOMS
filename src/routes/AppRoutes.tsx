@@ -49,7 +49,7 @@ export const AppRoutes: React.FC = () => {
         <Route
           path="/design-system"
           element={
-            <ProtectedRoute requiredRoles={['system_admin']}>
+            <ProtectedRoute requiredRoles={['system_admin', 'executive_director']}>
               <DesignSystemPreview />
             </ProtectedRoute>
           }
@@ -57,7 +57,7 @@ export const AppRoutes: React.FC = () => {
         <Route
           path="/foundation"
           element={
-            <ProtectedRoute requiredRoles={['system_admin']}>
+            <ProtectedRoute requiredRoles={['system_admin', 'executive_director']}>
               <FoundationDashboard />
             </ProtectedRoute>
           }
@@ -67,7 +67,7 @@ export const AppRoutes: React.FC = () => {
         <Route
           path="/users"
           element={
-            <ProtectedRoute requiredPermissions={['roles.manage']}>
+            <ProtectedRoute requiredPermissions={['users.view']}>
               <UserManagementPage />
             </ProtectedRoute>
           }

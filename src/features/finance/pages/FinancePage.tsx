@@ -120,13 +120,14 @@ export const FinancePage: React.FC = () => {
   const financialAnalyticsData: AnalyticsDataPoint[] = useMemo(() => {
     const categories: Record<string, number> = {};
     requests.forEach((r) => {
-      const key = r.requestType.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      const typeStr = r.requestType || 'Other';
+      const key = typeStr.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase());
       categories[key] = (categories[key] || 0) + (r.approvedAmount ?? r.totalAmount);
     });
     return Object.entries(categories).map(([label, value]) => ({
       label,
       value,
-      description: `Total allocation across ${requests.filter((r) => r.requestType.toLowerCase() === label.toLowerCase().replace(' ', '_')).length} requisitions`,
+      description: `Total allocation across ${requests.filter((r) => (r.requestType || 'Other').toLowerCase() === label.toLowerCase().replace(' ', '_')).length} requisitions`,
     }));
   }, [requests]);
 

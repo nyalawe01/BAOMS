@@ -106,16 +106,29 @@ export const ROLE_PERMISSIONS: Record<RoleCode, PermissionCode[]> = {
   ],
   [ROLES.EXECUTIVE_DIRECTOR]: [
     PERMISSIONS.USERS_VIEW,
+    PERMISSIONS.USERS_CREATE,
+    PERMISSIONS.USERS_UPDATE,
+    PERMISSIONS.USERS_DEACTIVATE,
+    PERMISSIONS.ROLES_VIEW,
+    PERMISSIONS.ROLES_MANAGE,
     PERMISSIONS.DEPARTMENTS_VIEW,
+    PERMISSIONS.DEPARTMENTS_MANAGE,
     PERMISSIONS.AUDIT_VIEW,
+    PERMISSIONS.SYSTEM_CONFIGURE,
     PERMISSIONS.DOCUMENTS_VIEW,
     PERMISSIONS.DOCUMENTS_UPLOAD,
     PERMISSIONS.DOCUMENTS_APPROVE,
+    PERMISSIONS.DOCUMENTS_DELETE,
     PERMISSIONS.PROJECTS_VIEW,
+    PERMISSIONS.PROJECTS_CREATE,
     PERMISSIONS.PROJECTS_MANAGE,
+    PERMISSIONS.PROJECTS_REPORT,
     PERMISSIONS.FINANCE_VIEW,
+    PERMISSIONS.FINANCE_REQUEST,
     PERMISSIONS.FINANCE_APPROVE,
+    PERMISSIONS.FINANCE_DISBURSE,
     PERMISSIONS.HR_VIEW,
+    PERMISSIONS.HR_MANAGE,
     PERMISSIONS.LEAVE_APPROVE,
     PERMISSIONS.LEAVE_REQUEST,
     PERMISSIONS.CORRESPONDENCE_VIEW,
@@ -208,7 +221,7 @@ export function checkPermission(
   requiredPermission: string,
   userRoles: string[] = []
 ): boolean {
-  if (userRoles.includes(ROLES.SYSTEM_ADMIN)) {
+  if (userRoles.includes(ROLES.SYSTEM_ADMIN) || userRoles.includes(ROLES.EXECUTIVE_DIRECTOR)) {
     return true;
   }
   return assignedPermissions.includes(requiredPermission);
@@ -221,7 +234,7 @@ export function checkRole(
   userRoles: string[],
   requiredRoles: RoleCode[]
 ): boolean {
-  if (userRoles.includes(ROLES.SYSTEM_ADMIN)) {
+  if (userRoles.includes(ROLES.SYSTEM_ADMIN) || userRoles.includes(ROLES.EXECUTIVE_DIRECTOR)) {
     return true;
   }
   return requiredRoles.some((role) => userRoles.includes(role));
