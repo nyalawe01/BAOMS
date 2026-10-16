@@ -10,7 +10,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { AssignMemberInput, ProjectRole } from '../types/project';
-import { DEMO_ACCOUNTS } from '@/features/auth/demoAccounts';
+import { fetchActiveStaffMembers, StaffMemberOption } from '@/services/staffService';
 
 interface AssignMemberModalProps {
   isOpen: boolean;
@@ -29,14 +29,25 @@ export const AssignMemberModal: React.FC<AssignMemberModalProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const availableStaff = DEMO_ACCOUNTS.filter(
-    (a) => a.isActive && !existingUserIds.includes(a.id)
-  );
-
-  const [userId, setUserId] = useState(availableStaff[0]?.id || '');
+  const [staffList, setStaffList] = useState<StaffMemberOption[]>([]);
+  const [userId, setUserId] = useState('');
   const [projectRole, setProjectRole] = useState<ProjectRole>('officer');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    fetchActiveStaffMembers().then((staff) => {
+      setStaffList(staff);
+      const available = staff.filter((a) => a.isActive && !existingUserIds.includes(a.id));
+      if (available.length > 0) {
+        setUserId((curr) => curr || available[0].id);
+      }
+    });
+  }, [existingUserIds]);
+
+  const availableStaff = staffList.filter(
+    (a) => a.isActive && !existingUserIds.includes(a.id)
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

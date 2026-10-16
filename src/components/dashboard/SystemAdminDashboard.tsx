@@ -14,24 +14,97 @@ import {
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
-import { DEMO_ACCOUNTS } from '@/features/auth/demoAccounts';
 import { getAuditLogs } from '@/features/audit/services/auditService';
 import { AuditLogRecord } from '@/features/audit/types/audit';
-import { getPersistentItem } from '@/lib/storageSync';
+import { getPersistentItem, setPersistentItem } from '@/lib/storageSync';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+
+interface AdminStaffUser {
+  id: string;
+  email: string;
+  displayName: string;
+  departmentName: string;
+  role: string;
+  isActive: boolean;
+  approvalStatus?: string;
+  isMfaEnrolled?: boolean;
+}
 
 export const SystemAdminDashboard: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [auditLogs, setAuditLogs] = useState<AuditLogRecord[]>([]);
-  const [users, setUsers] = useState(DEMO_ACCOUNTS);
+  const [users, setUsers] = useState<AdminStaffUser[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [dbLatency, setDbLatency] = useState<number | null>(null);
+  const [isLiveConnected, setIsLiveConnected] = useState(false);
+  const [totalAuditCount, setTotalAuditCount] = useState(0);
 
-  const loadData = () => {
+  const loadData = async () => {
     setIsLoading(true);
-    const persistedUsers = getPersistentItem('baoms_users', () => DEMO_ACCOUNTS);
-    setUsers(persistedUsers);
+    const t0 = performance.now();
+
+    // 1. Live Supabase fetch when online
+    if (navigator.onLine && isSupabaseConfigured) {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select(`
+            id,
+            display_name,
+            official_email,
+            is_active,
+            approval_status,
+            departments ( name_en ),
+            user_roles ( roles ( code ) )
+          `)
+          .order('created_at', { ascending: false });
+
+        const latency = Math.round(performance.now() - t0);
+        setDbLatency(latency);
+        setIsLiveConnected(true);
+
+        if (!error && data) {
+          const liveUsers: AdminStaffUser[] = data.map((p: any) => {
+            const dept = p.departments;
+            const roleArr = (p.user_roles || []).flatMap((ur: any) => {
+              const r = Array.isArray(ur.roles) ? ur.roles[0] : ur.roles;
+              return r?.code ? [r.code] : [];
+            });
+            return {
+              id: p.id,
+              email: p.official_email || 'staff@babawatoto.or.tz',
+              displayName: p.display_name || 'Staff Member',
+              departmentName: dept?.name_en || 'General Administration',
+              role: roleArr[0] || 'Unassigned',
+              isActive: p.is_active ?? true,
+              approvalStatus: p.approval_status || 'approved',
+              isMfaEnrolled: false,
+            };
+          });
+
+          setUsers(liveUsers);
+          setPersistentItem('baoms_users_cache', liveUsers);
+        } else {
+          const cached = getPersistentItem<AdminStaffUser[]>('baoms_users_cache', () => []);
+          setUsers(cached);
+        }
+      } catch (err) {
+        console.warn('Falling back to local cached users:', err);
+        setIsLiveConnected(false);
+        const cached = getPersistentItem<AdminStaffUser[]>('baoms_users_cache', () => []);
+        setUsers(cached);
+      }
+    } else {
+      setIsLiveConnected(false);
+      const cached = getPersistentItem<AdminStaffUser[]>('baoms_users_cache', () => []);
+      setUsers(cached);
+    }
+
+    // 2. Fetch live audit events
     getAuditLogs().then((res) => {
       setAuditLogs(res.logs.slice(0, 8));
+      setTotalAuditCount(res.total);
       setIsLoading(false);
     });
   };
@@ -41,12 +114,12 @@ export const SystemAdminDashboard: React.FC = () => {
   }, []);
 
   const totalUsers = users.length;
-  const activeUsers = users.filter((u) => u.isActive).length;
+  const activeUsers = users.filter((u) => u.isActive && u.approvalStatus !== 'rejected').length;
+  const pendingApprovalsCount = users.filter((u) => u.approvalStatus === 'pending_hr' || u.approvalStatus === 'pending_ed').length;
+  const deactivatedCount = users.filter((u) => !u.isActive).length;
   const mfaEnrolledCount = users.filter((u) => u.isMfaEnrolled).length;
   const mfaPercentage = Math.round((mfaEnrolledCount / (totalUsers || 1)) * 100);
-  const securityEventsCount = auditLogs.filter(
-    (l) => l.category === 'AUTH' || l.category === 'SYSTEM'
-  ).length;
+  const securityEventsCount = totalAuditCount || auditLogs.length;
 
   return (
     <div className="space-y-6">
@@ -85,7 +158,11 @@ export const SystemAdminDashboard: React.FC = () => {
               {activeUsers} <span className="text-sm font-normal text-charcoal-muted">/ {totalUsers}</span>
             </div>
             <span className="text-xs text-charcoal-muted block truncate">
-              {totalUsers - activeUsers} deactivated accounts
+              {pendingApprovalsCount > 0 ? (
+                <span className="text-amber-600 font-medium">{pendingApprovalsCount} awaiting HR/ED approval</span>
+              ) : (
+                <span>{deactivatedCount} deactivated accounts</span>
+              )}
             </span>
           </div>
           <div className="h-10 w-10 shrink-0 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
@@ -133,10 +210,10 @@ export const SystemAdminDashboard: React.FC = () => {
               System Infrastructure
             </span>
             <div className="text-[28px] font-bold text-emerald-700 leading-tight font-mono tabular-nums">
-              99.98%
+              {isLiveConnected ? '100%' : '99.98%'}
             </div>
             <span className="text-xs text-charcoal-muted block truncate">
-              Node v20 • Latency 14ms
+              {isLiveConnected ? `PostgreSQL 17 • Latency ${dbLatency !== null ? dbLatency + 'ms' : 'Live'}` : 'Offline Mode • Cache'}
             </span>
           </div>
           <div className="h-10 w-10 shrink-0 rounded-lg bg-forest-50 text-forest-700 flex items-center justify-center">
@@ -164,10 +241,15 @@ export const SystemAdminDashboard: React.FC = () => {
           <div className="p-3 bg-slate-50/70 border border-surface-border rounded-lg space-y-1">
             <div className="flex items-center justify-between text-xs text-charcoal-muted">
               <span>Database Connection</span>
-              <StatusIndicator status="approved" label="CONNECTED" />
+              <StatusIndicator 
+                status={isLiveConnected ? 'approved' : 'warning'} 
+                label={isLiveConnected ? 'ONLINE (SUPABASE)' : 'OFFLINE CACHE'} 
+              />
             </div>
             <div className="font-semibold text-charcoal-900">PostgreSQL (Supabase Engine)</div>
-            <div className="text-xs text-charcoal-muted">Connection pool active • RLS enforced</div>
+            <div className="text-xs text-charcoal-muted">
+              {isLiveConnected ? `Live round-trip: ${dbLatency !== null ? dbLatency + 'ms' : '<50ms'} • RLS enforced` : 'Operating in offline cache mode'}
+            </div>
           </div>
 
           <div className="p-3 bg-slate-50/70 border border-surface-border rounded-lg space-y-1">

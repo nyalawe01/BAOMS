@@ -83,8 +83,8 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
             comments: `Formally signed off by Executive Director (${user?.email || 'Executive Office'})`,
           },
           {
-            id: user?.id || '00000000-0000-0000-0000-000000000002',
-            name: 'Elisha N. Mwakipesile',
+            id: user?.id || '',
+            name: user?.name || user?.email || 'Executive Director',
             role: 'executive_director',
           }
         );
@@ -130,8 +130,8 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
             comments: comment,
           },
           {
-            id: user?.id || '00000000-0000-0000-0000-000000000002',
-            name: 'Elisha N. Mwakipesile',
+            id: user?.id || '',
+            name: user?.name || user?.email || 'Executive Director',
             role: 'executive_director',
           }
         );

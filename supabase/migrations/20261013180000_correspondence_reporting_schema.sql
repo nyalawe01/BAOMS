@@ -163,7 +163,7 @@ CREATE POLICY "correspondence_select_policy" ON public.correspondence
             SELECT 1 FROM public.user_roles ur
             JOIN public.roles r ON ur.role_id = r.id
             WHERE ur.user_id = auth.uid()
-            AND r.name IN ('system_admin', 'executive_director')
+            AND r.code IN ('system_admin', 'executive_director')
         )
         OR
         -- Non-confidential correspondence is visible to all authenticated staff
@@ -184,7 +184,7 @@ CREATE POLICY "correspondence_update_policy" ON public.correspondence
             SELECT 1 FROM public.user_roles ur
             JOIN public.roles r ON ur.role_id = r.id
             WHERE ur.user_id = auth.uid()
-            AND r.name IN ('system_admin', 'executive_director', 'project_manager')
+            AND r.code IN ('system_admin', 'executive_director', 'project_manager')
         )
         OR registered_by = auth.uid()
     );
@@ -196,7 +196,7 @@ CREATE POLICY "meetings_select_policy" ON public.meetings
             SELECT 1 FROM public.user_roles ur
             JOIN public.roles r ON ur.role_id = r.id
             WHERE ur.user_id = auth.uid()
-            AND r.name IN ('system_admin', 'executive_director')
+            AND r.code IN ('system_admin', 'executive_director')
         )
         OR confidentiality_level != 'confidential'
         OR chairperson_id = auth.uid()
@@ -214,7 +214,7 @@ CREATE POLICY "meetings_insert_update_policy" ON public.meetings
             SELECT 1 FROM public.user_roles ur
             JOIN public.roles r ON ur.role_id = r.id
             WHERE ur.user_id = auth.uid()
-            AND r.name IN ('system_admin', 'executive_director', 'project_manager', 'hr_administrator')
+            AND r.code IN ('system_admin', 'executive_director', 'project_manager', 'hr_administrator')
         )
     );
 

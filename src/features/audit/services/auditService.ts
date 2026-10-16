@@ -56,17 +56,22 @@ export async function recordAuditEvent(payload: {
   };
 
   // If live Supabase configured, attempt remote insert
-  if (isSupabaseConfigured) {
+  if (navigator.onLine && isSupabaseConfigured) {
     try {
       await supabase.from('audit_logs').insert([
         {
-          actor_id: payload.actorId,
+          actor_id: payload.actorId && payload.actorId.length === 36 ? payload.actorId : null,
           action: payload.action,
-          entity_type: payload.entityType,
-          entity_id: payload.entityId,
-          details: payload.details,
+          target_entity: payload.entityType,
+          target_id: payload.entityId,
+          payload: {
+            details: payload.details,
+            actor_name: payload.actorName,
+            role: payload.actorRole,
+            category: payload.category,
+            ...(payload.metadata || {}),
+          },
           ip_address: payload.ipAddress || '127.0.0.1',
-          metadata: payload.metadata || {},
           created_at: newRecord.createdAt,
         },
       ]);
@@ -87,7 +92,56 @@ export async function recordAuditEvent(payload: {
 export async function getAuditLogs(
   filters?: AuditLogFilters
 ): Promise<{ logs: AuditLogRecord[]; total: number; totalPages: number }> {
-  // Sync latest from storage
+  // 1. Try Live Supabase Query when online
+  if (navigator.onLine && isSupabaseConfigured) {
+    try {
+      let query = supabase
+        .from('audit_logs')
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false });
+
+      if (filters?.search && filters.search.trim() !== '') {
+        const q = filters.search.trim();
+        query = query.or(`action.ilike.%${q}%,target_entity.ilike.%${q}%,target_id.ilike.%${q}%`);
+      }
+
+      const pageSize = filters?.pageSize || 15;
+      const page = filters?.page || 1;
+      const start = (page - 1) * pageSize;
+      query = query.range(start, start + pageSize - 1);
+
+      const { data, count, error } = await query;
+      if (!error && data) {
+        const mappedLogs: AuditLogRecord[] = data.map((row: any) => ({
+          id: row.id,
+          actorId: row.actor_id || '',
+          actorName: row.payload?.actor_name || (row.actor_id ? 'Authenticated Staff' : 'System Service'),
+          actorRole: row.payload?.role || 'Staff Member',
+          action: row.action,
+          category: (row.payload?.category as AuditActionCategory) || 'SYSTEM',
+          entityType: row.target_entity || 'System',
+          entityId: row.target_id || '',
+          details: row.payload?.details || row.payload?.reason || row.action,
+          ipAddress: row.ip_address || '127.0.0.1',
+          metadata: row.payload || {},
+          createdAt: row.created_at,
+        }));
+
+        if (mappedLogs.length > 0) {
+          setPersistentItem(STORAGE_KEY, mappedLogs);
+          return {
+            logs: mappedLogs,
+            total: count ?? mappedLogs.length,
+            totalPages: Math.ceil((count ?? mappedLogs.length) / pageSize) || 1,
+          };
+        }
+      }
+    } catch (err) {
+      console.warn('Falling back to local persistent audit logs:', err);
+    }
+  }
+
+  // 2. Offline Fallback
   mockAuditLogs = getPersistentItem<AuditLogRecord[]>(STORAGE_KEY, () => [...INITIAL_AUDIT_LOGS]);
 
   let results = [...mockAuditLogs];

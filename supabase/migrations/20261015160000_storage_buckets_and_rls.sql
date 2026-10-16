@@ -77,10 +77,8 @@ ON CONFLICT (id) DO UPDATE SET
 
 -- ------------------------------------------------------------------------------
 -- 2. ROW-LEVEL SECURITY (RLS) FOR STORAGE OBJECTS
--- ------------------------------------------------------------------------------
-
--- Ensure RLS is active on storage.objects
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+-- Ensure RLS is active on storage.objects (Supabase manages this by default)
+-- RLS policies on storage.objects:
 
 -- 2.1 DOCUMENTS BUCKET POLICIES
 DROP POLICY IF EXISTS "documents_read_authenticated" ON storage.objects;

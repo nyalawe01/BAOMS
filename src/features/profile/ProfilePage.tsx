@@ -31,12 +31,25 @@ import {
   getStaffByUserId,
   getStaffById,
 } from '@/features/hr/services/hrService';
-import { DEMO_ACCOUNTS, DemoAccount } from '@/features/auth/demoAccounts';
-import { getPersistentItem } from '@/lib/storageSync';
+import { supabase } from '@/lib/supabase';
 import { CompleteHrOnboardingModal } from '@/features/hr/components/CompleteHrOnboardingModal';
 import { CompleteStatutoryModal } from '@/features/hr/components/CompleteStatutoryModal';
 
-const USER_STORAGE_KEY = 'baoms_staff_users';
+interface UserProfileDisplay {
+  id: string;
+  email: string;
+  displayName: string;
+  phoneNumber?: string;
+  preferredLanguage?: 'en' | 'sw';
+  departmentId?: string;
+  departmentCode?: string;
+  departmentName?: string;
+  role: string;
+  roles: string[];
+  permissions: string[];
+  isActive: boolean;
+  avatarInitials: string;
+}
 
 export const ProfilePage: React.FC = () => {
   const { t } = useTranslation();
@@ -48,7 +61,7 @@ export const ProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'userInfo' | 'hrDossier' | 'statutory'>('userInfo');
 
   // Target User & Staff Records
-  const [targetAccount, setTargetAccount] = useState<DemoAccount | null>(null);
+  const [targetAccount, setTargetAccount] = useState<UserProfileDisplay | null>(null);
   const [staffRecord, setStaffRecord] = useState<StaffProfileRecord | null>(null);
 
   // Editable Profile fields for the user
@@ -91,20 +104,69 @@ export const ProfilePage: React.FC = () => {
   // Load user and associated staff profile
   const loadProfileData = useCallback(async () => {
     try {
-      const allUsers = getPersistentItem<DemoAccount[]>(USER_STORAGE_KEY, () => DEMO_ACCOUNTS);
       let account: DemoAccount | null = null;
       let staff: StaffProfileRecord | null = null;
 
-      if (userId) {
-        account = allUsers.find((u) => u.id === userId || u.email === userId) || null;
-        if (!account && (userId.startsWith('staff-') || userId.startsWith('STF-'))) {
+      if (isSelf && authUser) {
+        account = {
+          id: authUser.id,
+          email: authUser.email,
+          displayName: authProfile?.display_name || authUser.email.split('@')[0],
+          phoneNumber: authProfile?.phone_number || '',
+          preferredLanguage: authProfile?.preferred_language || 'en',
+          departmentId: authProfile?.department_id || '',
+          departmentCode: department?.code || '',
+          departmentName: department?.name || '',
+          role: roles[0] || 'staff',
+          roles: roles,
+          permissions: [],
+          isActive: authProfile?.is_active ?? true,
+          avatarInitials: (authProfile?.display_name || authUser.email).substring(0, 2).toUpperCase(),
+        };
+      } else if (userId) {
+        if (userId.startsWith('staff-') || userId.startsWith('STF-')) {
           staff = await getStaffById(userId);
-          if (staff && staff.userId) {
-            account = allUsers.find((u) => u.id === staff?.userId) || null;
-          }
         }
-      } else if (authUser) {
-        account = allUsers.find((u) => u.id === authUser.id || u.email === authUser.email) || null;
+        
+        // Fetch profile from Supabase
+        const { data: pData } = await supabase
+          .from('profiles')
+          .select(`
+            id,
+            display_name,
+            official_email,
+            phone_number,
+            preferred_language,
+            is_active,
+            department_id,
+            departments ( code, name_en ),
+            user_roles ( roles ( code ) )
+          `)
+          .eq('id', staff?.userId || userId)
+          .single();
+
+        if (pData) {
+          const dept = (pData as any).departments;
+          const roleArr = ((pData as any).user_roles || []).flatMap((ur: any) => {
+            const r = Array.isArray(ur.roles) ? ur.roles[0] : ur.roles;
+            return r?.code ? [r.code] : [];
+          });
+          account = {
+            id: pData.id,
+            email: pData.official_email || '',
+            displayName: pData.display_name,
+            phoneNumber: pData.phone_number || '',
+            preferredLanguage: (pData.preferred_language as any) || 'en',
+            departmentId: pData.department_id || '',
+            departmentCode: dept?.code || '',
+            departmentName: dept?.name_en || '',
+            role: roleArr[0] || 'staff',
+            roles: roleArr,
+            permissions: [],
+            isActive: pData.is_active ?? true,
+            avatarInitials: pData.display_name.substring(0, 2).toUpperCase(),
+          };
+        }
       }
 
       setTargetAccount(account);

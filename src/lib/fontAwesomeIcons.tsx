@@ -20,6 +20,10 @@ interface GlyphData {
 }
 
 export const FA_GLYPHS: Record<string, GlyphData> = {
+  'copy': {
+    viewBox: '0 0 448 512',
+    d: 'M384 336l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L384 96.1 384 320c0 8.8-7.2 16-16 16zM192 0C156.7 0 128 28.7 128 64l0 256c0 35.3 28.7 64 64 64l192 0c35.3 0 64-28.7 64-64l0-223.9c0-17-6.7-33.3-18.7-45.3L387.9 18.7C375.9 6.7 359.6 0 342.6 0L192 0zM64 128c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l192 0c35.3 0 64-28.7 64-64l0-32-64 0 0 32c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l32 0 0-64-32 0z'
+  },
   'cart-shopping': {
     viewBox: '0 0 576 512',
     d: 'M0 24C0 10.7 10.7 0 24 0L69.5 0c22 0 41.5 12.8 50.6 32l411 0c26.3 0 45.5 25 38.6 50.4l-41 152.3c-8.5 31.4-37 53.3-69.5 53.3l-288.5 0 5.4 28.5c2.2 11.3 12.1 19.5 23.6 19.5L488 336c13.3 0 24 10.7 24 24s-10.7 24-24 24l-288.3 0c-34.6 0-64.3-24.6-70.7-58.5L77.4 54.5c-.7-3.8-4-6.5-7.9-6.5L24 48C10.7 48 0 37.3 0 24zM128 464a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm336-48a48 48 0 1 1 0 96 48 48 0 1 1 0-96z'
@@ -645,6 +649,7 @@ export const Clipboard = createIcon('Clipboard', 'clipboard');
 export const ClipboardList = createIcon('ClipboardList', 'clipboard-list');
 export const Clock = createIcon('Clock', 'clock');
 export const Contact = createIcon('Contact', 'address-book');
+export const Copy = createIcon('Copy', 'copy');
 export const CreditCard = createIcon('CreditCard', 'credit-card');
 export const Database = createIcon('Database', 'database');
 export const DollarSign = createIcon('DollarSign', 'dollar-sign');

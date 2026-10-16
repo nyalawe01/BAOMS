@@ -133,6 +133,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Compatible alias for update_updated_at_column
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = timezone('utc'::text, now());
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Trigger applications for updated_at
 DROP TRIGGER IF EXISTS trg_departments_updated_at ON public.departments;
 CREATE TRIGGER trg_departments_updated_at

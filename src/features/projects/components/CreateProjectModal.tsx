@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { CreateProjectInput } from '../types/project';
-import { DEMO_ACCOUNTS } from '@/features/auth/demoAccounts';
+import { fetchActiveStaffMembers, StaffMemberOption } from '@/services/staffService';
 
 interface CreateProjectModalProps {
   isOpen: boolean;
@@ -37,18 +37,19 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   );
   const [totalBudget, setTotalBudget] = useState('50000000');
   const [currency, setCurrency] = useState('TZS');
+  const [activeStaff, setActiveStaff] = useState<StaffMemberOption[]>([]);
+  const [managerId, setManagerId] = useState('');
+  const [coordinatorId, setCoordinatorId] = useState('');
 
-  // Filter available managers and coordinators
-  const activeStaff = DEMO_ACCOUNTS.filter((a) => a.isActive);
-  const defaultManager =
-    activeStaff.find((a) => a.role === 'project_manager')?.id ||
-    activeStaff[0]?.id ||
-    '';
-  const defaultCoordinator =
-    activeStaff.find((a) => a.role === 'project_coordinator')?.id || '';
-
-  const [managerId, setManagerId] = useState(defaultManager);
-  const [coordinatorId, setCoordinatorId] = useState(defaultCoordinator);
+  useEffect(() => {
+    fetchActiveStaffMembers().then((staff) => {
+      setActiveStaff(staff);
+      const defaultManager = staff.find((a) => a.role === 'project_manager')?.id || staff[0]?.id || '';
+      const defaultCoordinator = staff.find((a) => a.role === 'project_coordinator')?.id || staff[1]?.id || '';
+      setManagerId((curr) => curr || defaultManager);
+      setCoordinatorId((curr) => curr || defaultCoordinator);
+    });
+  }, []);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);

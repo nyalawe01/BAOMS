@@ -31,7 +31,6 @@ import {
   INITIAL_MOCK_REPORTS,
   INITIAL_MOCK_BUDGETS,
 } from '../data/mockProjects';
-import { DEMO_ACCOUNTS } from '@/features/auth/demoAccounts';
 import { getPersistentItem, setPersistentItem } from '@/lib/storageSync';
 
 const PROJECT_STORAGE_KEYS = {
@@ -189,11 +188,7 @@ interface SupabaseReportRow {
 }
 
 function getUserInfo(userId: string): { name: string; email: string } {
-  const account = DEMO_ACCOUNTS.find((a) => a.id === userId);
-  if (account) {
-    return { name: account.displayName, email: account.email };
-  }
-  return { name: 'Staff Member', email: 'staff@babawatoto.org' };
+  return { name: 'Assigned Staff', email: 'staff@babawatoto.or.tz' };
 }
 
 /**
@@ -289,8 +284,8 @@ export async function getProjects(
 
     const { data, error } = await query;
     if (error) {
-      console.warn('Supabase projects query failed, falling back to mock:', error);
-      return getProjects(params, currentUser);
+      console.warn('Supabase projects query failed, returning cached projects:', error);
+      return inMemoryProjects;
     }
 
     return (data || []).map((row: SupabaseProjectRow) => {
@@ -355,8 +350,8 @@ export async function getProjects(
       };
     });
   } catch (err) {
-    console.warn('Projects exception, falling back to mock:', err);
-    return getProjects(params, currentUser);
+    console.warn('Projects exception, returning cached projects:', err);
+    return inMemoryProjects;
   }
 }
 

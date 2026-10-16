@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { AlertCircle } from 'lucide-react';
 import { useAuth } from '@/features/auth/useAuth';
 import { isSupabaseConfigured } from '@/lib/supabase';
-import { DEMO_ACCOUNTS } from '@/features/auth/demoAccounts';
 import { Badge } from '@/components/ui/Badge';
 
 export const SignInPage: React.FC = () => {
@@ -63,15 +62,6 @@ export const SignInPage: React.FC = () => {
       navigate(from, { replace: true });
     } else {
       setErrorMessage(result.error || 'MFA verification failed.');
-    }
-  };
-
-  const handleQuickLogin = (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword('baoms2026');
-    setErrorMessage('');
-    if (mfaPending) {
-      cancelMfa();
     }
   };
 
@@ -295,59 +285,17 @@ export const SignInPage: React.FC = () => {
               <div className="text-center mt-6">
                 <p className="text-gray-600 text-sm">
                   Don't have an account?
-                  <button
-                    type="button"
-                    onClick={() =>
-                      alert(
-                        t(
-                          'auth.selfRegNotice',
-                          'Self-registration is disabled. Staff accounts are issued by Administration.'
-                        )
-                      )
-                    }
+                  <Link
+                    to="/register"
                     className="text-[#D68904] font-semibold hover:underline ml-1"
                   >
                     Register
-                  </button>
+                  </Link>
                 </p>
                 <p className="text-[11px] text-gray-400 mt-2">
-                  {t('auth.selfRegNotice', 'Self-registration is disabled. Staff accounts are issued by Administration.')}
+                  Official @babawatoto.or.tz organization email required for self-registration.
                 </p>
               </div>
-
-              {/* Quick Account Switcher (Offline Mode) */}
-              {!isSupabaseConfigured && (
-                <div className="mt-8 pt-5 border-t border-slate-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                      Demo Role Presets (Offline)
-                    </span>
-                    <Badge variant="info" className="text-[9px]">
-                      Offline Ready
-                    </Badge>
-                  </div>
-                  <div className="grid grid-cols-1 gap-1.5">
-                    {DEMO_ACCOUNTS.filter((acc) => acc.isActive && !acc.isMfaEnrolled && acc.role === 'SYSTEM_ADMIN').map((acc) => (
-                      <button
-                        key={acc.id}
-                        type="button"
-                        onClick={() => handleQuickLogin(acc.email)}
-                        className="flex flex-col text-left p-2 rounded-lg border border-slate-200 hover:bg-amber-50/40 hover:border-[#F2A507] transition-colors text-[11px]"
-                      >
-                        <span className="font-semibold text-slate-900 truncate">
-                          {acc.displayName}
-                        </span>
-                        <span className="text-[10px] text-[#D68904] truncate">
-                          {acc.email}
-                        </span>
-                        <span className="text-[9px] text-slate-400 mt-0.5">
-                          {acc.role.replace('_', ' ')}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>

@@ -3,6 +3,7 @@ import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '@/features/auth/useAuth';
 import { RoleCode } from '@/lib/permissions';
 import { AccessDeniedPage } from '@/features/auth/pages/AccessDeniedPage';
+import { WaitingForApprovalDashboard } from '@/features/dashboard/WaitingForApprovalDashboard';
 
 interface ProtectedRouteProps {
   requiredRoles?: RoleCode[];
@@ -16,7 +17,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
 }) => {
   const location = useLocation();
-  const { isAuthenticated, isDeactivated, isLoading, hasRole, hasPermission } = useAuth();
+  const { isAuthenticated, isDeactivated, isPendingApproval, isLoading, hasRole, hasPermission } = useAuth();
 
   if (isLoading) {
     return (
@@ -39,6 +40,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Account marked inactive -> Redirect to deactivated page
   if (isDeactivated) {
     return <Navigate to="/account-deactivated" replace />;
+  }
+
+  // Account awaiting HR or Executive Director approval -> Show Waiting for Approval Dashboard
+  if (isPendingApproval) {
+    return <WaitingForApprovalDashboard />;
   }
 
   // Role requirement check

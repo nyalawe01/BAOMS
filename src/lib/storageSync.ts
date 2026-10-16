@@ -7,7 +7,7 @@
  * and browser restarts, while providing a clean reset mechanism for automated testing.
  */
 
-const CURRENT_STORAGE_CLEAN_VERSION = 'baoms_storage_clean_v2';
+const CURRENT_STORAGE_CLEAN_VERSION = 'baoms_storage_clean_v4';
 
 if (typeof window !== 'undefined' && window.localStorage) {
   try {
@@ -41,7 +41,11 @@ if (typeof window !== 'undefined' && window.localStorage) {
         'baoms_audit_logs',
         'baoms_staff_registration_draft',
         'baoms_project_registration_draft',
-        'baoms_staff_users', // Clear old mock-seeded user list
+        'baoms_staff_users',
+        'baoms_staff_users_v2',
+        'baoms_users',
+        'baoms_users_cache',
+        'baoms_live_staff_cache',
       ];
       keysToClear.forEach((k) => localStorage.removeItem(k));
       localStorage.setItem(CURRENT_STORAGE_CLEAN_VERSION, 'true');

@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { DEMO_ACCOUNTS } from './demoAccounts';
 import { RoleCode, PermissionCode, checkPermission, checkRole } from '@/lib/permissions';
 import { Profile } from '@/types/database';
 
@@ -24,6 +23,9 @@ export interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   isDeactivated: boolean;
+  isPendingApproval: boolean;
+  approvalStatus: 'pending_hr' | 'pending_ed' | 'approved' | 'rejected' | null;
+  reloadProfile: () => Promise<void>;
   isSessionExpired: boolean;
   dismissSessionExpired: () => void;
   triggerSessionExpiry: () => void;
@@ -108,64 +110,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
         }
       } catch (err) {
-        console.warn('Authoritative Supabase user lookup failed, falling back to local account:', err);
-        const demo = DEMO_ACCOUNTS.find((a) => a.id === userId || a.email.toLowerCase() === userEmail.toLowerCase());
-        if (demo) {
-          setUser({ id: demo.id, email: demo.email });
-          setProfile({
-            id: demo.id,
-            display_name: demo.displayName,
-            phone_number: demo.phoneNumber,
-            preferred_language: demo.preferredLanguage,
-            department_id: demo.departmentId,
-            is_active: demo.isActive,
-            created_at: '2026-01-01T00:00:00Z',
-            updated_at: '2026-10-13T00:00:00Z',
-          });
-          setRoles(demo.roles);
-          setPermissions(demo.permissions);
-          setDepartment({
-            id: demo.departmentId,
-            code: demo.departmentCode,
-            name: demo.departmentName,
-          });
-        } else {
-          setUser(null);
-          setProfile(null);
-          setRoles([]);
-          setPermissions([]);
-          setDepartment(null);
-        }
-      }
-    } else {
-      // Local development / demonstration mode
-      const demo = DEMO_ACCOUNTS.find((a) => a.id === userId || a.email.toLowerCase() === userEmail.toLowerCase());
-      if (demo) {
-        setUser({ id: demo.id, email: demo.email });
-        setProfile({
-          id: demo.id,
-          display_name: demo.displayName,
-          phone_number: demo.phoneNumber,
-          preferred_language: demo.preferredLanguage,
-          department_id: demo.departmentId,
-          is_active: demo.isActive,
-          created_at: '2026-01-01T00:00:00Z',
-          updated_at: '2026-10-13T00:00:00Z',
-        });
-        setRoles(demo.roles);
-        setPermissions(demo.permissions);
-        setDepartment({
-          id: demo.departmentId,
-          code: demo.departmentCode,
-          name: demo.departmentName,
-        });
-      } else {
+        console.warn('Authoritative Supabase user lookup failed:', err);
         setUser(null);
         setProfile(null);
         setRoles([]);
         setPermissions([]);
         setDepartment(null);
       }
+    } else {
+      setUser(null);
+      setProfile(null);
+      setRoles([]);
+      setPermissions([]);
+      setDepartment(null);
     }
   }, []);
 
@@ -177,24 +134,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           await loadUserData(session.user.id, session.user.email || '');
-        } else {
-          // Check local session storage fallback for demo accounts
-          const savedUserId =
-            localStorage.getItem(SESSION_STORAGE_KEY) ||
-            sessionStorage.getItem(SESSION_STORAGE_KEY) ||
-            localStorage.getItem('baoms_active_session_id') ||
-            sessionStorage.getItem('baoms_active_session_id');
-          if (savedUserId) {
-            const match = DEMO_ACCOUNTS.find(
-              (a) =>
-                a.id === savedUserId ||
-                a.email.toLowerCase() === savedUserId.toLowerCase() ||
-                a.role === savedUserId
-            );
-            if (match) {
-              await loadUserData(match.id, match.email);
-            }
-          }
         }
 
         // Listen for live Supabase Auth state changes
@@ -218,23 +157,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoading(false);
         return () => subscription.unsubscribe();
       } else {
-        // Dev fallback: restore session identifier if present
-        const savedUserId =
-          localStorage.getItem(SESSION_STORAGE_KEY) ||
-          sessionStorage.getItem(SESSION_STORAGE_KEY) ||
-          localStorage.getItem('baoms_active_session_id') ||
-          sessionStorage.getItem('baoms_active_session_id');
-        if (savedUserId) {
-          const match = DEMO_ACCOUNTS.find(
-            (a) =>
-              a.id === savedUserId ||
-              a.email.toLowerCase() === savedUserId.toLowerCase() ||
-              a.role === savedUserId
-          );
-          if (match) {
-            await loadUserData(match.id, match.email);
-          }
-        }
         setIsLoading(false);
       }
     };
@@ -293,25 +215,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: false, error: msg };
       }
     } else {
-      // In offline / preview demo mode:
-      if (cleanCode === '123456' || (cleanCode.length === 6 && /^\d+$/.test(cleanCode))) {
-        if (pendingUser) {
-          if (pendingUser.rememberMe) {
-            localStorage.setItem(SESSION_STORAGE_KEY, pendingUser.id);
-          } else {
-            sessionStorage.setItem(SESSION_STORAGE_KEY, pendingUser.id);
-          }
-          await loadUserData(pendingUser.id, pendingUser.email);
-        }
-        setMfaPending(false);
-        setPendingUser(null);
-        setIsLoading(false);
-        return { success: true };
-      }
       setIsLoading(false);
       return {
         success: false,
-        error: 'Invalid 6-digit authenticator code. Enter any 6-digit numeric code (e.g. 123456) to verify.',
+        error: 'Database connection is unavailable. Live authentication requires an active connection to Supabase.',
       };
     }
   };
@@ -337,7 +244,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           password,
         });
 
-        if (!error && data.user) {
+        if (error) {
+          setIsLoading(false);
+          return {
+            success: false,
+            error: error.message || 'Authentication failed. Please verify your credentials.',
+          };
+        }
+
+        if (data.user) {
           // Check if account has MFA enrolled / requires AAL2
           const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
           if (aalData && aalData.nextLevel === 'aal2' && aalData.currentLevel !== 'aal2') {
@@ -351,73 +266,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setIsLoading(false);
           return { success: true };
         }
-      } catch (err) {
-        console.warn('Supabase signIn encountered network error, falling back to demo check:', err);
+      } catch (err: any) {
+        setIsLoading(false);
+        return {
+          success: false,
+          error: err?.message || 'Network error communicating with authentication database.',
+        };
       }
     }
 
-    // Local dev / demonstration mode fallback
-    const matchedAccount = DEMO_ACCOUNTS.find((a) => a.email.toLowerCase() === cleanEmail);
-
-      if (!matchedAccount) {
-        setIsLoading(false);
-        return {
-          success: false,
-          error: 'No registered staff account found with this email. Contact your System Administrator.',
-        };
-      }
-
-      // In demo mode, accept any non-empty password of length >= 6 (or default "baoms2026")
-      if (password.length < 6) {
-        setIsLoading(false);
-        return {
-          success: false,
-          error: 'Password must be at least 6 characters long.',
-        };
-      }
-
-      // Check account active status
-      if (!matchedAccount.isActive) {
-        // Set user to trigger deactivated page
-        setUser({ id: matchedAccount.id, email: matchedAccount.email });
-        setProfile({
-          id: matchedAccount.id,
-          display_name: matchedAccount.displayName,
-          phone_number: matchedAccount.phoneNumber,
-          preferred_language: matchedAccount.preferredLanguage,
-          department_id: matchedAccount.departmentId,
-          is_active: false,
-          created_at: '2026-01-01T00:00:00Z',
-          updated_at: '2026-10-13T00:00:00Z',
-        });
-        setRoles(matchedAccount.roles);
-        setPermissions([]);
-        setIsLoading(false);
-        return {
-          success: false,
-          error: 'Account deactivated: Access denied by Organization Administration.',
-        };
-      }
-
-      // Check if account has MFA enrolled
-      if (matchedAccount.isMfaEnrolled) {
-        setPendingUser({ id: matchedAccount.id, email: matchedAccount.email, rememberMe });
-        setMfaPending(true);
-        setIsLoading(false);
-        return { success: false, mfaRequired: true };
-      }
-
-      // Successful login
-      if (rememberMe) {
-        localStorage.setItem(SESSION_STORAGE_KEY, matchedAccount.id);
-      } else {
-        sessionStorage.setItem(SESSION_STORAGE_KEY, matchedAccount.id);
-      }
-
-      await loadUserData(matchedAccount.id, matchedAccount.email);
-      setIsLoading(false);
-      return { success: true };
+    setIsLoading(false);
+    return {
+      success: false,
+      error: 'Database connection is not configured.',
     };
+  };
 
   // Sign Out
   const signOut = async () => {
@@ -446,16 +309,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: false, error: error.message };
       }
       return { success: true };
-    } else {
-      const exists = DEMO_ACCOUNTS.some((a) => a.email.toLowerCase() === cleanEmail);
-      if (!exists) {
-        return {
-          success: false,
-          error: 'Email address not found in authorized organization directory.',
-        };
-      }
-      return { success: true };
     }
+    return { success: false, error: 'Database service is not configured.' };
   };
 
   // Update Password
@@ -487,7 +342,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return roles.includes('system_admin');
   };
 
-  const isDeactivated = Boolean(profile && profile.is_active === false);
+  const reloadProfile = useCallback(async () => {
+    if (user) {
+      await loadUserData(user.id, user.email);
+    }
+  }, [user, loadUserData]);
+
+  const approvalStatus: 'pending_hr' | 'pending_ed' | 'approved' | 'rejected' | null =
+    profile?.approval_status || (roles.length > 0 ? 'approved' : null);
+
+  const isPendingApproval = Boolean(
+    user && (approvalStatus === 'pending_hr' || approvalStatus === 'pending_ed' || (roles.length === 0 && approvalStatus !== 'approved'))
+  );
+
+  const isDeactivated = Boolean(profile && profile.is_active === false && approvalStatus !== 'pending_hr' && approvalStatus !== 'pending_ed');
   const isAuthenticated = Boolean(user && !isDeactivated);
 
   return (
@@ -501,6 +369,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         isAuthenticated,
         isDeactivated,
+        isPendingApproval,
+        approvalStatus,
+        reloadProfile,
         isSessionExpired,
         dismissSessionExpired,
         triggerSessionExpiry,

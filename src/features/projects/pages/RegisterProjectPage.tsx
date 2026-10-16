@@ -24,7 +24,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Stepper, StepItem } from '@/components/ui/Stepper';
 import { CreateProjectInput } from '../types/project';
 import { createProject } from '../services/projectService';
-import { DEMO_ACCOUNTS } from '@/features/auth/demoAccounts';
+import { fetchActiveStaffMembers, StaffMemberOption } from '@/services/staffService';
 import { addNotification } from '@/services/notificationsService';
 import { useAuth } from '@/features/auth/useAuth';
 
@@ -102,20 +102,30 @@ export const RegisterProjectPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
 
-  const activeStaff = DEMO_ACCOUNTS.filter((a) => a.isActive);
-  const defaultManager =
-    activeStaff.find((a) => a.role === 'project_manager')?.id ||
-    activeStaff[0]?.id ||
-    '';
-  const defaultCoordinator =
-    activeStaff.find((a) => a.role === 'project_coordinator')?.id || '';
+  const [activeStaff, setActiveStaff] = useState<StaffMemberOption[]>([]);
+
+  useEffect(() => {
+    fetchActiveStaffMembers().then((staff) => {
+      setActiveStaff(staff);
+      const defaultManager = staff.find((a) => a.role === 'project_manager')?.id || staff[0]?.id || '';
+      const defaultCoordinator = staff.find((a) => a.role === 'project_coordinator')?.id || staff[1]?.id || '';
+      setFormData((prev) => ({
+        ...prev,
+        governance: {
+          ...prev.governance,
+          managerId: prev.governance.managerId || defaultManager,
+          coordinatorId: prev.governance.coordinatorId || defaultCoordinator,
+        },
+      }));
+    });
+  }, []);
 
   const [formData, setFormData] = useState<ProjectDraftState>({
     ...INITIAL_PROJECT_DRAFT,
     governance: {
       ...INITIAL_PROJECT_DRAFT.governance,
-      managerId: defaultManager,
-      coordinatorId: defaultCoordinator,
+      managerId: '',
+      coordinatorId: '',
     },
   });
 

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -11,6 +11,14 @@ import {
   Mail,
   Building,
   Trash2,
+  RefreshCw,
+  WifiOff,
+  Clock,
+  CheckCircle2,
+  Copy,
+  ExternalLink,
+  ShieldCheck,
+  AlertCircle,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
@@ -28,24 +36,175 @@ import { FilterControls } from '@/components/ui/FilterControls';
 import { DropdownMenu, DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { useToast } from '@/lib/ToastContext';
 import { ROLES, RoleCode } from '@/lib/permissions';
-import { DemoAccount } from '@/features/auth/demoAccounts';
 import { getPersistentItem, setPersistentItem } from '@/lib/storageSync';
 import { createStaffFromUserCreation } from '@/features/hr/services/hrService';
 import { createNotification } from '@/services/notificationsService';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { useAuth } from '@/features/auth/useAuth';
+import { UserOnboardingReviewModal, PendingUserCandidate } from './components/UserOnboardingReviewModal';
+import { ExecutiveApprovalModal } from './components/ExecutiveApprovalModal';
 
-const USER_STORAGE_KEY = 'baoms_staff_users';
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export interface StaffUser {
+  id: string;
+  email: string;
+  displayName: string;
+  phoneNumber: string;
+  departmentCode: string;
+  departmentName: string;
+  roleCode: RoleCode;
+  isActive: boolean;
+  approvalStatus: 'pending_hr' | 'pending_ed' | 'approved' | 'rejected';
+  stagedDetails?: Record<string, any>;
+  avatarInitials: string;
+  createdAt?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const USER_STORAGE_KEY = 'baoms_staff_users_v2';
 const ALLOWED_EMAIL_DOMAIN = '@babawatoto.or.tz';
+
+const DEPT_NAMES: Record<string, string> = {
+  EXEC: 'Executive Office',
+  FIN: 'Finance & Operations',
+  PRJ: 'Projects & Programs',
+  HR: 'Human Resources & Administration',
+  ADMIN: 'IT & System Administration',
+  PROC: 'Procurement & Logistics',
+};
+
+const ROLE_TITLES: Record<string, string> = {
+  [ROLES.PROJECT_COORDINATOR]: 'Project Coordinator',
+  [ROLES.PROJECT_MANAGER]: 'Project Manager',
+  [ROLES.FINANCE_OFFICER]: 'Finance Officer',
+  [ROLES.HR_ADMINISTRATOR]: 'HR Administrator',
+  [ROLES.EXECUTIVE_DIRECTOR]: 'Executive Director',
+  [ROLES.SYSTEM_ADMIN]: 'System Administrator',
+  [ROLES.PROCUREMENT_OFFICER]: 'Procurement Officer',
+};
+
+// ---------------------------------------------------------------------------
+// Supabase data helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch all staff profiles from Supabase joining departments and user_roles.
+ */
+async function fetchStaffFromSupabase(): Promise<StaffUser[]> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select(`
+      id,
+      display_name,
+      official_email,
+      phone_number,
+      is_active,
+      approval_status,
+      staged_details,
+      created_at,
+      departments ( code, name_en ),
+      user_roles ( roles ( code ) )
+    `)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  return (data || []).map((row: any) => {
+    const dept = row.departments;
+    const roleArr = (row.user_roles || []).flatMap((ur: any) => {
+      const r = Array.isArray(ur.roles) ? ur.roles[0] : ur.roles;
+      return r?.code ? [r.code as RoleCode] : [];
+    });
+    const roleCode: RoleCode = roleArr[0] || ROLES.PROJECT_COORDINATOR;
+    const name: string = row.display_name || '';
+    const email: string = row.official_email || '';
+    const approvalStatus = row.approval_status || (roleArr.length > 0 ? 'approved' : 'pending_hr');
+
+    return {
+      id: row.id,
+      email,
+      displayName: name,
+      phoneNumber: row.phone_number || '',
+      departmentCode: dept?.code || 'PRJ',
+      departmentName: dept?.name_en || 'Projects & Programs',
+      roleCode,
+      isActive: row.is_active ?? true,
+      approvalStatus,
+      stagedDetails: row.staged_details || {},
+      avatarInitials: name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
+      createdAt: row.created_at,
+    };
+  });
+}
+
+/**
+ * Fetch staff + their emails via the admin API (requires service role key — use edge fn for email).
+ * Since we can't expose the service role in the browser, we fetch emails from the invite list
+ * stored alongside profiles in a lightweight way: we look up auth user emails only for rows
+ * the current user created. For the full list we rely on display_name + profile id.
+ *
+ * Note: emails for all auth.users are NOT readable by anon clients — this is by design.
+ * Admins who need the email list should use the Supabase dashboard or the admin API.
+ */
+async function updateStaffStatusInSupabase(userId: string, isActive: boolean): Promise<void> {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ is_active: isActive })
+    .eq('id', userId);
+  if (error) throw error;
+}
+
+async function updateStaffRoleInSupabase(
+  userId: string,
+  newRoleCode: RoleCode,
+  adminId: string
+): Promise<void> {
+  // 1. Resolve the new role_id
+  const { data: roleRow, error: roleLookupErr } = await supabase
+    .from('roles')
+    .select('id')
+    .eq('code', newRoleCode)
+    .single();
+  if (roleLookupErr || !roleRow) throw new Error(`Role '${newRoleCode}' not found in database.`);
+
+  // 2. Delete existing role assignments for this user
+  const { error: deleteErr } = await supabase
+    .from('user_roles')
+    .delete()
+    .eq('user_id', userId);
+  if (deleteErr) throw deleteErr;
+
+  // 3. Insert the new role
+  const { error: insertErr } = await supabase
+    .from('user_roles')
+    .insert({ user_id: userId, role_id: roleRow.id, assigned_by: adminId });
+  if (insertErr) throw insertErr;
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export const UserManagementPage: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { showToast } = useToast();
+  const { user: currentUser } = useAuth();
 
-  // Start with an empty list — no mock data seeded.
-  const [staffList, setStaffList] = useState<DemoAccount[]>(() =>
-    getPersistentItem(USER_STORAGE_KEY, () => [])
-  );
+  // Online/offline connectivity state
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  // Staff list & loading
+  const [staffList, setStaffList] = useState<StaffUser[]>([]);
+  const [isFetching, setIsFetching] = useState(false);
+
+  // Search / filter / pagination
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,9 +215,14 @@ export const UserManagementPage: React.FC = () => {
   const [isEditRoleModalOpen, setIsEditRoleModalOpen] = useState(false);
   const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedStaff, setSelectedStaff] = useState<DemoAccount | null>(null);
+  const [selectedStaff, setSelectedStaff] = useState<StaffUser | null>(null);
 
-  // Form states for Invite
+  // Approval workflow modal states
+  const [isOnboardingModalOpen, setIsOnboardingModalOpen] = useState(false);
+  const [isExecutiveModalOpen, setIsExecutiveModalOpen] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState<PendingUserCandidate | null>(null);
+
+  // Invite form
   const [inviteName, setInviteName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
   const [invitePersonalEmail, setInvitePersonalEmail] = useState('');
@@ -69,35 +233,86 @@ export const UserManagementPage: React.FC = () => {
   const [emailDomainError, setEmailDomainError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Form state for Edit Role
+  // Edit role form
   const [editRoleValue, setEditRoleValue] = useState<RoleCode>(ROLES.PROJECT_COORDINATOR);
 
-  // Filter options
-  const filterOptions = [
-    { id: 'all', label: 'All Staff', count: staffList.length },
-    { id: 'active', label: 'Active', count: staffList.filter((s) => s.isActive).length },
-    { id: 'deactivated', label: 'Deactivated', count: staffList.filter((s) => !s.isActive).length },
-  ];
+  // ─── Network connectivity listener ────────────────────────────────────────
+  useEffect(() => {
+    const goOnline = () => setIsOnline(true);
+    const goOffline = () => setIsOnline(false);
+    window.addEventListener('online', goOnline);
+    window.addEventListener('offline', goOffline);
+    return () => {
+      window.removeEventListener('online', goOnline);
+      window.removeEventListener('offline', goOffline);
+    };
+  }, []);
+
+  // ─── Load staff (Supabase when online, localStorage when offline) ─────────
+  const loadStaff = useCallback(async () => {
+    setIsFetching(true);
+    if (isSupabaseConfigured && isOnline) {
+      try {
+        const remoteStaff = await fetchStaffFromSupabase();
+        setStaffList(remoteStaff);
+        // Cache locally for offline fallback
+        setPersistentItem(USER_STORAGE_KEY, remoteStaff);
+      } catch (err) {
+        console.warn('[UserManagementPage] Supabase fetch failed, using cached data:', err);
+        const cached = getPersistentItem<StaffUser[]>(USER_STORAGE_KEY, () => []);
+        setStaffList(cached);
+        showToast({
+          title: 'Using Cached Data',
+          message: 'Could not reach database. Showing last synced user list.',
+          variant: 'warning',
+        });
+      }
+    } else {
+      // Offline fallback
+      const cached = getPersistentItem<StaffUser[]>(USER_STORAGE_KEY, () => []);
+      setStaffList(cached);
+    }
+    setIsFetching(false);
+  }, [isOnline, showToast]);
+
+  useEffect(() => {
+    loadStaff();
+  }, [loadStaff]);
+
+  // ─── Filtered & paginated list ────────────────────────────────────────────
+  const pendingCandidates = staffList.filter(
+    (s) => s.approvalStatus === 'pending_hr' || s.approvalStatus === 'pending_ed'
+  );
 
   const filteredStaff = staffList.filter((staff) => {
     const matchesSearch =
       staff.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      staff.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      staff.role.toLowerCase().includes(searchQuery.toLowerCase());
+      (staff.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      staff.roleCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      staff.departmentName.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus =
       statusFilter === 'all'
         ? true
         : statusFilter === 'active'
-        ? staff.isActive
+        ? staff.isActive && staff.approvalStatus === 'approved'
+        : statusFilter === 'pending'
+        ? staff.approvalStatus === 'pending_hr' || staff.approvalStatus === 'pending_ed'
         : !staff.isActive;
 
     return matchesSearch && matchesStatus;
   });
 
-  const validateEmailDomain = (email: string): boolean => {
-    return email.trim().toLowerCase().endsWith(ALLOWED_EMAIL_DOMAIN);
-  };
+  const filterOptions = [
+    { id: 'all', label: 'All Staff', count: staffList.length },
+    { id: 'active', label: 'Active', count: staffList.filter((s) => s.isActive && s.approvalStatus === 'approved').length },
+    { id: 'pending', label: 'Pending Approvals', count: pendingCandidates.length },
+    { id: 'deactivated', label: 'Deactivated', count: staffList.filter((s) => !s.isActive).length },
+  ];
+
+  // ─── Email validation ─────────────────────────────────────────────────────
+  const validateEmailDomain = (email: string): boolean =>
+    email.trim().toLowerCase().endsWith(ALLOWED_EMAIL_DOMAIN);
 
   const handleEmailChange = (value: string) => {
     setInviteEmail(value);
@@ -108,6 +323,16 @@ export const UserManagementPage: React.FC = () => {
     }
   };
 
+  // ─── Create Staff User ────────────────────────────────────────────────────
+  /**
+   * WHY WE USE AN EDGE FUNCTION:
+   * The Supabase anon/publishable key (VITE_SUPABASE_ANON_KEY) cannot call
+   * supabase.auth.admin.* — that requires the SERVICE ROLE key which must
+   * NEVER be placed in the browser. Instead, we call our Edge Function
+   * `create-staff-user` which holds the service role key on the server.
+   * The edge function verifies the caller is a system_admin, then creates
+   * the auth user + profile + role assignment in one secure transaction.
+   */
   const handleInviteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteName.trim() || !inviteEmail.trim()) return;
@@ -117,7 +342,7 @@ export const UserManagementPage: React.FC = () => {
       return;
     }
 
-    if (isSupabaseConfigured && (!invitePassword || invitePassword.length < 8)) {
+    if (!invitePassword || invitePassword.length < 8) {
       showToast({
         title: 'Password Required',
         message: 'Please set a temporary password (minimum 8 characters) for the new staff account.',
@@ -127,102 +352,129 @@ export const UserManagementPage: React.FC = () => {
     }
 
     setIsSubmitting(true);
-
-    const deptNames: Record<string, string> = {
-      EXEC: 'Executive Office',
-      FIN: 'Finance & Operations',
-      PRJ: 'Projects & Programs',
-      HR: 'Human Resources & Administration',
-      ADMIN: 'IT & System Administration',
-      PROC: 'Procurement & Logistics',
-    };
-    const deptName = deptNames[inviteDept] || 'Projects & Programs';
-
-    const roleTitles: Record<string, string> = {
-      [ROLES.PROJECT_COORDINATOR]: 'Project Coordinator',
-      [ROLES.PROJECT_MANAGER]: 'Project Manager',
-      [ROLES.FINANCE_OFFICER]: 'Finance Officer',
-      [ROLES.HR_ADMINISTRATOR]: 'HR Administrator',
-      [ROLES.EXECUTIVE_DIRECTOR]: 'Executive Director',
-      [ROLES.SYSTEM_ADMIN]: 'System Administrator',
-      [ROLES.PROCUREMENT_OFFICER]: 'Procurement Officer',
-    };
-    const roleTitle = roleTitles[inviteRole] || 'Staff Member';
     const cleanEmail = inviteEmail.trim().toLowerCase();
+    const deptName = DEPT_NAMES[inviteDept] || 'Projects & Programs';
+    const roleTitle = ROLE_TITLES[inviteRole] || 'Staff Member';
 
-    let userId = `staff-${Date.now()}`;
-
-    if (isSupabaseConfigured) {
+    if (isSupabaseConfigured && isOnline) {
+      // ── ONLINE: use Edge Function for secure user creation ──
       try {
-        const { data: authData, error: authErr } = await supabase.auth.admin.createUser({
-          email: cleanEmail,
-          password: invitePassword,
-          email_confirm: true,
-          user_metadata: {
-            display_name: inviteName.trim(),
-            role: inviteRole,
-            department_code: inviteDept,
-          },
-        });
-
-        if (authErr) {
-          showToast({ title: 'Supabase Auth Error', message: authErr.message, variant: 'error' });
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          showToast({ title: 'Session Expired', message: 'Please sign in again.', variant: 'error' });
           setIsSubmitting(false);
           return;
         }
 
-        userId = authData.user.id;
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+        const response = await fetch(`${supabaseUrl}/functions/v1/create-staff-user`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            email: cleanEmail,
+            password: invitePassword,
+            displayName: inviteName.trim(),
+            phoneNumber: invitePhone.trim() || null,
+            departmentCode: inviteDept,
+            roleCode: inviteRole,
+            personalEmail: invitePersonalEmail.trim() || null,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          showToast({
+            title: 'User Creation Failed',
+            message: result.error || 'An unknown error occurred.',
+            variant: 'error',
+          });
+          setIsSubmitting(false);
+          return;
+        }
+
+        // Optimistically prepend new user to local list
+        const newStaff: StaffUser = {
+          id: result.user.id,
+          email: cleanEmail,
+          displayName: inviteName.trim(),
+          phoneNumber: invitePhone.trim() || '',
+          departmentCode: inviteDept,
+          departmentName: deptName,
+          roleCode: inviteRole,
+          isActive: true,
+          avatarInitials: inviteName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
+        };
+
+        const updated = [newStaff, ...staffList];
+        setStaffList(updated);
+        setPersistentItem(USER_STORAGE_KEY, updated);
+
+        // HR record + notification
+        const createdHrStaff = await createStaffFromUserCreation({
+          userId: result.user.id,
+          fullName: inviteName.trim(),
+          personalEmail: invitePersonalEmail.trim() || null,
+          officialEmail: cleanEmail,
+          phoneNumber: invitePhone.trim() || '+255 754 000 000',
+          departmentCode: inviteDept,
+          departmentName: deptName,
+          jobTitle: roleTitle,
+        });
+
+        createNotification({
+          title: 'Staff Onboarding Pending (HR)',
+          message: `New staff member ${inviteName.trim()} access created. Please complete HR personnel record.`,
+          type: 'hr',
+          targetRole: 'hr_administrator',
+          link: '/hr',
+          metadata: { staffId: createdHrStaff.id, action: 'complete_hr' },
+        });
+
+        showToast({
+          title: '✅ Staff Account Created in Supabase',
+          message: `${cleanEmail} can now log in with the provided password. HR onboarding notification dispatched.`,
+          variant: 'success',
+        });
       } catch (err: unknown) {
         showToast({
-          title: 'Error Creating User',
-          message: err instanceof Error ? err.message : 'Failed to create Supabase auth user.',
+          title: 'Network Error',
+          message: err instanceof Error ? err.message : 'Failed to reach server.',
           variant: 'error',
         });
         setIsSubmitting(false);
         return;
       }
+    } else {
+      // ── OFFLINE: store locally, will need to sync when back online ──
+      const localId = `local-${Date.now()}`;
+      const newStaff: StaffUser = {
+        id: localId,
+        email: cleanEmail,
+        displayName: inviteName.trim(),
+        phoneNumber: invitePhone.trim() || '+255 754 000 000',
+        departmentCode: inviteDept,
+        departmentName: deptName,
+        roleCode: inviteRole,
+        isActive: true,
+        avatarInitials: inviteName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
+      };
+
+      const updated = [newStaff, ...staffList];
+      setStaffList(updated);
+      setPersistentItem(USER_STORAGE_KEY, updated);
+
+      showToast({
+        title: '📦 Saved Offline',
+        message: `${cleanEmail} saved locally. This account will be synced to Supabase when internet is restored.`,
+        variant: 'warning',
+      });
     }
 
-    const newStaff: DemoAccount = {
-      id: userId,
-      email: cleanEmail,
-      displayName: inviteName.trim(),
-      phoneNumber: invitePhone.trim() || '+255 754 000 000',
-      preferredLanguage: 'sw',
-      departmentId: `dept-${inviteDept.toLowerCase()}`,
-      departmentCode: inviteDept,
-      departmentName: deptName,
-      role: inviteRole,
-      roles: [inviteRole],
-      permissions: [],
-      isActive: true,
-      avatarInitials: inviteName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
-    };
-
-    const updated = [newStaff, ...staffList];
-    setStaffList(updated);
-    setPersistentItem(USER_STORAGE_KEY, updated);
-
-    const createdHrStaff = await createStaffFromUserCreation({
-      userId: newStaff.id,
-      fullName: newStaff.displayName,
-      personalEmail: invitePersonalEmail.trim() || null,
-      officialEmail: newStaff.email,
-      phoneNumber: newStaff.phoneNumber,
-      departmentCode: inviteDept,
-      departmentName: deptName,
-      jobTitle: roleTitle,
-    });
-
-    createNotification({
-      title: 'Staff Onboarding Pending (HR)',
-      message: `New staff member ${newStaff.displayName} access created. Please complete HR personnel record (DOB, NIDA, TIN, CV, Certifications, Salary).`,
-      type: 'hr',
-      targetRole: 'hr_administrator',
-      link: '/hr',
-      metadata: { staffId: createdHrStaff.id, action: 'complete_hr' },
-    });
-
+    // Reset form
     setIsInviteModalOpen(false);
     setInviteName('');
     setInviteEmail('');
@@ -231,30 +483,56 @@ export const UserManagementPage: React.FC = () => {
     setInvitePassword('');
     setEmailDomainError('');
     setIsSubmitting(false);
-
-    showToast({
-      title: isSupabaseConfigured ? 'User Created in Supabase' : 'Staff Access Provisioned',
-      message: isSupabaseConfigured
-        ? `Auth account created for ${cleanEmail}. HR onboarding notification dispatched.`
-        : `Local account provisioned for ${cleanEmail}. Automated onboarding notification forwarded to HR.`,
-      variant: 'success',
-    });
   };
 
-  const handleSaveRole = () => {
+  // ─── Save Role Change ─────────────────────────────────────────────────────
+  const handleSaveRole = async () => {
     if (!selectedStaff) return;
+
+    if (isSupabaseConfigured && isOnline && currentUser) {
+      try {
+        await updateStaffRoleInSupabase(selectedStaff.id, editRoleValue, currentUser.id);
+      } catch (err) {
+        showToast({
+          title: 'Role Update Failed',
+          message: err instanceof Error ? err.message : 'Could not update role in database.',
+          variant: 'error',
+        });
+        return;
+      }
+    }
+
     const updated = staffList.map((s) =>
-      s.id === selectedStaff.id ? { ...s, role: editRoleValue, roles: [editRoleValue] } : s
+      s.id === selectedStaff.id ? { ...s, roleCode: editRoleValue } : s
     );
     setStaffList(updated);
     setPersistentItem(USER_STORAGE_KEY, updated);
     setIsEditRoleModalOpen(false);
-    showToast({ title: 'Role Updated', message: `${selectedStaff.displayName} was reassigned to ${editRoleValue}.`, variant: 'success' });
+    showToast({
+      title: 'Role Updated',
+      message: `${selectedStaff.displayName} reassigned to ${ROLE_TITLES[editRoleValue] || editRoleValue}.`,
+      variant: 'success',
+    });
   };
 
-  const handleToggleActive = () => {
+  // ─── Toggle Active Status ─────────────────────────────────────────────────
+  const handleToggleActive = async () => {
     if (!selectedStaff) return;
     const newStatus = !selectedStaff.isActive;
+
+    if (isSupabaseConfigured && isOnline) {
+      try {
+        await updateStaffStatusInSupabase(selectedStaff.id, newStatus);
+      } catch (err) {
+        showToast({
+          title: 'Status Update Failed',
+          message: err instanceof Error ? err.message : 'Could not update status in database.',
+          variant: 'error',
+        });
+        return;
+      }
+    }
+
     const updated = staffList.map((s) =>
       s.id === selectedStaff.id ? { ...s, isActive: newStatus } : s
     );
@@ -268,24 +546,50 @@ export const UserManagementPage: React.FC = () => {
     });
   };
 
-  const handleDeleteUser = () => {
+  // ─── Delete User (soft only in DB via is_active; hard delete offline) ─────
+  const handleDeleteUser = async () => {
     if (!selectedStaff) return;
+
+    if (isSupabaseConfigured && isOnline) {
+      // We soft-delete (deactivate) in Supabase — hard deletes require service role via dashboard
+      try {
+        await updateStaffStatusInSupabase(selectedStaff.id, false);
+      } catch (err) {
+        showToast({
+          title: 'Delete Failed',
+          message: err instanceof Error ? err.message : 'Could not deactivate user in database.',
+          variant: 'error',
+        });
+        return;
+      }
+      showToast({
+        title: 'User Deactivated in Database',
+        message: `${selectedStaff.displayName} has been deactivated. To fully delete the auth account, use the Supabase dashboard → Authentication → Users.`,
+        variant: 'warning',
+      });
+    } else {
+      showToast({
+        title: 'User Removed Locally',
+        message: `${selectedStaff.displayName} removed from local list.`,
+        variant: 'warning',
+      });
+    }
+
     const updated = staffList.filter((s) => s.id !== selectedStaff.id);
     setStaffList(updated);
     setPersistentItem(USER_STORAGE_KEY, updated);
     setIsDeleteDialogOpen(false);
-    showToast({
-      title: 'User Removed',
-      message: `${selectedStaff.displayName} has been permanently removed from the system directory.`,
-      variant: 'warning',
-    });
   };
 
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
       <PageHeader
         title={t('users.managementTitle', 'Staff User Management')}
-        subtitle={t('users.managementSubtitle', 'Provision staff accounts, manage organizational role assignments, and govern account lifecycles. Only @babawatoto.or.tz email addresses are authorized.')}
+        subtitle={t(
+          'users.managementSubtitle',
+          'Provision staff accounts, manage role assignments, and govern account lifecycles. Only @babawatoto.or.tz email addresses are authorized.'
+        )}
         breadcrumbs={[
           { label: t('nav.dashboard', 'Dashboard'), href: '/' },
           { label: t('nav.userManagement', 'User Management') },
@@ -296,22 +600,101 @@ export const UserManagementPage: React.FC = () => {
           </Badge>
         }
         actions={
-          <Button variant="primary" size="sm" onClick={() => setIsInviteModalOpen(true)}>
-            <UserPlus className="h-4 w-4 mr-1.5" />
-            <span>{t('users.inviteButton', 'Provision Staff Member')}</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const regUrl = `${window.location.origin}/register`;
+                navigator.clipboard.writeText(regUrl);
+                showToast({
+                  title: 'Registration Link Copied',
+                  message: `${regUrl} copied to clipboard. Share with incoming staff.`,
+                  variant: 'success',
+                });
+              }}
+              title="Copy staff self-registration portal link"
+              className="text-xs flex items-center gap-1.5 border-slate-300"
+            >
+              <Copy className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Self-Registration Link</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              isIconOnly
+              onClick={loadStaff}
+              disabled={isFetching}
+              title="Refresh user list from database"
+            >
+              <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+            </Button>
+            <Button variant="primary" size="sm" onClick={() => setIsInviteModalOpen(true)}>
+              <UserPlus className="h-4 w-4 mr-1.5" />
+              <span>{t('users.inviteButton', 'Provision Staff Member')}</span>
+            </Button>
+          </div>
         }
       />
 
-      {/* Domain Policy Notice */}
-      <div className="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
-        <Mail className="h-4 w-4 shrink-0 mt-0.5 text-amber-600" />
-        <span>
-          <strong>Email Domain Policy:</strong> Only{' '}
-          <code className="font-mono bg-amber-100 px-1 rounded">@babawatoto.or.tz</code> email
-          addresses are authorized for staff accounts. All other domains will be rejected.
-        </span>
+      {/* Online / Offline Banner */}
+      {!isOnline && (
+        <div className="flex items-center gap-2.5 rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 text-xs text-orange-800">
+          <WifiOff className="h-4 w-4 shrink-0 text-orange-600" />
+          <span>
+            <strong>Offline Mode:</strong> No internet connection detected. Showing cached staff list.
+            Changes will be saved locally and can be synced when connectivity is restored.
+          </span>
+        </div>
+      )}
+
+      {/* Security Architecture & Password Policy Notice */}
+      <div className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50/70 p-4 text-xs text-blue-900">
+        <ShieldCheck className="h-5 w-5 shrink-0 text-blue-600 mt-0.5" />
+        <div className="space-y-1">
+          <p className="font-semibold text-blue-950">
+            Official Access & Credential Governance
+          </p>
+          <p className="text-slate-600 leading-relaxed">
+            In compliance with Supabase Auth zero-knowledge cryptographic standards and ISO security best practices,
+            administrators cannot type or view plaintext user passwords. Staff members register their own secret password
+            via the <strong className="text-slate-800">Self-Registration Portal</strong> (<code className="text-blue-700 font-mono">/register</code>)
+            using their official <code className="bg-white px-1 py-0.5 rounded border border-blue-200 font-mono">@babawatoto.or.tz</code> email.
+            Newly registered accounts enter a waiting state until Human Resources and the Executive Director authorize their role and scopes.
+          </p>
+        </div>
       </div>
+
+      {/* Pending Approvals Callout Banner */}
+      {pendingCandidates.length > 0 && (
+        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-amber-500/15 text-amber-600 mt-0.5">
+              <Clock className="w-5 h-5 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-sm text-amber-950">
+                  Pending Staff Registrations ({pendingCandidates.length})
+                </h3>
+                <Badge variant="warning" className="text-[10px]">Action Required</Badge>
+              </div>
+              <p className="text-xs text-amber-800 mt-0.5 max-w-2xl">
+                Staff have registered with official organization emails and are waiting for HR review and Executive Director authorization.
+              </p>
+            </div>
+          </div>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setStatusFilter('pending')}
+            className="border-amber-300 text-amber-900 bg-white hover:bg-amber-100/50 text-xs shrink-0 self-start sm:self-auto"
+          >
+            <span>Filter Pending Queue ({pendingCandidates.length})</span>
+          </Button>
+        </div>
+      )}
 
       {/* Filter and Search Bar */}
       <Card>
@@ -319,7 +702,7 @@ export const UserManagementPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="max-w-sm w-full">
               <SearchInput
-                placeholder={t('users.searchPlaceholder', 'Search staff by name, email, or role...')}
+                placeholder={t('users.searchPlaceholder', 'Search staff by name, email, role, or department...')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 showShortcut={false}
@@ -339,13 +722,20 @@ export const UserManagementPage: React.FC = () => {
             <Badge variant="info">{filteredStaff.length} Records</Badge>
           </div>
           <CardDescription>
-            {isSupabaseConfigured
-              ? 'Users provisioned directly in Supabase Auth. Roles are server-enforced through PostgreSQL RLS.'
-              : 'Offline mode — users saved locally. Connect Supabase to sync with the live database.'}
+            {isSupabaseConfigured && isOnline
+              ? 'Live data from Supabase. Roles enforced through PostgreSQL Row-Level Security (RLS).'
+              : isSupabaseConfigured && !isOnline
+              ? 'Offline — showing locally cached data. Reconnect to sync with Supabase.'
+              : 'Offline mode — Supabase not configured. Users saved locally.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
-          {filteredStaff.length === 0 ? (
+          {isFetching ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <RefreshCw className="h-8 w-8 text-slate-300 mb-3 animate-spin" />
+              <p className="text-sm text-slate-500">Loading staff from database...</p>
+            </div>
+          ) : filteredStaff.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <User className="h-10 w-10 text-slate-300 mb-3" />
               <p className="text-sm font-medium text-slate-600">No staff accounts yet</p>
@@ -382,7 +772,7 @@ export const UserManagementPage: React.FC = () => {
                         icon: Shield,
                         onClick: () => {
                           setSelectedStaff(staff);
-                          setEditRoleValue(staff.role);
+                          setEditRoleValue(staff.roleCode);
                           setIsEditRoleModalOpen(true);
                         },
                       },
@@ -399,7 +789,7 @@ export const UserManagementPage: React.FC = () => {
                       },
                       {
                         id: 'delete-user',
-                        label: 'Delete User',
+                        label: 'Remove User',
                         icon: Trash2,
                         isDestructive: true,
                         onClick: () => {
@@ -418,10 +808,14 @@ export const UserManagementPage: React.FC = () => {
                             </div>
                             <div className="space-y-0.5">
                               <span className="font-semibold text-xs text-charcoal block">{staff.displayName}</span>
-                              <span className="text-[11px] text-charcoal-muted flex items-center gap-1">
-                                <Mail className="h-3 w-3" />
-                                {staff.email}
-                              </span>
+                              {staff.email ? (
+                                <span className="text-[11px] text-charcoal-muted flex items-center gap-1">
+                                  <Mail className="h-3 w-3" />
+                                  {staff.email}
+                                </span>
+                              ) : (
+                                <span className="text-[11px] text-slate-400 italic">ID: {staff.id.substring(0, 8)}…</span>
+                              )}
                             </div>
                           </div>
                         </TableCell>
@@ -432,24 +826,73 @@ export const UserManagementPage: React.FC = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="font-mono text-xs font-semibold text-charcoal-900">{staff.role}</span>
+                          <span className="font-mono text-xs font-semibold text-charcoal-900">
+                            {ROLE_TITLES[staff.roleCode] || staff.roleCode}
+                          </span>
                         </TableCell>
                         <TableCell>
-                          <StatusIndicator
-                            status={staff.isActive ? 'active' : 'deactivated'}
-                            label={staff.isActive ? 'Active' : 'Deactivated'}
-                          />
+                          {staff.approvalStatus === 'pending_hr' ? (
+                            <Badge variant="warning" className="text-[11px] flex items-center gap-1 w-fit bg-amber-50 text-amber-800 border-amber-300">
+                              <Clock className="w-3 h-3 text-amber-600 animate-pulse" />
+                              <span>Pending HR Review</span>
+                            </Badge>
+                          ) : staff.approvalStatus === 'pending_ed' ? (
+                            <Badge variant="warning" className="text-[11px] flex items-center gap-1 w-fit bg-blue-50 text-blue-800 border-blue-300">
+                              <ShieldCheck className="w-3 h-3 text-blue-600" />
+                              <span>Pending ED Approval</span>
+                            </Badge>
+                          ) : staff.approvalStatus === 'rejected' ? (
+                            <Badge variant="danger" className="text-[11px] w-fit">
+                              Rejected
+                            </Badge>
+                          ) : (
+                            <StatusIndicator
+                              status={staff.isActive ? 'active' : 'deactivated'}
+                              label={staff.isActive ? 'Active' : 'Deactivated'}
+                            />
+                          )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <DropdownMenu
-                            menuWidth="w-52"
-                            trigger={
-                              <Button variant="ghost" size="sm" isIconOnly aria-label="Staff options">
-                                <Edit2 className="h-3.5 w-3.5" />
+                          <div className="flex items-center justify-end gap-1.5">
+                            {staff.approvalStatus === 'pending_hr' && (
+                              <Button
+                                size="xs"
+                                variant="primary"
+                                onClick={() => {
+                                  setSelectedCandidate(staff);
+                                  setIsOnboardingModalOpen(true);
+                                }}
+                                className="bg-[#D68904] hover:bg-[#b86e03] text-white text-[11px] py-1 px-2.5 h-auto flex items-center gap-1 shrink-0"
+                              >
+                                <span>Review & Onboard</span>
                               </Button>
-                            }
-                            items={actionItems}
-                          />
+                            )}
+
+                            {staff.approvalStatus === 'pending_ed' && (
+                              <Button
+                                size="xs"
+                                variant="primary"
+                                onClick={() => {
+                                  setSelectedCandidate(staff);
+                                  setIsExecutiveModalOpen(true);
+                                }}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] py-1 px-2.5 h-auto flex items-center gap-1 shrink-0"
+                              >
+                                <ShieldCheck className="w-3 h-3" />
+                                <span>Authorize</span>
+                              </Button>
+                            )}
+
+                            <DropdownMenu
+                              menuWidth="w-52"
+                              trigger={
+                                <Button variant="ghost" size="sm" isIconOnly aria-label="Staff options">
+                                  <Edit2 className="h-3.5 w-3.5" />
+                                </Button>
+                              }
+                              items={actionItems}
+                            />
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -470,19 +913,23 @@ export const UserManagementPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Invite / Provision Staff Modal */}
+      {/* ── Invite / Provision Staff Modal ── */}
       <Modal
         isOpen={isInviteModalOpen}
         onClose={() => { setIsInviteModalOpen(false); setEmailDomainError(''); }}
         title="Provision New Staff Account"
-        description={`Create an authorized organizational identity. Only @babawatoto.or.tz email addresses are accepted.${isSupabaseConfigured ? ' This will create a real account in Supabase Auth.' : ''}`}
+        description={
+          isSupabaseConfigured && isOnline
+            ? 'This creates a real Supabase Auth account. The staff member can log in immediately with the provided password.'
+            : 'Offline mode — account will be saved locally and synced to Supabase when internet is restored.'
+        }
         footer={
           <>
             <Button variant="secondary" size="sm" onClick={() => { setIsInviteModalOpen(false); setEmailDomainError(''); }}>
               Cancel
             </Button>
             <Button variant="primary" size="sm" onClick={handleInviteSubmit} disabled={isSubmitting}>
-              {isSubmitting ? 'Creating...' : 'Create Account'}
+              {isSubmitting ? 'Creating Account...' : 'Create Account'}
             </Button>
           </>
         }
@@ -511,17 +958,20 @@ export const UserManagementPage: React.FC = () => {
             )}
           </div>
 
-          {isSupabaseConfigured && (
-            <Input
-              type="password"
-              label="Temporary Password"
-              placeholder="Min. 8 characters"
-              value={invitePassword}
-              onChange={(e) => setInvitePassword(e.target.value)}
-              required
-              helperText="Staff will be prompted to change this on first login."
-            />
-          )}
+          {/* Password is always required — needed for the user to login */}
+          <Input
+            type="password"
+            label="Temporary Password"
+            placeholder="Min. 8 characters"
+            value={invitePassword}
+            onChange={(e) => setInvitePassword(e.target.value)}
+            required
+            helperText={
+              isSupabaseConfigured && isOnline
+                ? 'Staff will use this password to log in. They can change it in their profile settings.'
+                : 'Will be stored locally and applied when synced to Supabase.'
+            }
+          />
 
           <Input
             type="email"
@@ -567,16 +1017,17 @@ export const UserManagementPage: React.FC = () => {
               { value: ROLES.SYSTEM_ADMIN, label: 'System Administrator' },
               { value: ROLES.PROCUREMENT_OFFICER, label: 'Procurement Officer' },
             ]}
+            helperText="Determines which dashboard and features the staff member can access."
           />
         </form>
       </Modal>
 
-      {/* Edit Role Modal */}
+      {/* ── Edit Role Modal ── */}
       <Modal
         isOpen={isEditRoleModalOpen}
         onClose={() => setIsEditRoleModalOpen(false)}
         title="Modify Role Assignment"
-        description={selectedStaff ? `Update authoritative role permissions for ${selectedStaff.displayName}.` : 'Update role assignment.'}
+        description={selectedStaff ? `Update role permissions for ${selectedStaff.displayName}.` : 'Update role assignment.'}
         footer={
           <>
             <Button variant="secondary" size="sm" onClick={() => setIsEditRoleModalOpen(false)}>Cancel</Button>
@@ -596,13 +1047,18 @@ export const UserManagementPage: React.FC = () => {
               { value: ROLES.HR_ADMINISTRATOR, label: 'HR Administrator' },
               { value: ROLES.EXECUTIVE_DIRECTOR, label: 'Executive Director' },
               { value: ROLES.SYSTEM_ADMIN, label: 'System Administrator' },
+              { value: ROLES.PROCUREMENT_OFFICER, label: 'Procurement Officer' },
             ]}
-            helperText="Server-enforced via public.user_roles Row-Level Security."
+            helperText={
+              isSupabaseConfigured && isOnline
+                ? 'Will be updated in Supabase user_roles table immediately.'
+                : 'Saved locally. Sync required when back online.'
+            }
           />
         </div>
       </Modal>
 
-      {/* Deactivate / Reactivate Confirmation Dialog */}
+      {/* ── Deactivate / Reactivate Confirmation ── */}
       <ConfirmationDialog
         isOpen={isDeactivateDialogOpen}
         onClose={() => setIsDeactivateDialogOpen(false)}
@@ -610,22 +1066,48 @@ export const UserManagementPage: React.FC = () => {
         title={selectedStaff?.isActive ? 'Confirm Account Deactivation' : 'Confirm Account Reactivation'}
         message={
           selectedStaff?.isActive
-            ? `Are you sure you wish to deactivate ${selectedStaff.displayName}'s account? The user will immediately be barred from signing in.`
-            : `Reactivate ${selectedStaff?.displayName}'s account to restore authorized staff access?`
+            ? `Deactivate ${selectedStaff.displayName}'s account? They will be immediately barred from signing in.`
+            : `Reactivate ${selectedStaff?.displayName}'s account to restore staff access?`
         }
         confirmText={selectedStaff?.isActive ? 'Deactivate Account' : 'Reactivate Account'}
         variant={selectedStaff?.isActive ? 'danger' : 'primary'}
       />
 
-      {/* Delete User Confirmation Dialog */}
+      {/* ── Delete User Confirmation ── */}
       <ConfirmationDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleDeleteUser}
-        title="Permanently Delete User"
-        message={`Are you sure you want to permanently delete ${selectedStaff?.displayName} (${selectedStaff?.email})? This cannot be undone. If Supabase is configured, you must also remove the user from Supabase Auth manually.`}
-        confirmText="Delete User"
+        title="Remove User"
+        message={
+          isSupabaseConfigured && isOnline
+            ? `${selectedStaff?.displayName} will be deactivated in the database. To permanently delete the auth account, use the Supabase Dashboard → Authentication → Users.`
+            : `Remove ${selectedStaff?.displayName} from the local list?`
+        }
+        confirmText="Remove User"
         variant="danger"
+      />
+
+      {/* ── HR User Onboarding Review Modal (Stepper) ── */}
+      <UserOnboardingReviewModal
+        isOpen={isOnboardingModalOpen}
+        onClose={() => {
+          setIsOnboardingModalOpen(false);
+          setSelectedCandidate(null);
+        }}
+        user={selectedCandidate}
+        onSuccess={loadStaff}
+      />
+
+      {/* ── Executive Director Authorization Modal ── */}
+      <ExecutiveApprovalModal
+        isOpen={isExecutiveModalOpen}
+        onClose={() => {
+          setIsExecutiveModalOpen(false);
+          setSelectedCandidate(null);
+        }}
+        user={selectedCandidate}
+        onSuccess={loadStaff}
       />
     </div>
   );

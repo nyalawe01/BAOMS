@@ -83,8 +83,8 @@ export const HrAdministratorDashboard: React.FC = () => {
             decisionNotes: 'Approved by HR Administrator upon checking entitlements.',
           },
           {
-            id: user?.id || '00000000-0000-0000-0000-000000000006',
-            displayName: user?.email || 'Amina L. Kimaro',
+            id: user?.id || '',
+            displayName: user?.name || user?.email || 'HR Administrator',
             roles: roles || ['hr_administrator'],
           }
         );
@@ -129,8 +129,8 @@ export const HrAdministratorDashboard: React.FC = () => {
             decisionNotes: comment,
           },
           {
-            id: user?.id || '00000000-0000-0000-0000-000000000006',
-            displayName: user?.email || 'Amina L. Kimaro',
+            id: user?.id || '',
+            displayName: user?.name || user?.email || 'HR Administrator',
             roles: roles || ['hr_administrator'],
           }
         );

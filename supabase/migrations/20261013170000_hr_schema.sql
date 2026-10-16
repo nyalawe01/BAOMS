@@ -166,19 +166,23 @@ CREATE INDEX IF NOT EXISTS idx_staff_checklists_type ON public.staff_checklists(
 -- ------------------------------------------------------------------------------
 -- Triggers for Updated At timestamps
 -- ------------------------------------------------------------------------------
-CREATE OR REPLACE TRIGGER trg_staff_profiles_updated_at
+DROP TRIGGER IF EXISTS trg_staff_profiles_updated_at ON public.staff_profiles;
+CREATE TRIGGER trg_staff_profiles_updated_at
     BEFORE UPDATE ON public.staff_profiles
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
-CREATE OR REPLACE TRIGGER trg_leave_balances_updated_at
+DROP TRIGGER IF EXISTS trg_leave_balances_updated_at ON public.leave_balances;
+CREATE TRIGGER trg_leave_balances_updated_at
     BEFORE UPDATE ON public.leave_balances
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
-CREATE OR REPLACE TRIGGER trg_leave_requests_updated_at
+DROP TRIGGER IF EXISTS trg_leave_requests_updated_at ON public.leave_requests;
+CREATE TRIGGER trg_leave_requests_updated_at
     BEFORE UPDATE ON public.leave_requests
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
-CREATE OR REPLACE TRIGGER trg_staff_checklists_updated_at
+DROP TRIGGER IF EXISTS trg_staff_checklists_updated_at ON public.staff_checklists;
+CREATE TRIGGER trg_staff_checklists_updated_at
     BEFORE UPDATE ON public.staff_checklists
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 

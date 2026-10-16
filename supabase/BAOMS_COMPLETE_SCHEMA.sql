@@ -149,6 +149,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Compatible alias for update_updated_at_column
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = timezone('utc'::text, now());
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Trigger applications for updated_at
 DROP TRIGGER IF EXISTS trg_departments_updated_at ON public.departments;
 CREATE TRIGGER trg_departments_updated_at
@@ -2025,19 +2034,23 @@ CREATE INDEX IF NOT EXISTS idx_staff_checklists_type ON public.staff_checklists(
 -- ------------------------------------------------------------------------------
 -- Triggers for Updated At timestamps
 -- ------------------------------------------------------------------------------
-CREATE OR REPLACE TRIGGER trg_staff_profiles_updated_at
+DROP TRIGGER IF EXISTS trg_staff_profiles_updated_at ON public.staff_profiles;
+CREATE TRIGGER trg_staff_profiles_updated_at
     BEFORE UPDATE ON public.staff_profiles
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
-CREATE OR REPLACE TRIGGER trg_leave_balances_updated_at
+DROP TRIGGER IF EXISTS trg_leave_balances_updated_at ON public.leave_balances;
+CREATE TRIGGER trg_leave_balances_updated_at
     BEFORE UPDATE ON public.leave_balances
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
-CREATE OR REPLACE TRIGGER trg_leave_requests_updated_at
+DROP TRIGGER IF EXISTS trg_leave_requests_updated_at ON public.leave_requests;
+CREATE TRIGGER trg_leave_requests_updated_at
     BEFORE UPDATE ON public.leave_requests
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
-CREATE OR REPLACE TRIGGER trg_staff_checklists_updated_at
+DROP TRIGGER IF EXISTS trg_staff_checklists_updated_at ON public.staff_checklists;
+CREATE TRIGGER trg_staff_checklists_updated_at
     BEFORE UPDATE ON public.staff_checklists
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
@@ -2414,7 +2427,7 @@ CREATE POLICY "correspondence_select_policy" ON public.correspondence
             SELECT 1 FROM public.user_roles ur
             JOIN public.roles r ON ur.role_id = r.id
             WHERE ur.user_id = auth.uid()
-            AND r.name IN ('system_admin', 'executive_director')
+            AND r.code IN ('system_admin', 'executive_director')
         )
         OR
         -- Non-confidential correspondence is visible to all authenticated staff
@@ -2435,7 +2448,7 @@ CREATE POLICY "correspondence_update_policy" ON public.correspondence
             SELECT 1 FROM public.user_roles ur
             JOIN public.roles r ON ur.role_id = r.id
             WHERE ur.user_id = auth.uid()
-            AND r.name IN ('system_admin', 'executive_director', 'project_manager')
+            AND r.code IN ('system_admin', 'executive_director', 'project_manager')
         )
         OR registered_by = auth.uid()
     );
@@ -2447,7 +2460,7 @@ CREATE POLICY "meetings_select_policy" ON public.meetings
             SELECT 1 FROM public.user_roles ur
             JOIN public.roles r ON ur.role_id = r.id
             WHERE ur.user_id = auth.uid()
-            AND r.name IN ('system_admin', 'executive_director')
+            AND r.code IN ('system_admin', 'executive_director')
         )
         OR confidentiality_level != 'confidential'
         OR chairperson_id = auth.uid()
@@ -2465,7 +2478,7 @@ CREATE POLICY "meetings_insert_update_policy" ON public.meetings
             SELECT 1 FROM public.user_roles ur
             JOIN public.roles r ON ur.role_id = r.id
             WHERE ur.user_id = auth.uid()
-            AND r.name IN ('system_admin', 'executive_director', 'project_manager', 'hr_administrator')
+            AND r.code IN ('system_admin', 'executive_director', 'project_manager', 'hr_administrator')
         )
     );
 
@@ -2564,10 +2577,8 @@ ON CONFLICT (id) DO UPDATE SET
 
 -- ------------------------------------------------------------------------------
 -- 2. ROW-LEVEL SECURITY (RLS) FOR STORAGE OBJECTS
--- ------------------------------------------------------------------------------
-
--- Ensure RLS is active on storage.objects
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+-- Ensure RLS is active on storage.objects (Supabase enables this by default)
+-- RLS policies on storage.objects:
 
 -- 2.1 DOCUMENTS BUCKET POLICIES
 DROP POLICY IF EXISTS "documents_read_authenticated" ON storage.objects;
@@ -2661,5 +2672,383 @@ USING (
     bucket_id = 'staff_dossiers'
     AND (public.is_admin() OR public.has_permission('hr.manage'))
 );
+
+
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+-- START OF MODULE: 20261016083000_email_domain_restriction.sql
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+CREATE OR REPLACE FUNCTION public.enforce_email_domain()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  IF NEW.email IS NULL OR NEW.email NOT ILIKE '%@babawatoto.or.tz' THEN
+    RAISE EXCEPTION
+      'Registration denied: Only @babawatoto.or.tz email addresses are authorized. Received: %',
+      COALESCE(NEW.email, 'NULL')
+      USING ERRCODE = 'check_violation';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_enforce_email_domain ON auth.users;
+CREATE TRIGGER trg_enforce_email_domain
+  BEFORE INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.enforce_email_domain();
+
+
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+-- START OF MODULE: 20261016090000_user_self_registration_and_approval_workflow.sql
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'approval_status'
+    ) THEN
+        ALTER TABLE public.profiles 
+        ADD COLUMN approval_status TEXT NOT NULL DEFAULT 'pending_hr' 
+        CHECK (approval_status IN ('pending_hr', 'pending_ed', 'approved', 'rejected'));
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'official_email'
+    ) THEN
+        ALTER TABLE public.profiles ADD COLUMN official_email TEXT;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'staged_details'
+    ) THEN
+        ALTER TABLE public.profiles ADD COLUMN staged_details JSONB NOT NULL DEFAULT '{}'::jsonb;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'hr_reviewed_by'
+    ) THEN
+        ALTER TABLE public.profiles ADD COLUMN hr_reviewed_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'hr_reviewed_at'
+    ) THEN
+        ALTER TABLE public.profiles ADD COLUMN hr_reviewed_at TIMESTAMPTZ;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'ed_approved_by'
+    ) THEN
+        ALTER TABLE public.profiles ADD COLUMN ed_approved_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'ed_approved_at'
+    ) THEN
+        ALTER TABLE public.profiles ADD COLUMN ed_approved_at TIMESTAMPTZ;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'rejection_reason'
+    ) THEN
+        ALTER TABLE public.profiles ADD COLUMN rejection_reason TEXT;
+    END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_profiles_approval_status ON public.profiles(approval_status);
+CREATE INDEX IF NOT EXISTS idx_profiles_official_email ON public.profiles(official_email);
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+DECLARE
+    default_name TEXT;
+    default_lang TEXT;
+    default_phone TEXT;
+BEGIN
+    default_name := COALESCE(
+        NEW.raw_user_meta_data->>'full_name',
+        NEW.raw_user_meta_data->>'name',
+        split_part(NEW.email, '@', 1),
+        'BAO Staff Member'
+    );
+    default_lang := COALESCE(
+        NEW.raw_user_meta_data->>'preferred_language',
+        'en'
+    );
+    default_phone := NEW.raw_user_meta_data->>'phone';
+
+    IF default_lang NOT IN ('en', 'sw') THEN
+        default_lang := 'en';
+    END IF;
+
+    INSERT INTO public.profiles (
+        id, 
+        display_name, 
+        official_email, 
+        phone_number, 
+        preferred_language, 
+        is_active, 
+        approval_status, 
+        staged_details
+    )
+    VALUES (
+        NEW.id, 
+        default_name, 
+        NEW.email, 
+        default_phone, 
+        default_lang, 
+        true, 
+        'pending_hr', 
+        '{}'::jsonb
+    )
+    ON CONFLICT (id) DO UPDATE SET
+        official_email = EXCLUDED.official_email,
+        display_name = CASE WHEN profiles.display_name = 'BAO Staff Member' THEN EXCLUDED.display_name ELSE profiles.display_name END;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public.hr_submit_user_dossier(
+    p_user_id UUID,
+    p_department_id UUID,
+    p_staged_details JSONB
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_actor UUID := auth.uid();
+BEGIN
+    IF NOT (public.has_role('hr_administrator') OR public.is_admin()) THEN
+        RAISE EXCEPTION 'Access denied: Only HR Administrator or System Administrator can review user dossiers.';
+    END IF;
+
+    UPDATE public.profiles
+    SET 
+        department_id = p_department_id,
+        staged_details = p_staged_details,
+        approval_status = 'pending_ed',
+        hr_reviewed_by = v_actor,
+        hr_reviewed_at = timezone('utc'::text, now()),
+        updated_at = timezone('utc'::text, now())
+    WHERE id = p_user_id;
+
+    PERFORM public.log_audit_event(
+        'HR_SUBMITTED_USER_DOSSIER',
+        'profile',
+        p_user_id::text,
+        jsonb_build_object(
+            'department_id', p_department_id,
+            'target_user_id', p_user_id
+        )
+    );
+
+    RETURN jsonb_build_object('success', true, 'status', 'pending_ed');
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.ed_approve_user(
+    p_user_id UUID,
+    p_role_code TEXT,
+    p_department_id UUID DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_actor UUID := auth.uid();
+    v_role_id UUID;
+    v_final_dept_id UUID := p_department_id;
+    v_profile RECORD;
+BEGIN
+    IF NOT (public.has_role('executive_director') OR public.is_admin()) THEN
+        RAISE EXCEPTION 'Access denied: Only the Executive Director or System Administrator can grant final authorization.';
+    END IF;
+
+    SELECT id INTO v_role_id FROM public.roles WHERE code = p_role_code;
+    IF v_role_id IS NULL THEN
+        RAISE EXCEPTION 'Role with code % does not exist.', p_role_code;
+    END IF;
+
+    SELECT * INTO v_profile FROM public.profiles WHERE id = p_user_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Profile % not found.', p_user_id;
+    END IF;
+
+    IF v_final_dept_id IS NULL THEN
+        v_final_dept_id := v_profile.department_id;
+    END IF;
+
+    UPDATE public.profiles
+    SET 
+        approval_status = 'approved',
+        department_id = v_final_dept_id,
+        is_active = true,
+        ed_approved_by = v_actor,
+        ed_approved_at = timezone('utc'::text, now()),
+        updated_at = timezone('utc'::text, now())
+    WHERE id = p_user_id;
+
+    DELETE FROM public.user_roles WHERE user_id = p_user_id;
+    INSERT INTO public.user_roles (user_id, role_id, assigned_by)
+    VALUES (p_user_id, v_role_id, v_actor);
+
+    PERFORM public.log_audit_event(
+        'ED_APPROVED_USER_ACCESS',
+        'profile',
+        p_user_id::text,
+        jsonb_build_object(
+            'role_code', p_role_code,
+            'department_id', v_final_dept_id,
+            'target_user_id', p_user_id
+        )
+    );
+
+    RETURN jsonb_build_object('success', true, 'status', 'approved');
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.reject_user_registration(
+    p_user_id UUID,
+    p_reason TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    IF NOT (public.has_role('hr_administrator') OR public.has_role('executive_director') OR public.is_admin()) THEN
+        RAISE EXCEPTION 'Access denied: Insufficient permissions to reject user.';
+    END IF;
+
+    UPDATE public.profiles
+    SET 
+        approval_status = 'rejected',
+        rejection_reason = p_reason,
+        is_active = false,
+        updated_at = timezone('utc'::text, now())
+    WHERE id = p_user_id;
+
+    PERFORM public.log_audit_event(
+        'USER_REGISTRATION_REJECTED',
+        'profile',
+        p_user_id::text,
+        jsonb_build_object('reason', p_reason)
+    );
+
+    RETURN jsonb_build_object('success', true, 'status', 'rejected');
+END;
+$$;
+
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+-- START OF MODULE: 20261016100000_seed_admin_user.sql
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+-- ==============================================================================
+-- Provision System Administrator in auth.users, profiles, and user_roles
+-- ==============================================================================
+DO $$
+DECLARE
+    v_admin_id UUID;
+    v_dept_id UUID;
+    v_role_id UUID;
+BEGIN
+    SELECT id INTO v_dept_id FROM public.departments WHERE code = 'ADMIN' LIMIT 1;
+    SELECT id INTO v_role_id FROM public.roles WHERE code = 'system_admin' LIMIT 1;
+
+    SELECT id INTO v_admin_id FROM auth.users WHERE email = 'admin@babawatoto.or.tz';
+
+    IF v_admin_id IS NULL THEN
+        v_admin_id := '76a9777b-d93c-479c-9391-3cff9b3f8ec1'::UUID;
+
+        INSERT INTO auth.users (
+            instance_id,
+            id,
+            aud,
+            role,
+            email,
+            encrypted_password,
+            email_confirmed_at,
+            raw_app_meta_data,
+            raw_user_meta_data,
+            created_at,
+            updated_at,
+            confirmation_token
+        ) VALUES (
+            '00000000-0000-0000-0000-000000000000',
+            v_admin_id,
+            'authenticated',
+            'authenticated',
+            'admin@babawatoto.or.tz',
+            crypt('Admin@BabaWatoto2026!', gen_salt('bf')),
+            timezone('utc'::text, now()),
+            '{"provider":"email","providers":["email"]}',
+            '{"full_name":"System Administrator","role":"system_admin"}',
+            timezone('utc'::text, now()),
+            timezone('utc'::text, now()),
+            ''
+        )
+        ON CONFLICT (id) DO UPDATE SET
+            encrypted_password = crypt('Admin@BabaWatoto2026!', gen_salt('bf')),
+            email_confirmed_at = COALESCE(auth.users.email_confirmed_at, timezone('utc'::text, now())),
+            updated_at = timezone('utc'::text, now());
+    ELSE
+        UPDATE auth.users
+        SET 
+            encrypted_password = crypt('Admin@BabaWatoto2026!', gen_salt('bf')),
+            email_confirmed_at = COALESCE(email_confirmed_at, timezone('utc'::text, now())),
+            updated_at = timezone('utc'::text, now())
+        WHERE id = v_admin_id;
+    END IF;
+
+    INSERT INTO public.profiles (
+        id,
+        display_name,
+        preferred_language,
+        department_id,
+        is_active,
+        approval_status,
+        official_email
+    ) VALUES (
+        v_admin_id,
+        'System Administrator',
+        'en',
+        v_dept_id,
+        true,
+        'approved',
+        'admin@babawatoto.or.tz'
+    )
+    ON CONFLICT (id) DO UPDATE SET
+        display_name = 'System Administrator',
+        department_id = COALESCE(v_dept_id, public.profiles.department_id),
+        is_active = true,
+        approval_status = 'approved',
+        official_email = 'admin@babawatoto.or.tz',
+        updated_at = timezone('utc'::text, now());
+
+    IF v_role_id IS NOT NULL THEN
+        INSERT INTO public.user_roles (user_id, role_id)
+        VALUES (v_admin_id, v_role_id)
+        ON CONFLICT (user_id, role_id) DO NOTHING;
+    END IF;
+
+    RAISE NOTICE 'Admin user provisioned successfully with ID: %', v_admin_id;
+END $$;
+
+
 
 

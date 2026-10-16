@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AppShell } from '@/components/layout/AppShell';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 import { SignInPage } from '@/features/auth/pages/SignInPage';
+import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { PasswordResetPage } from '@/features/auth/pages/PasswordResetPage';
 import { AccountDeactivatedPage } from '@/features/auth/pages/AccountDeactivatedPage';
 import { AccessDeniedPage } from '@/features/auth/pages/AccessDeniedPage';
@@ -38,6 +39,7 @@ export const AppRoutes: React.FC = () => {
     <Routes>
       {/* Standalone Authentication & Lifecycle Routes */}
       <Route path="/login" element={<SignInPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route path="/reset-password" element={<PasswordResetPage />} />
       <Route path="/account-deactivated" element={<AccountDeactivatedPage />} />
 
