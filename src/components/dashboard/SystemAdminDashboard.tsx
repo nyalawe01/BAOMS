@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/Button';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
 import { getAuditLogs } from '@/features/audit/services/auditService';
 import { AuditLogRecord } from '@/features/audit/types/audit';
-import { getPersistentItem, setPersistentItem } from '@/lib/storageSync';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 interface AdminStaffUser {
@@ -84,21 +83,17 @@ export const SystemAdminDashboard: React.FC = () => {
           });
 
           setUsers(liveUsers);
-          setPersistentItem('baoms_users_cache', liveUsers);
         } else {
-          const cached = getPersistentItem<AdminStaffUser[]>('baoms_users_cache', () => []);
-          setUsers(cached);
+          setUsers([]);
         }
       } catch (err) {
-        console.warn('Falling back to local cached users:', err);
+        console.warn('Error fetching users from Supabase:', err);
         setIsLiveConnected(false);
-        const cached = getPersistentItem<AdminStaffUser[]>('baoms_users_cache', () => []);
-        setUsers(cached);
+        setUsers([]);
       }
     } else {
       setIsLiveConnected(false);
-      const cached = getPersistentItem<AdminStaffUser[]>('baoms_users_cache', () => []);
-      setUsers(cached);
+      setUsers([]);
     }
 
     // 2. Fetch live audit events

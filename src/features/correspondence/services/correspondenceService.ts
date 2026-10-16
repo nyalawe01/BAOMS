@@ -2,9 +2,10 @@
  * BAOMS Phase 10: Correspondence & Meetings Service Layer
  * Babawatoto Organization Management System
  * 
- * Supports dual-mode architecture: live Supabase PostgreSQL (RLS) with 100% in-memory fallback.
- * Enforces role-based scoping, confidentiality controls, sequential reference generation,
- * and meeting follow-up task tracking.
+ * Strict Database-Driven Architecture:
+ * All correspondence, meetings, attendees, decisions, and action items
+ * are queried and persisted exclusively via Supabase PostgreSQL.
+ * No mock data or offline fallbacks.
  */
 
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
@@ -23,47 +24,9 @@ import {
   CreateMeetingActionPayload,
   UpdateMeetingActionPayload,
 } from '../types/correspondence';
-import {
-  INITIAL_MOCK_CORRESPONDENCE,
-  INITIAL_MOCK_MEETINGS,
-  INITIAL_MOCK_ATTENDEES,
-  INITIAL_MOCK_DECISIONS,
-  INITIAL_MOCK_ACTIONS,
-} from '../data/mockCorrespondence';
-import { getPersistentItem, setPersistentItem } from '@/lib/storageSync';
 
-const CORR_STORAGE_KEYS = {
-  CORRESPONDENCE: 'baoms_correspondence',
-  MEETINGS: 'baoms_meetings',
-  ATTENDEES: 'baoms_meeting_attendees',
-  DECISIONS: 'baoms_meeting_decisions',
-  ACTIONS: 'baoms_meeting_actions',
-};
-
-// In-Memory persistent state
-let mockCorrespondence: CorrespondenceRecord[] = getPersistentItem(CORR_STORAGE_KEYS.CORRESPONDENCE, () => [
-  ...INITIAL_MOCK_CORRESPONDENCE,
-]);
-let mockMeetings: MeetingRecord[] = getPersistentItem(CORR_STORAGE_KEYS.MEETINGS, () => [
-  ...INITIAL_MOCK_MEETINGS,
-]);
-let mockAttendees: MeetingAttendeeRecord[] = getPersistentItem(CORR_STORAGE_KEYS.ATTENDEES, () => [
-  ...INITIAL_MOCK_ATTENDEES,
-]);
-let mockDecisions: MeetingDecisionRecord[] = getPersistentItem(CORR_STORAGE_KEYS.DECISIONS, () => [
-  ...INITIAL_MOCK_DECISIONS,
-]);
-let mockActions: MeetingActionRecord[] = getPersistentItem(CORR_STORAGE_KEYS.ACTIONS, () => [
-  ...INITIAL_MOCK_ACTIONS,
-]);
-
-const syncCorrespondenceState = (): void => {
-  setPersistentItem(CORR_STORAGE_KEYS.CORRESPONDENCE, mockCorrespondence);
-  setPersistentItem(CORR_STORAGE_KEYS.MEETINGS, mockMeetings);
-  setPersistentItem(CORR_STORAGE_KEYS.ATTENDEES, mockAttendees);
-  setPersistentItem(CORR_STORAGE_KEYS.DECISIONS, mockDecisions);
-  setPersistentItem(CORR_STORAGE_KEYS.ACTIONS, mockActions);
-};
+export const syncCorrespondenceState = (): void => {};
+export const resetMockCorrespondenceData = (): void => {};
 
 /**
  * Helper to compute whether an action item is overdue
@@ -87,61 +50,58 @@ export async function getCorrespondence(
   },
   currentUser?: { id: string; roles: string[] }
 ): Promise<CorrespondenceRecord[]> {
-  if (isSupabaseConfigured) {
-    try {
-      let query = supabase.from('correspondence').select(`
-        *,
-        project:projects(name),
-        document:documents(title, reference_number)
-      `);
+  if (!isSupabaseConfigured) return [];
 
-      if (filters?.direction && filters.direction !== 'all') {
-        query = query.eq('direction', filters.direction);
-      }
-      if (filters?.category && filters.category !== 'all') {
-        query = query.eq('category', filters.category);
-      }
-      if (filters?.status && filters.status !== 'all') {
-        query = query.eq('status', filters.status);
-      }
-      if (filters?.projectId && filters.projectId !== 'all') {
-        query = query.eq('project_id', filters.projectId);
-      }
+  let query = supabase.from('correspondence').select(`
+    *,
+    project:projects(name),
+    document:documents(title, reference_number),
+    registrar:profiles!registered_by(display_name)
+  `).order('correspondence_date', { ascending: false });
 
-      const { data, error } = await query;
-      if (!error && data) {
-        return data.map((item: any) => ({
-          id: item.id,
-          referenceNumber: item.reference_number,
-          direction: item.direction,
-          sender: item.sender,
-          recipient: item.recipient,
-          subject: item.subject,
-          correspondenceDate: item.correspondence_date,
-          category: item.category,
-          projectId: item.project_id,
-          projectName: item.project?.name || null,
-          documentId: item.document_id,
-          documentTitle: item.document?.title || null,
-          documentNumber: item.document?.reference_number || null,
-          status: item.status,
-          confidentialityLevel: item.confidentiality_level,
-          notes: item.notes,
-          registeredBy: item.registered_by,
-          registeredByName: null,
-          createdAt: item.created_at,
-          updatedAt: item.updated_at,
-        }));
-      }
-    } catch {
-      // Fall through to in-memory fallback
-    }
+  if (filters?.direction && filters.direction !== 'all') {
+    query = query.eq('direction', filters.direction);
+  }
+  if (filters?.category && filters.category !== 'all') {
+    query = query.eq('category', filters.category);
+  }
+  if (filters?.status && filters.status !== 'all') {
+    query = query.eq('status', filters.status);
+  }
+  if (filters?.projectId && filters.projectId !== 'all') {
+    query = query.eq('project_id', filters.projectId);
   }
 
-  // In-Memory Fallback
-  let results = [...mockCorrespondence];
+  const { data, error } = await query;
+  if (error || !data) {
+    console.error('[correspondenceService] Failed to fetch correspondence:', error);
+    return [];
+  }
 
-  // Confidentiality scoping:
+  let results: CorrespondenceRecord[] = data.map((item: any) => ({
+    id: item.id,
+    referenceNumber: item.reference_number,
+    direction: item.direction,
+    sender: item.sender,
+    recipient: item.recipient,
+    subject: item.subject,
+    correspondenceDate: item.correspondence_date,
+    category: item.category,
+    projectId: item.project_id,
+    projectName: item.project?.name || null,
+    documentId: item.document_id,
+    documentTitle: item.document?.title || null,
+    documentNumber: item.document?.reference_number || null,
+    status: item.status,
+    confidentialityLevel: item.confidentiality_level,
+    notes: item.notes,
+    registeredBy: item.registered_by,
+    registeredByName: item.registrar?.display_name || 'Staff Member',
+    createdAt: item.created_at,
+    updatedAt: item.updated_at,
+  }));
+
+  // Confidentiality scoping
   if (currentUser) {
     const isLeadership = currentUser.roles.some((r) =>
       ['system_admin', 'executive_director'].includes(r)
@@ -155,20 +115,6 @@ export async function getCorrespondence(
     }
   }
 
-  // Filters:
-  if (filters?.direction && filters.direction !== 'all') {
-    results = results.filter((c) => c.direction === filters.direction);
-  }
-  if (filters?.category && filters.category !== 'all') {
-    results = results.filter((c) => c.category === filters.category);
-  }
-  if (filters?.status && filters.status !== 'all') {
-    results = results.filter((c) => c.status === filters.status);
-  }
-  if (filters?.projectId && filters.projectId !== 'all') {
-    results = results.filter((c) => c.projectId === filters.projectId);
-  }
-
   if (filters?.search) {
     const q = filters.search.toLowerCase().trim();
     results = results.filter(
@@ -180,11 +126,7 @@ export async function getCorrespondence(
     );
   }
 
-  return results.sort(
-    (a, b) =>
-      new Date(b.correspondenceDate).getTime() -
-      new Date(a.correspondenceDate).getTime()
-  );
+  return results;
 }
 
 /**
@@ -193,8 +135,43 @@ export async function getCorrespondence(
 export async function getCorrespondenceById(
   id: string
 ): Promise<CorrespondenceRecord | null> {
-  const item = mockCorrespondence.find((c) => c.id === id);
-  return item || null;
+  if (!isSupabaseConfigured) return null;
+
+  const { data, error } = await supabase
+    .from('correspondence')
+    .select(`
+      *,
+      project:projects(name),
+      document:documents(title, reference_number),
+      registrar:profiles!registered_by(display_name)
+    `)
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  return {
+    id: data.id,
+    referenceNumber: data.reference_number,
+    direction: data.direction,
+    sender: data.sender,
+    recipient: data.recipient,
+    subject: data.subject,
+    correspondenceDate: data.correspondence_date,
+    category: data.category,
+    projectId: data.project_id,
+    projectName: data.project?.name || null,
+    documentId: data.document_id,
+    documentTitle: data.document?.title || null,
+    documentNumber: data.document?.reference_number || null,
+    status: data.status,
+    confidentialityLevel: data.confidentiality_level,
+    notes: data.notes,
+    registeredBy: data.registered_by,
+    registeredByName: data.registrar?.display_name || 'Staff Member',
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
 }
 
 /**
@@ -204,40 +181,70 @@ export async function createCorrespondence(
   payload: CreateCorrespondencePayload,
   currentUser?: { id: string; displayName?: string }
 ): Promise<CorrespondenceRecord> {
+  if (!isSupabaseConfigured) throw new Error('Database is not configured.');
+
   const currentYear = new Date().getFullYear();
   const dirPrefix = payload.direction === 'incoming' ? 'IN' : 'OUT';
-  const matchingDir = mockCorrespondence.filter(
-    (c) => c.direction === payload.direction
-  );
-  const nextSeq = (matchingDir.length + 1).toString().padStart(3, '0');
+
+  const { count } = await supabase
+    .from('correspondence')
+    .select('*', { count: 'exact', head: true })
+    .eq('direction', payload.direction);
+
+  const nextSeq = ((count || 0) + 1).toString().padStart(3, '0');
   const referenceNumber = `COR-${dirPrefix}-${currentYear}-${nextSeq}`;
 
-  const newRecord: CorrespondenceRecord = {
-    id: `cor-${Date.now()}`,
-    referenceNumber,
-    direction: payload.direction,
-    sender: payload.sender.trim(),
-    recipient: payload.recipient.trim(),
-    subject: payload.subject.trim(),
-    correspondenceDate: payload.correspondenceDate,
-    category: payload.category,
-    projectId: payload.projectId || null,
-    projectName: null,
-    documentId: payload.documentId || null,
-    documentTitle: null,
-    documentNumber: null,
-    status: payload.direction === 'incoming' ? 'received' : 'draft',
-    confidentialityLevel: payload.confidentialityLevel || 'internal',
-    notes: payload.notes?.trim() || null,
-    registeredBy: currentUser?.id || 'sys-admin',
-    registeredByName: currentUser?.displayName || 'System Admin',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
+  const { data, error } = await supabase
+    .from('correspondence')
+    .insert({
+      reference_number: referenceNumber,
+      direction: payload.direction,
+      sender: payload.sender.trim(),
+      recipient: payload.recipient.trim(),
+      subject: payload.subject.trim(),
+      correspondence_date: payload.correspondenceDate,
+      category: payload.category,
+      project_id: payload.projectId || null,
+      document_id: payload.documentId || null,
+      status: payload.direction === 'incoming' ? 'received' : 'draft',
+      confidentiality_level: payload.confidentialityLevel || 'internal',
+      notes: payload.notes?.trim() || null,
+      registered_by: currentUser?.id || null,
+    })
+    .select(`
+      *,
+      project:projects(name),
+      document:documents(title, reference_number),
+      registrar:profiles!registered_by(display_name)
+    `)
+    .single();
 
-  mockCorrespondence = [newRecord, ...mockCorrespondence];
-  syncCorrespondenceState();
-  return newRecord;
+  if (error || !data) {
+    throw new Error(`Failed to create correspondence: ${error?.message}`);
+  }
+
+  return {
+    id: data.id,
+    referenceNumber: data.reference_number,
+    direction: data.direction,
+    sender: data.sender,
+    recipient: data.recipient,
+    subject: data.subject,
+    correspondenceDate: data.correspondence_date,
+    category: data.category,
+    projectId: data.project_id,
+    projectName: data.project?.name || null,
+    documentId: data.document_id,
+    documentTitle: data.document?.title || null,
+    documentNumber: data.document?.reference_number || null,
+    status: data.status,
+    confidentialityLevel: data.confidentiality_level,
+    notes: data.notes,
+    registeredBy: data.registered_by,
+    registeredByName: data.registrar?.display_name || currentUser?.displayName || 'Staff Member',
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
 }
 
 /**
@@ -247,21 +254,56 @@ export async function updateCorrespondence(
   id: string,
   payload: Partial<CorrespondenceRecord>
 ): Promise<CorrespondenceRecord> {
-  const index = mockCorrespondence.findIndex((c) => c.id === id);
-  if (index === -1) {
-    throw new Error('Correspondence record not found.');
-  }
+  if (!isSupabaseConfigured) throw new Error('Database is not configured.');
 
-  const existing = mockCorrespondence[index]!;
-  const updated: CorrespondenceRecord = {
-    ...existing,
-    ...payload,
-    updatedAt: new Date().toISOString(),
+  const updateFields: Record<string, any> = {
+    updated_at: new Date().toISOString(),
   };
 
-  mockCorrespondence[index] = updated;
-  syncCorrespondenceState();
-  return updated;
+  if (payload.status !== undefined) updateFields.status = payload.status;
+  if (payload.notes !== undefined) updateFields.notes = payload.notes;
+  if (payload.confidentialityLevel !== undefined) updateFields.confidentiality_level = payload.confidentialityLevel;
+  if (payload.category !== undefined) updateFields.category = payload.category;
+  if (payload.documentId !== undefined) updateFields.document_id = payload.documentId;
+
+  const { data, error } = await supabase
+    .from('correspondence')
+    .update(updateFields)
+    .eq('id', id)
+    .select(`
+      *,
+      project:projects(name),
+      document:documents(title, reference_number),
+      registrar:profiles!registered_by(display_name)
+    `)
+    .single();
+
+  if (error || !data) {
+    throw new Error(`Failed to update correspondence: ${error?.message}`);
+  }
+
+  return {
+    id: data.id,
+    referenceNumber: data.reference_number,
+    direction: data.direction,
+    sender: data.sender,
+    recipient: data.recipient,
+    subject: data.subject,
+    correspondenceDate: data.correspondence_date,
+    category: data.category,
+    projectId: data.project_id,
+    projectName: data.project?.name || null,
+    documentId: data.document_id,
+    documentTitle: data.document?.title || null,
+    documentNumber: data.document?.reference_number || null,
+    status: data.status,
+    confidentialityLevel: data.confidentiality_level,
+    notes: data.notes,
+    registeredBy: data.registered_by,
+    registeredByName: data.registrar?.display_name || 'Staff Member',
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
 }
 
 /**
@@ -284,7 +326,53 @@ export async function getMeetings(
   },
   currentUser?: { id: string; roles: string[] }
 ): Promise<MeetingRecord[]> {
-  let list = [...mockMeetings];
+  if (!isSupabaseConfigured) return [];
+
+  let query = supabase.from('meetings').select(`
+    *,
+    chairperson:profiles!chairperson_id(display_name),
+    secretary:profiles!secretary_id(display_name),
+    minutes_document:documents(title),
+    meeting_attendees(id),
+    meeting_decisions(id),
+    meeting_actions(id)
+  `).order('meeting_date', { ascending: false });
+
+  if (filters?.meetingType && filters.meetingType !== 'all') {
+    query = query.eq('meeting_type', filters.meetingType);
+  }
+  if (filters?.status && filters.status !== 'all') {
+    query = query.eq('status', filters.status);
+  }
+
+  const { data, error } = await query;
+  if (error || !data) {
+    console.error('[correspondenceService] Failed to fetch meetings:', error);
+    return [];
+  }
+
+  let list: MeetingRecord[] = data.map((m: any) => ({
+    id: m.id,
+    meetingNumber: m.meeting_number,
+    title: m.title,
+    meetingType: m.meeting_type,
+    meetingDate: m.meeting_date,
+    location: m.location,
+    chairpersonId: m.chairperson_id,
+    chairpersonName: m.chairperson?.display_name || null,
+    secretaryId: m.secretary_id,
+    secretaryName: m.secretary?.display_name || null,
+    minutesDocumentId: m.minutes_document_id,
+    minutesDocumentTitle: m.minutes_document?.title || null,
+    status: m.status,
+    confidentialityLevel: m.confidentiality_level,
+    attendeesCount: m.meeting_attendees?.length || 0,
+    decisionsCount: m.meeting_decisions?.length || 0,
+    actionsCount: m.meeting_actions?.length || 0,
+    createdBy: m.created_by,
+    createdAt: m.created_at,
+    updatedAt: m.updated_at,
+  }));
 
   // Confidentiality scoping
   if (currentUser) {
@@ -302,12 +390,6 @@ export async function getMeetings(
     }
   }
 
-  if (filters?.meetingType && filters.meetingType !== 'all') {
-    list = list.filter((m) => m.meetingType === filters.meetingType);
-  }
-  if (filters?.status && filters.status !== 'all') {
-    list = list.filter((m) => m.status === filters.status);
-  }
   if (filters?.search) {
     const q = filters.search.toLowerCase().trim();
     list = list.filter(
@@ -318,18 +400,53 @@ export async function getMeetings(
     );
   }
 
-  return list.sort(
-    (a, b) =>
-      new Date(b.meetingDate).getTime() - new Date(a.meetingDate).getTime()
-  );
+  return list;
 }
 
 /**
  * Fetch meeting details by ID
  */
 export async function getMeetingById(id: string): Promise<MeetingRecord | null> {
-  const m = mockMeetings.find((item) => item.id === id);
-  return m || null;
+  if (!isSupabaseConfigured) return null;
+
+  const { data, error } = await supabase
+    .from('meetings')
+    .select(`
+      *,
+      chairperson:profiles!chairperson_id(display_name),
+      secretary:profiles!secretary_id(display_name),
+      minutes_document:documents(title),
+      meeting_attendees(id),
+      meeting_decisions(id),
+      meeting_actions(id)
+    `)
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  return {
+    id: data.id,
+    meetingNumber: data.meeting_number,
+    title: data.title,
+    meetingType: data.meeting_type,
+    meetingDate: data.meeting_date,
+    location: data.location,
+    chairpersonId: data.chairperson_id,
+    chairpersonName: data.chairperson?.display_name || null,
+    secretaryId: data.secretary_id,
+    secretaryName: data.secretary?.display_name || null,
+    minutesDocumentId: data.minutes_document_id,
+    minutesDocumentTitle: data.minutes_document?.title || null,
+    status: data.status,
+    confidentialityLevel: data.confidentiality_level,
+    attendeesCount: data.meeting_attendees?.length || 0,
+    decisionsCount: data.meeting_decisions?.length || 0,
+    actionsCount: data.meeting_actions?.length || 0,
+    createdBy: data.created_by,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
 }
 
 /**
@@ -339,53 +456,75 @@ export async function createMeeting(
   payload: CreateMeetingPayload,
   currentUser?: { id: string; displayName?: string }
 ): Promise<MeetingRecord> {
+  if (!isSupabaseConfigured) throw new Error('Database is not configured.');
+
   const currentYear = new Date().getFullYear();
-  const nextSeq = (mockMeetings.length + 1).toString().padStart(3, '0');
+  const { count } = await supabase.from('meetings').select('*', { count: 'exact', head: true });
+  const nextSeq = ((count || 0) + 1).toString().padStart(3, '0');
   const meetingNumber = `MTG-${currentYear}-${nextSeq}`;
 
-  const newMeeting: MeetingRecord = {
-    id: `mtg-${Date.now()}`,
-    meetingNumber,
-    title: payload.title.trim(),
-    meetingType: payload.meetingType,
-    meetingDate: payload.meetingDate,
-    location: payload.location.trim(),
-    chairpersonId: payload.chairpersonId || null,
-    chairpersonName: null,
-    secretaryId: payload.secretaryId || null,
-    secretaryName: null,
-    minutesDocumentId: payload.minutesDocumentId || null,
-    minutesDocumentTitle: null,
-    status: 'completed',
-    confidentialityLevel: payload.confidentialityLevel || 'internal',
+  const { data: dbMeeting, error: meetErr } = await supabase
+    .from('meetings')
+    .insert({
+      meeting_number: meetingNumber,
+      title: payload.title.trim(),
+      meeting_type: payload.meetingType,
+      meeting_date: payload.meetingDate,
+      location: payload.location.trim(),
+      chairperson_id: payload.chairpersonId || null,
+      secretary_id: payload.secretaryId || null,
+      minutes_document_id: payload.minutesDocumentId || null,
+      status: 'completed',
+      confidentiality_level: payload.confidentialityLevel || 'internal',
+      created_by: currentUser?.id || null,
+    })
+    .select(`
+      *,
+      chairperson:profiles!chairperson_id(display_name),
+      secretary:profiles!secretary_id(display_name),
+      minutes_document:documents(title)
+    `)
+    .single();
+
+  if (meetErr || !dbMeeting) {
+    throw new Error(`Failed to create meeting: ${meetErr?.message}`);
+  }
+
+  // Insert attendees if provided
+  if (payload.attendees && payload.attendees.length > 0) {
+    const attendeesToInsert = payload.attendees.map((att) => ({
+      meeting_id: dbMeeting.id,
+      user_id: att.userId || null,
+      external_name: att.externalName || null,
+      email: att.email || null,
+      role: att.role || 'participant',
+      attended: att.attended ?? true,
+    }));
+    await supabase.from('meeting_attendees').insert(attendeesToInsert);
+  }
+
+  return {
+    id: dbMeeting.id,
+    meetingNumber: dbMeeting.meeting_number,
+    title: dbMeeting.title,
+    meetingType: dbMeeting.meeting_type,
+    meetingDate: dbMeeting.meeting_date,
+    location: dbMeeting.location,
+    chairpersonId: dbMeeting.chairperson_id,
+    chairpersonName: dbMeeting.chairperson?.display_name || null,
+    secretaryId: dbMeeting.secretary_id,
+    secretaryName: dbMeeting.secretary?.display_name || null,
+    minutesDocumentId: dbMeeting.minutes_document_id,
+    minutesDocumentTitle: dbMeeting.minutes_document?.title || null,
+    status: dbMeeting.status,
+    confidentialityLevel: dbMeeting.confidentiality_level,
     attendeesCount: payload.attendees?.length || 0,
     decisionsCount: 0,
     actionsCount: 0,
-    createdBy: currentUser?.id || 'sys-admin',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdBy: dbMeeting.created_by,
+    createdAt: dbMeeting.created_at,
+    updatedAt: dbMeeting.updated_at,
   };
-
-  mockMeetings = [newMeeting, ...mockMeetings];
-
-  // Add attendees if provided
-  if (payload.attendees && payload.attendees.length > 0) {
-    for (const att of payload.attendees) {
-      mockAttendees.push({
-        id: `att-${Date.now()}-${Math.random()}`,
-        meetingId: newMeeting.id,
-        userId: att.userId || null,
-        externalName: att.externalName || null,
-        email: att.email || null,
-        role: att.role || 'participant',
-        attended: att.attended ?? true,
-        displayName: att.externalName || 'Attendee',
-      });
-    }
-  }
-
-  syncCorrespondenceState();
-  return newMeeting;
 }
 
 /**
@@ -394,7 +533,25 @@ export async function createMeeting(
 export async function getMeetingAttendees(
   meetingId: string
 ): Promise<MeetingAttendeeRecord[]> {
-  return mockAttendees.filter((a) => a.meetingId === meetingId);
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('meeting_attendees')
+    .select('*, user:profiles(display_name)')
+    .eq('meeting_id', meetingId);
+
+  if (error || !data) return [];
+
+  return data.map((a: any) => ({
+    id: a.id,
+    meetingId: a.meeting_id,
+    userId: a.user_id,
+    externalName: a.external_name,
+    email: a.email,
+    role: a.role,
+    attended: a.attended,
+    displayName: a.external_name || a.user?.display_name || 'Attendee',
+  }));
 }
 
 /**
@@ -403,7 +560,25 @@ export async function getMeetingAttendees(
 export async function getMeetingDecisions(
   meetingId: string
 ): Promise<MeetingDecisionRecord[]> {
-  return mockDecisions.filter((d) => d.meetingId === meetingId);
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('meeting_decisions')
+    .select('*')
+    .eq('meeting_id', meetingId)
+    .order('created_at', { ascending: true });
+
+  if (error || !data) return [];
+
+  return data.map((d: any) => ({
+    id: d.id,
+    meetingId: d.meeting_id,
+    decisionNumber: d.decision_number,
+    title: d.title,
+    description: d.description,
+    category: d.category,
+    createdAt: d.created_at,
+  }));
 }
 
 /**
@@ -412,31 +587,42 @@ export async function getMeetingDecisions(
 export async function createMeetingDecision(
   payload: CreateMeetingDecisionPayload
 ): Promise<MeetingDecisionRecord> {
-  const meeting = mockMeetings.find((m) => m.id === payload.meetingId);
-  if (!meeting) throw new Error('Meeting not found.');
+  if (!isSupabaseConfigured) throw new Error('Database is not configured.');
 
   const currentYear = new Date().getFullYear();
-  const nextSeq = (mockDecisions.length + 1).toString().padStart(3, '0');
+  const { count } = await supabase.from('meeting_decisions').select('*', { count: 'exact', head: true });
+  const nextSeq = ((count || 0) + 1).toString().padStart(3, '0');
   const decisionNumber = `DEC-${currentYear}-${nextSeq}`;
 
-  const newDecision: MeetingDecisionRecord = {
-    id: `dec-${Date.now()}`,
-    meetingId: payload.meetingId,
-    decisionNumber,
-    title: payload.title.trim(),
-    description: payload.description.trim(),
-    category: payload.category || 'operational',
-    createdAt: new Date().toISOString(),
-  };
+  const { data, error } = await supabase
+    .from('meeting_decisions')
+    .insert({
+      meeting_id: payload.meetingId,
+      decision_number: decisionNumber,
+      title: payload.title.trim(),
+      description: payload.description.trim(),
+      category: payload.category || 'operational',
+    })
+    .select('*')
+    .single();
 
-  mockDecisions.push(newDecision);
-  meeting.decisionsCount += 1;
-  syncCorrespondenceState();
-  return newDecision;
+  if (error || !data) {
+    throw new Error(`Failed to create meeting decision: ${error?.message}`);
+  }
+
+  return {
+    id: data.id,
+    meetingId: data.meeting_id,
+    decisionNumber: data.decision_number,
+    title: data.title,
+    description: data.description,
+    category: data.category,
+    createdAt: data.created_at,
+  };
 }
 
 /**
- * Fetch trackable follow-up action items with dynamic overdue flags
+ * Fetch trackable follow-up action items
  */
 export async function getMeetingActions(filters?: {
   meetingId?: string;
@@ -444,31 +630,55 @@ export async function getMeetingActions(filters?: {
   status?: string;
   overdueOnly?: boolean;
 }): Promise<MeetingActionRecord[]> {
-  let list = mockActions.map((act) => {
-    const overdue = isActionOverdue(act.dueDate, act.status);
+  if (!isSupabaseConfigured) return [];
+
+  let query = supabase.from('meeting_actions').select(`
+    *,
+    meeting:meetings(meeting_number, title),
+    assignee:profiles!assigned_to(display_name)
+  `).order('due_date', { ascending: true });
+
+  if (filters?.meetingId && filters.meetingId !== 'all') {
+    query = query.eq('meeting_id', filters.meetingId);
+  }
+  if (filters?.assignedTo && filters.assignedTo !== 'all') {
+    query = query.eq('assigned_to', filters.assignedTo);
+  }
+  if (filters?.status && filters.status !== 'all') {
+    query = query.eq('status', filters.status);
+  }
+
+  const { data, error } = await query;
+  if (error || !data) return [];
+
+  let list: MeetingActionRecord[] = data.map((act: any) => {
+    const overdue = isActionOverdue(act.due_date, act.status);
     return {
-      ...act,
-      isOverdue: overdue,
+      id: act.id,
+      meetingId: act.meeting_id,
+      meetingNumber: act.meeting?.meeting_number || 'MTG',
+      meetingTitle: act.meeting?.title || 'Meeting',
+      decisionId: act.decision_id,
+      actionNumber: act.action_number,
+      taskDescription: act.task_description,
+      assignedTo: act.assigned_to,
+      assignedToName: act.assigned_to_name || act.assignee?.display_name || 'Assigned Officer',
+      dueDate: act.due_date,
       status: overdue && act.status === 'pending' ? 'overdue' : act.status,
+      isOverdue: overdue,
+      completionNotes: act.completion_notes,
+      completedAt: act.completed_at,
+      completedBy: act.completed_by,
+      createdAt: act.created_at,
+      updatedAt: act.updated_at,
     };
   });
 
-  if (filters?.meetingId && filters.meetingId !== 'all') {
-    list = list.filter((a) => a.meetingId === filters.meetingId);
-  }
-  if (filters?.assignedTo && filters.assignedTo !== 'all') {
-    list = list.filter((a) => a.assignedTo === filters.assignedTo);
-  }
-  if (filters?.status && filters.status !== 'all') {
-    list = list.filter((a) => a.status === filters.status);
-  }
   if (filters?.overdueOnly) {
     list = list.filter((a) => a.isOverdue);
   }
 
-  return list.sort(
-    (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
-  );
+  return list;
 }
 
 /**
@@ -477,38 +687,56 @@ export async function getMeetingActions(filters?: {
 export async function createMeetingAction(
   payload: CreateMeetingActionPayload
 ): Promise<MeetingActionRecord> {
-  const meeting = mockMeetings.find((m) => m.id === payload.meetingId);
-  if (!meeting) throw new Error('Meeting not found.');
+  if (!isSupabaseConfigured) throw new Error('Database is not configured.');
 
   const currentYear = new Date().getFullYear();
-  const nextSeq = (mockActions.length + 1).toString().padStart(3, '0');
+  const { count } = await supabase.from('meeting_actions').select('*', { count: 'exact', head: true });
+  const nextSeq = ((count || 0) + 1).toString().padStart(3, '0');
   const actionNumber = `ACT-${currentYear}-${nextSeq}`;
 
-  const overdue = isActionOverdue(payload.dueDate, 'pending');
-  const newAction: MeetingActionRecord = {
-    id: `act-${Date.now()}`,
-    meetingId: payload.meetingId,
-    meetingNumber: meeting.meetingNumber,
-    meetingTitle: meeting.title,
-    decisionId: payload.decisionId || null,
-    actionNumber,
-    taskDescription: payload.taskDescription.trim(),
-    assignedTo: payload.assignedTo || null,
-    assignedToName: payload.assignedToName || 'Assigned Officer',
-    dueDate: payload.dueDate,
-    status: overdue ? 'overdue' : 'pending',
+  const { data, error } = await supabase
+    .from('meeting_actions')
+    .insert({
+      meeting_id: payload.meetingId,
+      decision_id: payload.decisionId || null,
+      action_number: actionNumber,
+      task_description: payload.taskDescription.trim(),
+      assigned_to: payload.assignedTo || null,
+      assigned_to_name: payload.assignedToName || null,
+      due_date: payload.dueDate,
+      status: 'pending',
+    })
+    .select(`
+      *,
+      meeting:meetings(meeting_number, title),
+      assignee:profiles!assigned_to(display_name)
+    `)
+    .single();
+
+  if (error || !data) {
+    throw new Error(`Failed to create meeting action: ${error?.message}`);
+  }
+
+  const overdue = isActionOverdue(data.due_date, data.status);
+  return {
+    id: data.id,
+    meetingId: data.meeting_id,
+    meetingNumber: data.meeting?.meeting_number || 'MTG',
+    meetingTitle: data.meeting?.title || 'Meeting',
+    decisionId: data.decision_id,
+    actionNumber: data.action_number,
+    taskDescription: data.task_description,
+    assignedTo: data.assigned_to,
+    assignedToName: data.assigned_to_name || data.assignee?.display_name || 'Assigned Officer',
+    dueDate: data.due_date,
+    status: overdue ? 'overdue' : data.status,
     isOverdue: overdue,
     completionNotes: null,
     completedAt: null,
     completedBy: null,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
   };
-
-  mockActions.push(newAction);
-  meeting.actionsCount += 1;
-  syncCorrespondenceState();
-  return newAction;
 }
 
 /**
@@ -518,40 +746,57 @@ export async function updateMeetingAction(
   payload: UpdateMeetingActionPayload,
   currentUser?: { id: string; displayName?: string }
 ): Promise<MeetingActionRecord> {
-  const index = mockActions.findIndex((a) => a.id === payload.actionId);
-  if (index === -1) {
-    throw new Error('Action item not found.');
-  }
+  if (!isSupabaseConfigured) throw new Error('Database is not configured.');
 
-  const existing = mockActions[index]!;
   const isComplete = payload.status === 'completed';
+  const now = new Date().toISOString();
 
-  const updated: MeetingActionRecord = {
-    ...existing,
+  const updateFields: Record<string, any> = {
     status: payload.status,
-    completionNotes:
-      payload.completionNotes !== undefined
-        ? payload.completionNotes
-        : existing.completionNotes,
-    completedAt: isComplete ? new Date().toISOString() : existing.completedAt,
-    completedBy: isComplete ? currentUser?.id || 'sys-admin' : existing.completedBy,
-    updatedAt: new Date().toISOString(),
-    isOverdue: !isComplete && isActionOverdue(existing.dueDate, payload.status),
+    updated_at: now,
   };
 
-  mockActions[index] = updated;
-  syncCorrespondenceState();
-  return updated;
-}
+  if (payload.completionNotes !== undefined) {
+    updateFields.completion_notes = payload.completionNotes;
+  }
+  if (isComplete) {
+    updateFields.completed_at = now;
+    updateFields.completed_by = currentUser?.id || null;
+  }
 
-/**
- * Reset in-memory mock correspondence state (for test isolation)
- */
-export function resetMockCorrespondenceData(): void {
-  mockCorrespondence = [...INITIAL_MOCK_CORRESPONDENCE];
-  mockMeetings = [...INITIAL_MOCK_MEETINGS];
-  mockAttendees = [...INITIAL_MOCK_ATTENDEES];
-  mockDecisions = [...INITIAL_MOCK_DECISIONS];
-  mockActions = [...INITIAL_MOCK_ACTIONS];
-  syncCorrespondenceState();
+  const { data, error } = await supabase
+    .from('meeting_actions')
+    .update(updateFields)
+    .eq('id', payload.actionId)
+    .select(`
+      *,
+      meeting:meetings(meeting_number, title),
+      assignee:profiles!assigned_to(display_name)
+    `)
+    .single();
+
+  if (error || !data) {
+    throw new Error(`Failed to update action item: ${error?.message}`);
+  }
+
+  const overdue = !isComplete && isActionOverdue(data.due_date, data.status);
+  return {
+    id: data.id,
+    meetingId: data.meeting_id,
+    meetingNumber: data.meeting?.meeting_number || 'MTG',
+    meetingTitle: data.meeting?.title || 'Meeting',
+    decisionId: data.decision_id,
+    actionNumber: data.action_number,
+    taskDescription: data.task_description,
+    assignedTo: data.assigned_to,
+    assignedToName: data.assigned_to_name || data.assignee?.display_name || 'Assigned Officer',
+    dueDate: data.due_date,
+    status: overdue ? 'overdue' : data.status,
+    isOverdue: overdue,
+    completionNotes: data.completion_notes,
+    completedAt: data.completed_at,
+    completedBy: data.completed_by,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
 }

@@ -36,7 +36,6 @@ import { FilterControls } from '@/components/ui/FilterControls';
 import { DropdownMenu, DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { useToast } from '@/lib/ToastContext';
 import { ROLES, RoleCode } from '@/lib/permissions';
-import { getPersistentItem, setPersistentItem } from '@/lib/storageSync';
 import { createStaffFromUserCreation } from '@/features/hr/services/hrService';
 import { createNotification } from '@/services/notificationsService';
 import { supabase, isSupabaseConfigured, supabaseUrl } from '@/lib/supabase';
@@ -67,7 +66,6 @@ export interface StaffUser {
 // Constants
 // ---------------------------------------------------------------------------
 
-const USER_STORAGE_KEY = 'baoms_staff_users_v2';
 const ALLOWED_EMAIL_DOMAIN = '@babawatoto.or.tz';
 
 const DEPT_NAMES: Record<string, string> = {
@@ -251,29 +249,24 @@ export const UserManagementPage: React.FC = () => {
   // ─── Load staff (Supabase when online, localStorage when offline) ─────────
   const loadStaff = useCallback(async () => {
     setIsFetching(true);
-    if (isSupabaseConfigured && isOnline) {
+    if (isSupabaseConfigured) {
       try {
         const remoteStaff = await fetchStaffFromSupabase();
         setStaffList(remoteStaff);
-        // Cache locally for offline fallback
-        setPersistentItem(USER_STORAGE_KEY, remoteStaff);
-      } catch (err) {
-        console.warn('[UserManagementPage] Supabase fetch failed, using cached data:', err);
-        const cached = getPersistentItem<StaffUser[]>(USER_STORAGE_KEY, () => []);
-        setStaffList(cached);
+      } catch (err: any) {
+        console.warn('[UserManagementPage] Supabase fetch failed:', err);
+        setStaffList([]);
         showToast({
-          title: 'Using Cached Data',
-          message: 'Could not reach database. Showing last synced user list.',
-          variant: 'warning',
+          title: 'Database Error',
+          message: err?.message || 'Could not load staff users from database.',
+          variant: 'error',
         });
       }
     } else {
-      // Offline fallback
-      const cached = getPersistentItem<StaffUser[]>(USER_STORAGE_KEY, () => []);
-      setStaffList(cached);
+      setStaffList([]);
     }
     setIsFetching(false);
-  }, [isOnline, showToast]);
+  }, [showToast]);
 
   useEffect(() => {
     loadStaff();

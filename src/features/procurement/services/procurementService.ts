@@ -1,4 +1,4 @@
-import { getPersistentItem, setPersistentItem } from '@/lib/storageSync';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import {
   PurchaseOrderRecord,
   VendorRecord,
@@ -9,114 +9,129 @@ import {
   UpdateInventoryInput,
   PurchaseOrderStatus,
 } from '../types/procurement';
-import {
-  INITIAL_MOCK_PURCHASE_ORDERS,
-  INITIAL_MOCK_VENDORS,
-  INITIAL_MOCK_INVENTORY,
-} from '../data/mockProcurement';
-
-const STORAGE_KEYS = {
-  PURCHASE_ORDERS: 'baoms_procurement_po',
-  VENDORS: 'baoms_procurement_vendors',
-  INVENTORY: 'baoms_procurement_inventory',
-};
-
-let mockPOs: PurchaseOrderRecord[] = getPersistentItem(
-  STORAGE_KEYS.PURCHASE_ORDERS,
-  () => JSON.parse(JSON.stringify(INITIAL_MOCK_PURCHASE_ORDERS))
-);
-
-let mockVendors: VendorRecord[] = getPersistentItem(
-  STORAGE_KEYS.VENDORS,
-  () => JSON.parse(JSON.stringify(INITIAL_MOCK_VENDORS))
-);
-
-let mockInventory: InventoryItemRecord[] = getPersistentItem(
-  STORAGE_KEYS.INVENTORY,
-  () => JSON.parse(JSON.stringify(INITIAL_MOCK_INVENTORY))
-);
-
-const syncState = () => {
-  setPersistentItem(STORAGE_KEYS.PURCHASE_ORDERS, mockPOs);
-  setPersistentItem(STORAGE_KEYS.VENDORS, mockVendors);
-  setPersistentItem(STORAGE_KEYS.INVENTORY, mockInventory);
-};
 
 export async function getPurchaseOrders(params?: {
   status?: string;
   vendorId?: string;
   searchQuery?: string;
 }): Promise<PurchaseOrderRecord[]> {
-  let list = [...mockPOs];
+  if (!isSupabaseConfigured) return [];
+
+  let query = supabase
+    .from('purchase_orders')
+    .select('*, vendor:vendors(business_name), requester:profiles!requested_by(display_name), approver:profiles!approved_by(display_name)')
+    .order('created_at', { ascending: false });
 
   if (params?.status && params.status !== 'all') {
-    list = list.filter((p) => p.status === params.status);
+    query = query.eq('status', params.status);
   }
-
   if (params?.vendorId && params.vendorId !== 'all') {
-    list = list.filter((p) => p.vendorId === params.vendorId);
+    query = query.eq('vendor_id', params.vendorId);
   }
-
   if (params?.searchQuery) {
-    const q = params.searchQuery.toLowerCase().trim();
-    list = list.filter(
-      (p) =>
-        p.orderNumber.toLowerCase().includes(q) ||
-        p.title.toLowerCase().includes(q) ||
-        p.vendorName.toLowerCase().includes(q)
-    );
+    const q = params.searchQuery.trim();
+    query = query.or(`order_number.ilike.%${q}%,title.ilike.%${q}%`);
   }
 
-  return list;
+  const { data, error } = await query;
+  if (error || !data) return [];
+
+  return data.map((row: any) => ({
+    id: row.id,
+    orderNumber: row.order_number,
+    projectId: row.project_id,
+    vendorId: row.vendor_id,
+    vendorName: row.vendor?.business_name || 'Vendor',
+    title: row.title,
+    status: row.status as PurchaseOrderStatus,
+    requestedBy: row.requested_by || '',
+    requestedByName: row.requester?.display_name || 'Staff Member',
+    approvedBy: row.approved_by,
+    approvedByName: row.approver?.display_name,
+    orderDate: row.order_date,
+    expectedDeliveryDate: row.expected_delivery_date,
+    deliveredDate: row.delivered_date,
+    currency: row.currency,
+    totalAmount: Number(row.total_amount),
+    items: [],
+    notes: row.notes,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
 }
 
 export async function createPurchaseOrder(
   input: CreatePurchaseOrderInput,
   currentUser?: { id: string; name: string }
 ): Promise<PurchaseOrderRecord> {
-  const vendor = mockVendors.find((v) => v.id === input.vendorId);
-  if (!vendor) throw new Error('Selected vendor was not found in register.');
+  if (!isSupabaseConfigured) throw new Error('Database connection is not configured.');
 
-  const author = currentUser || { id: 'procurement-officer', name: 'Bakari H. Mhando' };
-  const poId = `po-${Date.now()}`;
-  const orderNumber = `PO-${new Date().getFullYear()}-${String(mockPOs.length + 1).padStart(3, '0')}`;
+  const orderNumber = `PO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+  const totalAmount = input.items.reduce((sum, it) => sum + (it.quantity * it.unitPrice), 0);
 
-  const items = input.items.map((it, idx) => ({
-    id: `poi-${Date.now()}-${idx + 1}`,
-    orderId: poId,
-    description: it.description,
-    quantity: it.quantity,
-    unitOfMeasure: it.unitOfMeasure,
-    unitPrice: it.unitPrice,
-    totalPrice: it.quantity * it.unitPrice,
-  }));
+  const { data, error } = await supabase
+    .from('purchase_orders')
+    .insert({
+      order_number: orderNumber,
+      project_id: input.projectId || null,
+      vendor_id: input.vendorId,
+      title: input.title.trim(),
+      status: 'pending_approval',
+      requested_by: currentUser?.id || null,
+      order_date: new Date().toISOString().slice(0, 10),
+      expected_delivery_date: input.expectedDeliveryDate,
+      currency: input.currency || 'TZS',
+      total_amount: totalAmount,
+      notes: input.notes || null,
+    })
+    .select('*, vendor:vendors(business_name)')
+    .single();
 
-  const totalAmount = items.reduce((sum, it) => sum + it.totalPrice, 0);
+  if (error || !data) {
+    throw new Error(error?.message || 'Failed to create purchase order in database.');
+  }
 
-  const newPO: PurchaseOrderRecord = {
-    id: poId,
-    orderNumber,
-    projectId: input.projectId || null,
-    vendorId: vendor.id,
-    vendorName: vendor.businessName,
-    title: input.title.trim(),
-    status: 'pending_approval',
-    requestedBy: author.id,
-    requestedByName: author.name,
-    orderDate: new Date().toISOString().slice(0, 10),
-    expectedDeliveryDate: input.expectedDeliveryDate,
-    currency: input.currency || 'TZS',
-    totalAmount,
-    items,
-    notes: input.notes,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+  // Insert items
+  if (input.items.length > 0) {
+    await supabase.from('purchase_order_items').insert(
+      input.items.map((it) => ({
+        order_id: data.id,
+        description: it.description,
+        quantity: it.quantity,
+        unit_of_measure: it.unitOfMeasure,
+        unit_price: it.unitPrice,
+        total_price: it.quantity * it.unitPrice,
+      }))
+    );
+  }
+
+  return {
+    id: data.id,
+    orderNumber: data.order_number,
+    projectId: data.project_id,
+    vendorId: data.vendor_id,
+    vendorName: data.vendor?.business_name || 'Vendor',
+    title: data.title,
+    status: data.status,
+    requestedBy: data.requested_by,
+    requestedByName: currentUser?.name || 'Staff Member',
+    orderDate: data.order_date,
+    expectedDeliveryDate: data.expected_delivery_date,
+    currency: data.currency,
+    totalAmount: Number(data.total_amount),
+    items: input.items.map((it, idx) => ({
+      id: `item-${idx}`,
+      orderId: data.id,
+      description: it.description,
+      quantity: it.quantity,
+      unitOfMeasure: it.unitOfMeasure,
+      unitPrice: it.unitPrice,
+      totalPrice: it.quantity * it.unitPrice,
+    })),
+    notes: data.notes,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
   };
-
-  mockPOs.unshift(newPO);
-  vendor.totalOrdersCount += 1;
-  syncState();
-  return newPO;
 }
 
 export async function updatePurchaseOrderStatus(
@@ -124,74 +139,140 @@ export async function updatePurchaseOrderStatus(
   newStatus: PurchaseOrderStatus,
   approver?: { id: string; name: string }
 ): Promise<PurchaseOrderRecord> {
-  const po = mockPOs.find((p) => p.id === orderId);
-  if (!po) throw new Error('Purchase order not found.');
+  if (!isSupabaseConfigured) throw new Error('Database connection is not configured.');
 
-  po.status = newStatus;
-  po.updatedAt = new Date().toISOString();
+  const updatePayload: Record<string, any> = {
+    status: newStatus,
+    updated_at: new Date().toISOString(),
+  };
 
   if (newStatus === 'approved' && approver) {
-    po.approvedBy = approver.id;
-    po.approvedByName = approver.name;
+    updatePayload.approved_by = approver.id;
   }
-
   if (newStatus === 'delivered') {
-    po.deliveredDate = new Date().toISOString();
+    updatePayload.delivered_date = new Date().toISOString().slice(0, 10);
   }
 
-  syncState();
-  return po;
+  const { data, error } = await supabase
+    .from('purchase_orders')
+    .update(updatePayload)
+    .eq('id', orderId)
+    .select('*, vendor:vendors(business_name)')
+    .single();
+
+  if (error || !data) throw new Error(error?.message || 'Failed to update order status.');
+
+  return {
+    id: data.id,
+    orderNumber: data.order_number,
+    projectId: data.project_id,
+    vendorId: data.vendor_id,
+    vendorName: data.vendor?.business_name || 'Vendor',
+    title: data.title,
+    status: data.status,
+    requestedBy: data.requested_by,
+    requestedByName: 'Staff Member',
+    approvedBy: data.approved_by,
+    approvedByName: approver?.name,
+    orderDate: data.order_date,
+    expectedDeliveryDate: data.expected_delivery_date,
+    deliveredDate: data.delivered_date,
+    currency: data.currency,
+    totalAmount: Number(data.total_amount),
+    items: [],
+    notes: data.notes,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
 }
 
 export async function getVendors(params?: {
   category?: string;
   searchQuery?: string;
 }): Promise<VendorRecord[]> {
-  let list = [...mockVendors];
+  if (!isSupabaseConfigured) return [];
+
+  let query = supabase
+    .from('vendors')
+    .select('*')
+    .order('business_name', { ascending: true });
 
   if (params?.category && params.category !== 'all') {
-    list = list.filter((v) => v.category === params.category);
+    query = query.eq('category', params.category);
   }
-
   if (params?.searchQuery) {
-    const q = params.searchQuery.toLowerCase().trim();
-    list = list.filter(
-      (v) =>
-        v.businessName.toLowerCase().includes(q) ||
-        v.contactPerson.toLowerCase().includes(q) ||
-        v.vendorCode.toLowerCase().includes(q)
-    );
+    const q = params.searchQuery.trim();
+    query = query.or(`business_name.ilike.%${q}%,contact_person.ilike.%${q}%,vendor_code.ilike.%${q}%`);
   }
 
-  return list;
+  const { data, error } = await query;
+  if (error || !data) return [];
+
+  return data.map((v: any) => ({
+    id: v.id,
+    vendorCode: v.vendor_code,
+    businessName: v.business_name,
+    category: v.category,
+    contactPerson: v.contact_person,
+    email: v.email,
+    phone: v.phone,
+    physicalAddress: v.physical_address,
+    tinNumber: v.tin_number,
+    vrnNumber: v.vrn_number,
+    bankName: v.bank_name,
+    bankAccountNumber: v.bank_account_number,
+    isCompliant: v.is_compliant,
+    totalOrdersCount: 0,
+    ratingScore: Number(v.rating_score),
+    createdAt: v.created_at,
+  }));
 }
 
 export async function registerVendor(input: RegisterVendorInput): Promise<VendorRecord> {
-  const vendorId = `ven-${Date.now()}`;
-  const vendorCode = `VND-${new Date().getFullYear()}-${String(mockVendors.length + 1).padStart(3, '0')}`;
+  if (!isSupabaseConfigured) throw new Error('Database connection is not configured.');
 
-  const newVendor: VendorRecord = {
-    id: vendorId,
-    vendorCode,
-    businessName: input.businessName.trim(),
-    category: input.category,
-    contactPerson: input.contactPerson.trim(),
-    email: input.email.trim(),
-    phone: input.phone.trim(),
-    physicalAddress: input.physicalAddress.trim(),
-    tinNumber: input.tinNumber?.trim(),
-    vrnNumber: input.vrnNumber?.trim(),
-    bankName: input.bankName?.trim(),
-    bankAccountNumber: input.bankAccountNumber?.trim(),
-    isCompliant: true,
+  const vendorCode = `VND-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`;
+
+  const { data, error } = await supabase
+    .from('vendors')
+    .insert({
+      vendor_code: vendorCode,
+      business_name: input.businessName.trim(),
+      category: input.category,
+      contact_person: input.contactPerson.trim(),
+      email: input.email.trim(),
+      phone: input.phone.trim(),
+      physical_address: input.physicalAddress.trim(),
+      tin_number: input.tinNumber?.trim() || null,
+      vrn_number: input.vrnNumber?.trim() || null,
+      bank_name: input.bankName?.trim() || null,
+      bank_account_number: input.bankAccountNumber?.trim() || null,
+      is_compliant: true,
+      rating_score: 5.0,
+    })
+    .select()
+    .single();
+
+  if (error || !data) throw new Error(error?.message || 'Failed to register vendor.');
+
+  return {
+    id: data.id,
+    vendorCode: data.vendor_code,
+    businessName: data.business_name,
+    category: data.category,
+    contactPerson: data.contact_person,
+    email: data.email,
+    phone: data.phone,
+    physicalAddress: data.physical_address,
+    tinNumber: data.tin_number,
+    vrnNumber: data.vrn_number,
+    bankName: data.bank_name,
+    bankAccountNumber: data.bank_account_number,
+    isCompliant: data.is_compliant,
     totalOrdersCount: 0,
-    ratingScore: 5.0,
-    createdAt: new Date().toISOString(),
+    ratingScore: Number(data.rating_score),
+    createdAt: data.created_at,
   };
-
-  mockVendors.unshift(newVendor);
-  syncState();
-  return newVendor;
 }
 
 export async function getInventoryItems(params?: {
@@ -199,66 +280,125 @@ export async function getInventoryItems(params?: {
   category?: string;
   searchQuery?: string;
 }): Promise<InventoryItemRecord[]> {
-  let list = [...mockInventory];
+  if (!isSupabaseConfigured) return [];
+
+  let query = supabase
+    .from('inventory_items')
+    .select('*')
+    .order('name', { ascending: true });
 
   if (params?.status && params.status !== 'all') {
-    list = list.filter((i) => i.status === params.status);
+    query = query.eq('status', params.status);
   }
-
   if (params?.category && params.category !== 'all') {
-    list = list.filter((i) => i.category === params.category);
+    query = query.eq('category', params.category);
   }
-
   if (params?.searchQuery) {
-    const q = params.searchQuery.toLowerCase().trim();
-    list = list.filter(
-      (i) =>
-        i.name.toLowerCase().includes(q) ||
-        i.sku.toLowerCase().includes(q) ||
-        i.location.toLowerCase().includes(q)
-    );
+    const q = params.searchQuery.trim();
+    query = query.or(`name.ilike.%${q}%,sku.ilike.%${q}%,location.ilike.%${q}%`);
   }
 
-  return list;
+  const { data, error } = await query;
+  if (error || !data) return [];
+
+  return data.map((i: any) => ({
+    id: i.id,
+    sku: i.sku,
+    name: i.name,
+    category: i.category,
+    quantityOnHand: Number(i.quantity_on_hand),
+    reorderPoint: Number(i.reorder_point),
+    unitOfMeasure: i.unit_of_measure,
+    unitCost: Number(i.unit_cost),
+    location: i.location,
+    status: i.status,
+    lastRestockedAt: i.last_restocked_at,
+  }));
 }
 
 export async function updateInventoryQuantity(
   input: UpdateInventoryInput
 ): Promise<InventoryItemRecord> {
-  const item = mockInventory.find((i) => i.id === input.itemId);
-  if (!item) throw new Error('Inventory item not found.');
+  if (!isSupabaseConfigured) throw new Error('Database connection is not configured.');
 
-  item.quantityOnHand = Math.max(0, item.quantityOnHand + input.quantityChange);
+  const { data: item, error: fetchErr } = await supabase
+    .from('inventory_items')
+    .select('*')
+    .eq('id', input.itemId)
+    .single();
 
-  if (item.quantityOnHand === 0) {
-    item.status = 'out_of_stock';
-  } else if (item.quantityOnHand <= item.reorderPoint) {
-    item.status = 'low_stock';
-  } else {
-    item.status = 'in_stock';
-  }
+  if (fetchErr || !item) throw new Error('Inventory item not found.');
+
+  const newQty = Math.max(0, Number(item.quantity_on_hand) + input.quantityChange);
+  let status = 'in_stock';
+  if (newQty === 0) status = 'out_of_stock';
+  else if (newQty <= item.reorder_point) status = 'low_stock';
+
+  const updatePayload: Record<string, any> = {
+    quantity_on_hand: newQty,
+    status,
+    updated_at: new Date().toISOString(),
+  };
 
   if (input.quantityChange > 0) {
-    item.lastRestockedAt = new Date().toISOString().slice(0, 10);
+    updatePayload.last_restocked_at = new Date().toISOString();
   }
 
-  syncState();
-  return item;
+  const { data: updated, error: updateErr } = await supabase
+    .from('inventory_items')
+    .update(updatePayload)
+    .eq('id', input.itemId)
+    .select()
+    .single();
+
+  if (updateErr || !updated) throw new Error(updateErr?.message || 'Failed to update inventory.');
+
+  return {
+    id: updated.id,
+    sku: updated.sku,
+    name: updated.name,
+    category: updated.category,
+    quantityOnHand: Number(updated.quantity_on_hand),
+    reorderPoint: Number(updated.reorder_point),
+    unitOfMeasure: updated.unit_of_measure,
+    unitCost: Number(updated.unit_cost),
+    location: updated.location,
+    status: updated.status,
+    lastRestockedAt: updated.last_restocked_at,
+  };
 }
 
 export async function getProcurementKpis(): Promise<ProcurementKpis> {
-  const activeOrdersAmount = mockPOs
-    .filter((p) => p.status === 'ordered' || p.status === 'pending_approval' || p.status === 'approved')
-    .reduce((sum, p) => sum + p.totalAmount, 0);
+  if (!isSupabaseConfigured) {
+    return {
+      totalOrdersCount: 0,
+      activeOrdersAmount: 0,
+      deliveredOrdersCount: 0,
+      registeredVendorsCount: 0,
+      lowStockItemsCount: 0,
+    };
+  }
 
-  const deliveredOrdersCount = mockPOs.filter((p) => p.status === 'delivered').length;
-  const lowStockItemsCount = mockInventory.filter((i) => i.status === 'low_stock' || i.status === 'out_of_stock').length;
+  const [ordersRes, vendorsRes, invRes] = await Promise.all([
+    supabase.from('purchase_orders').select('status, total_amount'),
+    supabase.from('vendors').select('id', { count: 'exact' }),
+    supabase.from('inventory_items').select('status'),
+  ]);
+
+  const orders = ordersRes.data || [];
+  const activeAmount = orders
+    .filter((o: any) => o.status === 'ordered' || o.status === 'pending_approval' || o.status === 'approved')
+    .reduce((sum: number, o: any) => sum + Number(o.total_amount), 0);
+
+  const deliveredCount = orders.filter((o: any) => o.status === 'delivered').length;
+  const inventory = invRes.data || [];
+  const lowStockCount = inventory.filter((i: any) => i.status === 'low_stock' || i.status === 'out_of_stock').length;
 
   return {
-    totalOrdersCount: mockPOs.length,
-    activeOrdersAmount,
-    deliveredOrdersCount,
-    registeredVendorsCount: mockVendors.length,
-    lowStockItemsCount,
+    totalOrdersCount: orders.length,
+    activeOrdersAmount: activeAmount,
+    deliveredOrdersCount: deliveredCount,
+    registeredVendorsCount: vendorsRes.count || (vendorsRes.data?.length ?? 0),
+    lowStockItemsCount: lowStockCount,
   };
 }

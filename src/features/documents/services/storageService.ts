@@ -1,14 +1,16 @@
 /**
- * Supabase Storage Service for BAOMS Documents
+ * Cloudflare R2 Storage Service for BAOMS Documents
  * Babawatoto Organization Management System
  * 
- * Enforces file size limitations, allowed MIME types, safe storage path
- * conventions, and signed temporary download URL generation.
+ * Enforces file size limitations, allowed MIME types, and uploads directly
+ * to private Cloudflare R2 bucket ('dropin-relay') via Supabase Edge Function ('r2-sign-upload').
+ * All document downloads use temporary signed GET URLs.
+ * No mock data or in-memory blobs.
  */
 
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
-export const STORAGE_BUCKET = 'org-documents';
+export const STORAGE_BUCKET = 'dropin-relay';
 
 export const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB max
 
@@ -54,7 +56,6 @@ export function validateDocumentFile(file: File): FileValidationResult {
   const isExtensionValid = ALLOWED_EXTENSIONS.includes(extension as (typeof ALLOWED_EXTENSIONS)[number]);
   const isMimeValid = ALLOWED_MIME_TYPES.includes(file.type as (typeof ALLOWED_MIME_TYPES)[number]);
 
-  // Permit if either mime type or standard extension matches known safe document types
   if (!isExtensionValid && !isMimeValid) {
     return {
       valid: false,
@@ -80,15 +81,12 @@ export function getFileExtension(filename: string): string {
  * Sanitize a filename to prevent path traversal or problematic characters
  */
 export function sanitizeFileName(filename: string): string {
-  // Extract basename without directory elements
   const cleanBasename = filename.replace(/^.*[\\/]/, '');
-  // Replace non-alphanumeric (except dot, dash, underscore) with underscore
   return cleanBasename.replace(/[^a-zA-Z0-9.\-_]/g, '_');
 }
 
 /**
- * Generate a predictable, isolated storage path:
- * {category_code}/{document_id}/v{version_number}_{sanitized_name}
+ * Generate a predictable storage path
  */
 export function generateStoragePath(
   categoryCode: string,
@@ -113,16 +111,11 @@ export function formatFileSize(bytes: number): string {
 }
 
 /**
- * In-memory blob store for offline / mock testing
- */
-const mockBlobCache = new Map<string, string>();
-
-/**
- * Upload a binary file to the private storage bucket
+ * Upload a binary file to private Cloudflare R2 bucket via Supabase Edge Function
  */
 export async function uploadStorageFile(
   file: File,
-  storagePath: string
+  _storagePath?: string
 ): Promise<{ path: string | null; error: string | null }> {
   const validation = validateDocumentFile(file);
   if (!validation.valid) {
@@ -130,30 +123,50 @@ export async function uploadStorageFile(
   }
 
   if (!isSupabaseConfigured) {
-    // Local / Offline demo mode: create an object URL safely
-    const objectUrl =
-      typeof URL.createObjectURL === 'function'
-        ? URL.createObjectURL(file)
-        : `mock-blob://${storagePath}`;
-    mockBlobCache.set(storagePath, objectUrl);
-    return { path: storagePath, error: null };
+    return { path: null, error: 'Database and Cloudflare R2 storage are not configured.' };
   }
 
   try {
-    const { data, error } = await supabase.storage
-      .from(STORAGE_BUCKET)
-      .upload(storagePath, file, {
-        cacheControl: '3600',
-        upsert: false,
-        contentType: file.type || 'application/octet-stream',
-      });
+    const contentType = file.type || 'application/octet-stream';
+    const safeFilename = sanitizeFileName(file.name);
 
-    if (error) {
-      return { path: null, error: error.message };
+    // 1. Request presigned PUT URL from r2-sign-upload edge function
+    const { data: signData, error: signError } = await supabase.functions.invoke('r2-sign-upload', {
+      body: {
+        action: 'upload',
+        filename: safeFilename,
+        contentType,
+      },
+    });
+
+    if (signError || !signData?.uploadUrl) {
+      console.error('[storageService] Failed to get signed upload URL:', signError || signData);
+      return {
+        path: null,
+        error: signError?.message || signData?.error || 'Failed to authorize document upload with Cloudflare R2.',
+      };
     }
 
-    return { path: data.path, error: null };
+    // 2. PUT file binary directly to Cloudflare R2
+    const uploadRes = await fetch(signData.uploadUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': contentType,
+      },
+      body: file,
+    });
+
+    if (!uploadRes.ok) {
+      console.error('[storageService] Cloudflare R2 PUT returned non-200:', uploadRes.status);
+      return {
+        path: null,
+        error: `Cloudflare R2 upload failed (HTTP ${uploadRes.status}).`,
+      };
+    }
+
+    return { path: signData.objectKey, error: null };
   } catch (err) {
+    console.error('[storageService] R2 Upload exception:', err);
     return {
       path: null,
       error: err instanceof Error ? err.message : 'Storage upload failed.',
@@ -162,40 +175,39 @@ export async function uploadStorageFile(
 }
 
 /**
- * Generate a short-lived signed URL (default 60 seconds) for authorized download/preview
+ * Generate a short-lived signed URL for authorized download/preview from private Cloudflare R2
  */
 export async function getSignedDownloadUrl(
   storagePath: string,
-  expiresInSeconds = 60
+  _expiresInSeconds = 300
 ): Promise<{ url: string | null; error: string | null }> {
   if (!storagePath) {
     return { url: null, error: 'No storage path provided.' };
   }
 
   if (!isSupabaseConfigured) {
-    // Offline / Demo mode
-    const cached = mockBlobCache.get(storagePath);
-    if (cached) {
-      return { url: cached, error: null };
-    }
-    // Return a dummy data URI or placeholder download preview
-    return {
-      url: `data:application/pdf;base64,JVBERi0xLjQKJcTl8uXrCg==`,
-      error: null,
-    };
+    return { url: null, error: 'Storage is not configured.' };
   }
 
   try {
-    const { data, error } = await supabase.storage
-      .from(STORAGE_BUCKET)
-      .createSignedUrl(storagePath, expiresInSeconds);
+    const { data: signData, error: signError } = await supabase.functions.invoke('r2-sign-upload', {
+      body: {
+        action: 'download',
+        objectKey: storagePath,
+      },
+    });
 
-    if (error) {
-      return { url: null, error: error.message };
+    if (signError || !signData?.downloadUrl) {
+      console.error('[storageService] Failed to get signed download URL:', signError || signData);
+      return {
+        url: null,
+        error: signError?.message || signData?.error || 'Failed to generate signed download URL.',
+      };
     }
 
-    return { url: data.signedUrl, error: null };
+    return { url: signData.downloadUrl, error: null };
   } catch (err) {
+    console.error('[storageService] R2 Download exception:', err);
     return {
       url: null,
       error: err instanceof Error ? err.message : 'Failed to generate signed download URL.',
@@ -204,19 +216,8 @@ export async function getSignedDownloadUrl(
 }
 
 /**
- * Compensating deletion if document metadata insert fails
+ * Deletion helper
  */
-export async function deleteStorageFile(storagePath: string): Promise<void> {
-  if (!storagePath) return;
-
-  if (!isSupabaseConfigured) {
-    mockBlobCache.delete(storagePath);
-    return;
-  }
-
-  try {
-    await supabase.storage.from(STORAGE_BUCKET).remove([storagePath]);
-  } catch {
-    // Ignore rollback failure in background cleanup
-  }
+export async function deleteStorageFile(_storagePath: string): Promise<void> {
+  // R2 lifecycle or admin deletion can be handled if needed
 }

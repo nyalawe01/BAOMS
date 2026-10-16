@@ -4,7 +4,6 @@
  */
 
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { getPersistentItem, setPersistentItem } from '@/lib/storageSync';
 
 export interface StaffMemberOption {
   id: string;
@@ -16,10 +15,8 @@ export interface StaffMemberOption {
   isActive: boolean;
 }
 
-const CACHE_KEY = 'baoms_live_staff_cache';
-
 export async function fetchActiveStaffMembers(): Promise<StaffMemberOption[]> {
-  if (navigator.onLine && isSupabaseConfigured) {
+  if (isSupabaseConfigured) {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -37,7 +34,7 @@ export async function fetchActiveStaffMembers(): Promise<StaffMemberOption[]> {
         .order('display_name', { ascending: true });
 
       if (!error && data) {
-        const staff: StaffMemberOption[] = data.map((row: any) => {
+        return data.map((row: any) => {
           const dept = row.departments;
           const roleArr = (row.user_roles || []).flatMap((ur: any) => {
             const r = Array.isArray(ur.roles) ? ur.roles[0] : ur.roles;
@@ -53,15 +50,11 @@ export async function fetchActiveStaffMembers(): Promise<StaffMemberOption[]> {
             isActive: row.is_active ?? true,
           };
         });
-
-        setPersistentItem(CACHE_KEY, staff);
-        return staff;
       }
     } catch (err) {
-      console.warn('Failed to fetch staff from Supabase, checking local cache:', err);
+      console.warn('Failed to fetch staff from Supabase:', err);
     }
   }
 
-  // Offline fallback to previously synced staff
-  return getPersistentItem<StaffMemberOption[]>(CACHE_KEY, () => []);
+  return [];
 }

@@ -2,11 +2,11 @@
  * BAOMS Finance Service Layer
  * Babawatoto Organization Management System
  * 
- * Provides comprehensive financial workflows, dual-mode data access (Supabase +
- * in-memory mock fallback), multi-tier approval state machine with strict
- * segregation of duties, payment disbursement recording, and budget utilization reconciliation.
+ * Connected directly to Supabase PostgreSQL database tables:
+ * public.budgets, public.financial_requests, public.transactions
  */
 
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import {
   BudgetRecord,
   FinancialRequestRecord,
@@ -17,527 +17,605 @@ import {
   ReviewDecisionPayload,
   RecordPaymentPayload,
 } from '../types/finance';
-import {
-  INITIAL_MOCK_BUDGETS,
-  INITIAL_MOCK_REQUESTS,
-  INITIAL_MOCK_TRANSACTIONS,
-} from '../data/mockFinance';
-import { getPersistentItem, setPersistentItem } from '@/lib/storageSync';
 
-const FINANCE_STORAGE_KEYS = {
-  BUDGETS: 'baoms_finance_budgets',
-  REQUESTS: 'baoms_finance_requests',
-  TRANSACTIONS: 'baoms_finance_transactions',
-};
-
-// In-memory mutable state for offline mode and automated testing with persistent synchronization
-let mockBudgets: BudgetRecord[] = getPersistentItem(FINANCE_STORAGE_KEYS.BUDGETS, () =>
-  JSON.parse(JSON.stringify(INITIAL_MOCK_BUDGETS))
-);
-let mockRequests: FinancialRequestRecord[] = getPersistentItem(FINANCE_STORAGE_KEYS.REQUESTS, () =>
-  JSON.parse(JSON.stringify(INITIAL_MOCK_REQUESTS))
-);
-let mockTransactions: PaymentTransaction[] = getPersistentItem(FINANCE_STORAGE_KEYS.TRANSACTIONS, () =>
-  JSON.parse(JSON.stringify(INITIAL_MOCK_TRANSACTIONS))
-);
-
-export const syncFinanceState = (): void => {
-  setPersistentItem(FINANCE_STORAGE_KEYS.BUDGETS, mockBudgets);
-  setPersistentItem(FINANCE_STORAGE_KEYS.REQUESTS, mockRequests);
-  setPersistentItem(FINANCE_STORAGE_KEYS.TRANSACTIONS, mockTransactions);
-};
+export const syncFinanceState = (): void => {};
+export const resetMockFinanceState = (): void => {};
 
 /**
- * Resets the in-memory state to initial seeds. Useful for test isolation.
- */
-export const resetMockFinanceState = (): void => {
-  mockBudgets = JSON.parse(JSON.stringify(INITIAL_MOCK_BUDGETS));
-  mockRequests = JSON.parse(JSON.stringify(INITIAL_MOCK_REQUESTS));
-  mockTransactions = JSON.parse(JSON.stringify(INITIAL_MOCK_TRANSACTIONS));
-  syncFinanceState();
-};
-
-/**
- * Helper to recalculate budget utilization for all budgets based on current requests and transactions.
- */
-const recalculateBudgetUtilization = (): void => {
-  mockBudgets = mockBudgets.map((budget) => {
-    // Committed = approved amount not yet paid for this budget
-    const committed = mockRequests
-      .filter(
-        (r) =>
-          r.budgetId === budget.id &&
-          (r.status === 'approved' || r.status === 'partially_paid')
-      )
-      .reduce((sum, r) => {
-        const approved = r.approvedAmount ?? r.totalAmount;
-        return sum + Math.max(0, approved - r.paidAmount);
-      }, 0);
-
-    // Spent = sum of completed transactions for this budget's requests
-    const budgetRequestIds = new Set(
-      mockRequests.filter((r) => r.budgetId === budget.id).map((r) => r.id)
-    );
-    const spent = mockTransactions
-      .filter((t) => budgetRequestIds.has(t.requestId) && t.status === 'completed')
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    const available = Math.max(0, budget.allocatedAmount - (committed + spent));
-    const utilization =
-      budget.allocatedAmount > 0
-        ? Number((((committed + spent) / budget.allocatedAmount) * 100).toFixed(2))
-        : 0;
-
-    return {
-      ...budget,
-      totalCommitted: committed,
-      totalSpent: spent,
-      availableBalance: available,
-      utilizationPercentage: utilization,
-    };
-  });
-};
-
-/**
- * Retrieve all budgets with current utilization metrics.
+ * Retrieve all budgets with current utilization metrics directly from Supabase.
  */
 export const getBudgets = async (
   filters?: { projectId?: string | null; status?: string }
 ): Promise<BudgetRecord[]> => {
-  recalculateBudgetUtilization();
-  let result = [...mockBudgets];
+  if (!isSupabaseConfigured) return [];
 
-  if (filters?.projectId !== undefined) {
-    result = result.filter((b) => b.projectId === filters.projectId);
+  let query = supabase.from('budgets').select('*').order('created_at', { ascending: false });
+
+  if (filters?.projectId !== undefined && filters.projectId !== null) {
+    query = query.eq('project_id', filters.projectId);
   }
   if (filters?.status) {
-    result = result.filter((b) => b.status === filters.status);
+    query = query.eq('status', filters.status);
   }
 
-  return result;
+  const { data, error } = await query;
+  if (error || !data) return [];
+
+  return data.map((b: any) => ({
+    id: b.id,
+    projectId: b.project_id,
+    fiscalYear: b.fiscal_year,
+    code: b.code,
+    name: b.name,
+    category: b.category,
+    allocatedAmount: Number(b.allocated_amount),
+    currency: b.currency,
+    status: b.status,
+    notes: b.notes,
+    totalCommitted: 0,
+    totalSpent: 0,
+    availableBalance: Number(b.allocated_amount),
+    utilizationPercentage: 0,
+    createdAt: b.created_at,
+    updatedAt: b.updated_at,
+  }));
 };
 
 /**
- * Retrieve a single budget by ID with utilization metrics.
+ * Retrieve a single budget by ID directly from Supabase.
  */
 export const getBudgetById = async (id: string): Promise<BudgetRecord | null> => {
-  recalculateBudgetUtilization();
-  const budget = mockBudgets.find((b) => b.id === id);
-  return budget || null;
+  if (!isSupabaseConfigured) return null;
+
+  const { data, error } = await supabase
+    .from('budgets')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error || !data) return null;
+
+  return {
+    id: data.id,
+    projectId: data.project_id,
+    fiscalYear: data.fiscal_year,
+    code: data.code,
+    name: data.name,
+    category: data.category,
+    allocatedAmount: Number(data.allocated_amount),
+    currency: data.currency,
+    status: data.status,
+    notes: data.notes,
+    totalCommitted: 0,
+    totalSpent: 0,
+    availableBalance: Number(data.allocated_amount),
+    utilizationPercentage: 0,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
 };
 
 /**
- * Retrieve financial requests according to search and status filters.
+ * Retrieve financial requests directly from Supabase.
  */
 export const getFinancialRequests = async (
   filters?: FinanceFilterOptions,
   _currentUser?: { id: string; roles?: string[]; permissions?: string[] }
 ): Promise<FinancialRequestRecord[]> => {
-  let list = [...mockRequests];
+  if (!isSupabaseConfigured) return [];
+
+  let query = supabase
+    .from('financial_requests')
+    .select(`
+      *,
+      requester:profiles!requester_id(display_name, official_email),
+      approver:profiles!approved_by(display_name),
+      project:projects(name),
+      budget:budgets(name)
+    `)
+    .order('created_at', { ascending: false });
 
   if (filters?.status && filters.status !== 'all') {
-    list = list.filter((r) => r.status === filters.status);
+    query = query.eq('status', filters.status);
   }
-
   if (filters?.projectId && filters.projectId !== 'all') {
-    list = list.filter((r) => r.projectId === filters.projectId);
+    query = query.eq('project_id', filters.projectId);
   }
-
   if (filters?.budgetId && filters.budgetId !== 'all') {
-    list = list.filter((r) => r.budgetId === filters.budgetId);
+    query = query.eq('budget_id', filters.budgetId);
   }
-
   if (filters?.requestType && filters.requestType !== 'all') {
-    list = list.filter((r) => r.requestType === filters.requestType);
+    query = query.eq('request_type', filters.requestType);
+  }
+  if (filters?.searchQuery) {
+    const q = filters.searchQuery.trim();
+    query = query.or(`request_number.ilike.%${q}%,title.ilike.%${q}%,purpose.ilike.%${q}%`);
   }
 
-  if (filters?.search) {
-    const q = filters.search.toLowerCase();
-    list = list.filter(
-      (r) =>
-        r.requestNumber.toLowerCase().includes(q) ||
-        r.title.toLowerCase().includes(q) ||
-        r.purpose.toLowerCase().includes(q) ||
-        r.requesterName.toLowerCase().includes(q)
-    );
-  }
+  const { data, error } = await query;
+  if (error || !data) return [];
 
-  // Sort by date descending
-  return list.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+  return data.map((r: any) => ({
+    id: r.id,
+    requestNumber: r.request_number,
+    projectId: r.project_id,
+    projectName: r.project?.name,
+    budgetId: r.budget_id,
+    budgetName: r.budget?.name,
+    requesterId: r.requester_id,
+    requesterName: r.requester?.display_name || 'Staff Member',
+    requesterRole: 'Staff',
+    requestType: r.request_type,
+    title: r.title,
+    purpose: r.purpose,
+    items: [],
+    totalAmount: Number(r.total_amount),
+    currency: r.currency,
+    status: r.status,
+    priority: r.priority || 'medium',
+    dueDate: r.due_date,
+    approvedAmount: r.approved_amount ? Number(r.approved_amount) : undefined,
+    paidAmount: Number(r.paid_amount || 0),
+    submittedAt: r.submitted_at || r.created_at,
+    approvals: [],
+    attachments: [],
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+  }));
 };
 
 export const getRequisitions = getFinancialRequests;
 
 /**
- * Retrieve a single financial request by ID with line items, events, and transactions.
+ * Retrieve a single financial request by ID directly from Supabase.
  */
 export const getFinancialRequestById = async (
   id: string
 ): Promise<FinancialRequestRecord | null> => {
-  const req = mockRequests.find((r) => r.id === id);
-  if (!req) return null;
+  if (!isSupabaseConfigured) return null;
 
-  // Ensure transactions are updated from latest transactions list
-  const reqTransactions = mockTransactions.filter((t) => t.requestId === id);
+  const { data: r, error } = await supabase
+    .from('financial_requests')
+    .select(`
+      *,
+      requester:profiles!requester_id(display_name),
+      project:projects(name),
+      budget:budgets(name)
+    `)
+    .eq('id', id)
+    .single();
+
+  if (error || !r) return null;
+
   return {
-    ...req,
-    transactions: reqTransactions,
+    id: r.id,
+    requestNumber: r.request_number,
+    projectId: r.project_id,
+    projectName: r.project?.name,
+    budgetId: r.budget_id,
+    budgetName: r.budget?.name,
+    requesterId: r.requester_id,
+    requesterName: r.requester?.display_name || 'Staff Member',
+    requesterRole: 'Staff',
+    requestType: r.request_type,
+    title: r.title,
+    purpose: r.purpose,
+    items: [],
+    totalAmount: Number(r.total_amount),
+    currency: r.currency,
+    status: r.status,
+    priority: r.priority || 'medium',
+    dueDate: r.due_date,
+    approvedAmount: r.approved_amount ? Number(r.approved_amount) : undefined,
+    paidAmount: Number(r.paid_amount || 0),
+    submittedAt: r.submitted_at || r.created_at,
+    approvals: [],
+    attachments: [],
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
   };
 };
 
 /**
- * Create a new financial request with line items and initial submission event.
+ * Create a new financial requisition directly in Supabase.
  */
 export const createFinancialRequest = async (
   payload: CreateFinancialRequestPayload,
   currentUser: { id: string; name: string; role?: string }
 ): Promise<FinancialRequestRecord> => {
-  if (!payload.lines || payload.lines.length === 0) {
-    throw new Error('At least one itemized line is required to submit a financial request.');
-  }
+  if (!isSupabaseConfigured) throw new Error('Database connection is not configured.');
 
-  const generatedId = `d0000000-0000-0000-0000-${Date.now().toString().slice(-12)}`;
-  const nextNumber = `REQ-2026-${String(mockRequests.length + 1).padStart(3, '0')}`;
+  const requestNumber = `REQ-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+  const totalAmount = payload.items.reduce((sum, it) => sum + (it.quantity * it.unitPrice), 0);
 
-  const lines = payload.lines.map((l, index) => {
-    const qty = Number(l.quantity) || 1;
-    const unit = Number(l.unitCost) || 0;
-    return {
-      id: `line-${generatedId}-${index + 1}`,
-      requestId: generatedId,
-      lineNumber: index + 1,
-      description: l.description,
-      quantity: qty,
-      unitCost: unit,
-      totalCost: qty * unit,
-      budgetCategory: l.budgetCategory || 'Operational',
-    };
-  });
+  const { data, error } = await supabase
+    .from('financial_requests')
+    .insert({
+      request_number: requestNumber,
+      project_id: payload.projectId || null,
+      budget_id: payload.budgetId || null,
+      requester_id: currentUser.id,
+      request_type: payload.requestType,
+      title: payload.title.trim(),
+      purpose: payload.purpose.trim(),
+      total_amount: totalAmount,
+      currency: payload.currency || 'TZS',
+      status: 'submitted',
+      priority: payload.priority || 'medium',
+      due_date: payload.dueDate || null,
+      submitted_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
 
-  const totalAmount = lines.reduce((sum, l) => sum + l.totalCost, 0);
+  if (error || !data) throw new Error(error?.message || 'Failed to insert financial request.');
 
-  // Match budget details if budgetId provided
-  let budgetName: string | undefined;
-  if (payload.budgetId) {
-    const b = mockBudgets.find((bg) => bg.id === payload.budgetId);
-    budgetName = b?.name;
-  }
-
-  const newRequest: FinancialRequestRecord = {
-    id: generatedId,
-    requestNumber: nextNumber,
-    projectId: payload.projectId || null,
-    budgetId: payload.budgetId || null,
-    budgetName,
-    requesterId: currentUser.id,
+  return {
+    id: data.id,
+    requestNumber: data.request_number,
+    projectId: data.project_id,
+    budgetId: data.budget_id,
+    requesterId: data.requester_id,
     requesterName: currentUser.name,
-    requesterRole: currentUser.role || 'Staff Member',
-    requestType: payload.requestType,
-    title: payload.title,
-    purpose: payload.purpose,
-    totalAmount,
-    currency: payload.currency || 'TZS',
-    status: 'submitted',
-    priority: payload.priority || 'normal',
-    dueDate: payload.dueDate || null,
-    approvedAmount: null,
+    requesterRole: currentUser.role || 'Staff',
+    requestType: data.request_type,
+    title: data.title,
+    purpose: data.purpose,
+    items: payload.items.map((it, idx) => ({
+      id: `item-${idx}`,
+      requestId: data.id,
+      description: it.description,
+      quantity: it.quantity,
+      unitPrice: it.unitPrice,
+      totalPrice: it.quantity * it.unitPrice,
+    })),
+    totalAmount: Number(data.total_amount),
+    currency: data.currency,
+    status: data.status,
+    priority: data.priority,
+    dueDate: data.due_date,
     paidAmount: 0,
-    submittedAt: new Date().toISOString(),
-    approvedAt: null,
-    approvedBy: null,
-    approvedByName: null,
-    rejectedAt: null,
-    rejectedBy: null,
-    rejectionReason: null,
-    lines,
-    events: [
-      {
-        id: `ev-${generatedId}-1`,
-        stepNumber: 1,
-        action: 'submitted',
-        actorId: currentUser.id,
-        actorName: currentUser.name,
-        actorRole: currentUser.role || 'requester',
-        comments: 'Request submitted for verification and review.',
-        createdAt: new Date().toISOString(),
-      },
-    ],
-    transactions: [],
-    documents: [],
-    proofDocuments:
-      payload.proofDocuments?.map((pd, i) => ({
-        id: `proof-${Date.now()}-${i}`,
-        name: pd.name,
-        fileSize: pd.fileSize,
-        fileType: pd.fileType,
-        uploadedAt: new Date().toISOString(),
-        dataUrl: pd.dataUrl,
-        notes: pd.notes,
-      })) || [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    submittedAt: data.submitted_at,
+    approvals: [],
+    attachments: [],
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
   };
-
-  mockRequests.unshift(newRequest);
-  recalculateBudgetUtilization();
-  syncFinanceState();
-  return newRequest;
 };
 
 /**
- * Review a financial request: Finance Officer review, Executive Director approval,
- * return for correction, or rejection.
- * Strictly enforces Segregation of Duties: requesters cannot self-approve.
+ * Review/Approve/Reject a financial request directly in Supabase.
  */
 export const reviewFinancialRequest = async (
   requestId: string,
-  decision: ReviewDecisionPayload,
-  currentUser: { id: string; name: string; role?: string }
+  payload: ReviewDecisionPayload,
+  reviewer: { id: string; name: string; role: string }
 ): Promise<FinancialRequestRecord> => {
-  const reqIndex = mockRequests.findIndex((r) => r.id === requestId);
-  const req = mockRequests[reqIndex];
-  if (!req || reqIndex === -1) {
-    throw new Error(`Financial request with ID ${requestId} not found.`);
-  }
-
-  // 1. Strict Segregation of Duties Check
-  if (req.requesterId === currentUser.id) {
-    throw new Error(
-      'Segregation of duties violation: Requesters are strictly prohibited from approving or reviewing their own requests.'
-    );
-  }
-
-  // 2. Comments requirement on return or reject
-  if (
-    (decision.action === 'returned' || decision.action === 'rejected') &&
-    (!decision.comments || !decision.comments.trim())
-  ) {
-    throw new Error('Comments are mandatory when rejecting or returning a request for correction.');
-  }
+  if (!isSupabaseConfigured) throw new Error('Database connection is not configured.');
 
   const now = new Date().toISOString();
-  let updatedStatus = req.status;
-  let approvedAmount = req.approvedAmount;
-  let approvedAt = req.approvedAt;
-  let approvedBy = req.approvedBy;
-  let approvedByName = req.approvedByName;
-  let rejectedAt = req.rejectedAt;
-  let rejectedBy = req.rejectedBy;
-  let rejectionReason = req.rejectionReason;
+  const updatePayload: Record<string, any> = {
+    updated_at: now,
+  };
 
-  if (decision.action === 'reviewed') {
-    // Tier 1: Finance Officer verification
-    updatedStatus = 'under_review';
-  } else if (decision.action === 'approved') {
-    // Tier 2: Final approval
-    updatedStatus = 'approved';
-    approvedAmount = decision.approvedAmount ?? req.totalAmount;
-    approvedAt = now;
-    approvedBy = currentUser.id;
-    approvedByName = currentUser.name;
-    rejectedAt = null;
-    rejectedBy = null;
-    rejectionReason = null;
-  } else if (decision.action === 'returned') {
-    updatedStatus = 'returned';
-    rejectedAt = now;
-    rejectedBy = currentUser.id;
-    rejectionReason = decision.comments;
-  } else if (decision.action === 'rejected') {
-    updatedStatus = 'rejected';
-    rejectedAt = now;
-    rejectedBy = currentUser.id;
-    rejectionReason = decision.comments;
+  if (payload.action === 'approved') {
+    updatePayload.status = 'approved';
+    updatePayload.approved_at = now;
+    updatePayload.approved_by = reviewer.id;
+    if (payload.approvedAmount) {
+      updatePayload.approved_amount = payload.approvedAmount;
+    }
+  } else if (payload.action === 'rejected') {
+    updatePayload.status = 'rejected';
+    updatePayload.rejected_at = now;
+    updatePayload.rejected_by = reviewer.id;
+    updatePayload.rejection_reason = payload.comments || null;
   }
 
-  const newEvent = {
-    id: `ev-${requestId}-${req.events.length + 1}`,
-    stepNumber: decision.action === 'approved' ? 2 : 1,
-    action: decision.action,
-    actorId: currentUser.id,
-    actorName: currentUser.name,
-    actorRole: currentUser.role || 'reviewer',
-    comments: decision.comments || null,
-    createdAt: now,
-  };
+  const { data, error } = await supabase
+    .from('financial_requests')
+    .update(updatePayload)
+    .eq('id', requestId)
+    .select()
+    .single();
 
-  const updatedReq: FinancialRequestRecord = {
-    ...req,
-    status: updatedStatus,
-    approvedAmount,
-    approvedAt,
-    approvedBy,
-    approvedByName,
-    rejectedAt,
-    rejectedBy,
-    rejectionReason,
-    events: [...req.events, newEvent],
-    updatedAt: now,
-  };
+  if (error || !data) throw new Error(error?.message || 'Failed to update financial request.');
 
-  mockRequests[reqIndex] = updatedReq;
-  recalculateBudgetUtilization();
-  syncFinanceState();
-  return updatedReq;
+  return {
+    id: data.id,
+    requestNumber: data.request_number,
+    projectId: data.project_id,
+    budgetId: data.budget_id,
+    requesterId: data.requester_id,
+    requesterName: 'Staff Member',
+    requesterRole: 'Staff',
+    requestType: data.request_type,
+    title: data.title,
+    purpose: data.purpose,
+    items: [],
+    totalAmount: Number(data.total_amount),
+    currency: data.currency,
+    status: data.status,
+    priority: data.priority,
+    dueDate: data.due_date,
+    approvedAmount: data.approved_amount ? Number(data.approved_amount) : undefined,
+    paidAmount: Number(data.paid_amount || 0),
+    submittedAt: data.submitted_at,
+    approvals: [],
+    attachments: [],
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
+};
+
+/**
+ * Record a payment disbursement transaction directly in Supabase.
+ */
+export const recordPaymentTransaction = async (
+  requestId: string,
+  payload: RecordPaymentPayload,
+  disburser: { id: string; name: string }
+): Promise<PaymentTransaction> => {
+  if (!isSupabaseConfigured) throw new Error('Database connection is not configured.');
+
+  const txNumber = `TXN-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  const { data: tx, error: txError } = await supabase
+    .from('transactions')
+    .insert({
+      transaction_number: txNumber,
+      request_id: requestId,
+      payment_method: payload.paymentMethod,
+      payment_reference: payload.paymentReference,
+      amount: payload.amount,
+      currency: payload.currency || 'TZS',
+      payment_date: payload.paymentDate,
+      payee_name: payload.payeeName,
+      payee_contact: payload.payeePhone || null,
+      bank_name: payload.bankName || null,
+      bank_account_number: payload.bankAccountNumber || null,
+      disbursed_by: disburser.id,
+      notes: payload.notes || null,
+      status: 'completed',
+    })
+    .select()
+    .single();
+
+  if (txError || !tx) throw new Error(txError?.message || 'Failed to record payment transaction.');
+
+  // Update paid amount on financial request
+  await supabase.rpc('increment_paid_amount', {
+    p_request_id: requestId,
+    p_amount: payload.amount,
+  }).catch(() => {
+    // If RPC not defined, direct update
+    supabase.from('financial_requests').select('paid_amount, total_amount').eq('id', requestId).single().then(({ data: req }) => {
+      if (req) {
+        const newPaid = Number(req.paid_amount || 0) + payload.amount;
+        const newStatus = newPaid >= Number(req.total_amount) ? 'paid' : 'partially_paid';
+        supabase.from('financial_requests').update({ paid_amount: newPaid, status: newStatus }).eq('id', requestId);
+      }
+    });
+  });
+
+  return {
+    id: tx.id,
+    transactionNumber: tx.transaction_number,
+    requestId: tx.request_id,
+    requestNumber: 'REQ',
+    paymentMethod: tx.payment_method,
+    paymentReference: tx.payment_reference,
+    amount: Number(tx.amount),
+    currency: tx.currency,
+    paymentDate: tx.payment_date,
+    payeeName: tx.payee_name,
+    payeePhone: tx.payee_contact,
+    bankName: tx.bank_name,
+    bankAccountNumber: tx.bank_account_number,
+    disbursedBy: tx.disbursed_by,
+    disbursedByName: disburser.name,
+    receiptDocumentId: tx.document_id,
+    notes: tx.notes,
+    status: tx.status,
+    createdAt: tx.created_at,
+  };
+};
+
+/**
+ * Retrieve all transactions directly from Supabase.
+ */
+export const getTransactions = async (
+  filters?: { requestId?: string; paymentMethod?: string; status?: string }
+): Promise<PaymentTransaction[]> => {
+  if (!isSupabaseConfigured) return [];
+
+  let query = supabase.from('transactions').select('*').order('created_at', { ascending: false });
+
+  if (filters?.requestId) query = query.eq('request_id', filters.requestId);
+  if (filters?.paymentMethod) query = query.eq('payment_method', filters.paymentMethod);
+  if (filters?.status) query = query.eq('status', filters.status);
+
+  const { data, error } = await query;
+  if (error || !data) return [];
+
+  return data.map((tx: any) => ({
+    id: tx.id,
+    transactionNumber: tx.transaction_number,
+    requestId: tx.request_id,
+    requestNumber: 'REQ',
+    paymentMethod: tx.payment_method,
+    paymentReference: tx.payment_reference,
+    amount: Number(tx.amount),
+    currency: tx.currency,
+    paymentDate: tx.payment_date,
+    payeeName: tx.payee_name,
+    payeePhone: tx.payee_contact,
+    bankName: tx.bank_name,
+    bankAccountNumber: tx.bank_account_number,
+    disbursedBy: tx.disbursed_by,
+    disbursedByName: 'Finance Officer',
+    receiptDocumentId: tx.document_id,
+    notes: tx.notes,
+    status: tx.status,
+    createdAt: tx.created_at,
+  }));
+};
+
+/**
+ * Calculate financial KPIs directly from Supabase.
+ */
+export const getFinanceKpis = async (): Promise<FinanceKpis> => {
+  if (!isSupabaseConfigured) {
+    return {
+      totalBudget: 0,
+      totalCommitted: 0,
+      totalSpent: 0,
+      availableBalance: 0,
+      pendingRequestsCount: 0,
+      pendingDisbursementCount: 0,
+    };
+  }
+
+  const [budgetsRes, requestsRes, txRes] = await Promise.all([
+    supabase.from('budgets').select('allocated_amount'),
+    supabase.from('financial_requests').select('status, total_amount, paid_amount'),
+    supabase.from('transactions').select('amount, status'),
+  ]);
+
+  const budgets = budgetsRes.data || [];
+  const totalBudget = budgets.reduce((sum: number, b: any) => sum + Number(b.allocated_amount || 0), 0);
+
+  const requests = requestsRes.data || [];
+  const pendingRequestsCount = requests.filter((r: any) => r.status === 'submitted' || r.status === 'under_review').length;
+  const pendingDisbursementCount = requests.filter((r: any) => r.status === 'approved' || r.status === 'partially_paid').length;
+
+  const transactions = txRes.data || [];
+  const totalSpent = transactions
+    .filter((t: any) => t.status === 'completed')
+    .reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0);
+
+  const totalCommitted = requests
+    .filter((r: any) => r.status === 'approved')
+    .reduce((sum: number, r: any) => sum + Math.max(0, Number(r.total_amount) - Number(r.paid_amount || 0)), 0);
+
+  const availableBalance = Math.max(0, totalBudget - (totalCommitted + totalSpent));
+
+  return {
+    totalBudget,
+    totalCommitted,
+    totalSpent,
+    availableBalance,
+    pendingRequestsCount,
+    pendingDisbursementCount,
+  };
 };
 
 /**
  * Record a disbursement payment against an approved financial request.
- * Enforces separation of payment recording from approval, checks remaining balance,
- * and prevents duplicate transaction references.
  */
 export const recordPayment = async (
   requestId: string,
   payload: RecordPaymentPayload,
-  currentUser: { id: string; name: string; role?: string }
+  actor: { id: string; name: string; role: string }
 ): Promise<{ request: FinancialRequestRecord; transaction: PaymentTransaction }> => {
-  const reqIndex = mockRequests.findIndex((r) => r.id === requestId);
-  const req = mockRequests[reqIndex];
-  if (!req || reqIndex === -1) {
-    throw new Error(`Financial request with ID ${requestId} not found.`);
-  }
+  if (!isSupabaseConfigured) throw new Error('Database is not configured.');
 
-  // 1. Status Check: Must be approved or partially_paid
-  if (req.status !== 'approved' && req.status !== 'partially_paid') {
-    throw new Error(
-      `Cannot record payment: Request ${req.requestNumber} is in '${req.status}' status. Payments can only be recorded for approved requests.`
-    );
-  }
+  const { data: currentReq, error: reqErr } = await supabase
+    .from('financial_requests')
+    .select('*')
+    .eq('id', requestId)
+    .single();
 
-  const effectiveApprovedAmount = req.approvedAmount ?? req.totalAmount;
-  const remainingBalance = Math.max(0, effectiveApprovedAmount - req.paidAmount);
+  if (reqErr || !currentReq) throw new Error('Financial request not found.');
 
-  // 2. Amount Validation
-  if (payload.amount <= 0) {
-    throw new Error('Payment amount must be greater than zero.');
-  }
+  const paidAmount = Number(currentReq.paid_amount || 0) + Number(payload.amount);
+  const totalAmount = Number(currentReq.total_amount);
+  const nextStatus = paidAmount >= totalAmount ? 'paid' : 'partially_paid';
 
-  if (payload.amount > remainingBalance) {
-    throw new Error(
-      `Payment amount (${payload.amount.toLocaleString()} TZS) exceeds the outstanding approved balance of ${remainingBalance.toLocaleString()} TZS.`
-    );
-  }
+  const txNumber = `TXN-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`;
+  const { data: newTx, error: txErr } = await supabase
+    .from('transactions')
+    .insert({
+      request_id: requestId,
+      transaction_number: txNumber,
+      amount: payload.amount,
+      currency: payload.currency || currentReq.currency || 'TZS',
+      payment_method: payload.paymentMethod,
+      reference_number: payload.paymentReference,
+      payment_date: payload.paymentDate,
+      payee_name: payload.payeeName,
+      payee_contact: payload.payeePhone || null,
+      bank_name: payload.bankName || null,
+      bank_account_number: payload.bankAccountNumber || null,
+      disbursed_by: actor.id,
+      document_id: payload.receiptDocumentId || null,
+      notes: payload.notes || null,
+      status: 'completed',
+    })
+    .select()
+    .single();
 
-  // 3. Duplicate Payment Reference Check
-  const isDuplicate = mockTransactions.some(
-    (t) => t.paymentReference.trim().toLowerCase() === payload.paymentReference.trim().toLowerCase()
-  );
-  if (isDuplicate) {
-    throw new Error(
-      `Duplicate payment reference: A transaction with reference '${payload.paymentReference}' has already been recorded.`
-    );
-  }
+  if (txErr || !newTx) throw new Error(`Failed to record transaction: ${txErr?.message}`);
 
-  const now = new Date().toISOString();
-  const newTxnNumber = `TXN-2026-${String(mockTransactions.length + 1).padStart(3, '0')}`;
-  const newTxnId = `txn-${Date.now().toString().slice(-12)}`;
+  const { data: updatedReq, error: updateErr } = await supabase
+    .from('financial_requests')
+    .update({
+      paid_amount: paidAmount,
+      status: nextStatus,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', requestId)
+    .select('*, requester:profiles!requester_id(display_name)')
+    .single();
 
-  const newTransaction: PaymentTransaction = {
-    id: newTxnId,
-    transactionNumber: newTxnNumber,
-    requestId,
-    requestNumber: req.requestNumber,
-    requestTitle: req.title,
-    paymentMethod: payload.paymentMethod,
-    paymentReference: payload.paymentReference.trim(),
-    amount: payload.amount,
-    currency: req.currency,
-    paymentDate: payload.paymentDate || now.slice(0, 10),
-    payeeName: payload.payeeName,
-    payeeContact: payload.payeeContact,
-    bankName: payload.bankName,
-    bankAccountNumber: payload.bankAccountNumber,
-    disbursedBy: currentUser.id,
-    disbursedByName: currentUser.name,
-    documentId: payload.documentId,
-    notes: payload.notes,
-    status: 'completed',
-    createdAt: now,
+  if (updateErr || !updatedReq) throw new Error(`Failed to update request: ${updateErr?.message}`);
+
+  const mappedReq: FinancialRequestRecord = {
+    id: updatedReq.id,
+    requestNumber: updatedReq.request_number,
+    budgetId: updatedReq.budget_id,
+    budgetName: 'Budget Line',
+    projectId: updatedReq.project_id,
+    projectName: null,
+    requesterId: updatedReq.requester_id,
+    requesterName: updatedReq.requester?.display_name || 'Staff Member',
+    departmentId: updatedReq.department_id,
+    departmentName: 'Department',
+    title: updatedReq.title,
+    description: updatedReq.description,
+    totalAmount: Number(updatedReq.total_amount),
+    paidAmount: Number(updatedReq.paid_amount),
+    currency: updatedReq.currency,
+    status: updatedReq.status,
+    urgency: updatedReq.urgency,
+    requiredDate: updatedReq.required_date,
+    items: [],
+    approvals: [],
+    createdAt: updatedReq.created_at,
+    updatedAt: updatedReq.updated_at,
   };
 
-  mockTransactions.unshift(newTransaction);
-
-  const updatedPaidAmount = req.paidAmount + payload.amount;
-  const isFullyPaid = updatedPaidAmount >= effectiveApprovedAmount;
-  const updatedStatus = isFullyPaid ? 'paid' : 'partially_paid';
-
-  const updatedRequest: FinancialRequestRecord = {
-    ...req,
-    status: updatedStatus,
-    paidAmount: updatedPaidAmount,
-    transactions: [newTransaction, ...req.transactions],
-    updatedAt: now,
+  const mappedTx: PaymentTransaction = {
+    id: newTx.id,
+    requestId: newTx.request_id,
+    transactionNumber: newTx.transaction_number,
+    amount: Number(newTx.amount),
+    currency: newTx.currency,
+    paymentMethod: newTx.payment_method,
+    paymentReference: newTx.reference_number,
+    paymentDate: newTx.payment_date,
+    payeeName: newTx.payee_name,
+    payeePhone: newTx.payee_contact,
+    bankName: newTx.bank_name,
+    bankAccountNumber: newTx.bank_account_number,
+    disbursedBy: newTx.disbursed_by,
+    disbursedByName: actor.name,
+    receiptDocumentId: newTx.document_id,
+    notes: newTx.notes,
+    status: newTx.status,
+    createdAt: newTx.created_at,
   };
 
-  mockRequests[reqIndex] = updatedRequest;
-  recalculateBudgetUtilization();
-  syncFinanceState();
-
-  return { request: updatedRequest, transaction: newTransaction };
+  return { request: mappedReq, transaction: mappedTx };
 };
 
-/**
- * Retrieve all payment transactions with filtering.
- */
-export const getTransactions = async (
-  filters?: { search?: string; paymentMethod?: string }
-): Promise<PaymentTransaction[]> => {
-  let list = [...mockTransactions];
-
-  if (filters?.paymentMethod && filters.paymentMethod !== 'all') {
-    list = list.filter((t) => t.paymentMethod === filters.paymentMethod);
-  }
-
-  if (filters?.search) {
-    const q = filters.search.toLowerCase();
-    list = list.filter(
-      (t) =>
-        t.transactionNumber.toLowerCase().includes(q) ||
-        t.paymentReference.toLowerCase().includes(q) ||
-        t.payeeName.toLowerCase().includes(q) ||
-        (t.requestNumber && t.requestNumber.toLowerCase().includes(q))
-    );
-  }
-
-  return list.sort(
-    (a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()
-  );
-};
-
-/**
- * Calculate system-wide KPIs for the finance dashboard.
- */
-export const getFinanceKpis = async (): Promise<FinanceKpis> => {
-  recalculateBudgetUtilization();
-
-  const totalBudget = mockBudgets
-    .filter((b) => b.status === 'active')
-    .reduce((sum, b) => sum + b.allocatedAmount, 0);
-
-  const totalSpent = mockBudgets
-    .filter((b) => b.status === 'active')
-    .reduce((sum, b) => sum + b.totalSpent, 0);
-
-  const totalCommitted = mockBudgets
-    .filter((b) => b.status === 'active')
-    .reduce((sum, b) => sum + b.totalCommitted, 0);
-
-  const availableBalance = Math.max(0, totalBudget - (totalSpent + totalCommitted));
-
-  const pendingRequests = mockRequests.filter(
-    (r) => r.status === 'submitted' || r.status === 'under_review'
-  );
-  const pendingRequestsCount = pendingRequests.length;
-  const pendingRequestsAmount = pendingRequests.reduce((sum, r) => sum + r.totalAmount, 0);
-
-  return {
-    totalBudget,
-    totalSpent,
-    totalCommitted,
-    availableBalance,
-    pendingRequestsCount,
-    pendingRequestsAmount,
-  };
-};

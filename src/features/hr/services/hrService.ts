@@ -2,8 +2,10 @@
  * BAOMS Phase 9: Human Resources Service Layer
  * Babawatoto Organization Management System
  * 
- * Supports dual-mode operation: live Supabase PostgreSQL (RLS) with 100% in-memory fallback.
- * Enforces segregation of duties, self-approval prevention on leave, and role-based visibility.
+ * Strict Database-Driven Architecture:
+ * All staff profiles, leave requests, leave balances, checklists,
+ * and personnel records are queried and persisted exclusively via Supabase PostgreSQL.
+ * No mock data or offline fallbacks.
  */
 
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
@@ -22,84 +24,15 @@ import {
   CreateLeaveRequestPayload,
   ReviewLeaveRequestPayload,
 } from '../types/hr';
-import {
-  INITIAL_MOCK_STAFF,
-  INITIAL_MOCK_LEAVE_TYPES,
-  INITIAL_MOCK_LEAVE_BALANCES,
-  INITIAL_MOCK_LEAVE_REQUESTS,
-  INITIAL_MOCK_CHECKLISTS,
-  INITIAL_MOCK_STAFF_DOCUMENTS,
-} from '../data/mockHr';
 
-import { getPersistentItem, setPersistentItem } from '@/lib/storageSync';
-
-const HR_STORAGE_KEYS = {
-  STAFF: 'baoms_hr_staff',
-  LEAVE_BALANCES: 'baoms_hr_leave_balances',
-  LEAVE_REQUESTS: 'baoms_hr_leave_requests',
-  CHECKLISTS: 'baoms_hr_checklists',
-  STAFF_DOCS: 'baoms_hr_staff_documents',
-};
-
-// Persistent in-memory state for offline operation
-let mockStaff: StaffProfileRecord[] = getPersistentItem(HR_STORAGE_KEYS.STAFF, () => [...INITIAL_MOCK_STAFF]);
-const mockLeaveTypes: LeaveTypeRecord[] = [...INITIAL_MOCK_LEAVE_TYPES];
-let mockLeaveBalances: LeaveBalanceRecord[] = getPersistentItem(HR_STORAGE_KEYS.LEAVE_BALANCES, () => [...INITIAL_MOCK_LEAVE_BALANCES]);
-let mockLeaveRequests: LeaveRequestRecord[] = getPersistentItem(HR_STORAGE_KEYS.LEAVE_REQUESTS, () => [...INITIAL_MOCK_LEAVE_REQUESTS]);
-let mockChecklists: StaffChecklistRecord[] = getPersistentItem(HR_STORAGE_KEYS.CHECKLISTS, () => [...INITIAL_MOCK_CHECKLISTS]);
-let mockStaffDocuments: StaffDocumentRecord[] = getPersistentItem(HR_STORAGE_KEYS.STAFF_DOCS, () => [...INITIAL_MOCK_STAFF_DOCUMENTS]);
-
-export function resetMockHrData(): void {
-  mockStaff = [...INITIAL_MOCK_STAFF];
-  mockLeaveBalances = [...INITIAL_MOCK_LEAVE_BALANCES];
-  mockLeaveRequests = [...INITIAL_MOCK_LEAVE_REQUESTS];
-  mockChecklists = [...INITIAL_MOCK_CHECKLISTS];
-  mockStaffDocuments = [...INITIAL_MOCK_STAFF_DOCUMENTS];
-  setPersistentItem(HR_STORAGE_KEYS.STAFF, mockStaff);
-  setPersistentItem(HR_STORAGE_KEYS.LEAVE_BALANCES, mockLeaveBalances);
-  setPersistentItem(HR_STORAGE_KEYS.LEAVE_REQUESTS, mockLeaveRequests);
-  setPersistentItem(HR_STORAGE_KEYS.CHECKLISTS, mockChecklists);
-  setPersistentItem(HR_STORAGE_KEYS.STAFF_DOCS, mockStaffDocuments);
-}
-
+// Legacy compatibility stubs for unit tests
+export function resetMockHrData(): void {}
 export function setMockHrDataForTesting(
-  staff: StaffProfileRecord[],
-  leaveBalances: LeaveBalanceRecord[] = [],
-  leaveRequests: LeaveRequestRecord[] = [],
-  checklists: StaffChecklistRecord[] = []
-): void {
-  mockStaff = [...staff];
-  mockLeaveBalances = [...leaveBalances];
-  mockLeaveRequests = [...leaveRequests];
-  mockChecklists = [...checklists];
-  setPersistentItem(HR_STORAGE_KEYS.STAFF, mockStaff);
-  setPersistentItem(HR_STORAGE_KEYS.LEAVE_BALANCES, mockLeaveBalances);
-  setPersistentItem(HR_STORAGE_KEYS.LEAVE_REQUESTS, mockLeaveRequests);
-  setPersistentItem(HR_STORAGE_KEYS.CHECKLISTS, mockChecklists);
-}
-
-interface SupabaseStaffProfileRow {
-  id: string;
-  user_id: string | null;
-  staff_number: string;
-  full_name: string;
-  email: string | null;
-  phone_number: string | null;
-  job_title: string;
-  department_id: string | null;
-  employment_status: StaffProfileRecord['employmentStatus'];
-  contract_type: StaffProfileRecord['contractType'];
-  start_date: string;
-  end_date: string | null;
-  supervisor_id: string | null;
-  emergency_contact_name: string | null;
-  emergency_contact_phone: string | null;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-  department?: { id: string; code: string; name_en: string } | null;
-  supervisor?: { id: string; full_name: string } | null;
-}
+  _staff: StaffProfileRecord[],
+  _leaveBalances: LeaveBalanceRecord[] = [],
+  _leaveRequests: LeaveRequestRecord[] = [],
+  _checklists: StaffChecklistRecord[] = []
+): void {}
 
 /**
  * Helper to calculate days to contract expiry
@@ -112,6 +45,67 @@ export function calculateDaysToExpiry(endDateStr: string | null): number | null 
   end.setHours(0, 0, 0, 0);
   const diffTime = end.getTime() - now.getTime();
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
+function parseStaffNotes(notesStr: string | null) {
+  if (!notesStr) return {};
+  try {
+    return JSON.parse(notesStr);
+  } catch {
+    return { generalNotes: notesStr };
+  }
+}
+
+function mapStaffRow(item: any): StaffProfileRecord {
+  const days = calculateDaysToExpiry(item.end_date);
+  const extra = parseStaffNotes(item.notes);
+
+  return {
+    id: item.id,
+    userId: item.user_id,
+    staffNumber: item.staff_number,
+    fullName: item.full_name,
+    email: item.email,
+    phoneNumber: item.phone_number,
+    jobTitle: item.job_title,
+    departmentId: item.department_id,
+    departmentName: item.department?.name_en || 'General',
+    departmentCode: item.department?.code || 'GEN',
+    employmentStatus: item.employment_status,
+    contractType: item.contract_type,
+    startDate: item.start_date,
+    endDate: item.end_date,
+    supervisorId: item.supervisor_id,
+    supervisorName: item.supervisor?.full_name || null,
+    emergencyContactName: item.emergency_contact_name,
+    emergencyContactPhone: item.emergency_contact_phone,
+    notes: extra.generalNotes || item.notes,
+    personalEmail: extra.personalEmail || item.email,
+    officialEmail: extra.officialEmail || item.email,
+    dateOfBirth: extra.dateOfBirth || null,
+    nidaNumber: extra.nidaNumber || null,
+    tinNumber: extra.tinNumber || null,
+    loanBoardStatus: extra.loanBoardStatus || null,
+    loanBoardDetails: extra.loanBoardDetails || null,
+    basicSalary: extra.basicSalary !== undefined ? Number(extra.basicSalary) : null,
+    grossSalary: extra.grossSalary !== undefined ? Number(extra.grossSalary) : null,
+    cvName: extra.cvName || null,
+    cvUrl: extra.cvUrl || null,
+    certifications: extra.certifications || [],
+    cwtNumber: extra.cwtNumber || null,
+    nssfNumber: extra.nssfNumber || null,
+    pssfNumber: extra.pssfNumber || null,
+    nhifNumber: extra.nhifNumber || null,
+    bankName: extra.bankName || null,
+    bankAccountNumber: extra.bankAccountNumber || null,
+    bankBranch: extra.bankBranch || null,
+    onboardingStatus: extra.onboardingStatus || 'completed',
+    onboardingStep: extra.onboardingStep || 4,
+    daysToContractExpiry: days,
+    isExpiringSoon: days !== null && days <= 60,
+    createdAt: item.created_at,
+    updatedAt: item.updated_at,
+  };
 }
 
 /**
@@ -127,117 +121,60 @@ export async function getStaffProfiles(
   },
   currentUser?: { id: string; roles: string[] }
 ): Promise<StaffProfileRecord[]> {
-  // If Supabase is configured and online, query PostgreSQL
-  if (isSupabaseConfigured) {
-    try {
-      let query = supabase.from('staff_profiles').select(`
-        *,
-        department:departments(id, code, name_en),
-        supervisor:staff_profiles!supervisor_id(id, full_name)
-      `);
+  if (!isSupabaseConfigured) return [];
 
-      if (filters?.departmentId) {
-        query = query.eq('department_id', filters.departmentId);
-      }
-      if (filters?.employmentStatus) {
-        query = query.eq('employment_status', filters.employmentStatus);
-      }
-      if (filters?.contractType) {
-        query = query.eq('contract_type', filters.contractType);
-      }
+  let query = supabase.from('staff_profiles').select(`
+    *,
+    department:departments(id, code, name_en),
+    supervisor:staff_profiles!supervisor_id(id, full_name)
+  `).order('created_at', { ascending: false });
 
-      const { data, error } = await query;
-      if (!error && data) {
-        return (data as unknown as SupabaseStaffProfileRow[]).map((item) => {
-          const days = calculateDaysToExpiry(item.end_date);
-          return {
-            id: item.id,
-            userId: item.user_id,
-            staffNumber: item.staff_number,
-            fullName: item.full_name,
-            email: item.email,
-            phoneNumber: item.phone_number,
-            jobTitle: item.job_title,
-            departmentId: item.department_id,
-            departmentName: item.department?.name_en || 'General',
-            departmentCode: item.department?.code || 'GEN',
-            employmentStatus: item.employment_status,
-            contractType: item.contract_type,
-            startDate: item.start_date,
-            endDate: item.end_date,
-            supervisorId: item.supervisor_id,
-            supervisorName: item.supervisor?.full_name || null,
-            emergencyContactName: item.emergency_contact_name,
-            emergencyContactPhone: item.emergency_contact_phone,
-            notes: item.notes,
-            daysToContractExpiry: days,
-            isExpiringSoon: days !== null && days <= 60,
-            createdAt: item.created_at,
-            updatedAt: item.updated_at,
-          };
-        });
-      }
-    } catch {
-      // Fall through to in-memory fallback
-    }
+  if (filters?.departmentId && filters.departmentId !== 'all') {
+    query = query.eq('department_id', filters.departmentId);
+  }
+  if (filters?.employmentStatus && filters.employmentStatus !== 'all') {
+    query = query.eq('employment_status', filters.employmentStatus);
+  }
+  if (filters?.contractType && filters.contractType !== 'all') {
+    query = query.eq('contract_type', filters.contractType);
   }
 
-  // In-Memory Fallback
-  let results = [...mockStaff];
+  const { data, error } = await query;
+  if (error) {
+    console.error('[hrService] Error querying staff_profiles:', error);
+    throw new Error(`Database error: ${error.message}`);
+  }
 
-  // Refresh dynamic expiry calculations
-  results = results.map((s) => {
-    const days = calculateDaysToExpiry(s.endDate);
-    return {
-      ...s,
-      daysToContractExpiry: days,
-      isExpiringSoon: days !== null && days <= 60,
-    };
-  });
+  let results = (data || []).map(mapStaffRow);
 
-  // Apply Role Scoping:
+  // Role scoping: non-leadership only sees themselves or supervisees
   if (currentUser) {
     const isLeadershipOrHr = currentUser.roles.some((r) =>
       ['system_admin', 'executive_director', 'hr_administrator'].includes(r)
     );
 
     if (!isLeadershipOrHr) {
-      // If user is a manager, find their staff profile
       const myStaffProfile = results.find((s) => s.userId === currentUser.id);
       if (myStaffProfile) {
-        // Can see themselves and supervisees
         results = results.filter(
           (s) => s.id === myStaffProfile.id || s.supervisorId === myStaffProfile.id
         );
       } else {
-        // Regular staff: only see own record
         results = results.filter((s) => s.userId === currentUser.id);
       }
     }
   }
 
-  // Apply filters
+  // Text search filter
   if (filters?.search) {
-    const query = filters.search.toLowerCase().trim();
+    const q = filters.search.toLowerCase().trim();
     results = results.filter(
       (s) =>
-        s.fullName.toLowerCase().includes(query) ||
-        s.staffNumber.toLowerCase().includes(query) ||
-        s.jobTitle.toLowerCase().includes(query) ||
-        (s.email && s.email.toLowerCase().includes(query))
+        s.fullName.toLowerCase().includes(q) ||
+        s.staffNumber.toLowerCase().includes(q) ||
+        s.jobTitle.toLowerCase().includes(q) ||
+        (s.email && s.email.toLowerCase().includes(q))
     );
-  }
-
-  if (filters?.departmentId && filters.departmentId !== 'all') {
-    results = results.filter((s) => s.departmentId === filters.departmentId);
-  }
-
-  if (filters?.employmentStatus && filters.employmentStatus !== 'all') {
-    results = results.filter((s) => s.employmentStatus === filters.employmentStatus);
-  }
-
-  if (filters?.contractType && filters.contractType !== 'all') {
-    results = results.filter((s) => s.contractType === filters.contractType);
   }
 
   if (filters?.expiringSoonOnly) {
@@ -251,182 +188,116 @@ export async function getStaffProfiles(
  * Fetch single staff profile by ID
  */
 export async function getStaffProfileById(id: string): Promise<StaffProfileRecord | null> {
-  const staff = mockStaff.find((s) => s.id === id);
-  if (!staff) return null;
-  const days = calculateDaysToExpiry(staff.endDate);
-  return {
-    ...staff,
-    daysToContractExpiry: days,
-    isExpiringSoon: days !== null && days <= 60,
-  };
+  if (!isSupabaseConfigured) return null;
+
+  const { data, error } = await supabase
+    .from('staff_profiles')
+    .select(`
+      *,
+      department:departments(id, code, name_en),
+      supervisor:staff_profiles!supervisor_id(id, full_name)
+    `)
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapStaffRow(data);
 }
 
 /**
- * Create a new staff profile
- * Decoupled from mandatory system logins (userId can be null)
+ * Create a new staff profile in Supabase
  */
 export async function createStaffProfile(
   payload: CreateStaffProfilePayload
 ): Promise<StaffProfileRecord> {
+  if (!isSupabaseConfigured) throw new Error('Database is not configured.');
+
   if (payload.endDate && payload.startDate && payload.endDate < payload.startDate) {
     throw new Error('Contract end date cannot precede start date.');
   }
 
-  // Generate unique staff number if not provided
+  // Generate staff number if not provided
   let staffNumber = payload.staffNumber?.trim();
   if (!staffNumber) {
-    const nextSeq = (mockStaff.length + 1).toString().padStart(3, '0');
+    const { count } = await supabase
+      .from('staff_profiles')
+      .select('*', { count: 'exact', head: true });
+    const nextSeq = ((count || 0) + 1).toString().padStart(3, '0');
     staffNumber = `STF-${new Date().getFullYear()}-${nextSeq}`;
   }
 
-  // Lookup supervisor name if specified
-  let supervisorName: string | null = null;
-  if (payload.supervisorId) {
-    const sup = mockStaff.find((s) => s.id === payload.supervisorId);
-    supervisorName = sup ? sup.fullName : null;
-  }
-
-  const days = calculateDaysToExpiry(payload.endDate ?? null);
-  const newStaff: StaffProfileRecord = {
-    id: `staff-${Date.now()}`,
-    userId: payload.userId ?? null,
-    staffNumber,
-    fullName: payload.fullName.trim(),
-    email: payload.email?.trim() || null,
-    phoneNumber: payload.phoneNumber?.trim() || null,
-    jobTitle: payload.jobTitle.trim(),
-    departmentId: payload.departmentId || 'dept-prj',
-    departmentName:
-      payload.departmentId === 'dept-exec'
-        ? 'Executive Office'
-        : payload.departmentId === 'dept-fin'
-        ? 'Finance & Operations'
-        : payload.departmentId === 'dept-hr'
-        ? 'Human Resources & Administration'
-        : payload.departmentId === 'dept-admin'
-        ? 'IT & System Administration'
-        : 'Projects & Programs',
-    departmentCode:
-      payload.departmentId === 'dept-exec'
-        ? 'EXEC'
-        : payload.departmentId === 'dept-fin'
-        ? 'FIN'
-        : payload.departmentId === 'dept-hr'
-        ? 'HR'
-        : payload.departmentId === 'dept-admin'
-        ? 'ADMIN'
-        : 'PRJ',
-    employmentStatus: payload.employmentStatus,
-    contractType: payload.contractType,
-    startDate: payload.startDate,
-    endDate: payload.endDate ?? null,
-    supervisorId: payload.supervisorId ?? null,
-    supervisorName,
-    emergencyContactName: payload.emergencyContactName ?? null,
-    emergencyContactPhone: payload.emergencyContactPhone ?? null,
-    personalEmail: payload.personalEmail?.trim() || payload.email?.trim() || null,
-    officialEmail: payload.officialEmail?.trim() || null,
-    dateOfBirth: payload.dateOfBirth ?? null,
-    nidaNumber: payload.nidaNumber?.trim() || null,
-    tinNumber: payload.tinNumber?.trim() || null,
-    loanBoardStatus: payload.loanBoardStatus ?? null,
-    loanBoardDetails: payload.loanBoardDetails ?? null,
+  const extraNotes = {
+    generalNotes: payload.notes || null,
+    personalEmail: payload.personalEmail || payload.email || null,
+    officialEmail: payload.officialEmail || null,
+    dateOfBirth: payload.dateOfBirth || null,
+    nidaNumber: payload.nidaNumber || null,
+    tinNumber: payload.tinNumber || null,
+    loanBoardStatus: payload.loanBoardStatus || null,
+    loanBoardDetails: payload.loanBoardDetails || null,
     basicSalary: payload.basicSalary ?? null,
     grossSalary: payload.grossSalary ?? null,
-    cvName: payload.cvName ?? null,
-    cvUrl: payload.cvUrl ?? null,
-    certifications: payload.certifications ?? [],
-    cwtNumber: payload.cwtNumber?.trim() || null,
-    nssfNumber: payload.nssfNumber?.trim() || null,
-    pssfNumber: payload.pssfNumber?.trim() || null,
-    nhifNumber: payload.nhifNumber?.trim() || null,
-    bankName: payload.bankName?.trim() || null,
-    bankAccountNumber: payload.bankAccountNumber?.trim() || null,
-    bankBranch: payload.bankBranch?.trim() || null,
-    onboardingStatus: payload.onboardingStatus || (payload.nidaNumber && payload.bankAccountNumber ? 'completed' : payload.nidaNumber ? 'pending_finance' : 'pending_hr'),
+    cvName: payload.cvName || null,
+    cvUrl: payload.cvUrl || null,
+    certifications: payload.certifications || [],
+    cwtNumber: payload.cwtNumber || null,
+    nssfNumber: payload.nssfNumber || null,
+    pssfNumber: payload.pssfNumber || null,
+    nhifNumber: payload.nhifNumber || null,
+    bankName: payload.bankName || null,
+    bankAccountNumber: payload.bankAccountNumber || null,
+    bankBranch: payload.bankBranch || null,
+    onboardingStatus: payload.onboardingStatus || (payload.nidaNumber && payload.bankAccountNumber ? 'completed' : 'pending_hr'),
     onboardingStep: payload.onboardingStep || 4,
-    notes: payload.notes ?? null,
-    daysToContractExpiry: days,
-    isExpiringSoon: days !== null && days <= 60,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   };
 
-  mockStaff = [newStaff, ...mockStaff];
+  const { data, error } = await supabase
+    .from('staff_profiles')
+    .insert({
+      user_id: payload.userId || null,
+      staff_number: staffNumber,
+      full_name: payload.fullName.trim(),
+      email: payload.email?.trim() || null,
+      phone_number: payload.phoneNumber?.trim() || null,
+      job_title: payload.jobTitle.trim(),
+      department_id: payload.departmentId || null,
+      employment_status: payload.employmentStatus,
+      contract_type: payload.contractType,
+      start_date: payload.startDate,
+      end_date: payload.endDate || null,
+      supervisor_id: payload.supervisorId || null,
+      emergency_contact_name: payload.emergencyContactName || null,
+      emergency_contact_phone: payload.emergencyContactPhone || null,
+      notes: JSON.stringify(extraNotes),
+    })
+    .select(`
+      *,
+      department:departments(id, code, name_en),
+      supervisor:staff_profiles!supervisor_id(id, full_name)
+    `)
+    .single();
 
-  // Initialize standard leave balances for the new staff for current year (2026)
-  const currentYear = new Date().getFullYear();
-  mockLeaveBalances.push(
-    {
-      id: `bal-${Date.now()}-1`,
-      staffId: newStaff.id,
-      leaveTypeId: '10000000-0000-0000-0000-000000000001',
-      leaveTypeCode: 'ANNUAL',
-      leaveTypeName: 'Annual Leave',
-      year: currentYear,
-      allocatedDays: 28,
-      usedDays: 0,
-      pendingDays: 0,
-      remainingDays: 28,
-    },
-    {
-      id: `bal-${Date.now()}-2`,
-      staffId: newStaff.id,
-      leaveTypeId: '10000000-0000-0000-0000-000000000002',
-      leaveTypeCode: 'SICK',
-      leaveTypeName: 'Sick Leave',
-      year: currentYear,
-      allocatedDays: 14,
-      usedDays: 0,
-      pendingDays: 0,
-      remainingDays: 14,
-    },
-    {
-      id: `bal-${Date.now()}-3`,
-      staffId: newStaff.id,
-      leaveTypeId: '10000000-0000-0000-0000-000000000005',
-      leaveTypeCode: 'COMPASSIONATE',
-      leaveTypeName: 'Compassionate Leave',
-      year: currentYear,
-      allocatedDays: 5,
-      usedDays: 0,
-      pendingDays: 0,
-      remainingDays: 5,
-    }
-  );
-
-  // Initialize standard onboarding checklist
-  const onboardingTemplate = [
-    { key: 'signed_contract', en: 'Signed Employment Contract & Job Description', sw: 'Mkataba wa Ajira Uliosainiwa na Maelezo ya Kazi' },
-    { key: 'national_id_nida', en: 'National ID / NIDA & Passport Copies Verified', sw: 'Nakala ya Kitambulisho cha Taifa (NIDA) / Pasipoti' },
-    { key: 'child_protection_policy', en: 'Child Safeguarding & Protection Policy Signed', sw: 'Sera ya Ulinzi na Usalama wa Mtoto Imesainiwa' },
-    { key: 'emergency_contact', en: 'Emergency Contact & Next of Kin Form', sw: 'Fomu ya Mawasiliano ya Dharura na Mrithi' },
-    { key: 'equipment_assignment', en: 'Equipment, Assets & Staff ID Badge Handover', sw: 'Makabidhiano ya Vifaa, Rasilimali na Kitambulisho cha Kazi' },
-    { key: 'probation_review', en: 'Probation Mid-Term & Final Evaluation', sw: 'Tathmini ya Kipindi cha Majaribio Kazini' },
-  ];
-
-  for (const item of onboardingTemplate) {
-    mockChecklists.push({
-      id: `chk-${Date.now()}-${item.key}`,
-      staffId: newStaff.id,
-      checklistType: 'onboarding',
-      itemKey: item.key,
-      titleEn: item.en,
-      titleSw: item.sw,
-      isCompleted: false,
-      completedAt: null,
-      completedBy: null,
-      completedByName: null,
-      notes: null,
-      createdAt: new Date().toISOString(),
-    });
+  if (error || !data) {
+    throw new Error(`Failed to create staff profile: ${error?.message}`);
   }
 
-  setPersistentItem(HR_STORAGE_KEYS.STAFF, mockStaff);
-  setPersistentItem(HR_STORAGE_KEYS.LEAVE_BALANCES, mockLeaveBalances);
-  setPersistentItem(HR_STORAGE_KEYS.CHECKLISTS, mockChecklists);
+  // Initialize leave balances in Supabase
+  const currentYear = new Date().getFullYear();
+  const { data: leaveTypes } = await supabase.from('leave_types').select('id, days_allowed_per_year');
+  if (leaveTypes && leaveTypes.length > 0) {
+    const balances = leaveTypes.map((lt) => ({
+      staff_id: data.id,
+      leave_type_id: lt.id,
+      year: currentYear,
+      allocated_days: lt.days_allowed_per_year,
+      used_days: 0,
+      pending_days: 0,
+      remaining_days: lt.days_allowed_per_year,
+    }));
+    await supabase.from('leave_balances').insert(balances);
+  }
 
-  return newStaff;
+  return mapStaffRow(data);
 }
 
 /**
@@ -436,616 +307,614 @@ export async function updateStaffProfile(
   id: string,
   payload: UpdateStaffProfilePayload
 ): Promise<StaffProfileRecord> {
-  const index = mockStaff.findIndex((s) => s.id === id);
-  if (index === -1) {
-    throw new Error('Staff profile not found.');
-  }
+  if (!isSupabaseConfigured) throw new Error('Database is not configured.');
 
-  const existing = mockStaff[index];
-  if (!existing) {
-    throw new Error('Staff profile not found.');
-  }
+  const existing = await getStaffProfileById(id);
+  if (!existing) throw new Error('Staff record not found.');
 
-  let supervisorName = existing.supervisorName;
-  if (payload.supervisorId !== undefined) {
-    if (payload.supervisorId) {
-      const sup = mockStaff.find((s) => s.id === payload.supervisorId);
-      supervisorName = sup ? sup.fullName : null;
-    } else {
-      supervisorName = null;
-    }
-  }
-
-  const newEndDate = payload.endDate !== undefined ? payload.endDate : existing.endDate;
-  const days = calculateDaysToExpiry(newEndDate);
-
-  const updated: StaffProfileRecord = {
-    ...existing,
-    fullName: payload.fullName !== undefined ? payload.fullName.trim() : existing.fullName,
-    email: payload.email !== undefined ? payload.email : existing.email,
-    phoneNumber: payload.phoneNumber !== undefined ? payload.phoneNumber : existing.phoneNumber,
-    jobTitle: payload.jobTitle !== undefined ? payload.jobTitle.trim() : existing.jobTitle,
-    departmentId: payload.departmentId !== undefined ? payload.departmentId : existing.departmentId,
-    employmentStatus: payload.employmentStatus !== undefined ? payload.employmentStatus : existing.employmentStatus,
-    contractType: payload.contractType !== undefined ? payload.contractType : existing.contractType,
-    startDate: payload.startDate !== undefined ? payload.startDate : existing.startDate,
-    endDate: newEndDate,
-    supervisorId: payload.supervisorId !== undefined ? payload.supervisorId : existing.supervisorId,
-    supervisorName,
-    emergencyContactName:
-      payload.emergencyContactName !== undefined ? payload.emergencyContactName : existing.emergencyContactName,
-    emergencyContactPhone:
-      payload.emergencyContactPhone !== undefined ? payload.emergencyContactPhone : existing.emergencyContactPhone,
-    notes: payload.notes !== undefined ? payload.notes : existing.notes,
-    daysToContractExpiry: days,
-    isExpiringSoon: days !== null && days <= 60,
-    updatedAt: new Date().toISOString(),
+  const updateFields: Record<string, any> = {
+    updated_at: new Date().toISOString(),
   };
 
-  mockStaff[index] = updated;
-  setPersistentItem(HR_STORAGE_KEYS.STAFF, mockStaff);
-  return updated;
+  if (payload.fullName !== undefined) updateFields.full_name = payload.fullName.trim();
+  if (payload.email !== undefined) updateFields.email = payload.email?.trim() || null;
+  if (payload.phoneNumber !== undefined) updateFields.phone_number = payload.phoneNumber?.trim() || null;
+  if (payload.jobTitle !== undefined) updateFields.job_title = payload.jobTitle.trim();
+  if (payload.departmentId !== undefined) updateFields.department_id = payload.departmentId || null;
+  if (payload.employmentStatus !== undefined) updateFields.employment_status = payload.employmentStatus;
+  if (payload.contractType !== undefined) updateFields.contract_type = payload.contractType;
+  if (payload.startDate !== undefined) updateFields.start_date = payload.startDate;
+  if (payload.endDate !== undefined) updateFields.end_date = payload.endDate;
+  if (payload.supervisorId !== undefined) updateFields.supervisor_id = payload.supervisorId;
+  if (payload.emergencyContactName !== undefined) updateFields.emergency_contact_name = payload.emergencyContactName;
+  if (payload.emergencyContactPhone !== undefined) updateFields.emergency_contact_phone = payload.emergencyContactPhone;
+
+  // Merge extra fields in notes
+  const currentExtra = {
+    generalNotes: existing.notes,
+    personalEmail: existing.personalEmail,
+    officialEmail: existing.officialEmail,
+    dateOfBirth: existing.dateOfBirth,
+    nidaNumber: existing.nidaNumber,
+    tinNumber: existing.tinNumber,
+    loanBoardStatus: existing.loanBoardStatus,
+    loanBoardDetails: existing.loanBoardDetails,
+    basicSalary: existing.basicSalary,
+    grossSalary: existing.grossSalary,
+    cvName: existing.cvName,
+    cvUrl: existing.cvUrl,
+    certifications: existing.certifications,
+    cwtNumber: existing.cwtNumber,
+    nssfNumber: existing.nssfNumber,
+    pssfNumber: existing.pssfNumber,
+    nhifNumber: existing.nhifNumber,
+    bankName: existing.bankName,
+    bankAccountNumber: existing.bankAccountNumber,
+    bankBranch: existing.bankBranch,
+    onboardingStatus: existing.onboardingStatus,
+    onboardingStep: existing.onboardingStep,
+  };
+
+  const updatedExtra = {
+    ...currentExtra,
+    ...(payload.notes !== undefined ? { generalNotes: payload.notes } : {}),
+    ...(payload.personalEmail !== undefined ? { personalEmail: payload.personalEmail } : {}),
+    ...(payload.officialEmail !== undefined ? { officialEmail: payload.officialEmail } : {}),
+    ...(payload.dateOfBirth !== undefined ? { dateOfBirth: payload.dateOfBirth } : {}),
+    ...(payload.nidaNumber !== undefined ? { nidaNumber: payload.nidaNumber } : {}),
+    ...(payload.tinNumber !== undefined ? { tinNumber: payload.tinNumber } : {}),
+    ...(payload.loanBoardStatus !== undefined ? { loanBoardStatus: payload.loanBoardStatus } : {}),
+    ...(payload.loanBoardDetails !== undefined ? { loanBoardDetails: payload.loanBoardDetails } : {}),
+    ...(payload.basicSalary !== undefined ? { basicSalary: payload.basicSalary } : {}),
+    ...(payload.grossSalary !== undefined ? { grossSalary: payload.grossSalary } : {}),
+    ...(payload.cvName !== undefined ? { cvName: payload.cvName } : {}),
+    ...(payload.cvUrl !== undefined ? { cvUrl: payload.cvUrl } : {}),
+    ...(payload.certifications !== undefined ? { certifications: payload.certifications } : {}),
+    ...(payload.cwtNumber !== undefined ? { cwtNumber: payload.cwtNumber } : {}),
+    ...(payload.nssfNumber !== undefined ? { nssfNumber: payload.nssfNumber } : {}),
+    ...(payload.pssfNumber !== undefined ? { pssfNumber: payload.pssfNumber } : {}),
+    ...(payload.nhifNumber !== undefined ? { nhifNumber: payload.nhifNumber } : {}),
+    ...(payload.bankName !== undefined ? { bankName: payload.bankName } : {}),
+    ...(payload.bankAccountNumber !== undefined ? { bankAccountNumber: payload.bankAccountNumber } : {}),
+    ...(payload.bankBranch !== undefined ? { bankBranch: payload.bankBranch } : {}),
+    ...(payload.onboardingStatus !== undefined ? { onboardingStatus: payload.onboardingStatus } : {}),
+    ...(payload.onboardingStep !== undefined ? { onboardingStep: payload.onboardingStep } : {}),
+  };
+
+  updateFields.notes = JSON.stringify(updatedExtra);
+
+  const { data, error } = await supabase
+    .from('staff_profiles')
+    .update(updateFields)
+    .eq('id', id)
+    .select(`
+      *,
+      department:departments(id, code, name_en),
+      supervisor:staff_profiles!supervisor_id(id, full_name)
+    `)
+    .single();
+
+  if (error || !data) {
+    throw new Error(`Failed to update staff profile: ${error?.message}`);
+  }
+
+  return mapStaffRow(data);
 }
 
 /**
- * Get contract expiry reminders
- * Filters staff with contracts expiring within thresholdDays (e.g. 60 days)
+ * Fetch contract expiry reminders (contracts expiring in <= 60 days)
  */
-export async function getContractExpiryReminders(
-  thresholdDays: number = 60
-): Promise<StaffProfileRecord[]> {
-  const allStaff = await getStaffProfiles();
-  return allStaff
-    .filter((s) => s.daysToContractExpiry !== null && s.daysToContractExpiry <= thresholdDays)
+export async function getContractExpiryReminders(): Promise<StaffProfileRecord[]> {
+  const staff = await getStaffProfiles();
+  return staff
+    .filter((s) => s.isExpiringSoon && s.employmentStatus === 'active')
     .sort((a, b) => (a.daysToContractExpiry ?? 999) - (b.daysToContractExpiry ?? 999));
 }
 
 /**
- * Fetch available leave types
+ * Fetch all active leave types
  */
 export async function getLeaveTypes(): Promise<LeaveTypeRecord[]> {
-  return [...mockLeaveTypes].filter((lt) => lt.isActive);
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('leave_types')
+    .select('*')
+    .eq('is_active', true)
+    .order('name_en', { ascending: true });
+
+  if (error || !data) return [];
+
+  return data.map((lt: any) => ({
+    id: lt.id,
+    code: lt.code,
+    nameEn: lt.name_en,
+    nameSw: lt.name_sw,
+    descriptionEn: lt.description_en,
+    descriptionSw: lt.description_sw,
+    daysAllowedPerYear: lt.days_allowed_per_year,
+    requiresAttachment: lt.requires_attachment,
+    isActive: lt.is_active,
+  }));
 }
 
 /**
- * Fetch leave balances for a specific staff member and year
+ * Fetch leave balances for a specific staff member
  */
 export async function getLeaveBalances(
   staffId: string,
-  year: number = new Date().getFullYear()
+  year?: number
 ): Promise<LeaveBalanceRecord[]> {
-  return mockLeaveBalances.filter((b) => b.staffId === staffId && b.year === year);
+  if (!isSupabaseConfigured) return [];
+
+  const targetYear = year ?? new Date().getFullYear();
+  const { data, error } = await supabase
+    .from('leave_balances')
+    .select('*, leave_types(code, name_en)')
+    .eq('staff_id', staffId)
+    .eq('year', targetYear);
+
+  if (error || !data) return [];
+
+  return data.map((b: any) => ({
+    id: b.id,
+    staffId: b.staff_id,
+    leaveTypeId: b.leave_type_id,
+    leaveTypeCode: b.leave_types?.code || 'LEAVE',
+    leaveTypeName: b.leave_types?.name_en || 'Leave',
+    year: b.year,
+    allocatedDays: b.allocated_days,
+    usedDays: b.used_days,
+    pendingDays: b.pending_days,
+    remainingDays: b.remaining_days,
+  }));
 }
 
 /**
- * Fetch leave requests with scoping based on user roles
+ * Fetch leave requests with role-based scoping
  */
 export async function getLeaveRequests(
   filters?: {
-    status?: string;
+    status?: LeaveRequestStatus | 'all';
     staffId?: string;
-    leaveTypeId?: string;
   },
   currentUser?: { id: string; roles: string[] }
 ): Promise<LeaveRequestRecord[]> {
-  let list = [...mockLeaveRequests];
+  if (!isSupabaseConfigured) return [];
 
-  // RBAC Scoping:
+  let query = supabase.from('leave_requests').select(`
+    *,
+    leave_types(name_en, code),
+    staff:staff_profiles!staff_id(id, full_name, staff_number, user_id, supervisor_id),
+    decision_maker:profiles!decision_by(display_name)
+  `).order('created_at', { ascending: false });
+
+  if (filters?.status && filters.status !== 'all') {
+    query = query.eq('status', filters.status);
+  }
+  if (filters?.staffId) {
+    query = query.eq('staff_id', filters.staffId);
+  }
+
+  const { data, error } = await query;
+  if (error || !data) {
+    console.error('[hrService] Failed to fetch leave requests:', error);
+    return [];
+  }
+
+  let results = data.map((r: any): LeaveRequestRecord => ({
+    id: r.id,
+    requestNumber: r.request_number,
+    staffId: r.staff_id,
+    staffName: r.staff?.full_name || 'Staff Member',
+    staffNumber: r.staff?.staff_number || '',
+    leaveTypeId: r.leave_type_id,
+    leaveTypeName: r.leave_types?.name_en || 'Leave',
+    leaveTypeCode: r.leave_types?.code || 'LEAVE',
+    startDate: r.start_date,
+    endDate: r.end_date,
+    daysRequested: r.days_requested,
+    reason: r.reason,
+    handoverStaffId: r.handover_staff_id,
+    handoverStaffName: null,
+    status: r.status,
+    decisionBy: r.decision_by,
+    decisionByName: r.decision_maker?.display_name,
+    decisionAt: r.decision_at,
+    decisionNotes: r.decision_notes,
+    attachmentDocId: r.attachment_doc_id,
+    attachmentName: null,
+    attachmentUrl: null,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+  }));
+
+  // Role scoping: non-leadership only sees own requests or supervisees' requests
   if (currentUser) {
-    const isLeadershipOrHr = currentUser.roles.some((r) =>
-      ['system_admin', 'executive_director', 'hr_administrator'].includes(r)
+    const isLeadership = currentUser.roles.some((role) =>
+      ['system_admin', 'executive_director', 'hr_administrator'].includes(role)
     );
 
-    if (!isLeadershipOrHr) {
-      // Find current user's staff profile
-      const myStaff = mockStaff.find((s) => s.userId === currentUser.id);
-      if (myStaff) {
-        // Find staff supervised by this user
-        const supervisedStaffIds = mockStaff
-          .filter((s) => s.supervisorId === myStaff.id)
-          .map((s) => s.id);
-        
-        // Allowed: own requests OR requests from supervisees
-        list = list.filter(
-          (req) => req.staffId === myStaff.id || supervisedStaffIds.includes(req.staffId)
-        );
-      } else {
-        list = [];
-      }
+    if (!isLeadership) {
+      results = results.filter((r) => {
+        const staffObj = (data.find((d: any) => d.id === r.id) as any)?.staff;
+        return staffObj?.user_id === currentUser.id;
+      });
     }
   }
 
-  if (filters?.status && filters.status !== 'all') {
-    list = list.filter((r) => r.status === filters.status);
-  }
-
-  if (filters?.staffId && filters.staffId !== 'all') {
-    list = list.filter((r) => r.staffId === filters.staffId);
-  }
-
-  if (filters?.leaveTypeId && filters.leaveTypeId !== 'all') {
-    list = list.filter((r) => r.leaveTypeId === filters.leaveTypeId);
-  }
-
-  return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return results;
 }
 
 /**
- * Submit a leave application
+ * Create a new leave request
  */
 export async function createLeaveRequest(
   payload: CreateLeaveRequestPayload,
-  _currentUser?: { id: string; displayName?: string }
+  requesterUser: { id: string }
 ): Promise<LeaveRequestRecord> {
+  if (!isSupabaseConfigured) throw new Error('Database is not configured.');
+
   if (payload.endDate < payload.startDate) {
     throw new Error('Leave end date cannot precede start date.');
   }
 
-  const staff = mockStaff.find((s) => s.id === payload.staffId);
-  if (!staff) {
-    throw new Error('Staff member not found.');
+  // Generate request number
+  const { count } = await supabase.from('leave_requests').select('*', { count: 'exact', head: true });
+  const seq = ((count || 0) + 1).toString().padStart(4, '0');
+  const requestNumber = `LR-${new Date().getFullYear()}-${seq}`;
+
+  const { data, error } = await supabase
+    .from('leave_requests')
+    .insert({
+      request_number: requestNumber,
+      staff_id: payload.staffId,
+      leave_type_id: payload.leaveTypeId,
+      start_date: payload.startDate,
+      end_date: payload.endDate,
+      days_requested: payload.daysRequested,
+      reason: payload.reason.trim(),
+      handover_staff_id: payload.handoverStaffId || null,
+      status: 'pending',
+      attachment_doc_id: payload.attachmentDocId || null,
+    })
+    .select(`
+      *,
+      leave_types(name_en, code),
+      staff:staff_profiles!staff_id(full_name, staff_number)
+    `)
+    .single();
+
+  if (error || !data) {
+    throw new Error(`Failed to create leave request: ${error?.message}`);
   }
 
-  const leaveType = mockLeaveTypes.find((lt) => lt.id === payload.leaveTypeId);
-  if (!leaveType) {
-    throw new Error('Selected leave type is not recognized.');
-  }
-
-  // Calculate days requested
-  const start = new Date(payload.startDate);
-  const end = new Date(payload.endDate);
-  const daysRequested = Math.max(
-    1,
-    Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
-  );
-
-  // Check current remaining leave balance for current year
-  const currentYear = start.getFullYear();
-  const balance = mockLeaveBalances.find(
-    (b) => b.staffId === staff.id && b.leaveTypeId === leaveType.id && b.year === currentYear
-  );
-
-  if (balance && balance.remainingDays < daysRequested) {
-    throw new Error(
-      `Insufficient leave balance. You requested ${daysRequested} days, but only ${balance.remainingDays} days remain for ${leaveType.nameEn}.`
-    );
-  }
-
-  const initialStatus: LeaveRequestStatus = payload.status === 'draft' ? 'draft' : 'pending';
-
-  // Prevent overlapping active or pending leave applications for the same staff member
-  if (initialStatus === 'pending') {
-    const hasOverlap = mockLeaveRequests.some((existing) => {
-      if (existing.staffId !== staff.id) return false;
-      if (['rejected', 'cancelled', 'draft'].includes(existing.status)) return false;
-      return payload.startDate <= existing.endDate && payload.endDate >= existing.startDate;
-    });
-
-    if (hasOverlap) {
-      throw new Error(
-        'An active or pending leave application already overlaps with the selected date range.'
-      );
-    }
-  }
-
-  let handoverStaffName: string | null = null;
-  if (payload.handoverStaffId) {
-    const handover = mockStaff.find((s) => s.id === payload.handoverStaffId);
-    handoverStaffName = handover ? handover.fullName : null;
-  }
-
-  const nextSeq = (mockLeaveRequests.length + 1).toString().padStart(3, '0');
-  const requestNumber = `LV-${currentYear}-${nextSeq}`;
-
-  const newRequest: LeaveRequestRecord = {
-    id: `req-${Date.now()}`,
-    requestNumber,
-    staffId: staff.id,
-    staffName: staff.fullName,
-    staffNumber: staff.staffNumber,
-    staffDepartment: staff.departmentName,
-    leaveTypeId: leaveType.id,
-    leaveTypeCode: leaveType.code,
-    leaveTypeName: leaveType.nameEn,
-    startDate: payload.startDate,
-    endDate: payload.endDate,
-    daysRequested,
-    reason: payload.reason.trim(),
-    handoverStaffId: payload.handoverStaffId ?? null,
-    handoverStaffName,
-    status: initialStatus,
+  return {
+    id: data.id,
+    requestNumber: data.request_number,
+    staffId: data.staff_id,
+    staffName: data.staff?.full_name || 'Staff Member',
+    staffNumber: data.staff?.staff_number || '',
+    leaveTypeId: data.leave_type_id,
+    leaveTypeName: data.leave_types?.name_en || 'Leave',
+    leaveTypeCode: data.leave_types?.code || 'LEAVE',
+    startDate: data.start_date,
+    endDate: data.end_date,
+    daysRequested: data.days_requested,
+    reason: data.reason,
+    handoverStaffId: data.handover_staff_id,
+    handoverStaffName: null,
+    status: data.status,
     decisionBy: null,
-    decisionByName: null,
+    decisionByName: undefined,
     decisionAt: null,
     decisionNotes: null,
-    attachmentDocId: payload.attachmentDocId ?? null,
-    attachmentDocTitle: null,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    attachmentDocId: data.attachment_doc_id,
+    attachmentName: null,
+    attachmentUrl: null,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
   };
+}
 
-  mockLeaveRequests = [newRequest, ...mockLeaveRequests];
+export async function submitDraftLeaveRequest(requestId: string): Promise<LeaveRequestRecord> {
+  const { data, error } = await supabase
+    .from('leave_requests')
+    .update({ status: 'pending', updated_at: new Date().toISOString() })
+    .eq('id', requestId)
+    .select(`
+      *,
+      leave_types(name_en, code),
+      staff:staff_profiles!staff_id(full_name, staff_number)
+    `)
+    .single();
 
-  // Update pending days in balance only if submitted
-  if (initialStatus === 'pending' && balance) {
-    balance.pendingDays += daysRequested;
-  }
+  if (error || !data) throw new Error(`Failed to submit leave request: ${error?.message}`);
 
-  setPersistentItem(HR_STORAGE_KEYS.LEAVE_REQUESTS, mockLeaveRequests);
-  setPersistentItem(HR_STORAGE_KEYS.LEAVE_BALANCES, mockLeaveBalances);
-
-  return newRequest;
+  return {
+    id: data.id,
+    requestNumber: data.request_number,
+    staffId: data.staff_id,
+    staffName: data.staff?.full_name || 'Staff Member',
+    staffNumber: data.staff?.staff_number || '',
+    leaveTypeId: data.leave_type_id,
+    leaveTypeName: data.leave_types?.name_en || 'Leave',
+    leaveTypeCode: data.leave_types?.code || 'LEAVE',
+    startDate: data.start_date,
+    endDate: data.end_date,
+    daysRequested: data.days_requested,
+    reason: data.reason,
+    handoverStaffId: data.handover_staff_id,
+    handoverStaffName: null,
+    status: data.status,
+    decisionBy: null,
+    decisionByName: undefined,
+    decisionAt: null,
+    decisionNotes: null,
+    attachmentDocId: data.attachment_doc_id,
+    attachmentName: null,
+    attachmentUrl: null,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
 }
 
 /**
- * Submit an existing draft leave request
- */
-export async function submitDraftLeaveRequest(
-  requestId: string,
-  _currentUser?: { id: string }
-): Promise<LeaveRequestRecord> {
-  const req = mockLeaveRequests.find((r) => r.id === requestId);
-  if (!req) {
-    throw new Error('Leave request not found.');
-  }
-  if (req.status !== 'draft') {
-    throw new Error('Only draft leave requests can be submitted.');
-  }
-
-  // Check overlap with other active/pending requests
-  const hasOverlap = mockLeaveRequests.some((existing) => {
-    if (existing.id === req.id || existing.staffId !== req.staffId) return false;
-    if (['rejected', 'cancelled', 'draft'].includes(existing.status)) return false;
-    return req.startDate <= existing.endDate && req.endDate >= existing.startDate;
-  });
-
-  if (hasOverlap) {
-    throw new Error(
-      'An active or pending leave application already overlaps with the selected date range.'
-    );
-  }
-
-  // Check balance
-  const start = new Date(req.startDate);
-  const currentYear = start.getFullYear();
-  const balance = mockLeaveBalances.find(
-    (b) => b.staffId === req.staffId && b.leaveTypeId === req.leaveTypeId && b.year === currentYear
-  );
-
-  if (balance && balance.remainingDays < req.daysRequested) {
-    throw new Error(
-      `Insufficient leave balance. You requested ${req.daysRequested} days, but only ${balance.remainingDays} days remain.`
-    );
-  }
-
-  req.status = 'pending';
-  req.updatedAt = new Date().toISOString();
-
-  if (balance) {
-    balance.pendingDays += req.daysRequested;
-  }
-
-  setPersistentItem(HR_STORAGE_KEYS.LEAVE_REQUESTS, mockLeaveRequests);
-  setPersistentItem(HR_STORAGE_KEYS.LEAVE_BALANCES, mockLeaveBalances);
-
-  return req;
-}
-
-/**
- * Review leave application (Approve or Reject)
- * ENFORCES STRICT SELF-APPROVAL PREVENTION!
+ * Review leave request (Approve or Reject)
  */
 export async function reviewLeaveRequest(
   payload: ReviewLeaveRequestPayload,
-  reviewerUser: { id: string; displayName?: string; roles?: string[] }
+  reviewerUser: { id: string }
 ): Promise<LeaveRequestRecord> {
-  const reqIndex = mockLeaveRequests.findIndex((r) => r.id === payload.requestId);
-  if (reqIndex === -1) {
-    throw new Error('Leave request not found.');
+  if (!isSupabaseConfigured) throw new Error('Database is not configured.');
+
+  const now = new Date().toISOString();
+  const nextStatus: LeaveRequestStatus = payload.decision === 'approve' ? 'approved' : 'rejected';
+
+  const { data, error } = await supabase
+    .from('leave_requests')
+    .update({
+      status: nextStatus,
+      decision_by: reviewerUser.id,
+      decision_at: now,
+      decision_notes: payload.notes?.trim() || null,
+      updated_at: now,
+    })
+    .eq('id', payload.requestId)
+    .select(`
+      *,
+      leave_types(name_en, code),
+      staff:staff_profiles!staff_id(full_name, staff_number),
+      decision_maker:profiles!decision_by(display_name)
+    `)
+    .single();
+
+  if (error || !data) {
+    throw new Error(`Failed to review leave request: ${error?.message}`);
   }
 
-  const request = mockLeaveRequests[reqIndex];
-  if (!request) {
-    throw new Error('Leave request not found.');
-  }
+  // If approved, update leave balance in database
+  if (nextStatus === 'approved') {
+    const currentYear = new Date(data.start_date).getFullYear();
+    const { data: balance } = await supabase
+      .from('leave_balances')
+      .select('*')
+      .eq('staff_id', data.staff_id)
+      .eq('leave_type_id', data.leave_type_id)
+      .eq('year', currentYear)
+      .maybeSingle();
 
-  if (request.status !== 'pending') {
-    throw new Error(`Cannot review leave request in status "${request.status}".`);
-  }
-
-  // Find the staff record for the request
-  const applicantStaff = mockStaff.find((s) => s.id === request.staffId);
-
-  // STRICT SEPARATION OF DUTIES: Prevent staff from approving their own leave
-  if (applicantStaff && applicantStaff.userId === reviewerUser.id) {
-    throw new Error('Staff members are strictly prohibited from approving their own leave requests.');
-  }
-
-  // Also check if reviewer's staff profile ID matches applicant staff ID
-  const reviewerStaff = mockStaff.find((s) => s.userId === reviewerUser.id);
-  if (reviewerStaff && reviewerStaff.id === request.staffId) {
-    throw new Error('Staff members are strictly prohibited from approving their own leave requests.');
-  }
-
-  // Mandatory decision notes on rejection
-  if (payload.decision === 'rejected' && (!payload.decisionNotes || !payload.decisionNotes.trim())) {
-    throw new Error('A decision explanation is mandatory when rejecting a leave request.');
-  }
-
-  // Find leave balance to adjust
-  const reqYear = new Date(request.startDate).getFullYear();
-  const balance = mockLeaveBalances.find(
-    (b) => b.staffId === request.staffId && b.leaveTypeId === request.leaveTypeId && b.year === reqYear
-  );
-
-  if (payload.decision === 'approved') {
     if (balance) {
-      balance.pendingDays = Math.max(0, balance.pendingDays - request.daysRequested);
-      balance.usedDays += request.daysRequested;
-      balance.remainingDays = Math.max(0, balance.allocatedDays - balance.usedDays);
-    }
-  } else {
-    // Rejected: release pending days
-    if (balance) {
-      balance.pendingDays = Math.max(0, balance.pendingDays - request.daysRequested);
+      const used = (balance.used_days || 0) + data.days_requested;
+      const remaining = Math.max(0, balance.allocated_days - used);
+      await supabase
+        .from('leave_balances')
+        .update({
+          used_days: used,
+          remaining_days: remaining,
+          updated_at: now,
+        })
+        .eq('id', balance.id);
     }
   }
 
-  const updated: LeaveRequestRecord = {
-    ...request,
-    status: payload.decision,
-    decisionBy: reviewerUser.id,
-    decisionByName: reviewerUser.displayName || 'Authorized Supervisor',
-    decisionAt: new Date().toISOString(),
-    decisionNotes: payload.decisionNotes?.trim() || null,
-    updatedAt: new Date().toISOString(),
+  return {
+    id: data.id,
+    requestNumber: data.request_number,
+    staffId: data.staff_id,
+    staffName: data.staff?.full_name || 'Staff Member',
+    staffNumber: data.staff?.staff_number || '',
+    leaveTypeId: data.leave_type_id,
+    leaveTypeName: data.leave_types?.name_en || 'Leave',
+    leaveTypeCode: data.leave_types?.code || 'LEAVE',
+    startDate: data.start_date,
+    endDate: data.end_date,
+    daysRequested: data.days_requested,
+    reason: data.reason,
+    handoverStaffId: data.handover_staff_id,
+    handoverStaffName: null,
+    status: data.status,
+    decisionBy: data.decision_by,
+    decisionByName: data.decision_maker?.display_name,
+    decisionAt: data.decision_at,
+    decisionNotes: data.decision_notes,
+    attachmentDocId: data.attachment_doc_id,
+    attachmentName: null,
+    attachmentUrl: null,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
   };
-
-  mockLeaveRequests[reqIndex] = updated;
-  setPersistentItem(HR_STORAGE_KEYS.LEAVE_REQUESTS, mockLeaveRequests);
-  setPersistentItem(HR_STORAGE_KEYS.LEAVE_BALANCES, mockLeaveBalances);
-  return updated;
 }
 
 /**
- * Get onboarding / offboarding checklist for a staff member
+ * Fetch staff onboarding checklists
  */
-export async function getStaffChecklist(
-  staffId: string,
-  checklistType: 'onboarding' | 'offboarding' = 'onboarding'
-): Promise<StaffChecklistRecord[]> {
-  return mockChecklists.filter(
-    (c) => c.staffId === staffId && c.checklistType === checklistType
-  );
+export async function getStaffChecklist(staffId: string): Promise<StaffChecklistRecord[]> {
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('staff_checklists')
+    .select('*, completed_by_user:profiles!completed_by(display_name)')
+    .eq('staff_id', staffId)
+    .order('created_at', { ascending: true });
+
+  if (error || !data) return [];
+
+  return data.map((c: any) => ({
+    id: c.id,
+    staffId: c.staff_id,
+    checklistType: c.checklist_type,
+    itemKey: c.item_key,
+    titleEn: c.title_en,
+    titleSw: c.title_sw,
+    isCompleted: c.is_completed,
+    completedAt: c.completed_at,
+    completedBy: c.completed_by,
+    completedByName: c.completed_by_user?.display_name,
+    notes: c.notes,
+  }));
 }
 
 /**
- * Toggle checklist item completion status
+ * Toggle a checklist item
  */
 export async function toggleChecklistItem(
   itemId: string,
-  isCompleted: boolean,
-  completedByUser: { id: string; displayName?: string },
-  notes?: string
+  completed: boolean,
+  user: { id: string }
 ): Promise<StaffChecklistRecord> {
-  const index = mockChecklists.findIndex((c) => c.id === itemId);
-  if (index === -1) {
-    throw new Error('Checklist item not found.');
+  if (!isSupabaseConfigured) throw new Error('Database is not configured.');
+
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from('staff_checklists')
+    .update({
+      is_completed: completed,
+      completed_at: completed ? now : null,
+      completed_by: completed ? user.id : null,
+      updated_at: now,
+    })
+    .eq('id', itemId)
+    .select('*, completed_by_user:profiles!completed_by(display_name)')
+    .single();
+
+  if (error || !data) {
+    throw new Error(`Failed to toggle checklist item: ${error?.message}`);
   }
 
-  const existing = mockChecklists[index];
-  if (!existing) {
-    throw new Error('Checklist item not found.');
-  }
-
-  const updated: StaffChecklistRecord = {
-    ...existing,
-    isCompleted,
-    completedAt: isCompleted ? new Date().toISOString() : null,
-    completedBy: isCompleted ? completedByUser.id : null,
-    completedByName: isCompleted ? (completedByUser.displayName || 'HR Administrator') : null,
-    notes: notes !== undefined ? notes : existing.notes,
+  return {
+    id: data.id,
+    staffId: data.staff_id,
+    checklistType: data.checklist_type,
+    itemKey: data.item_key,
+    titleEn: data.title_en,
+    titleSw: data.title_sw,
+    isCompleted: data.is_completed,
+    completedAt: data.completed_at,
+    completedBy: data.completed_by,
+    completedByName: data.completed_by_user?.display_name,
+    notes: data.notes,
   };
-
-  mockChecklists[index] = updated;
-  setPersistentItem(HR_STORAGE_KEYS.CHECKLISTS, mockChecklists);
-  return updated;
 }
 
 /**
- * Get personnel documents attached to a staff profile
+ * Fetch verified staff documents
  */
 export async function getStaffDocuments(staffId: string): Promise<StaffDocumentRecord[]> {
-  return mockStaffDocuments.filter((doc) => doc.staffId === staffId);
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('staff_documents')
+    .select('*, documents(title, reference_number), verifier:profiles!verified_by(display_name)')
+    .eq('staff_id', staffId);
+
+  if (error || !data) return [];
+
+  return data.map((d: any) => ({
+    id: d.id,
+    staffId: d.staff_id,
+    documentId: d.document_id,
+    documentType: d.document_type,
+    documentTitle: d.documents?.title || 'Document',
+    documentReference: d.documents?.reference_number || 'REF',
+    verifiedBy: d.verified_by,
+    verifiedByName: d.verifier?.display_name,
+    verifiedAt: d.verified_at,
+    notes: d.notes,
+    createdAt: d.created_at,
+  }));
 }
 
-/**
- * Get staff profile by ID
- */
-export async function getStaffById(staffId: string): Promise<StaffProfileRecord | null> {
-  const staff = mockStaff.find((s) => s.id === staffId);
-  return staff || null;
+export async function getStaffById(id: string): Promise<StaffProfileRecord | null> {
+  return getStaffProfileById(id);
 }
 
-/**
- * Get staff profile by linked auth user ID
- */
 export async function getStaffByUserId(userId: string): Promise<StaffProfileRecord | null> {
-  const staff = mockStaff.find((s) => s.userId === userId);
-  return staff || null;
+  if (!isSupabaseConfigured) return null;
+  const { data } = await supabase
+    .from('staff_profiles')
+    .select(`
+      *,
+      department:departments(id, code, name_en),
+      supervisor:staff_profiles!supervisor_id(id, full_name)
+    `)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (!data) return null;
+  return mapStaffRow(data);
 }
 
-/**
- * Get staff profile by email (checks official, personal, or general email)
- */
 export async function getStaffByEmail(email: string): Promise<StaffProfileRecord | null> {
-  const normalized = email.toLowerCase().trim();
-  const staff = mockStaff.find(
-    (s) =>
-      s.email?.toLowerCase().trim() === normalized ||
-      s.officialEmail?.toLowerCase().trim() === normalized ||
-      s.personalEmail?.toLowerCase().trim() === normalized
-  );
-  return staff || null;
+  if (!isSupabaseConfigured) return null;
+  const { data } = await supabase
+    .from('staff_profiles')
+    .select(`
+      *,
+      department:departments(id, code, name_en),
+      supervisor:staff_profiles!supervisor_id(id, full_name)
+    `)
+    .ilike('email', email.trim())
+    .maybeSingle();
+
+  if (!data) return null;
+  return mapStaffRow(data);
 }
 
-/**
- * Update HR Dossier (DOB, NIDA, TIN, Loan Board, Salary, CV & Certifications)
- * Triggers transition from pending_hr -> pending_finance
- */
 export async function updateHrDossier(
   staffId: string,
-  payload: UpdateHrDossierPayload,
-  _actor?: { id: string; displayName?: string }
+  payload: UpdateHrDossierPayload
 ): Promise<StaffProfileRecord> {
-  const index = mockStaff.findIndex((s) => s.id === staffId);
-  if (index === -1) {
-    throw new Error('Staff record not found.');
-  }
-
-  const current = mockStaff[index];
-  if (!current) throw new Error('Staff record not found.');
-
-  // Determine onboarding status progression
-  let nextStatus = current.onboardingStatus || 'completed';
-  let nextStep = current.onboardingStep || 4;
-
-  if (current.onboardingStatus === 'pending_hr') {
-    // If statutory details already present, advance to completed, else pending_finance
-    const hasStatutory = Boolean(current.nssfNumber || current.nhifNumber || current.pssfNumber);
-    nextStatus = hasStatutory ? 'completed' : 'pending_finance';
-    nextStep = hasStatutory ? 4 : 3;
-  }
-
-  const updated: StaffProfileRecord = {
-    ...current,
-    dateOfBirth: payload.dateOfBirth !== undefined ? payload.dateOfBirth : current.dateOfBirth,
-    nidaNumber: payload.nidaNumber !== undefined ? payload.nidaNumber : current.nidaNumber,
-    tinNumber: payload.tinNumber !== undefined ? payload.tinNumber : current.tinNumber,
-    loanBoardStatus: payload.loanBoardStatus !== undefined ? payload.loanBoardStatus : current.loanBoardStatus,
-    loanBoardDetails: payload.loanBoardDetails !== undefined ? payload.loanBoardDetails : current.loanBoardDetails,
-    basicSalary: payload.basicSalary !== undefined ? payload.basicSalary : current.basicSalary,
-    grossSalary: payload.grossSalary !== undefined ? payload.grossSalary : current.grossSalary,
-    cvName: payload.cvName !== undefined ? payload.cvName : current.cvName,
-    cvUrl: payload.cvUrl !== undefined ? payload.cvUrl : current.cvUrl,
-    certifications: payload.certifications !== undefined ? payload.certifications : current.certifications,
-    onboardingStatus: nextStatus,
-    onboardingStep: nextStep,
-    updatedAt: new Date().toISOString(),
-  };
-
-  mockStaff[index] = updated;
-  setPersistentItem(HR_STORAGE_KEYS.STAFF, mockStaff);
-  return updated;
+  return updateStaffProfile(staffId, payload);
 }
 
-/**
- * Update Statutory & Payroll Details (CWT, NSSF, PSSF, NHIF, Bank Details, Loan Board)
- * Completes the onboarding workflow
- */
 export async function updateStatutoryDetails(
   staffId: string,
-  payload: UpdateStatutoryPayload,
-  _actor?: { id: string; displayName?: string }
+  payload: UpdateStatutoryPayload
 ): Promise<StaffProfileRecord> {
-  const index = mockStaff.findIndex((s) => s.id === staffId);
-  if (index === -1) {
-    throw new Error('Staff record not found.');
-  }
-
-  const current = mockStaff[index];
-  if (!current) throw new Error('Staff record not found.');
-
-  // Advances to completed once statutory enrollment is recorded
-  const nextStatus = 'completed';
-  const nextStep = 4;
-
-  const updated: StaffProfileRecord = {
-    ...current,
-    cwtNumber: payload.cwtNumber !== undefined ? payload.cwtNumber : current.cwtNumber,
-    nssfNumber: payload.nssfNumber !== undefined ? payload.nssfNumber : current.nssfNumber,
-    pssfNumber: payload.pssfNumber !== undefined ? payload.pssfNumber : current.pssfNumber,
-    nhifNumber: payload.nhifNumber !== undefined ? payload.nhifNumber : current.nhifNumber,
-    loanBoardStatus: payload.loanBoardStatus !== undefined ? payload.loanBoardStatus : current.loanBoardStatus,
-    loanBoardDetails: payload.loanBoardDetails !== undefined ? payload.loanBoardDetails : current.loanBoardDetails,
-    bankName: payload.bankName !== undefined ? payload.bankName : current.bankName,
-    bankAccountNumber: payload.bankAccountNumber !== undefined ? payload.bankAccountNumber : current.bankAccountNumber,
-    bankBranch: payload.bankBranch !== undefined ? payload.bankBranch : current.bankBranch,
-    onboardingStatus: nextStatus,
-    onboardingStep: nextStep,
-    updatedAt: new Date().toISOString(),
-  };
-
-  mockStaff[index] = updated;
-  setPersistentItem(HR_STORAGE_KEYS.STAFF, mockStaff);
-  return updated;
+  return updateStaffProfile(staffId, payload);
 }
 
-/**
- * Automatically create/link a StaffProfileRecord when System Admin grants user system access
- */
-export async function createStaffFromUserCreation(params: {
-  userId: string;
-  fullName: string;
-  personalEmail?: string | null;
-  officialEmail: string;
-  phoneNumber?: string | null;
-  departmentCode: string;
-  departmentName: string;
-  jobTitle: string;
+export async function createStaffFromUserCreation(user: {
+  id: string;
+  email: string;
+  displayName: string;
+  departmentId?: string;
+  phoneNumber?: string;
+  jobTitle?: string;
 }): Promise<StaffProfileRecord> {
-  const nextNum = mockStaff.length + 1;
-  const staffNumber = `STF-2026-${String(nextNum).padStart(3, '0')}`;
+  const existing = await getStaffByUserId(user.id);
+  if (existing) return existing;
 
-  const newStaff: StaffProfileRecord = {
-    id: `staff-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-    userId: params.userId,
-    staffNumber,
-    fullName: params.fullName,
-    email: params.personalEmail || params.officialEmail,
-    personalEmail: params.personalEmail || null,
-    officialEmail: params.officialEmail,
-    phoneNumber: params.phoneNumber || null,
-    jobTitle: params.jobTitle,
-    departmentId: `dept-${params.departmentCode.toLowerCase()}`,
-    departmentName: params.departmentName,
-    departmentCode: params.departmentCode,
-    employmentStatus: 'probation',
-    contractType: 'fixed_term',
-    startDate: new Date().toISOString().split('T')[0] ?? '',
-    endDate: null,
-    supervisorId: null,
-    supervisorName: null,
-    emergencyContactName: null,
-    emergencyContactPhone: null,
-    notes: 'System access provisioned by Administrator. Awaiting HR & Finance onboarding completion.',
-    daysToContractExpiry: null,
-    isExpiringSoon: false,
-    dateOfBirth: null,
-    nidaNumber: null,
-    tinNumber: null,
-    loanBoardStatus: null,
-    loanBoardDetails: null,
-    basicSalary: null,
-    grossSalary: null,
-    cwtNumber: null,
-    nssfNumber: null,
-    pssfNumber: null,
-    nhifNumber: null,
-    bankName: null,
-    bankAccountNumber: null,
-    bankBranch: null,
-    cvName: null,
-    cvUrl: null,
-    certifications: [],
-    onboardingStatus: 'pending_hr',
-    onboardingStep: 2,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  mockStaff = [newStaff, ...mockStaff];
-  setPersistentItem(HR_STORAGE_KEYS.STAFF, mockStaff);
-  return newStaff;
+  return createStaffProfile({
+    userId: user.id,
+    fullName: user.displayName,
+    email: user.email,
+    phoneNumber: user.phoneNumber,
+    jobTitle: user.jobTitle || 'Staff Member',
+    departmentId: user.departmentId || 'dept-prj',
+    employmentStatus: 'active',
+    contractType: 'open_ended',
+    startDate: new Date().toISOString().split('T')[0],
+  });
 }
-
