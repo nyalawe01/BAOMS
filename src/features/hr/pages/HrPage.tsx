@@ -35,15 +35,22 @@ import {
   CheckCircle2,
   Clock,
   ClipboardList,
+  Download,
+  X,
+  RefreshCw,
 } from 'lucide-react';
 
-export const HrPage: React.FC = () => {
+interface HrPageProps {
+  defaultTab?: 'staff' | 'leave' | 'contracts' | 'checklists';
+}
+
+export const HrPage: React.FC<HrPageProps> = ({ defaultTab = 'staff' }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, roles, hasPermission, isAdmin } = useAuth();
 
   // State
-  const [activeTab, setActiveTab] = useState<'staff' | 'leave' | 'contracts' | 'checklists'>('staff');
+  const [activeTab, setActiveTab] = useState<'staff' | 'leave' | 'contracts' | 'checklists'>(defaultTab);
   const [staffList, setStaffList] = useState<StaffProfileRecord[]>([]);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequestRecord[]>([]);
   const [expiringStaff, setExpiringStaff] = useState<StaffProfileRecord[]>([]);
@@ -146,6 +153,29 @@ export const HrPage: React.FC = () => {
     }
   };
 
+  const exportStaffCsv = () => {
+    const headers = ['Staff Number', 'Full Name', 'Job Title', 'Department', 'Contract Type', 'Status', 'Start Date', 'Email', 'Phone'];
+    const rows = filteredStaff.map(s => [
+      s.staffNumber || '',
+      `"${s.fullName.replace(/"/g, '""')}"`,
+      `"${(s.jobTitle || '').replace(/"/g, '""')}"`,
+      `"${(s.departmentName || s.departmentId || '').replace(/"/g, '""')}"`,
+      s.contractType || '',
+      s.employmentStatus || '',
+      s.startDate || '',
+      s.email || '',
+      s.phone || ''
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `BAOMS_Staff_Directory_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -161,6 +191,14 @@ export const HrPage: React.FC = () => {
         ]}
         actions={
           <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={exportStaffCsv}
+              className="text-xs"
+            >
+              <Download className="h-4 w-4 mr-1.5" />
+              Export Roster (CSV)
+            </Button>
             <Button
               variant="outline"
               onClick={() => setIsCreateLeaveOpen(true)}
@@ -181,9 +219,9 @@ export const HrPage: React.FC = () => {
         }
       />
 
-      {/* KPI Metric Stat Cards */}
+      {/* KPI Metric Stat Cards (Unboxed monochrome icons) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="min-w-0">
+        <Card className="min-w-0 bg-white border border-surface-border shadow-xs">
           <CardContent className="p-4 flex items-center justify-between gap-3 min-w-0">
             <div className="space-y-1 min-w-0">
               <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider truncate block">
@@ -194,49 +232,43 @@ export const HrPage: React.FC = () => {
                 {staffList.filter((s) => !s.userId).length} {t('hr.fieldStaffWithoutLogin', 'field / non-login')}
               </span>
             </div>
-            <div className="h-10 w-10 shrink-0 rounded-lg bg-forest-50 text-forest-700 flex items-center justify-center border-none">
-              <i className="fa-solid fa-users-line text-lg" aria-hidden="true"></i>
-            </div>
+            <Users className="h-5 w-5 shrink-0 text-[#374151]" />
           </CardContent>
         </Card>
 
-        <Card className="min-w-0">
+        <Card className="min-w-0 bg-white border border-surface-border shadow-xs">
           <CardContent className="p-4 flex items-center justify-between gap-3 min-w-0">
             <div className="space-y-1 min-w-0">
               <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider truncate block">
                 {t('hr.activeContracts', 'Active Contracts')}
               </span>
-              <div className="text-[32px] font-bold text-emerald-700 leading-[1.2] font-mono tabular-nums truncate">
+              <div className="text-[32px] font-bold text-charcoal-900 leading-[1.2] font-mono tabular-nums truncate">
                 {staffList.filter((s) => s.employmentStatus === 'active').length}
               </div>
               <span className="text-xs text-charcoal-muted truncate block">
                 {staffList.filter((s) => s.employmentStatus === 'probation').length} {t('hr.onProbation', 'on probation')}
               </span>
             </div>
-            <div className="h-10 w-10 shrink-0 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center border-none">
-              <i className="fa-solid fa-user-check text-lg" aria-hidden="true"></i>
-            </div>
+            <CheckCircle2 className="h-5 w-5 shrink-0 text-[#374151]" />
           </CardContent>
         </Card>
 
-        <Card className="min-w-0">
+        <Card className="min-w-0 bg-white border border-surface-border shadow-xs">
           <CardContent className="p-4 flex items-center justify-between gap-3 min-w-0">
             <div className="space-y-1 min-w-0">
               <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider truncate block">
                 {t('hr.pendingLeave', 'Pending Leave Requests')}
               </span>
-              <div className="text-[32px] font-bold text-amber-700 leading-[1.2] font-mono tabular-nums truncate">{pendingRequestsCount}</div>
+              <div className="text-[32px] font-bold text-charcoal-900 leading-[1.2] font-mono tabular-nums truncate">{pendingRequestsCount}</div>
               <span className="text-xs text-charcoal-muted truncate block">
                 {leaveRequests.filter((r) => r.status === 'approved').length} {t('hr.approvedThisYear', 'approved')}
               </span>
             </div>
-            <div className="h-10 w-10 shrink-0 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center border-none">
-              <i className="fa-solid fa-calendar-minus text-lg" aria-hidden="true"></i>
-            </div>
+            <Calendar className="h-5 w-5 shrink-0 text-[#374151]" />
           </CardContent>
         </Card>
 
-        <Card className="min-w-0">
+        <Card className="min-w-0 bg-white border border-surface-border shadow-xs">
           <CardContent className="p-4 flex items-center justify-between gap-3 min-w-0">
             <div className="space-y-1 min-w-0">
               <span className="text-xs font-semibold text-charcoal-500 uppercase tracking-wider truncate block">
@@ -250,9 +282,7 @@ export const HrPage: React.FC = () => {
                 {t('hr.criticalExpiring', 'require urgent action')}
               </span>
             </div>
-            <div className="h-10 w-10 shrink-0 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center border-none">
-              <i className="fa-regular fa-circle-xmark text-lg" aria-hidden="true"></i>
-            </div>
+            <Clock className="h-5 w-5 shrink-0 text-[#374151]" />
           </CardContent>
         </Card>
       </div>
@@ -272,7 +302,7 @@ export const HrPage: React.FC = () => {
           onClick={() => setActiveTab('staff')}
           className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
             activeTab === 'staff'
-              ? 'border-forest-600 text-forest-700 font-bold'
+              ? 'border-charcoal-900 text-charcoal-900 font-bold'
               : 'border-transparent text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
@@ -284,7 +314,7 @@ export const HrPage: React.FC = () => {
           onClick={() => setActiveTab('leave')}
           className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
             activeTab === 'leave'
-              ? 'border-forest-600 text-forest-700 font-bold'
+              ? 'border-charcoal-900 text-charcoal-900 font-bold'
               : 'border-transparent text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
@@ -301,7 +331,7 @@ export const HrPage: React.FC = () => {
           onClick={() => setActiveTab('contracts')}
           className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
             activeTab === 'contracts'
-              ? 'border-forest-600 text-forest-700 font-bold'
+              ? 'border-charcoal-900 text-charcoal-900 font-bold'
               : 'border-transparent text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
@@ -313,7 +343,7 @@ export const HrPage: React.FC = () => {
           onClick={() => setActiveTab('checklists')}
           className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
             activeTab === 'checklists'
-              ? 'border-forest-600 text-forest-700 font-bold'
+              ? 'border-charcoal-900 text-charcoal-900 font-bold'
               : 'border-transparent text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
@@ -334,7 +364,7 @@ export const HrPage: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('hr.searchPlaceholder', 'Search staff by name, number, or title...')}
-                className="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-forest-600"
+                className="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-[#D68904]"
               />
             </div>
 
@@ -342,7 +372,7 @@ export const HrPage: React.FC = () => {
               <select
                 value={selectedDept}
                 onChange={(e) => setSelectedDept(e.target.value)}
-                className="px-3 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-forest-600"
+                className="px-3 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-[#D68904]"
               >
                 <option value="all">{t('common.allDepartments', 'All Departments')}</option>
                 <option value="dept-prj">Projects & Programs</option>
@@ -355,7 +385,7 @@ export const HrPage: React.FC = () => {
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="px-3 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-forest-600"
+                className="px-3 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-[#D68904]"
               >
                 <option value="all">{t('common.allStatuses', 'All Statuses')}</option>
                 <option value="active">Active</option>
@@ -367,7 +397,7 @@ export const HrPage: React.FC = () => {
               <select
                 value={selectedContract}
                 onChange={(e) => setSelectedContract(e.target.value)}
-                className="px-3 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-forest-600"
+                className="px-3 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-[#D68904]"
               >
                 <option value="all">{t('hr.allContracts', 'All Contract Types')}</option>
                 <option value="fixed_term">Fixed Term</option>
@@ -379,7 +409,7 @@ export const HrPage: React.FC = () => {
               <select
                 value={selectedOnboardingStatus}
                 onChange={(e) => setSelectedOnboardingStatus(e.target.value)}
-                className="px-3 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-forest-600"
+                className="px-3 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-[#D68904]"
               >
                 <option value="all">All Onboarding Stages</option>
                 <option value="pending_hr">Pending HR Dossier</option>
@@ -573,7 +603,7 @@ export const HrPage: React.FC = () => {
                     onClick={() => setSelectedLeaveStatus(st)}
                     className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                       selectedLeaveStatus === st
-                        ? 'bg-forest-700 text-white'
+                        ? 'bg-charcoal-900 text-white'
                         : 'bg-surface-card border border-surface-border text-charcoal-700 hover:bg-surface-muted'
                     }`}
                   >
@@ -623,7 +653,7 @@ export const HrPage: React.FC = () => {
                         <div className="text-xs text-charcoal-800">
                           {req.startDate} &rarr; {req.endDate}
                         </div>
-                        <div className="text-xs font-bold text-forest-800">
+                        <div className="text-xs font-bold text-charcoal-900">
                           {req.daysRequested} {t('hr.days', 'days')}
                         </div>
                       </td>
@@ -735,7 +765,7 @@ export const HrPage: React.FC = () => {
         <div className="space-y-4">
           <div className="p-4 rounded-xl border border-surface-border bg-surface-muted/20">
             <h3 className="text-sm font-bold text-charcoal-900 flex items-center gap-2 mb-1">
-              <ClipboardList className="h-4 w-4 text-forest-700" />
+              <ClipboardList className="h-4 w-4 text-[#374151]" />
               {t('hr.checklistsGovernance', 'Personnel Onboarding & Offboarding Lifecycle')}
             </h3>
             <p className="text-xs text-charcoal-muted leading-relaxed">

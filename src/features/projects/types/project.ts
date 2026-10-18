@@ -27,6 +27,8 @@ export interface ProjectBudgetRecord {
 export interface ProjectMemberRecord {
   id: string;
   projectId: string;
+  projectName?: string;
+  projectCode?: string;
   userId: string;
   userName: string;
   userEmail: string;
@@ -66,6 +68,8 @@ export interface ActivityDemographicBreakdown {
 export interface ActivityRecord {
   id: string;
   projectId: string;
+  projectName?: string;
+  projectCode?: string;
   title: string;
   description: string | null;
   activityDate: string;
@@ -103,6 +107,8 @@ export interface ActivityRecord {
 export interface TaskRecord {
   id: string;
   projectId: string;
+  projectName?: string;
+  projectCode?: string;
   activityId: string | null;
   activityTitle?: string;
   title: string;
@@ -122,6 +128,8 @@ export interface TaskRecord {
 export interface ProjectReportRecord {
   id: string;
   projectId: string;
+  projectName?: string;
+  projectCode?: string;
   reportType: ProjectReportType;
   title: string;
   reportingPeriodStart: string;

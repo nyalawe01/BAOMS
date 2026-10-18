@@ -70,6 +70,12 @@ export interface VendorRecord {
   vrnNumber?: string;
   bankName?: string;
   bankAccountNumber?: string;
+  phones?: Array<{ id: string; number: string; type: string; isPrimary?: boolean }>;
+  emails?: Array<{ id: string; email: string; type: string; isPrimary?: boolean }>;
+  addresses?: Array<{ id: string; address: string; city: string; region?: string; type: string; isPrimary?: boolean }>;
+  bankAccounts?: Array<{ id: string; bankName: string; accountName: string; accountNumber: string; branch: string; currency: string; isPrimary?: boolean }>;
+  supportingDocuments?: Array<{ id: string; name: string; tag?: string; customName?: string; url?: string; size?: string }>;
+  paymentTerms?: string;
   isCompliant: boolean;
   totalOrdersCount: number;
   ratingScore: number; // 1-5
@@ -90,7 +96,94 @@ export interface InventoryItemRecord {
   lastRestockedAt?: string;
 }
 
-export interface ProcurementKpis {
+export interface PurchaseRequestRecord {
+  id: string;
+  requestNumber: string;
+  projectId?: string | null;
+  projectName?: string;
+  requesterId: string;
+  requesterName: string;
+  title: string;
+  purpose: string;
+  totalAmount: number;
+  currency: string;
+  status: string;
+  priority: 'low' | 'normal' | 'urgent';
+  dueDate?: string | null;
+  itemsCount: number;
+  submittedAt: string;
+  approvedAt?: string | null;
+}
+
+export interface ProcurementPlanRecord {
+  id: string;
+  projectId: string;
+  projectName: string;
+  title: string;
+  category: string;
+  estimatedCost: number;
+  currency: string;
+  plannedQuarter: string;
+  plannedDate: string;
+  status: 'planned' | 'in_progress' | 'completed' | 'deferred';
+  responsibleOfficer: string;
+}
+
+export interface QuotationRecord {
+  id: string;
+  quotationNumber: string;
+  vendorId: string;
+  vendorName: string;
+  requestTitle: string;
+  quotedAmount: number;
+  currency: string;
+  submissionDate: string;
+  validUntil: string;
+  status: 'pending_review' | 'under_evaluation' | 'recommended' | 'rejected' | 'accepted';
+  deliveryLeadDays: number;
+  notes?: string;
+  documentUrl?: string;
+}
+
+export interface DeliveryRecord {
+  id: string;
+  orderId: string;
+  orderNumber: string;
+  vendorName: string;
+  deliveryDate?: string | null;
+  expectedDate: string;
+  itemsDeliveredSummary: string;
+  orderedQuantity: number;
+  deliveredQuantity: number;
+  verificationStatus: 'pending' | 'verified_complete' | 'discrepancy_noted' | 'rejected';
+  receivedBy: string;
+  notes?: string;
+}
+
+export interface ProcurementInvoiceRecord {
+  id: string;
+  invoiceNumber: string;
+  orderNumber: string;
+  vendorName: string;
+  invoiceDate: string;
+  amount: number;
+  currency: string;
+  verificationStatus: 'verified' | 'pending_verification' | 'disputed';
+  handoverStatus: 'awaiting_handover' | 'handed_to_finance' | 'payment_scheduled' | 'cleared';
+  handedOverAt?: string;
+  handedOverBy?: string;
+}
+
+export interface ProcurementDashboardKpis {
+  pendingPurchaseRequestsCount: number;
+  activeProcurementCount: number;
+  pendingQuotationsCount: number;
+  purchaseOrdersInProgressCount: number;
+  pendingDeliveriesCount: number;
+  invoicesAwaitingHandoverCount: number;
+}
+
+export interface ProcurementKpis extends ProcurementDashboardKpis {
   totalOrdersCount: number;
   activeOrdersAmount: number;
   deliveredOrdersCount: number;
@@ -111,6 +204,7 @@ export interface CreatePurchaseOrderInput {
     unitPrice: number;
   }>;
   notes?: string;
+  supportingDocuments?: Array<{ id: string; name: string; customName?: string; tag?: string }>;
 }
 
 export interface RegisterVendorInput {
@@ -124,6 +218,12 @@ export interface RegisterVendorInput {
   vrnNumber?: string;
   bankName?: string;
   bankAccountNumber?: string;
+  phones?: Array<{ id: string; number: string; type: string; isPrimary?: boolean }>;
+  emails?: Array<{ id: string; email: string; type: string; isPrimary?: boolean }>;
+  addresses?: Array<{ id: string; address: string; city: string; region?: string; type: string; isPrimary?: boolean }>;
+  bankAccounts?: Array<{ id: string; bankName: string; accountName: string; accountNumber: string; branch: string; currency: string; isPrimary?: boolean }>;
+  supportingDocuments?: Array<{ id: string; name: string; customName?: string; tag?: string }>;
+  paymentTerms?: string;
 }
 
 export interface UpdateInventoryInput {
@@ -133,3 +233,4 @@ export interface UpdateInventoryInput {
   movementType?: 'received' | 'dispensed' | 'adjusted';
   updatedBy?: string;
 }
+

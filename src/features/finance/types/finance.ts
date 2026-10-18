@@ -147,13 +147,45 @@ export interface BudgetRecord {
   utilizationPercentage: number;
 }
 
+export interface FinancialDocumentItem {
+  id: string;
+  title: string;
+  documentType: string;
+  referenceNumber: string;
+  relatedEntity: string;
+  fileSize?: string;
+  uploadedAt: string;
+  source: 'transaction_receipt' | 'requisition_attachment' | 'supporting_doc';
+}
+
+export interface IncomeRecord {
+  id: string;
+  referenceNumber: string;
+  source: string;
+  donorName: string;
+  projectId?: string | null;
+  projectName?: string;
+  amount: number;
+  currency: string;
+  date: string;
+  status: 'confirmed' | 'reconciled' | 'pending';
+  category: string;
+  notes?: string;
+}
+
 export interface FinanceKpis {
   totalBudget: number;
   totalSpent: number;
   totalCommitted: number;
   availableBalance: number;
+  recordedIncome?: number;
   pendingRequestsCount: number;
   pendingRequestsAmount: number;
+  pendingApprovalsCount?: number;
+  pendingDisbursementCount: number;
+  pendingDisbursementAmount: number;
+  outstandingPaymentsAmount?: number;
+  outstandingPaymentsCount?: number;
 }
 
 export interface CreateFinancialRequestLineInput {

@@ -196,8 +196,13 @@ export const UserManagementPage: React.FC = () => {
   const { t } = useTranslation();
   const { showToast } = useToast();
   const { user: currentUser, hasRole, isAdmin } = useAuth();
-  const canHRReview = (hasRole('hr_administrator') || isAdmin()) && !hasRole('executive_director');
-  const canEDAuthorize = hasRole('executive_director') || isAdmin();
+  // HR Administrator and System Admin can both review (HR vetting step) and authorize (final approval)
+  const canHRReview = hasRole('hr_administrator') || hasRole('system_admin') || isAdmin();
+  const canEDAuthorize =
+    hasRole('executive_director') ||
+    hasRole('hr_administrator') ||
+    hasRole('system_admin') ||
+    isAdmin();
 
   // Online/offline connectivity state
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -592,7 +597,7 @@ export const UserManagementPage: React.FC = () => {
         ]}
         badge={
           <Badge variant="info" withDot>
-            System Administrator
+            {hasRole('hr_administrator') ? 'HR Personnel Command' : isAdmin() ? 'System Administrator' : 'Access Governance'}
           </Badge>
         }
         actions={

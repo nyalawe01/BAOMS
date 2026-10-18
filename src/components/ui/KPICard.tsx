@@ -42,11 +42,7 @@ export const KPICard: React.FC<KPICardProps> = ({
         <span className="text-xs font-medium text-slate-500 dark:text-neutral-400 uppercase tracking-wider truncate">
           {label}
         </span>
-        {Icon && (
-          <div className="p-1.5 rounded-md bg-slate-50 dark:bg-neutral-800 border border-slate-100 dark:border-neutral-700 shrink-0">
-            <Icon className="h-4 w-4 text-slate-600 dark:text-neutral-400" />
-          </div>
-        )}
+        {Icon && <Icon className="h-4 w-4 text-[#374151] dark:text-neutral-300 shrink-0" />}
       </div>
 
       <div className="mt-3">

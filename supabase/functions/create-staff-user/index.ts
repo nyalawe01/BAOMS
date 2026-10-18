@@ -1,4 +1,4 @@
-﻿// ==============================================================================
+// ==============================================================================
 // BAOMS Edge Function: create-staff-user
 // Babawatoto Organization Management System
 //
@@ -125,7 +125,7 @@ serve(async (req) => {
 
     if (profileErr) {
       await adminClient.auth.admin.deleteUser(newUserId);
-      return new Response(JSON.stringify({ error: Profile creation failed:  }), {
+      return new Response(JSON.stringify({ error: `Profile creation failed: ${profileErr.message}` }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }

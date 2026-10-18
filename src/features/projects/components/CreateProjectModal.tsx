@@ -3,7 +3,7 @@
  * Babawatoto Organization Management System (BAOMS)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Briefcase, AlertCircle } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';

@@ -8,6 +8,11 @@ import {
   RegisterVendorInput,
   UpdateInventoryInput,
   PurchaseOrderStatus,
+  PurchaseRequestRecord,
+  ProcurementPlanRecord,
+  QuotationRecord,
+  DeliveryRecord,
+  ProcurementInvoiceRecord,
 } from '../types/procurement';
 
 export async function getPurchaseOrders(params?: {
@@ -233,23 +238,40 @@ export async function registerVendor(input: RegisterVendorInput): Promise<Vendor
 
   const vendorCode = `VND-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`;
 
+  const primaryPhone = input.phones?.find((p) => p.isPrimary)?.number || input.phone || '';
+  const primaryEmail = input.emails?.find((e) => e.isPrimary)?.email || input.email || '';
+  const primaryAddress = input.addresses?.find((a) => a.isPrimary)?.address || input.physicalAddress || '';
+  const primaryBank = input.bankAccounts?.find((b) => b.isPrimary);
+
+  const metaPayload = {
+    phones: input.phones || [],
+    emails: input.emails || [],
+    addresses: input.addresses || [],
+    bankAccounts: input.bankAccounts || [],
+    supportingDocuments: input.supportingDocuments || [],
+    paymentTerms: input.paymentTerms || '30_days_net',
+  };
+
+  const insertPayload: Record<string, any> = {
+    vendor_code: vendorCode,
+    business_name: input.businessName.trim(),
+    category: input.category,
+    contact_person: input.contactPerson.trim(),
+    email: primaryEmail.trim(),
+    phone: primaryPhone.trim(),
+    physical_address: primaryAddress.trim(),
+    tin_number: input.tinNumber?.trim() || null,
+    vrn_number: input.vrnNumber?.trim() || null,
+    bank_name: primaryBank?.bankName || input.bankName?.trim() || null,
+    bank_account_number: primaryBank?.accountNumber || input.bankAccountNumber?.trim() || null,
+    is_compliant: true,
+    rating_score: 5.0,
+    notes: JSON.stringify(metaPayload),
+  };
+
   const { data, error } = await supabase
     .from('vendors')
-    .insert({
-      vendor_code: vendorCode,
-      business_name: input.businessName.trim(),
-      category: input.category,
-      contact_person: input.contactPerson.trim(),
-      email: input.email.trim(),
-      phone: input.phone.trim(),
-      physical_address: input.physicalAddress.trim(),
-      tin_number: input.tinNumber?.trim() || null,
-      vrn_number: input.vrnNumber?.trim() || null,
-      bank_name: input.bankName?.trim() || null,
-      bank_account_number: input.bankAccountNumber?.trim() || null,
-      is_compliant: true,
-      rating_score: 5.0,
-    })
+    .insert(insertPayload)
     .select()
     .single();
 
@@ -268,9 +290,15 @@ export async function registerVendor(input: RegisterVendorInput): Promise<Vendor
     vrnNumber: data.vrn_number,
     bankName: data.bank_name,
     bankAccountNumber: data.bank_account_number,
+    phones: input.phones,
+    emails: input.emails,
+    addresses: input.addresses,
+    bankAccounts: input.bankAccounts,
+    supportingDocuments: input.supportingDocuments,
+    paymentTerms: input.paymentTerms,
     isCompliant: data.is_compliant,
     totalOrdersCount: 0,
-    ratingScore: Number(data.rating_score),
+    ratingScore: Number(data.rating_score || 5.0),
     createdAt: data.created_at,
   };
 }
@@ -368,6 +396,160 @@ export async function updateInventoryQuantity(
   };
 }
 
+export async function getPurchaseRequests(params?: {
+  status?: string;
+  projectId?: string;
+  searchQuery?: string;
+}): Promise<PurchaseRequestRecord[]> {
+  if (!isSupabaseConfigured) return [];
+
+  let query = supabase
+    .from('financial_requests')
+    .select('*, requester:profiles!requester_id(display_name), project:projects(name)')
+    .eq('request_type', 'procurement')
+    .order('created_at', { ascending: false });
+
+  if (params?.status && params.status !== 'all') {
+    query = query.eq('status', params.status);
+  }
+  if (params?.projectId && params.projectId !== 'all') {
+    query = query.eq('project_id', params.projectId);
+  }
+  if (params?.searchQuery) {
+    const q = params.searchQuery.trim();
+    query = query.or(`request_number.ilike.%${q}%,title.ilike.%${q}%,purpose.ilike.%${q}%`);
+  }
+
+  const { data, error } = await query;
+  if (error || !data) return [];
+
+  return data.map((r: any) => ({
+    id: r.id,
+    requestNumber: r.request_number,
+    projectId: r.project_id,
+    projectName: r.project?.name,
+    requesterId: r.requester_id,
+    requesterName: r.requester?.display_name || 'Staff Member',
+    title: r.title,
+    purpose: r.purpose,
+    totalAmount: Number(r.total_amount || 0),
+    currency: r.currency || 'TZS',
+    status: r.status,
+    priority: (r.priority as 'low' | 'normal' | 'urgent') || 'normal',
+    dueDate: r.due_date,
+    itemsCount: 1,
+    submittedAt: r.submitted_at || r.created_at,
+    approvedAt: r.approved_at,
+  }));
+}
+
+export async function getProcurementPlans(): Promise<ProcurementPlanRecord[]> {
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('budgets')
+    .select('*, project:projects(name)')
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((b: any) => ({
+    id: b.id,
+    projectId: b.project_id || '',
+    projectName: b.project?.name || 'Institutional / General',
+    title: b.name,
+    category: b.category,
+    estimatedCost: Number(b.allocated_amount || 0),
+    currency: b.currency || 'TZS',
+    plannedQuarter: b.fiscal_year || 'FY2026',
+    plannedDate: b.created_at?.slice(0, 10) || '',
+    status: b.status === 'active' ? 'in_progress' : 'planned',
+    responsibleOfficer: 'Procurement Specialist',
+  }));
+}
+
+export async function getQuotations(): Promise<QuotationRecord[]> {
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('entity_supporting_documents')
+    .select('*')
+    .eq('document_tag', 'quote')
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((doc: any, idx: number) => ({
+    id: doc.id,
+    quotationNumber: `QT-${new Date(doc.created_at).getFullYear()}-${String(idx + 1).padStart(3, '0')}`,
+    vendorId: doc.entity_id,
+    vendorName: doc.custom_name?.split('-')[0]?.trim() || 'Vendor Quote',
+    requestTitle: doc.custom_name || doc.original_name,
+    quotedAmount: Number(doc.file_size || 0),
+    currency: 'TZS',
+    submissionDate: doc.created_at?.slice(0, 10) || '',
+    validUntil: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+    status: 'under_evaluation',
+    deliveryLeadDays: 7,
+    notes: doc.notes || undefined,
+    documentUrl: doc.storage_path,
+  }));
+}
+
+export async function getDeliveries(): Promise<DeliveryRecord[]> {
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('purchase_orders')
+    .select('*, vendor:vendors(business_name)')
+    .in('status', ['ordered', 'delivered'])
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((po: any) => ({
+    id: po.id,
+    orderId: po.id,
+    orderNumber: po.order_number,
+    vendorName: po.vendor?.business_name || 'Vendor',
+    deliveryDate: po.delivered_date,
+    expectedDate: po.expected_delivery_date || 'Pending',
+    itemsDeliveredSummary: po.title,
+    orderedQuantity: 1,
+    deliveredQuantity: po.status === 'delivered' ? 1 : 0,
+    verificationStatus: po.status === 'delivered' ? 'verified_complete' : 'pending',
+    receivedBy: 'Procurement & Stores',
+    notes: po.notes || undefined,
+  }));
+}
+
+export async function getInvoicesForHandover(): Promise<ProcurementInvoiceRecord[]> {
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('financial_requests')
+    .select('*, requester:profiles!requester_id(display_name)')
+    .eq('request_type', 'procurement')
+    .in('status', ['approved', 'partially_paid', 'paid'])
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((r: any) => ({
+    id: r.id,
+    invoiceNumber: `INV-${r.request_number}`,
+    orderNumber: r.request_number,
+    vendorName: r.purpose?.slice(0, 30) || 'Approved Supplier',
+    invoiceDate: r.submitted_at?.slice(0, 10) || r.created_at?.slice(0, 10),
+    amount: Number(r.approved_amount || r.total_amount || 0),
+    currency: r.currency || 'TZS',
+    verificationStatus: 'verified',
+    handoverStatus: r.status === 'paid' ? 'cleared' : (r.status === 'partially_paid' ? 'payment_scheduled' : 'awaiting_handover'),
+    handedOverAt: r.approved_at,
+    handedOverBy: r.approved_by,
+  }));
+}
+
 export async function getProcurementKpis(): Promise<ProcurementKpis> {
   if (!isSupabaseConfigured) {
     return {
@@ -376,23 +558,40 @@ export async function getProcurementKpis(): Promise<ProcurementKpis> {
       deliveredOrdersCount: 0,
       registeredVendorsCount: 0,
       lowStockItemsCount: 0,
+      pendingPurchaseRequestsCount: 0,
+      activeProcurementCount: 0,
+      pendingQuotationsCount: 0,
+      purchaseOrdersInProgressCount: 0,
+      pendingDeliveriesCount: 0,
+      invoicesAwaitingHandoverCount: 0,
     };
   }
 
-  const [ordersRes, vendorsRes, invRes] = await Promise.all([
+  const [ordersRes, vendorsRes, invRes, reqsRes, docsRes] = await Promise.all([
     supabase.from('purchase_orders').select('status, total_amount'),
     supabase.from('vendors').select('id', { count: 'exact' }),
     supabase.from('inventory_items').select('status'),
+    supabase.from('financial_requests').select('status, request_type, total_amount'),
+    supabase.from('entity_supporting_documents').select('id, document_tag'),
   ]);
 
   const orders = ordersRes.data || [];
-  const activeAmount = orders
-    .filter((o: any) => o.status === 'ordered' || o.status === 'pending_approval' || o.status === 'approved')
-    .reduce((sum: number, o: any) => sum + Number(o.total_amount), 0);
-
+  const activeOrders = orders.filter((o: any) => o.status === 'ordered' || o.status === 'pending_approval' || o.status === 'approved');
+  const activeAmount = activeOrders.reduce((sum: number, o: any) => sum + Number(o.total_amount || 0), 0);
   const deliveredCount = orders.filter((o: any) => o.status === 'delivered').length;
+  const inProgressPOCount = activeOrders.length;
+  const pendingDeliveriesCount = orders.filter((o: any) => o.status === 'ordered').length;
+
   const inventory = invRes.data || [];
   const lowStockCount = inventory.filter((i: any) => i.status === 'low_stock' || i.status === 'out_of_stock').length;
+
+  const reqs = reqsRes.data || [];
+  const procurementReqs = reqs.filter((r: any) => r.request_type === 'procurement');
+  const pendingReqsCount = procurementReqs.filter((r: any) => r.status === 'submitted' || r.status === 'under_review').length;
+  const invoicesAwaitingCount = procurementReqs.filter((r: any) => r.status === 'approved').length;
+
+  const docs = docsRes.data || [];
+  const quotesCount = docs.filter((d: any) => d.document_tag === 'quote').length;
 
   return {
     totalOrdersCount: orders.length,
@@ -400,5 +599,11 @@ export async function getProcurementKpis(): Promise<ProcurementKpis> {
     deliveredOrdersCount: deliveredCount,
     registeredVendorsCount: vendorsRes.count || (vendorsRes.data?.length ?? 0),
     lowStockItemsCount: lowStockCount,
+    pendingPurchaseRequestsCount: pendingReqsCount,
+    activeProcurementCount: inProgressPOCount + pendingReqsCount,
+    pendingQuotationsCount: quotesCount,
+    purchaseOrdersInProgressCount: inProgressPOCount,
+    pendingDeliveriesCount: pendingDeliveriesCount,
+    invoicesAwaitingHandoverCount: invoicesAwaitingCount,
   };
 }

@@ -123,29 +123,127 @@ export async function getStaffProfiles(
 ): Promise<StaffProfileRecord[]> {
   if (!isSupabaseConfigured) return [];
 
-  let query = supabase.from('staff_profiles').select(`
-    *,
-    department:departments(id, code, name_en),
-    supervisor:staff_profiles!supervisor_id(id, full_name)
-  `).order('created_at', { ascending: false });
+  // 1. Fetch staff_profiles from database
+  let staffList: StaffProfileRecord[] = [];
+  try {
+    let query = supabase.from('staff_profiles').select(`
+      *,
+      department:departments(id, code, name_en),
+      supervisor:staff_profiles!supervisor_id(id, full_name)
+    `).order('created_at', { ascending: false });
 
-  if (filters?.departmentId && filters.departmentId !== 'all') {
-    query = query.eq('department_id', filters.departmentId);
-  }
-  if (filters?.employmentStatus && filters.employmentStatus !== 'all') {
-    query = query.eq('employment_status', filters.employmentStatus);
-  }
-  if (filters?.contractType && filters.contractType !== 'all') {
-    query = query.eq('contract_type', filters.contractType);
+    if (filters?.departmentId && filters.departmentId !== 'all') {
+      query = query.eq('department_id', filters.departmentId);
+    }
+    if (filters?.employmentStatus && filters.employmentStatus !== 'all') {
+      query = query.eq('employment_status', filters.employmentStatus);
+    }
+    if (filters?.contractType && filters.contractType !== 'all') {
+      query = query.eq('contract_type', filters.contractType);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      console.warn('[hrService] Querying staff_profiles warning/error:', error.message);
+    } else if (data) {
+      staffList = data.map(mapStaffRow);
+    }
+  } catch (err) {
+    console.warn('[hrService] staff_profiles catch:', err);
   }
 
-  const { data, error } = await query;
-  if (error) {
-    console.error('[hrService] Error querying staff_profiles:', error);
-    throw new Error(`Database error: ${error.message}`);
+  // 2. Fetch authenticated profiles to ensure ALL registered/created accounts and roles appear
+  try {
+    const { data: profileRows, error: profErr } = await supabase
+      .from('profiles')
+      .select(`
+        id,
+        display_name,
+        official_email,
+        phone_number,
+        is_active,
+        approval_status,
+        staged_details,
+        created_at,
+        updated_at,
+        departments ( id, code, name_en ),
+        user_roles:user_roles!user_roles_user_id_fkey ( roles ( code, name_en ) )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (!profErr && profileRows && profileRows.length > 0) {
+      const existingUserIds = new Set(staffList.map((s) => s.userId).filter(Boolean));
+      const existingEmails = new Set(staffList.map((s) => s.email?.toLowerCase()).filter(Boolean));
+
+      for (const p of profileRows) {
+        const emailLower = (p.official_email || '').toLowerCase().trim();
+        const hasMatch = (p.id && existingUserIds.has(p.id)) || (emailLower && existingEmails.has(emailLower));
+
+        if (!hasMatch) {
+          const dept = Array.isArray(p.departments) ? p.departments[0] : p.departments;
+          const roleArr = (p.user_roles || []).flatMap((ur: any) => {
+            const r = Array.isArray(ur.roles) ? ur.roles[0] : ur.roles;
+            return r?.name_en || r?.code ? [r.name_en || r.code] : [];
+          });
+          const staged = p.staged_details || {};
+          const jobTitle = staged.jobTitle || (roleArr.length > 0 ? roleArr[0] : 'Staff Member');
+          const isPending = p.approval_status === 'pending_hr' || p.approval_status === 'pending_ed';
+
+          const synthesized: StaffProfileRecord = {
+            id: p.id,
+            userId: p.id,
+            staffNumber: `STF-${p.id.substring(0, 4).toUpperCase()}`,
+            fullName: p.display_name || emailLower.split('@')[0] || 'Staff Member',
+            email: p.official_email,
+            phoneNumber: p.phone_number || '',
+            jobTitle,
+            departmentId: dept?.id || null,
+            departmentName: dept?.name_en || staged.departmentName || 'General',
+            departmentCode: dept?.code || staged.departmentCode || 'GEN',
+            employmentStatus: p.is_active ? 'active' : 'suspended',
+            contractType: staged.employmentType || 'open_ended',
+            startDate: p.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+            endDate: null,
+            supervisorId: null,
+            supervisorName: staged.supervisor || null,
+            emergencyContactName: staged.emergencyName || null,
+            emergencyContactPhone: staged.emergencyPhone || null,
+            notes: staged ? JSON.stringify(staged) : null,
+            personalEmail: staged.personalEmail || p.official_email,
+            officialEmail: p.official_email,
+            dateOfBirth: staged.dob || null,
+            nidaNumber: staged.nida || null,
+            tinNumber: null,
+            loanBoardStatus: null,
+            loanBoardDetails: null,
+            basicSalary: null,
+            grossSalary: null,
+            cvName: null,
+            cvUrl: null,
+            certifications: [],
+            cwtNumber: null,
+            nssfNumber: null,
+            pssfNumber: null,
+            nhifNumber: null,
+            bankName: null,
+            bankAccountNumber: null,
+            bankBranch: null,
+            onboardingStatus: isPending ? 'pending_hr' : 'completed',
+            onboardingStep: isPending ? 1 : 4,
+            daysToContractExpiry: null,
+            isExpiringSoon: false,
+            createdAt: p.created_at,
+            updatedAt: p.updated_at,
+          };
+          staffList.push(synthesized);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[hrService] Profile federation catch:', err);
   }
 
-  let results = (data || []).map(mapStaffRow);
+  let results = staffList;
 
   // Role scoping: non-leadership only sees themselves or supervisees
   if (currentUser) {
@@ -251,21 +349,41 @@ export async function createStaffProfile(
     onboardingStep: payload.onboardingStep || 4,
   };
 
+  // Validate and resolve foreign key UUIDs
+  let sanitizedDeptId: string | null = null;
+  if (payload.departmentId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(payload.departmentId)) {
+    sanitizedDeptId = payload.departmentId;
+  } else if (payload.departmentId) {
+    const code = payload.departmentId.replace('dept-', '').toUpperCase();
+    const { data: deptRow } = await supabase.from('departments').select('id').ilike('code', code).maybeSingle();
+    sanitizedDeptId = deptRow?.id || null;
+  }
+
+  let sanitizedUserId: string | null = null;
+  if (payload.userId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(payload.userId)) {
+    sanitizedUserId = payload.userId;
+  }
+
+  let sanitizedSupervisorId: string | null = null;
+  if (payload.supervisorId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(payload.supervisorId)) {
+    sanitizedSupervisorId = payload.supervisorId;
+  }
+
   const { data, error } = await supabase
     .from('staff_profiles')
     .insert({
-      user_id: payload.userId || null,
+      user_id: sanitizedUserId,
       staff_number: staffNumber,
       full_name: payload.fullName.trim(),
       email: payload.email?.trim() || null,
       phone_number: payload.phoneNumber?.trim() || null,
       job_title: payload.jobTitle.trim(),
-      department_id: payload.departmentId || null,
+      department_id: sanitizedDeptId,
       employment_status: payload.employmentStatus,
       contract_type: payload.contractType,
       start_date: payload.startDate,
       end_date: payload.endDate || null,
-      supervisor_id: payload.supervisorId || null,
+      supervisor_id: sanitizedSupervisorId,
       emergency_contact_name: payload.emergencyContactName || null,
       emergency_contact_phone: payload.emergencyContactPhone || null,
       notes: JSON.stringify(extraNotes),
@@ -896,23 +1014,54 @@ export async function updateStatutoryDetails(
 }
 
 export async function createStaffFromUserCreation(user: {
-  id: string;
-  email: string;
-  displayName: string;
+  id?: string;
+  userId?: string;
+  email?: string;
+  officialEmail?: string;
+  displayName?: string;
+  fullName?: string;
   departmentId?: string;
+  departmentCode?: string;
+  departmentName?: string;
   phoneNumber?: string;
   jobTitle?: string;
+  personalEmail?: string | null;
 }): Promise<StaffProfileRecord> {
-  const existing = await getStaffByUserId(user.id);
-  if (existing) return existing;
+  const resolvedUserId = user.userId || user.id || '';
+  const resolvedEmail = (user.officialEmail || user.email || '').toLowerCase().trim();
+  const resolvedFullName = user.fullName || user.displayName || 'Staff Member';
+
+  if (resolvedUserId) {
+    const existing = await getStaffByUserId(resolvedUserId);
+    if (existing) return existing;
+  }
+  if (resolvedEmail) {
+    const existing = await getStaffByEmail(resolvedEmail);
+    if (existing) return existing;
+  }
+
+  // Resolve department UUID if a code or dept- slug was passed
+  let resolvedDeptId: string | undefined = undefined;
+  if (user.departmentId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(user.departmentId)) {
+    resolvedDeptId = user.departmentId;
+  } else {
+    const deptCode = user.departmentCode || (user.departmentId ? user.departmentId.replace('dept-', '').toUpperCase() : 'PRJ');
+    const { data: deptRow } = await supabase
+      .from('departments')
+      .select('id')
+      .ilike('code', deptCode)
+      .maybeSingle();
+    resolvedDeptId = deptRow?.id;
+  }
 
   return createStaffProfile({
-    userId: user.id,
-    fullName: user.displayName,
-    email: user.email,
-    phoneNumber: user.phoneNumber,
+    userId: resolvedUserId || undefined,
+    fullName: resolvedFullName,
+    email: resolvedEmail,
+    personalEmail: user.personalEmail || null,
+    phoneNumber: user.phoneNumber || '+255 754 000 000',
     jobTitle: user.jobTitle || 'Staff Member',
-    departmentId: user.departmentId || 'dept-prj',
+    departmentId: resolvedDeptId,
     employmentStatus: 'active',
     contractType: 'open_ended',
     startDate: new Date().toISOString().split('T')[0],

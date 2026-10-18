@@ -13,6 +13,7 @@ import {
   PaymentTransaction,
   FinanceFilterOptions,
   FinanceKpis,
+  IncomeRecord,
   CreateFinancialRequestPayload,
   ReviewDecisionPayload,
   RecordPaymentPayload,
@@ -29,7 +30,10 @@ export const getBudgets = async (
 ): Promise<BudgetRecord[]> => {
   if (!isSupabaseConfigured) return [];
 
-  let query = supabase.from('budgets').select('*').order('created_at', { ascending: false });
+  let query = supabase
+    .from('budgets')
+    .select('*, project:projects(name)')
+    .order('created_at', { ascending: false });
 
   if (filters?.projectId !== undefined && filters.projectId !== null) {
     query = query.eq('project_id', filters.projectId);
@@ -38,27 +42,44 @@ export const getBudgets = async (
     query = query.eq('status', filters.status);
   }
 
-  const { data, error } = await query;
-  if (error || !data) return [];
+  const [budgetsRes, requestsRes] = await Promise.all([
+    query,
+    supabase.from('financial_requests').select('budget_id, total_amount, paid_amount, status'),
+  ]);
 
-  return data.map((b: any) => ({
-    id: b.id,
-    projectId: b.project_id,
-    fiscalYear: b.fiscal_year,
-    code: b.code,
-    name: b.name,
-    category: b.category,
-    allocatedAmount: Number(b.allocated_amount),
-    currency: b.currency,
-    status: b.status,
-    notes: b.notes,
-    totalCommitted: 0,
-    totalSpent: 0,
-    availableBalance: Number(b.allocated_amount),
-    utilizationPercentage: 0,
-    createdAt: b.created_at,
-    updatedAt: b.updated_at,
-  }));
+  if (budgetsRes.error || !budgetsRes.data) return [];
+  const allReqs = requestsRes.data || [];
+
+  return budgetsRes.data.map((b: any) => {
+    const allocated = Number(b.allocated_amount || 0);
+    const relatedReqs = allReqs.filter((r: any) => r.budget_id === b.id);
+    const spent = relatedReqs.reduce((sum: number, r: any) => sum + Number(r.paid_amount || 0), 0);
+    const committed = relatedReqs
+      .filter((r: any) => r.status === 'approved')
+      .reduce((sum: number, r: any) => sum + Math.max(0, Number(r.total_amount || 0) - Number(r.paid_amount || 0)), 0);
+    const available = Math.max(0, allocated - (spent + committed));
+    const utilization = allocated > 0 ? Math.min(100, Math.round((spent / allocated) * 100)) : 0;
+
+    return {
+      id: b.id,
+      projectId: b.project_id,
+      projectName: b.project?.name,
+      fiscalYear: b.fiscal_year,
+      code: b.code,
+      name: b.name,
+      category: b.category,
+      allocatedAmount: allocated,
+      currency: b.currency || 'TZS',
+      status: b.status,
+      notes: b.notes,
+      totalCommitted: committed,
+      totalSpent: spent,
+      availableBalance: available,
+      utilizationPercentage: utilization,
+      createdAt: b.created_at,
+      updatedAt: b.updated_at,
+    };
+  });
 };
 
 /**
@@ -472,7 +493,9 @@ export const getFinanceKpis = async (): Promise<FinanceKpis> => {
       totalSpent: 0,
       availableBalance: 0,
       pendingRequestsCount: 0,
+      pendingRequestsAmount: 0,
       pendingDisbursementCount: 0,
+      pendingDisbursementAmount: 0,
     };
   }
 
@@ -486,8 +509,16 @@ export const getFinanceKpis = async (): Promise<FinanceKpis> => {
   const totalBudget = budgets.reduce((sum: number, b: any) => sum + Number(b.allocated_amount || 0), 0);
 
   const requests = requestsRes.data || [];
-  const pendingRequestsCount = requests.filter((r: any) => r.status === 'submitted' || r.status === 'under_review').length;
-  const pendingDisbursementCount = requests.filter((r: any) => r.status === 'approved' || r.status === 'partially_paid').length;
+  const pendingRequests = requests.filter((r: any) => r.status === 'submitted' || r.status === 'under_review');
+  const pendingRequestsCount = pendingRequests.length;
+  const pendingRequestsAmount = pendingRequests.reduce((sum: number, r: any) => sum + Number(r.total_amount || 0), 0);
+
+  const pendingDisbursements = requests.filter((r: any) => r.status === 'approved' || r.status === 'partially_paid');
+  const pendingDisbursementCount = pendingDisbursements.length;
+  const pendingDisbursementAmount = pendingDisbursements.reduce(
+    (sum: number, r: any) => sum + Math.max(0, Number(r.total_amount || 0) - Number(r.paid_amount || 0)),
+    0
+  );
 
   const transactions = txRes.data || [];
   const totalSpent = transactions
@@ -505,9 +536,44 @@ export const getFinanceKpis = async (): Promise<FinanceKpis> => {
     totalCommitted,
     totalSpent,
     availableBalance,
+    recordedIncome: totalBudget,
     pendingRequestsCount,
+    pendingRequestsAmount,
+    pendingApprovalsCount: pendingRequestsCount,
     pendingDisbursementCount,
+    pendingDisbursementAmount,
+    outstandingPaymentsAmount: pendingDisbursementAmount,
+    outstandingPaymentsCount: pendingDisbursementCount,
   };
+};
+
+/**
+ * Retrieve all income and grant receipts directly from budgets and grant allocations.
+ */
+export const getIncomeRecords = async (): Promise<IncomeRecord[]> => {
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('budgets')
+    .select('*, project:projects(name)')
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((b: any, idx: number) => ({
+    id: b.id,
+    referenceNumber: `INC-${b.fiscal_year || '2026'}-${String(idx + 1).padStart(3, '0')}`,
+    source: b.category === 'operational' ? 'Institutional Funding' : 'Donor Grant Allocation',
+    donorName: b.project?.name ? `${b.project.name} Partner` : 'General Operations Fund',
+    projectId: b.project_id,
+    projectName: b.project?.name || 'Institutional / General',
+    amount: Number(b.allocated_amount || 0),
+    currency: b.currency || 'TZS',
+    date: b.created_at?.slice(0, 10) || '2026-01-01',
+    status: b.status === 'active' ? 'confirmed' : 'pending',
+    category: b.category,
+    notes: b.notes || undefined,
+  }));
 };
 
 /**
@@ -618,4 +684,175 @@ export const recordPayment = async (
 
   return { request: mappedReq, transaction: mappedTx };
 };
+
+export interface ProjectFinancialMetric {
+  projectId: string;
+  projectCode: string;
+  projectName: string;
+  funder: string;
+  totalBudget: number;
+  totalSpent: number;
+  totalCommitted: number;
+  availableBalance: number;
+  utilizationRate: number;
+  requisitionsCount: number;
+}
+
+/**
+ * Retrieve project-scoped financial tracking metrics.
+ */
+export const getProjectFinancialTracking = async (): Promise<ProjectFinancialMetric[]> => {
+  if (!isSupabaseConfigured) return [];
+
+  const [projectsRes, budgetsRes, requestsRes] = await Promise.all([
+    supabase.from('projects').select('id, project_code, name, funder, total_budget, status').order('created_at', { ascending: false }),
+    supabase.from('budgets').select('id, project_id, allocated_amount'),
+    supabase.from('financial_requests').select('id, project_id, total_amount, paid_amount, status'),
+  ]);
+
+  if (projectsRes.error || !projectsRes.data) return [];
+
+  const projects = projectsRes.data;
+  const budgets = budgetsRes.data || [];
+  const requests = requestsRes.data || [];
+
+  return projects.map((p: any) => {
+    const projectBudgets = budgets.filter((b: any) => b.project_id === p.id);
+    const allocated = projectBudgets.length > 0
+      ? projectBudgets.reduce((sum: number, b: any) => sum + Number(b.allocated_amount || 0), 0)
+      : Number(p.total_budget || 0);
+
+    const projectReqs = requests.filter((r: any) => r.project_id === p.id);
+    const spent = projectReqs.reduce((sum: number, r: any) => sum + Number(r.paid_amount || 0), 0);
+    const committed = projectReqs
+      .filter((r: any) => r.status === 'approved')
+      .reduce((sum: number, r: any) => sum + Math.max(0, Number(r.total_amount || 0) - Number(r.paid_amount || 0)), 0);
+
+    const available = Math.max(0, allocated - (spent + committed));
+    const utilization = allocated > 0 ? Math.min(100, Math.round((spent / allocated) * 100)) : 0;
+
+    return {
+      projectId: p.id,
+      projectCode: p.project_code || 'PRJ',
+      projectName: p.name,
+      funder: p.funder || 'Babawatoto Core Fund',
+      totalBudget: allocated,
+      totalSpent: spent,
+      totalCommitted: committed,
+      availableBalance: available,
+      utilizationRate: utilization,
+      requisitionsCount: projectReqs.length,
+    };
+  });
+};
+
+export interface ProcurementFinancialHandoverItem {
+  id: string;
+  orderNumber: string;
+  title: string;
+  vendorName: string;
+  totalAmount: number;
+  currency: string;
+  status: string;
+  orderDate: string;
+  expectedDeliveryDate?: string;
+  paymentStatus: 'unpaid' | 'partially_paid' | 'paid';
+  paidAmount: number;
+  requestId?: string;
+}
+
+/**
+ * Retrieve procurement orders and invoices for financial processing.
+ */
+export const getProcurementFinancialHandover = async (): Promise<ProcurementFinancialHandoverItem[]> => {
+  if (!isSupabaseConfigured) return [];
+
+  const [ordersRes, requestsRes] = await Promise.all([
+    supabase.from('purchase_orders').select('*, vendor:vendors(business_name)').order('created_at', { ascending: false }),
+    supabase.from('financial_requests').select('id, request_number, total_amount, paid_amount, status, title').eq('request_type', 'procurement'),
+  ]);
+
+  const orders = ordersRes.data || [];
+  const procReqs = requestsRes.data || [];
+
+  return orders.map((o: any) => {
+    // Find matching financial requisition if any
+    const matchedReq = procReqs.find((r: any) => r.title.includes(o.order_number) || r.request_number === o.order_number);
+    const total = Number(o.total_amount || 0);
+    const paid = matchedReq ? Number(matchedReq.paid_amount || 0) : (o.status === 'delivered' ? total : 0);
+    const paymentStatus: 'unpaid' | 'partially_paid' | 'paid' = paid >= total && total > 0
+      ? 'paid'
+      : (paid > 0 ? 'partially_paid' : 'unpaid');
+
+    return {
+      id: o.id,
+      orderNumber: o.order_number,
+      title: o.title,
+      vendorName: o.vendor?.business_name || 'Vendor',
+      totalAmount: total,
+      currency: o.currency || 'TZS',
+      status: o.status,
+      orderDate: o.order_date,
+      expectedDeliveryDate: o.expected_delivery_date,
+      paymentStatus,
+      paidAmount: paid,
+      requestId: matchedReq?.id,
+    };
+  });
+};
+
+export interface FinancialDocumentItem {
+  id: string;
+  title: string;
+  documentType: string;
+  referenceNumber: string;
+  relatedEntity: string;
+  fileSize?: string;
+  uploadedAt: string;
+  source: 'transaction_receipt' | 'requisition_attachment' | 'supporting_doc';
+}
+
+/**
+ * Retrieve all financial documents, vouchers, receipts, and supporting attachments.
+ */
+export const getFinancialDocuments = async (): Promise<FinancialDocumentItem[]> => {
+  if (!isSupabaseConfigured) return [];
+
+  const [txRes, docsRes] = await Promise.all([
+    supabase.from('transactions').select('id, transaction_number, payment_reference, payee_name, payment_date, amount, currency, notes').order('created_at', { ascending: false }),
+    supabase.from('request_documents').select('request_id, document_id, document_type, attached_at, document:documents(title, file_name, file_size, storage_path)').limit(50),
+  ]);
+
+  const items: FinancialDocumentItem[] = [];
+
+  // Vouchers and receipts from transactions
+  (txRes.data || []).forEach((t: any) => {
+    items.push({
+      id: t.id,
+      title: `Disbursement Voucher - ${t.payee_name} (${t.currency} ${Number(t.amount).toLocaleString()})`,
+      documentType: 'Payment Voucher',
+      referenceNumber: t.payment_reference || t.transaction_number,
+      relatedEntity: t.payee_name,
+      uploadedAt: t.payment_date,
+      source: 'transaction_receipt',
+    });
+  });
+
+  // Attached request documents
+  (docsRes.data || []).forEach((d: any) => {
+    items.push({
+      id: d.document_id,
+      title: d.document?.title || d.document?.file_name || 'Attached Evidence',
+      documentType: d.document_type || 'Receipt / Invoice',
+      referenceNumber: `DOC-${d.document_id.substring(0, 8).toUpperCase()}`,
+      relatedEntity: 'Financial Requisition',
+      fileSize: d.document?.file_size ? `${Math.round(d.document.file_size / 1024)} KB` : undefined,
+      uploadedAt: d.attached_at,
+      source: 'requisition_attachment',
+    });
+  });
+
+  return items;
+};
+
 

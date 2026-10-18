@@ -18,6 +18,19 @@ import {
   Target,
   CheckSquare,
   ShieldCheck,
+  UserPlus,
+  Award,
+  FolderOpen,
+  Bell,
+  Receipt,
+  CreditCard,
+  FileSpreadsheet,
+  AlertCircle,
+  Activity,
+  MapPin,
+  Truck,
+  Package,
+  Scale,
 } from 'lucide-react';
 import { BentoDashboardIcon } from '@/components/icons/BentoDashboardIcon';
 import { cn } from '@/lib/utils';
@@ -81,15 +94,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
           ],
         },
         {
-          heading: t('nav.section.accessSecurity', 'Access & Security'),
+          heading: t('nav.section.accessSecurity', 'Access, Roles & Staff'),
           items: [
-            { to: '/users', label: t('nav.userAccounts', 'Users & Accounts'), icon: UserCog },
+            { to: '/users', label: t('nav.userAccounts', 'Staff Accounts & Roles'), icon: UserCog },
+            { to: '/hr', label: t('nav.staffDirectory', 'Staff Directory & HR Records'), icon: Users },
           ],
         },
         {
-          heading: t('nav.section.orgRecords', 'Organization & Records'),
+          heading: t('nav.section.orgRecords', 'Organization & Governance'),
           items: [
-            { to: '/hr', label: t('nav.departments', 'Organization Structure'), icon: Users },
+            { to: '/organization', label: t('nav.departments', 'Organization Structure'), icon: Building2 },
             { to: '/documents', label: t('nav.documents', 'Document Registry & Storage'), icon: FileText },
           ],
         },
@@ -103,16 +117,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
           heading: t('nav.section.executiveCommand', 'Executive Command'),
           items: [
             { to: '/', label: 'Dashboard', description: 'Organization-wide overview', icon: BentoDashboardIcon },
-            { to: '/hr?tab=org', label: 'Organization', description: 'Organizational profile, departments and structure', icon: Building2 },
+            { to: '/organization', label: 'Organization', description: 'Organizational profile, departments and structure', icon: Building2 },
             { to: '/projects', label: 'Projects & Programs', description: 'All projects, status and performance', icon: Briefcase },
             { to: '/finance', label: 'Finance', description: 'Budgets, expenditure and financial reports', icon: Wallet },
-            { to: '/reports?tab=impact', label: 'M&E & Impact', description: 'Targets, indicators and beneficiary outcomes', icon: Target },
+            { to: '/me-impact', label: 'M&E & Impact', description: 'Targets, indicators and beneficiary outcomes', icon: Target },
             { to: '/hr', label: 'Human Resources', description: 'Staff overview and workforce reports', icon: Users },
             { to: '/procurement', label: 'Procurement', description: 'Purchases, contracts and procurement status', icon: ShoppingCart },
-            { to: '/finance?tab=approvals', label: 'Approvals', description: "Items requiring the Director's decision", icon: CheckSquare },
+            { to: '/approvals', label: 'Approvals', description: "Centralized decision inbox", icon: CheckSquare },
             { to: '/documents', label: 'Documents & Correspondence', description: 'Official records, letters and signatures', icon: FileText },
             { to: '/reports', label: 'Reports & Analytics', description: 'Consolidated reports and exports', icon: BarChart3 },
-            { to: '/settings?tab=compliance', label: 'Audit & Compliance', description: 'Audit findings, policies and compliance', icon: ShieldCheck },
             { to: '/settings', label: 'Settings', description: 'Personal preferences and authorized settings', icon: Settings },
           ],
         },
@@ -123,24 +136,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (activeRole === 'finance_officer' || hasRole('finance_officer')) {
       return [
         {
-          heading: t('nav.section.financialCommand', 'Financial Command'),
+          heading: t('nav.section.financialOperations', 'Financial Operations'),
           items: [
-            { to: '/', label: t('nav.financeDashboard', 'Finance Dashboard'), icon: BentoDashboardIcon },
-            { to: '/finance', label: t('nav.budgetsLedger', 'Budgets & Financial Ledger'), icon: Wallet },
-          ],
-        },
-        {
-          heading: t('nav.section.operations', 'Operations & Procurement'),
-          items: [
-            { to: '/procurement', label: t('nav.procurement', 'Procurement & Supplies'), icon: ShoppingCart },
-            { to: '/documents', label: t('nav.supportingDocs', 'Supporting Financial Docs'), icon: FileText },
-          ],
-        },
-        {
-          heading: t('nav.section.compliance', 'Compliance & Audits'),
-          items: [
-            { to: '/reports', label: t('nav.financialReports', 'Financial Reports & Audits'), icon: BarChart3 },
-            { to: '/correspondence', label: t('nav.financialLetters', 'Financial Correspondence'), icon: Mail },
+            { to: '/', label: t('nav.financeDashboard', 'Dashboard'), icon: BentoDashboardIcon },
+            { to: '/finance/budgets', label: t('nav.budgetsAllocations', 'Budgets & Allocations'), icon: Wallet },
+            { to: '/finance/income', label: t('nav.incomeReceipts', 'Income & Receipts'), icon: Receipt },
+            { to: '/finance/expenditure', label: t('nav.expenditurePayments', 'Expenditure & Payments'), icon: CreditCard },
+            { to: '/finance/transactions', label: t('nav.financialTransactions', 'Financial Transactions'), icon: FileSpreadsheet },
+            { to: '/finance/projects', label: t('nav.projectTracking', 'Project Financial Tracking'), icon: Briefcase },
+            { to: '/finance/procurement', label: t('nav.procurementPayments', 'Procurement Payments'), icon: ShoppingCart },
+            { to: '/finance/approvals', label: t('nav.financialApprovals', 'Financial Approvals'), icon: CheckSquare },
+            { to: '/finance/documents', label: t('nav.financialDocuments', 'Financial Documents'), icon: FileText },
+            { to: '/finance/reports', label: t('nav.financialReports', 'Financial Reports'), icon: BarChart3 },
+            { to: '/notifications', label: t('nav.notifications', 'Notifications'), icon: Bell },
+            { to: '/settings', label: t('nav.settings', 'Settings'), icon: Settings },
           ],
         },
       ];
@@ -150,25 +159,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (activeRole === 'project_manager' || hasRole('project_manager')) {
       return [
         {
-          heading: t('nav.section.projectManagement', 'Project Management'),
+          heading: t('nav.section.portfolioDelivery', 'Portfolio & Delivery'),
           items: [
-            { to: '/', label: t('nav.projectDashboard', 'Project Dashboard'), icon: BentoDashboardIcon },
-            { to: '/projects', label: t('nav.myProjects', 'Projects & Programs'), icon: Briefcase },
+            { to: '/', label: t('nav.projectDashboard', 'Dashboard'), icon: BentoDashboardIcon },
+            { to: '/projects', label: t('nav.myProjects', 'My Projects'), icon: Briefcase },
+            { to: '/projects/planning', label: t('nav.projectPlanning', 'Project Planning'), icon: Calendar },
+            { to: '/projects/activities', label: t('nav.workPlansActivities', 'Work Plans & Activities'), icon: CheckSquare },
+            { to: '/projects/team', label: t('nav.projectTeam', 'Project Team'), icon: Users },
           ],
         },
         {
-          heading: t('nav.section.trackingDelivery', 'Delivery & Documentation'),
+          heading: t('nav.section.impactAccountability', 'Impact & Accountability'),
           items: [
-            { to: '/documents', label: t('nav.projectDocs', 'Project Documents & Evidence'), icon: FileText },
-            { to: '/reports', label: t('nav.progressReports', 'Progress Reports & Analytics'), icon: BarChart3 },
-            { to: '/correspondence', label: t('nav.officialLetters', 'Official Correspondence'), icon: Mail },
+            { to: '/me', label: t('nav.monitoringEvaluation', 'Monitoring & Evaluation'), icon: Target },
+            { to: '/projects/beneficiaries', label: t('nav.beneficiariesParticipants', 'Beneficiaries & Participants'), icon: Users },
+            { to: '/projects/risks', label: t('nav.risksIssues', 'Risks & Issues'), icon: AlertCircle },
+            { to: '/projects/budgets', label: t('nav.budgetsExpenditure', 'Budgets & Expenditure'), icon: Wallet },
+            { to: '/projects/reports', label: t('nav.reportsDeliverables', 'Reports & Deliverables'), icon: BarChart3 },
+            { to: '/projects/documents', label: t('nav.projectDocuments', 'Project Documents'), icon: FileText },
           ],
         },
         {
-          heading: t('nav.section.resources', 'Resources & Procurement'),
+          heading: t('nav.section.governance', 'Governance & Preferences'),
           items: [
-            { to: '/finance', label: t('nav.projectBudgets', 'Budget & Expenditure'), icon: Wallet },
-            { to: '/procurement', label: t('nav.procurement', 'Procurement & Supplies'), icon: ShoppingCart },
+            { to: '/approvals', label: t('nav.approvalsRequests', 'Approvals & Requests'), icon: CheckSquare },
+            { to: '/notifications', label: t('nav.notifications', 'Notifications'), icon: Bell },
+            { to: '/settings', label: t('nav.settings', 'Settings'), icon: Settings },
           ],
         },
       ];
@@ -178,23 +194,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (activeRole === 'project_coordinator' || hasRole('project_coordinator')) {
       return [
         {
-          heading: t('nav.section.fieldCoordination', 'Field Operations Desk'),
+          heading: t('nav.section.fieldOperations', 'Field Operations'),
           items: [
-            { to: '/', label: t('nav.coordinatorDashboard', 'Coordinator Dashboard'), icon: BentoDashboardIcon },
-            { to: '/projects', label: t('nav.assignedProjects', 'Assigned Field Projects'), icon: Briefcase },
+            { to: '/', label: t('nav.coordinatorDashboard', 'Dashboard'), icon: BentoDashboardIcon },
+            { to: '/projects', label: t('nav.myProjects', 'My Projects'), icon: Briefcase },
+            { to: '/projects/planning', label: t('nav.activitySchedule', 'Activity Schedule'), icon: Calendar },
+            { to: '/projects/tasks', label: t('nav.taskManagement', 'Task Management'), icon: CheckSquare },
+            { to: '/projects/activities', label: t('nav.activityImplementation', 'Activity Implementation'), icon: Activity },
           ],
         },
         {
-          heading: t('nav.section.documentation', 'Tasks & Documentation'),
+          heading: t('nav.section.fieldReporting', 'Field Reporting & Data'),
           items: [
-            { to: '/documents', label: t('nav.evidenceUploads', 'Evidence & Photo Uploads'), icon: FileText },
+            { to: '/projects/beneficiaries', label: t('nav.beneficiariesParticipants', 'Beneficiaries & Participants'), icon: Users },
+            { to: '/projects/field-updates', label: t('nav.fieldUpdates', 'Field Updates'), icon: MapPin },
+            { to: '/me', label: t('nav.monitoringData', 'Monitoring Data'), icon: Target },
+            { to: '/projects/reports', label: t('nav.activityReports', 'Activity Reports'), icon: BarChart3 },
+            { to: '/projects/documents', label: t('nav.projectDocuments', 'Project Documents'), icon: FolderOpen },
           ],
         },
         {
-          heading: t('nav.section.teamDirectory', 'Team & Communications'),
+          heading: t('nav.section.coordinationIssues', 'Coordination & Requests'),
           items: [
-            { to: '/hr', label: t('nav.teamDirectory', 'Team Contacts Directory'), icon: Users },
-            { to: '/correspondence', label: t('nav.letters', 'Official Correspondence'), icon: Mail },
+            { to: '/projects/risks', label: t('nav.requestsIssues', 'Requests & Issues'), icon: AlertCircle },
+            { to: '/notifications', label: t('nav.notifications', 'Notifications'), icon: Bell },
+            { to: '/settings', label: t('nav.settings', 'Settings'), icon: Settings },
           ],
         },
       ];
@@ -204,23 +228,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (activeRole === 'hr_administrator' || hasRole('hr_administrator')) {
       return [
         {
-          heading: t('nav.section.hrCommand', 'HR & Personnel Command'),
+          heading: t('nav.section.hrOperations', 'Workforce Administration'),
           items: [
-            { to: '/', label: t('nav.hrDashboard', 'HR Dashboard'), icon: BentoDashboardIcon },
-            { to: '/hr', label: t('nav.staffRoster', 'Staff Directory & Contracts'), icon: Users },
-          ],
-        },
-        {
-          heading: t('nav.section.complianceDocs', 'Personnel Compliance'),
-          items: [
-            { to: '/documents', label: t('nav.staffDocuments', 'Staff Documents & Policies'), icon: FileText },
-            { to: '/reports', label: t('nav.hrReports', 'Personnel Reports & Audits'), icon: BarChart3 },
-          ],
-        },
-        {
-          heading: t('nav.section.administration', 'Governance & Communications'),
-          items: [
-            { to: '/correspondence', label: t('nav.letters', 'Official Correspondence'), icon: Mail },
+            { to: '/', label: t('nav.dashboard', 'Dashboard'), icon: BentoDashboardIcon },
+            { to: '/hr', label: t('nav.staffDirectory', 'Staff Directory'), icon: Users },
+            { to: '/hr/departments', label: t('nav.departments', 'Departments & Positions'), icon: Building2 },
+            { to: '/hr/onboarding', label: t('nav.recruitmentOnboarding', 'Recruitment & Onboarding'), icon: UserPlus },
+            { to: '/hr/leave', label: t('nav.attendanceLeave', 'Attendance & Leave'), icon: Calendar },
+            { to: '/hr/contracts', label: t('nav.contractsEmployment', 'Contracts & Employment'), icon: FileText },
+            { to: '/hr/performance', label: t('nav.performanceTraining', 'Performance & Training'), icon: Award },
+            { to: '/hr/documents', label: t('nav.hrDocuments', 'HR Documents'), icon: FolderOpen },
+            { to: '/hr/approvals', label: t('nav.hrApprovals', 'HR Requests & Approvals'), icon: CheckSquare },
+            { to: '/hr/reports', label: t('nav.hrReports', 'HR Reports & Analytics'), icon: BarChart3 },
+            { to: '/notifications', label: t('nav.notifications', 'Notifications'), icon: Bell },
+            { to: '/settings', label: t('nav.settings', 'Settings'), icon: Settings },
           ],
         },
       ];
@@ -230,18 +251,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (activeRole === 'procurement_officer' || hasRole('procurement_officer')) {
       return [
         {
-          heading: t('nav.section.procurementCommand', 'Procurement Command'),
+          heading: t('nav.section.procurementCommand', 'Procurement & Supply Chain'),
           items: [
-            { to: '/', label: t('nav.procurementDashboard', 'Procurement Dashboard'), icon: BentoDashboardIcon },
-            { to: '/procurement', label: t('nav.ordersVendors', 'Purchase Orders & Inventory'), icon: ShoppingCart },
-          ],
-        },
-        {
-          heading: t('nav.section.financeDocs', 'Financial & Records'),
-          items: [
-            { to: '/finance', label: t('nav.requisitions', 'Financial Requisitions'), icon: Wallet },
-            { to: '/documents', label: t('nav.procurementDocs', 'Invoices & Vendor Quotes'), icon: FileText },
-            { to: '/reports', label: t('nav.reports', 'Procurement Analytics'), icon: BarChart3 },
+            { to: '/', label: t('nav.procurementDashboard', 'Dashboard'), icon: BentoDashboardIcon },
+            { to: '/procurement/requests', label: t('nav.purchaseRequests', 'Purchase Requests'), icon: FileText },
+            { to: '/procurement/plans', label: t('nav.procurementPlans', 'Procurement Plans'), icon: Calendar },
+            { to: '/procurement/quotations', label: t('nav.quotationManagement', 'Quotation Management'), icon: FileSpreadsheet },
+            { to: '/procurement/vendors', label: t('nav.supplierRegister', 'Supplier Register'), icon: Building2 },
+            { to: '/procurement/orders', label: t('nav.purchaseOrders', 'Purchase Orders'), icon: ShoppingCart },
+            { to: '/procurement/receiving', label: t('nav.receiving', 'Goods & Services Receiving'), icon: Truck },
+            { to: '/procurement/inventory', label: t('nav.inventorySupplies', 'Inventory & Supplies'), icon: Package },
+            { to: '/procurement/evaluation', label: t('nav.procurementEvaluation', 'Procurement Evaluation'), icon: Scale },
+            { to: '/procurement/approvals', label: t('nav.procurementApprovals', 'Procurement Approvals'), icon: ShieldCheck },
+            { to: '/procurement/invoices', label: t('nav.invoicesHandover', 'Invoices & Payment Handover'), icon: Receipt },
+            { to: '/procurement/documents', label: t('nav.procurementDocuments', 'Procurement Documents'), icon: FolderOpen },
+            { to: '/procurement/reports', label: t('nav.procurementReports', 'Procurement Reports'), icon: BarChart3 },
+            { to: '/notifications', label: t('nav.notifications', 'Notifications'), icon: Bell },
+            { to: '/settings', label: t('nav.settings', 'Settings'), icon: Settings },
           ],
         },
       ];
@@ -397,11 +423,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   >
                     {({ isActive }) => (
                       <>
-                        {/* Restrained icon size & brand color when active */}
+                        {/* Restrained monochrome icon (never colored tiles or borders) */}
                         <Icon
                           className={cn(
                             'w-[18px] h-[18px] shrink-0 transition-transform group-hover:scale-105',
-                            isActive ? 'text-[#D68904]' : 'text-slate-400 group-hover:text-charcoal-700'
+                            isActive ? 'text-[#111827]' : 'text-[#4B5563] group-hover:text-[#111827]'
                           )}
                         />
 

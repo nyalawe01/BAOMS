@@ -74,11 +74,15 @@ export function markAsRead(id: string): void {
   broadcast();
 }
 
+export const markNotificationAsRead = markAsRead;
+
 export function markAllAsRead(): void {
   cachedNotifications = cachedNotifications.map((n) => ({ ...n, read: true }));
   setPersistentItem(NOTIFICATIONS_STORAGE_KEY, cachedNotifications);
   broadcast();
 }
+
+export const markAllNotificationsAsRead = markAllAsRead;
 
 export function subscribeToNotifications(
   listener: (items: NotificationItem[]) => void

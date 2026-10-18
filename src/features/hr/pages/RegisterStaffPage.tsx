@@ -17,6 +17,7 @@ import {
   FileText,
   ShieldCheck,
   Check,
+  FileStack,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
@@ -25,6 +26,15 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { Stepper, StepItem } from '@/components/ui/Stepper';
+import {
+  MultiPhoneInput,
+  MultiPhoneItem,
+  MultiEmailInput,
+  MultiEmailItem,
+  MultiBankDetailsInput,
+  MultiBankItem,
+} from '@/components/ui/MultiContactAndBankFields';
+import { DocumentUploadSection, UploadedDocument } from '@/components/ui/DocumentUploadSection';
 import {
   StaffProfileRecord,
   EmploymentStatus,
@@ -163,6 +173,42 @@ export const RegisterStaffPage: React.FC = () => {
   const [newCertName, setNewCertName] = useState('');
   const [newCertInstitution, setNewCertInstitution] = useState('');
   const [newCertYear, setNewCertYear] = useState(new Date().getFullYear().toString());
+
+  // Multi-fields for personnel
+  const [phones, setPhones] = useState<MultiPhoneItem[]>([
+    {
+      id: 'phone-1',
+      number: formData.personal.phoneNumber || '+255 754 123 456',
+      type: 'primary',
+      isPrimary: true,
+    },
+  ]);
+  const [emails, setEmails] = useState<MultiEmailItem[]>([
+    {
+      id: 'email-1',
+      email: formData.personal.personalEmail || '',
+      type: 'personal',
+      isPrimary: true,
+    },
+    {
+      id: 'email-2',
+      email: formData.personal.officialEmail || '',
+      type: 'official',
+      isPrimary: false,
+    },
+  ]);
+  const [banks, setBanks] = useState<MultiBankItem[]>([
+    {
+      id: 'bank-1',
+      bankName: formData.statutory.bankName || 'CRDB Bank Plc',
+      accountName: formData.personal.fullName || '',
+      accountNumber: formData.statutory.bankAccountNumber || '',
+      branch: formData.statutory.bankBranch || 'Kariakoo Branch',
+      currency: 'TZS',
+      isPrimary: true,
+    },
+  ]);
+  const [staffDocuments, setStaffDocuments] = useState<UploadedDocument[]>([]);
 
   // Load existing staff for supervisor dropdown and check for draft
   useEffect(() => {
@@ -596,46 +642,37 @@ export const RegisterStaffPage: React.FC = () => {
                   }
                 />
 
-                <Input
-                  type="tel"
-                  label={`${t('hr.phone', 'Primary Contact Phone')} *`}
-                  placeholder="+255 754 123 456"
-                  value={formData.personal.phoneNumber}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      personal: { ...formData.personal, phoneNumber: e.target.value },
-                    })
-                  }
-                  required
-                />
+                <div className="md:col-span-2 pt-2 border-t border-surface-border">
+                  <MultiPhoneInput
+                    label="Personnel Contact Phone Numbers (Multi-Phone Supported)"
+                    phones={phones}
+                    onChange={(newPhones) => {
+                      setPhones(newPhones);
+                      const primary = newPhones.find((p) => p.isPrimary)?.number || newPhones[0]?.number || '';
+                      setFormData((prev) => ({
+                        ...prev,
+                        personal: { ...prev.personal, phoneNumber: primary },
+                      }));
+                    }}
+                    required
+                  />
+                </div>
 
-                <Input
-                  type="email"
-                  label={t('hr.personalEmail', 'Personal Email Address')}
-                  placeholder="daudi.matiko@gmail.com"
-                  value={formData.personal.personalEmail}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      personal: { ...formData.personal, personalEmail: e.target.value },
-                    })
-                  }
-                />
-
-                <Input
-                  type="email"
-                  label={t('hr.officialEmail', 'Official Office Email (@babawatoto.org)')}
-                  placeholder="daudi.matiko@babawatoto.org"
-                  value={formData.personal.officialEmail}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      personal: { ...formData.personal, officialEmail: e.target.value },
-                    })
-                  }
-                  helperText="Assigned Babawatoto organization domain address"
-                />
+                <div className="md:col-span-2 pt-2 border-t border-surface-border">
+                  <MultiEmailInput
+                    label="Personnel Email Addresses (Multi-Email Supported)"
+                    emails={emails}
+                    onChange={(newEmails) => {
+                      setEmails(newEmails);
+                      const personal = newEmails.find((e) => e.type === 'personal')?.email || newEmails[0]?.email || '';
+                      const official = newEmails.find((e) => e.type === 'official')?.email || '';
+                      setFormData((prev) => ({
+                        ...prev,
+                        personal: { ...prev.personal, personalEmail: personal, officialEmail: official },
+                      }));
+                    }}
+                  />
+                </div>
 
                 <Input
                   label={t('hr.emergencyContactName', 'Emergency Contact Person / Next of Kin')}
@@ -1130,41 +1167,37 @@ export const RegisterStaffPage: React.FC = () => {
                   Payroll & Salary Disbursement Details
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Input
-                    label={t('hr.bankName', 'Disbursement Bank Name')}
-                    placeholder="e.g. CRDB Bank Plc"
-                    value={formData.statutory.bankName}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        statutory: { ...formData.statutory, bankName: e.target.value },
-                      })
-                    }
+                <div className="space-y-4">
+                  <MultiBankDetailsInput
+                    label="Salary Disbursement Bank Accounts (Multi-Bank Accounts Supported)"
+                    banks={banks}
+                    onChange={(newBanks) => {
+                      setBanks(newBanks);
+                      const primary = newBanks.find((b) => b.isPrimary) || newBanks[0];
+                      if (primary) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          statutory: {
+                            ...prev.statutory,
+                            bankName: primary.bankName,
+                            bankAccountNumber: primary.accountNumber,
+                            bankBranch: primary.branch,
+                          },
+                        }));
+                      }
+                    }}
+                    required
                   />
 
-                  <Input
-                    label={t('hr.bankAccount', 'Bank Account Number')}
-                    placeholder="e.g. 0150293847200"
-                    value={formData.statutory.bankAccountNumber}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        statutory: { ...formData.statutory, bankAccountNumber: e.target.value },
-                      })
-                    }
-                  />
-
-                  <Input
-                    label={t('hr.bankBranch', 'Branch Name')}
-                    placeholder="e.g. Kariakoo / Tower Branch"
-                    value={formData.statutory.bankBranch}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        statutory: { ...formData.statutory, bankBranch: e.target.value },
-                      })
-                    }
-                  />
+                  <div className="pt-4 border-t border-surface-border">
+                    <DocumentUploadSection
+                      documents={staffDocuments}
+                      onChange={setStaffDocuments}
+                      title="Upload Personnel Credentials & Documents (Optional)"
+                      hint="Upload NIDA copy, CV, certified degree copies, employment contracts. You can customize the name of each document before submission."
+                    />
+                  </div>
+                </div>
 
                   <Input
                     type="number"

@@ -91,7 +91,10 @@ export const UserOnboardingReviewModal: React.FC<UserOnboardingReviewModalProps>
   const { user: currentActor, hasRole, isAdmin } = useAuth();
   const { showToast } = useToast();
 
-  const isExecutiveDirectorOnly = hasRole('executive_director') && !hasRole('hr_administrator') && !isAdmin();
+  const isExecutiveDirectorOnly =
+    hasRole('executive_director') &&
+    !hasRole('hr_administrator') &&
+    !isAdmin();
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -228,7 +231,7 @@ export const UserOnboardingReviewModal: React.FC<UserOnboardingReviewModalProps>
         title: 'Staff Approval Required (Executive Director)',
         message: `HR has completed dossier for ${fullName.trim()} (${selectedRole.replace(/_/g, ' ')} in ${selectedDept.name}). Please review and authorize access.`,
         type: 'hr',
-        targetRole: 'system_admin',
+        targetRole: 'all',
         link: '/users',
         metadata: {
           action: 'ed_authorize',

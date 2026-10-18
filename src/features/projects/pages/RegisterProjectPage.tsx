@@ -14,6 +14,7 @@ import {
   MapPin,
   ShieldCheck,
   Check,
+  FileStack,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
@@ -22,6 +23,7 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { Stepper, StepItem } from '@/components/ui/Stepper';
+import { DocumentUploadSection, UploadedDocument } from '@/components/ui/DocumentUploadSection';
 import { CreateProjectInput } from '../types/project';
 import { createProject } from '../services/projectService';
 import { fetchActiveStaffMembers, StaffMemberOption } from '@/services/staffService';
@@ -166,6 +168,8 @@ export const RegisterProjectPage: React.FC = () => {
     }
   }, []);
 
+  const [documents, setDocuments] = useState<UploadedDocument[]>([]);
+
   const steps: StepItem[] = [
     {
       id: 0,
@@ -187,6 +191,12 @@ export const RegisterProjectPage: React.FC = () => {
     },
     {
       id: 3,
+      title: t('projects.stepper.documents', 'Supporting Documents'),
+      subtitle: t('projects.stepper.documentsSub', 'Charters, MoUs & Grants'),
+      icon: <FileStack className="w-4 h-4" />,
+    },
+    {
+      id: 4,
       title: t('projects.stepper.review', 'Review & Approval'),
       subtitle: t('projects.stepper.reviewSub', 'Final Verification'),
       icon: <CheckCircle2 className="w-4 h-4" />,
@@ -842,13 +852,36 @@ export const RegisterProjectPage: React.FC = () => {
           </div>
         )}
 
-        {/* Step 4: Review, Budget Allocation & Final Approval */}
+        {/* Step 3: Supporting Documents (Optional with custom rename) */}
         {formData.step === 3 && (
           <div>
             <CardHeader>
               <div className="flex items-center gap-2">
+                <FileStack className="w-5 h-5 text-slate-700" />
+                <CardTitle>{t('projects.step3DocsTitle', 'Step 4: Supporting Documentation & Charters')}</CardTitle>
+              </div>
+              <p className="text-xs text-charcoal-muted mt-1">
+                Attach project charters, donor MoUs, concept proposals, and baseline reports. You can rename each document by custom name.
+              </p>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <DocumentUploadSection
+                documents={documents}
+                onChange={setDocuments}
+                title="Upload Project Files"
+                hint="PDF, PNG, JPG, or spreadsheets up to 25MB each. You can customize the name of each document before submission."
+              />
+            </CardContent>
+          </div>
+        )}
+
+        {/* Step 4: Review, Budget Allocation & Final Approval */}
+        {formData.step === 4 && (
+          <div>
+            <CardHeader>
+              <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-forest-700" />
-                <CardTitle>{t('projects.step4Title', 'Step 4: Review Project Charter & Finalize')}</CardTitle>
+                <CardTitle>{t('projects.step4Title', 'Step 5: Review Project Charter & Finalize')}</CardTitle>
               </div>
               <p className="text-xs text-charcoal-muted mt-1">
                 Verify all operational metrics, financial appropriations, and team assignments before creating the workspace.
@@ -987,6 +1020,40 @@ export const RegisterProjectPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Supporting Documents Box */}
+                <div className="p-4 rounded-lg border border-surface-border bg-surface-muted/20 space-y-2 md:col-span-2">
+                  <div className="flex items-center justify-between border-b border-surface-border pb-1.5">
+                    <span className="text-xs font-bold text-charcoal-800 uppercase tracking-wider flex items-center gap-1.5">
+                      <FileStack className="w-3.5 h-3.5 text-forest-700" />
+                      Attached Project Documents ({documents.length})
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, step: 3 })}
+                      className="text-xs text-forest-700 hover:underline font-semibold"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  {documents.length === 0 ? (
+                    <p className="text-xs text-slate-400 italic">No supporting documents uploaded.</p>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                      {documents.map((d) => (
+                        <div key={d.id} className="p-2 rounded bg-white border border-surface-border flex items-center justify-between text-xs">
+                          <div>
+                            <span className="font-semibold text-slate-800">{d.customName}</span>
+                            <span className="text-slate-400 ml-1.5">({d.file.name})</span>
+                          </div>
+                          <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 uppercase font-mono">
+                            {d.tag}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Ready for Finalization Notice */}
@@ -1038,7 +1105,7 @@ export const RegisterProjectPage: React.FC = () => {
               <span>{t('common.saveDraft', 'Save Draft')}</span>
             </Button>
 
-            {formData.step < 3 ? (
+            {formData.step < 4 ? (
               <Button
                 type="button"
                 variant="primary"

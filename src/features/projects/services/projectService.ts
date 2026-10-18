@@ -594,6 +594,75 @@ export async function submitActivity(
 }
 
 /**
+ * Update an existing field activity report (for drafts or returned activities)
+ */
+export async function updateActivity(
+  activityId: string,
+  input: Partial<CreateActivityInput> & { submitImmediately?: boolean },
+  user: { id: string }
+): Promise<ActivityRecord> {
+  if (!isSupabaseConfigured) throw new Error('Database is not configured.');
+
+  const now = new Date().toISOString();
+  const updatePayload: Record<string, any> = {
+    updated_at: now,
+  };
+
+  if (input.title !== undefined) updatePayload.title = input.title.trim();
+  if (input.description !== undefined) updatePayload.description = input.description || null;
+  if (input.activityDate !== undefined) updatePayload.activity_date = input.activityDate;
+  if (input.location !== undefined) updatePayload.location = input.location || null;
+  if (input.participantsCount !== undefined) updatePayload.participants_count = input.participantsCount;
+  if (input.progress !== undefined) updatePayload.progress = input.progress.trim();
+  if (input.challenges !== undefined || input.operationalChallenges !== undefined) {
+    updatePayload.challenges = input.challenges || input.operationalChallenges || null;
+  }
+  if (input.followUpActions !== undefined || input.recommendations !== undefined) {
+    updatePayload.follow_up_actions = input.followUpActions || input.recommendations || null;
+  }
+  if (input.submitImmediately) {
+    updatePayload.submission_status = 'submitted';
+    updatePayload.submitted_at = now;
+    updatePayload.submitted_by = user.id;
+  }
+
+  const { data, error } = await supabase
+    .from('activities')
+    .update(updatePayload)
+    .eq('id', activityId)
+    .select('*, submitter:profiles!submitted_by(display_name), reviewer:profiles!reviewed_by(display_name)')
+    .single();
+
+  if (error || !data) {
+    throw new Error(`Failed to update activity: ${error?.message}`);
+  }
+
+  return {
+    id: data.id,
+    projectId: data.project_id,
+    title: data.title,
+    description: data.description,
+    activityDate: data.activity_date,
+    location: data.location,
+    participantsCount: data.participants_count || 0,
+    progress: data.progress,
+    challenges: data.challenges,
+    followUpActions: data.follow_up_actions,
+    submissionStatus: data.submission_status,
+    submittedBy: data.submitted_by,
+    submittedByName: data.submitter?.display_name || 'Staff Member',
+    submittedAt: data.submitted_at,
+    reviewedBy: data.reviewed_by,
+    reviewedByName: data.reviewer?.display_name,
+    reviewedAt: data.reviewed_at,
+    reviewComments: data.review_comments,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+    evidenceDocuments: [],
+  };
+}
+
+/**
  * Review an activity (Approve or Return for Correction)
  */
 export async function reviewActivity(
@@ -645,6 +714,25 @@ export async function reviewActivity(
     updatedAt: data.updated_at,
     evidenceDocuments: [],
   };
+}
+
+/**
+ * Review activity submission helper supporting direct status decision
+ */
+export async function reviewActivitySubmission(
+  activityId: string,
+  decision: 'approved' | 'returned_for_correction',
+  reviewerId: string,
+  comments?: string
+): Promise<ActivityRecord> {
+  return reviewActivity(
+    {
+      activityId,
+      decision: decision === 'approved' ? 'approve' : 'return',
+      comments: comments || (decision === 'approved' ? 'Approved by Project Manager' : 'Returned for revision'),
+    },
+    { id: reviewerId, name: 'Project Manager' }
+  );
 }
 
 /**
@@ -928,3 +1016,248 @@ export async function removeProjectMember(
     throw new Error(`Failed to remove member: ${error.message}`);
   }
 }
+
+/**
+ * Fetch all field activities across all projects with project name and coordinator info
+ */
+export async function getAllActivities(params?: {
+  projectId?: string;
+  status?: string;
+  submittedBy?: string;
+  searchQuery?: string;
+}): Promise<ActivityRecord[]> {
+  if (!isSupabaseConfigured) return [];
+
+  let query = supabase
+    .from('activities')
+    .select(`
+      *,
+      project:projects(id, project_code, name),
+      submitter:profiles!submitted_by(display_name),
+      reviewer:profiles!reviewed_by(display_name),
+      activity_documents(
+        id, activity_id, document_id, attached_at, attached_by,
+        documents(title, reference_number)
+      )
+    `)
+    .order('activity_date', { ascending: false });
+
+  if (params?.projectId && params.projectId !== 'all') {
+    query = query.eq('project_id', params.projectId);
+  }
+  if (params?.status && params.status !== 'all') {
+    query = query.eq('submission_status', params.status);
+  }
+  if (params?.submittedBy) {
+    query = query.eq('submitted_by', params.submittedBy);
+  }
+  if (params?.searchQuery) {
+    const q = params.searchQuery.trim();
+    query = query.or(`title.ilike.%${q}%,location.ilike.%${q}%,progress.ilike.%${q}%`);
+  }
+
+  const { data, error } = await query;
+  if (error || !data) return [];
+
+  return data.map((row: any): ActivityRecord => {
+    const evidence: ActivityDocumentRecord[] = (row.activity_documents || []).map((ad: any) => ({
+      id: ad.id,
+      activityId: ad.activity_id,
+      documentId: ad.document_id,
+      documentTitle: ad.documents?.title || 'Evidence File',
+      documentReference: ad.documents?.reference_number || 'REF',
+      attachedAt: ad.attached_at,
+      attachedBy: ad.attached_by,
+    }));
+
+    return {
+      id: row.id,
+      projectId: row.project_id,
+      projectName: row.project?.name,
+      projectCode: row.project?.project_code,
+      title: row.title,
+      description: row.description,
+      activityDate: row.activity_date,
+      location: row.location,
+      participantsCount: row.participants_count || 0,
+      progress: row.progress || '',
+      challenges: row.challenges,
+      followUpActions: row.follow_up_actions,
+      submissionStatus: row.submission_status,
+      submittedBy: row.submitted_by,
+      submittedByName: row.submitter?.display_name || 'Staff Member',
+      submittedAt: row.submitted_at,
+      reviewedBy: row.reviewed_by,
+      reviewedByName: row.reviewer?.display_name,
+      reviewedAt: row.reviewed_at,
+      reviewComments: row.review_comments,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      evidenceDocuments: evidence,
+    };
+  });
+}
+
+/**
+ * Fetch all workplan tasks across projects
+ */
+export async function getAllTasks(params?: {
+  projectId?: string;
+  status?: string;
+  priority?: string;
+  assignedTo?: string;
+  searchQuery?: string;
+}): Promise<TaskRecord[]> {
+  if (!isSupabaseConfigured) return [];
+
+  let query = supabase
+    .from('tasks')
+    .select(`
+      *,
+      project:projects(id, project_code, name),
+      activities:activities(title),
+      assignee:profiles!assigned_to(display_name)
+    `)
+    .order('due_date', { ascending: true });
+
+  if (params?.projectId && params.projectId !== 'all') {
+    query = query.eq('project_id', params.projectId);
+  }
+  if (params?.status && params.status !== 'all') {
+    query = query.eq('status', params.status);
+  }
+  if (params?.priority && params.priority !== 'all') {
+    query = query.eq('priority', params.priority);
+  }
+  if (params?.assignedTo) {
+    query = query.eq('assigned_to', params.assignedTo);
+  }
+  if (params?.searchQuery) {
+    const q = params.searchQuery.trim();
+    query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%`);
+  }
+
+  const { data, error } = await query;
+  if (error || !data) return [];
+
+  return data.map((row: any): TaskRecord => ({
+    id: row.id,
+    projectId: row.project_id,
+    projectName: row.project?.name,
+    projectCode: row.project?.project_code,
+    activityId: row.activity_id,
+    activityTitle: row.activities?.title,
+    title: row.title,
+    description: row.description,
+    assignedTo: row.assigned_to,
+    assignedToName: row.assignee?.display_name || 'Unassigned',
+    dueDate: row.due_date,
+    priority: row.priority,
+    status: row.status,
+    completedAt: row.completed_at,
+    completedBy: null,
+    createdBy: row.created_by,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+}
+
+/**
+ * Fetch all project reports and donor deliverables
+ */
+export async function getAllReports(params?: {
+  projectId?: string;
+  status?: string;
+  reportType?: string;
+}): Promise<ProjectReportRecord[]> {
+  if (!isSupabaseConfigured) return [];
+
+  let query = supabase
+    .from('project_reports')
+    .select(`
+      *,
+      project:projects(id, project_code, name),
+      documents:documents(title),
+      submitter:profiles!submitted_by(display_name)
+    `)
+    .order('period_end', { ascending: false });
+
+  if (params?.projectId && params.projectId !== 'all') {
+    query = query.eq('project_id', params.projectId);
+  }
+  if (params?.status && params.status !== 'all') {
+    query = query.eq('status', params.status);
+  }
+  if (params?.reportType && params.reportType !== 'all') {
+    query = query.eq('report_type', params.reportType);
+  }
+
+  const { data, error } = await query;
+  if (error || !data) return [];
+
+  return data.map((row: any): ProjectReportRecord => ({
+    id: row.id,
+    projectId: row.project_id,
+    projectName: row.project?.name,
+    projectCode: row.project?.project_code,
+    reportType: row.report_type,
+    title: row.title,
+    reportingPeriodStart: row.period_start,
+    reportingPeriodEnd: row.period_end,
+    summary: row.summary,
+    achievements: null,
+    challenges: null,
+    recommendations: null,
+    status: row.status,
+    submittedBy: row.submitted_by,
+    submittedByName: row.submitter?.display_name || 'Project Staff',
+    submittedAt: row.submitted_at,
+    documentId: row.document_id,
+    documentTitle: row.documents?.title,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+}
+
+/**
+ * Fetch all project team members and coordinator assignments
+ */
+export async function getAllTeamMembers(params?: {
+  projectId?: string;
+  role?: string;
+}): Promise<ProjectMemberRecord[]> {
+  if (!isSupabaseConfigured) return [];
+
+  let query = supabase
+    .from('project_members')
+    .select(`
+      *,
+      project:projects(id, project_code, name),
+      profiles:profiles!project_members_user_id_fkey(display_name, official_email)
+    `)
+    .order('assigned_at', { ascending: false });
+
+  if (params?.projectId && params.projectId !== 'all') {
+    query = query.eq('project_id', params.projectId);
+  }
+  if (params?.role && params.role !== 'all') {
+    query = query.eq('project_role', params.role);
+  }
+
+  const { data, error } = await query;
+  if (error || !data) return [];
+
+  return data.map((row: any): ProjectMemberRecord => ({
+    id: row.id,
+    projectId: row.project_id,
+    projectName: row.project?.name,
+    projectCode: row.project?.project_code,
+    userId: row.user_id,
+    userName: row.profiles?.display_name || 'Staff Member',
+    userEmail: row.profiles?.official_email || '',
+    projectRole: row.project_role,
+    assignedAt: row.assigned_at,
+    assignedBy: row.assigned_by,
+  }));
+}
+

@@ -8,20 +8,26 @@ import {
   Plus,
   FileSpreadsheet,
   CreditCard,
-  Building,
+  Building2,
   Search,
   ExternalLink,
   TrendingUp,
+  CheckSquare,
+  Clock,
+  ChevronRight,
+  ShoppingCart,
+  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { KPICard } from '@/components/ui/KPICard';
-import { StatusIndicator } from '@/components/ui/StatusIndicator';
 import { AnalyticsVisualizer, AnalyticsDataPoint } from '@/components/ui/AnalyticsVisualizer';
 import {
   getBudgets,
-  getRequisitions,
+  getFinancialRequests,
   getTransactions,
   getFinanceKpis,
+  getProcurementFinancialHandover,
+  ProcurementFinancialHandoverItem,
 } from '@/features/finance/services/financeService';
 import {
   BudgetRecord,
@@ -38,6 +44,7 @@ export const FinanceOfficerDashboard: React.FC = () => {
   const [budgets, setBudgets] = useState<BudgetRecord[]>([]);
   const [requisitions, setRequisitions] = useState<FinancialRequestRecord[]>([]);
   const [transactions, setTransactions] = useState<PaymentTransaction[]>([]);
+  const [procurementItems, setProcurementItems] = useState<ProcurementFinancialHandoverItem[]>([]);
 
   // Table search and pagination
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,16 +53,18 @@ export const FinanceOfficerDashboard: React.FC = () => {
 
   const loadData = async () => {
     try {
-      const [kpiData, bList, rList, tList] = await Promise.all([
+      const [kpiData, bList, rList, tList, pList] = await Promise.all([
         getFinanceKpis(),
         getBudgets(),
-        getRequisitions(),
+        getFinancialRequests(),
         getTransactions(),
+        getProcurementFinancialHandover(),
       ]);
       setKpis(kpiData);
       setBudgets(bList);
       setRequisitions(rList);
       setTransactions(tList);
+      setProcurementItems(pList);
     } catch (e) {
       console.error('Failed loading finance telemetry:', e);
     }
@@ -68,6 +77,10 @@ export const FinanceOfficerDashboard: React.FC = () => {
   const pendingRequisitions = requisitions.filter(
     (r) => r.status === 'submitted' || r.status === 'under_review'
   );
+  const approvedForDisbursement = requisitions.filter(
+    (r) => r.status === 'approved' || r.status === 'partially_paid'
+  );
+  const unpaidProcurement = procurementItems.filter((p) => p.paymentStatus !== 'paid');
 
   // Budget vs Actual chart points from real budgets
   const chartData: AnalyticsDataPoint[] = useMemo(() => {
@@ -96,33 +109,46 @@ export const FinanceOfficerDashboard: React.FC = () => {
     return filteredTransactions.slice(start, start + pageSize);
   }, [filteredTransactions, currentPage, pageSize]);
 
+  const burnRate = kpis && kpis.totalBudget > 0
+    ? ((kpis.totalSpent / kpis.totalBudget) * 100).toFixed(1)
+    : '0';
+
   return (
     <div className="space-y-6">
       {/* Top Header - AdminCN Title & Action Row */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-slate-200/80">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            {t('finance.console', 'Finance & Operations')}
+            {t('finance.dashboardTitle', 'Finance Dashboard')}
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Budget utilization ledger, requisition verification queue, payment disbursements, and funding balances.
+            Budget allocations, expenditure tracking, payment disbursements, and funding balances.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigate('/reports')}>
-            <FileSpreadsheet className="h-3.5 w-3.5 mr-1.5" />
+          <Button variant="outline" size="sm" onClick={() => navigate('/finance/reports')}>
+            <FileSpreadsheet className="h-3.5 w-3.5 mr-1.5 text-slate-600" />
             {t('finance.auditReport', 'Audit Reports')}
           </Button>
-          <Button variant="primary" size="sm" onClick={() => navigate('/finance')}>
-            <Plus className="h-3.5 w-3.5 mr-1.5" />
+          <Button variant="outline" size="sm" onClick={() => navigate('/finance/payments/new')}>
+            <CreditCard className="h-3.5 w-3.5 mr-1.5 text-slate-600" />
+            Issue Payment
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => navigate('/finance/requisitions/new')}
+            className="bg-[#D68904] hover:bg-[#b45309] text-white font-semibold"
+          >
+            <Plus className="h-3.5 w-3.5 mr-1.5 text-white" />
             {t('finance.newRequest', 'New Requisition')}
           </Button>
         </div>
       </div>
 
-      {/* Row 1: Four Compact KPI Cards (AdminCN Style) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Row 1: The 6 Required KPI Cards (AdminCN Style) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
         <KPICard
           label="Total Approved Budget"
           value={`TZS ${((kpis?.totalBudget || 0) / 1000000).toFixed(1)}M`}
@@ -132,45 +158,167 @@ export const FinanceOfficerDashboard: React.FC = () => {
             isPositive: true,
             label: 'across active grants',
           }}
-          icon={Building}
+          icon={Building2}
+          onClick={() => navigate('/finance/budgets')}
         />
 
         <KPICard
-          label="Disbursed Expenditures"
+          label="Actual Expenditure"
           value={`TZS ${((kpis?.totalSpent || 0) / 1000000).toFixed(1)}M`}
           change={{
-            value: kpis ? `${((kpis.totalSpent / (kpis.totalBudget || 1)) * 100).toFixed(1)}% burn rate` : '0%',
+            value: `${burnRate}% burn rate`,
             isPositive: true,
             label: 'of total budget',
           }}
-          icon={Wallet}
+          icon={CreditCard}
+          onClick={() => navigate('/finance/transactions')}
         />
 
         <KPICard
-          label="Requisitions in Queue"
-          value={pendingRequisitions.length}
-          change={{
-            value: pendingRequisitions.length > 0 ? `${pendingRequisitions.length} Pending` : 'Clear',
-            isPositive: pendingRequisitions.length === 0,
-            label: pendingRequisitions.length > 0 ? 'awaiting verification' : 'all claims cleared',
-          }}
-          icon={Receipt}
-        />
-
-        <KPICard
-          label="Remaining Liquidity"
+          label="Available Budget"
           value={`TZS ${((kpis?.availableBalance || 0) / 1000000).toFixed(1)}M`}
           change={{
-            value: 'Available',
+            value: 'Uncommitted',
             isPositive: (kpis?.availableBalance || 0) > 0,
-            label: 'uncommitted balances',
+            label: 'available funds',
           }}
-          icon={CreditCard}
+          icon={Wallet}
+          onClick={() => navigate('/finance/budgets')}
+        />
+
+        <KPICard
+          label="Recorded Income"
+          value={`TZS ${((kpis?.recordedIncome || kpis?.totalBudget || 0) / 1000000).toFixed(1)}M`}
+          change={{
+            value: 'Secured',
+            isPositive: true,
+            label: 'grant allocations',
+          }}
+          icon={TrendingUp}
+          onClick={() => navigate('/finance/income')}
+        />
+
+        <KPICard
+          label="Pending Financial Approvals"
+          value={kpis?.pendingApprovalsCount ?? pendingRequisitions.length}
+          change={{
+            value: pendingRequisitions.length > 0 ? `${pendingRequisitions.length} In Queue` : 'Clear',
+            isPositive: pendingRequisitions.length === 0,
+            label: pendingRequisitions.length > 0 ? 'claims awaiting review' : 'all claims cleared',
+          }}
+          icon={CheckSquare}
+          onClick={() => navigate('/finance/approvals')}
+        />
+
+        <KPICard
+          label="Outstanding Payments"
+          value={`TZS ${((kpis?.outstandingPaymentsAmount || 0) / 1000000).toFixed(1)}M`}
+          change={{
+            value: `${approvedForDisbursement.length} Approved`,
+            isPositive: approvedForDisbursement.length === 0,
+            label: 'ready for disbursement',
+          }}
+          icon={Receipt}
+          onClick={() => navigate('/finance/expenditure')}
         />
       </div>
 
-      {/* Row 2: Budget-versus-Actual Chart + Requisitions Queue */}
+      {/* Row 2: Action Queue & Budget Allocation Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        {/* Action Queue: Financial Items Requiring Attention */}
+        <div className="lg:col-span-5 xl:col-span-4 bg-white border border-slate-200/80 rounded-lg overflow-hidden flex flex-col shadow-xs">
+          <div className="p-4 sm:px-5 sm:py-3.5 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/50">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-1.5">
+                <Clock className="h-4 w-4 text-[#374151]" />
+                Financial Action Queue
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Items requiring verification, clearance, or disbursement
+              </p>
+            </div>
+          </div>
+
+          <div className="divide-y divide-slate-100 flex-1 overflow-y-auto max-h-[300px]">
+            {/* Action Item 1: Claims awaiting verification */}
+            <div
+              onClick={() => navigate('/finance/approvals')}
+              className="p-3.5 hover:bg-slate-50/60 transition-colors flex items-center justify-between cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <CheckSquare className="h-4 w-4 text-slate-500 shrink-0" />
+                <div>
+                  <div className="text-xs font-semibold text-slate-900">
+                    Claims Awaiting Approval
+                  </div>
+                  <div className="text-[11px] text-slate-500">
+                    {pendingRequisitions.length} requisitions in verification queue
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-slate-400" />
+            </div>
+
+            {/* Action Item 2: Outstanding disbursements */}
+            <div
+              onClick={() => navigate('/finance/payments/new')}
+              className="p-3.5 hover:bg-slate-50/60 transition-colors flex items-center justify-between cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <CreditCard className="h-4 w-4 text-slate-500 shrink-0" />
+                <div>
+                  <div className="text-xs font-semibold text-slate-900">
+                    Ready for Payment Release
+                  </div>
+                  <div className="text-[11px] text-slate-500">
+                    {approvedForDisbursement.length} approved expense vouchers
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-slate-400" />
+            </div>
+
+            {/* Action Item 3: Procurement invoices handover */}
+            <div
+              onClick={() => navigate('/finance/procurement')}
+              className="p-3.5 hover:bg-slate-50/60 transition-colors flex items-center justify-between cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <ShoppingCart className="h-4 w-4 text-slate-500 shrink-0" />
+                <div>
+                  <div className="text-xs font-semibold text-slate-900">
+                    Procurement Payment Handover
+                  </div>
+                  <div className="text-[11px] text-slate-500">
+                    {unpaidProcurement.length} supplier orders awaiting settlement
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-slate-400" />
+            </div>
+
+            {/* Action Item 4: Project Financial Reviews */}
+            <div
+              onClick={() => navigate('/finance/projects')}
+              className="p-3.5 hover:bg-slate-50/60 transition-colors flex items-center justify-between cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                <div>
+                  <div className="text-xs font-semibold text-slate-900">
+                    Project Budget Tracking
+                  </div>
+                  <div className="text-[11px] text-slate-500">
+                    Track project grant utilization and burn rate
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-slate-400" />
+            </div>
+          </div>
+        </div>
+
+        {/* Budget Allocation Breakdown Chart */}
         <div className="lg:col-span-7 xl:col-span-8 bg-white border border-slate-200/80 rounded-lg overflow-hidden flex flex-col shadow-xs">
           <div className="p-4 sm:px-5 sm:py-3.5 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/50">
             <div>
@@ -182,7 +330,7 @@ export const FinanceOfficerDashboard: React.FC = () => {
                 Operational allocation comparison across primary budget lines
               </p>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/finance')}>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/finance/budgets')}>
               Ledger <ArrowRight className="h-3 w-3 ml-0.5" />
             </Button>
           </div>
@@ -204,58 +352,6 @@ export const FinanceOfficerDashboard: React.FC = () => {
             )}
           </div>
         </div>
-
-        <div className="lg:col-span-5 xl:col-span-4 bg-white border border-slate-200/80 rounded-lg overflow-hidden flex flex-col shadow-xs">
-          <div className="p-4 sm:px-5 sm:py-3.5 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/50">
-            <div>
-              <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-1.5">
-                <Receipt className="h-4 w-4 text-slate-700" />
-                Requisitions Verification Queue
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Staff expense claims awaiting processing
-              </p>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/finance')}>
-              All <ArrowRight className="h-3 w-3 ml-0.5" />
-            </Button>
-          </div>
-
-          <div className="divide-y divide-slate-100 flex-1 overflow-y-auto max-h-[300px]">
-            {pendingRequisitions.length === 0 ? (
-              <div className="p-8 text-center text-xs text-slate-400">
-                All financial requests have been processed and verified.
-              </div>
-            ) : (
-              pendingRequisitions.slice(0, 5).map((req) => (
-                <div
-                  key={req.id}
-                  className="p-3.5 hover:bg-slate-50/60 transition-colors cursor-pointer"
-                  onClick={() => navigate('/finance')}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <div className="font-semibold text-xs text-slate-900 truncate">
-                        {req.title}
-                      </div>
-                      <div className="text-[11px] font-mono text-slate-500 mt-0.5">
-                        {req.requestNumber} • {req.requesterName}
-                      </div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <div className="text-xs font-mono font-bold text-slate-900">
-                        {req.currency} {req.totalAmount.toLocaleString()}
-                      </div>
-                      <span className="inline-block mt-0.5 text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200/60 uppercase">
-                        {req.status}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
       </div>
 
       {/* Row 3: Recent Payment Disbursements Table (AdminCN Style) */}
@@ -263,7 +359,7 @@ export const FinanceOfficerDashboard: React.FC = () => {
         <div className="p-4 sm:px-5 sm:py-3.5 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-50/50">
           <div>
             <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-1.5">
-              <CreditCard className="h-4 w-4 text-emerald-600" />
+              <CreditCard className="h-4 w-4 text-[#374151]" />
               Recent Payment Disbursements & Vouchers
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -285,7 +381,7 @@ export const FinanceOfficerDashboard: React.FC = () => {
                 className="pl-8 pr-3 py-1.5 text-xs rounded-md border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-[#D68904]"
               />
             </div>
-            <Button variant="outline" size="sm" onClick={() => navigate('/finance')}>
+            <Button variant="outline" size="sm" onClick={() => navigate('/finance/transactions')}>
               All Transactions <ExternalLink className="h-3 w-3 ml-1" />
             </Button>
           </div>

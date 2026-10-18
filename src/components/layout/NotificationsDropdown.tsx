@@ -67,13 +67,13 @@ export const NotificationsDropdown: React.FC = () => {
   const getIcon = (type: NotificationItem['type']) => {
     switch (type) {
       case 'hr':
-        return <UserCheck className="h-4 w-4 text-[#D68904]" />;
+        return <UserCheck className="h-4 w-4 text-[#374151]" />;
       case 'finance':
-        return <Wallet className="h-4 w-4 text-emerald-700" />;
+        return <Wallet className="h-4 w-4 text-[#374151]" />;
       case 'document':
-        return <FileText className="h-4 w-4 text-slate-700" />;
+        return <FileText className="h-4 w-4 text-[#374151]" />;
       case 'project':
-        return <Calendar className="h-4 w-4 text-slate-700" />;
+        return <Calendar className="h-4 w-4 text-[#374151]" />;
     }
   };
 
@@ -142,7 +142,7 @@ export const NotificationsDropdown: React.FC = () => {
                   )}
                   onClick={() => handleNotificationClick(item)}
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white border border-surface-border">
+                  <div className="shrink-0 mt-0.5 text-[#374151]">
                     {getIcon(item.type)}
                   </div>
                   <div className="flex-1 space-y-1 min-w-0">

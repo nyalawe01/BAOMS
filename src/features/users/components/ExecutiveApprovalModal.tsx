@@ -43,8 +43,14 @@ export const ExecutiveApprovalModal: React.FC<ExecutiveApprovalModalProps> = ({
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
 
-  const isNonExecutive = hasRole('hr_administrator') && !hasRole('executive_director') && !isAdmin();
-  if (!isOpen || !user || isNonExecutive) return null;
+  // HR Administrators and System Admins share final authorization rights with the Executive Director.
+  // Only block the modal for roles that have NO authorization access (e.g. project coordinators, finance, etc.).
+  const canAuthorize =
+    hasRole('executive_director') ||
+    hasRole('hr_administrator') ||
+    hasRole('system_admin') ||
+    isAdmin();
+  if (!isOpen || !user || !canAuthorize) return null;
 
   const staged = user.stagedDetails || {};
   const assignedRoleCode: RoleCode = staged.roleCode || ROLES.PROJECT_COORDINATOR;

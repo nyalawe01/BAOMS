@@ -18,6 +18,14 @@ import {
   ShieldCheck,
   Clock,
   CheckCircle2,
+  Briefcase,
+  Scale,
+  CheckSquare,
+  FileSpreadsheet,
+  LineChart,
+  Printer,
+  Download,
+  AlertCircle,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card } from '@/components/ui/Card';
@@ -41,6 +49,8 @@ import {
   CreateFinancialRequestPayload,
   ReviewDecisionPayload,
   RecordPaymentPayload,
+  IncomeRecord,
+  FinancialDocumentItem,
 } from '../types/finance';
 import {
   getFinancialRequests,
@@ -50,25 +60,61 @@ import {
   createFinancialRequest,
   reviewFinancialRequest,
   recordPayment,
+  getIncomeRecords,
+  getFinancialDocuments,
 } from '../services/financeService';
-import { CreateFinancialRequestModal } from '../components/CreateFinancialRequestModal';
+import { CreateFinancialRequestPage } from './CreateFinancialRequestPage';
 import { FinancialRequestDetailModal } from '../components/FinancialRequestDetailModal';
 import { ReviewFinancialRequestModal } from '../components/ReviewFinancialRequestModal';
-import { RecordPaymentModal } from '../components/RecordPaymentModal';
+import { RecordPaymentPage } from './RecordPaymentPage';
+import { ProjectFinancialTrackingView } from '../components/ProjectFinancialTrackingView';
+import { ProcurementPaymentsView } from '../components/ProcurementPaymentsView';
+import { FinancialApprovalsView } from '../components/FinancialApprovalsView';
 
-export const FinancePage: React.FC = () => {
+export type FinanceTab =
+  | 'requests'
+  | 'budgets'
+  | 'income'
+  | 'transactions'
+  | 'projects'
+  | 'procurement'
+  | 'approvals'
+  | 'documents'
+  | 'reports'
+  | 'statutory';
+
+export interface FinancePageProps {
+  initialTab?: FinanceTab;
+}
+
+export const FinancePage: React.FC<FinancePageProps> = ({ initialTab = 'requests' }) => {
   const { t } = useTranslation();
   const { user, profile, roles, hasPermission, hasRole, isAdmin } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'requests' | 'budgets' | 'transactions' | 'statutory'>('requests');
+  const [activeTab, setActiveTab] = useState<FinanceTab>(initialTab);
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
+
   const [requests, setRequests] = useState<FinancialRequestRecord[]>([]);
   const [budgets, setBudgets] = useState<BudgetRecord[]>([]);
   const [transactions, setTransactions] = useState<PaymentTransaction[]>([]);
+  const [incomeRecords, setIncomeRecords] = useState<IncomeRecord[]>([]);
+  const [documents, setDocuments] = useState<FinancialDocumentItem[]>([]);
   const [staffList, setStaffList] = useState<StaffProfileRecord[]>([]);
   const [statutoryStaff, setStatutoryStaff] = useState<StaffProfileRecord | null>(null);
   const [isStatutoryModalOpen, setIsStatutoryModalOpen] = useState(false);
   const [statutorySearch, setStatutorySearch] = useState('');
   const [statutoryFilter, setStatutoryFilter] = useState<'all' | 'pending_finance' | 'completed'>('all');
+  const [incomeSearch, setIncomeSearch] = useState('');
+  const [incomeFilter, setIncomeFilter] = useState<'all' | 'confirmed' | 'pending'>('all');
+  const [docSearch, setDocSearch] = useState('');
+  const [docFilter, setDocFilter] = useState<'all' | 'Payment Voucher' | 'Receipt / Invoice' | 'supporting_doc'>('all');
+  const [reportsPeriod, setReportsPeriod] = useState<'all' | 'FY2026' | 'Q1'>('FY2026');
+
   const [kpis, setKpis] = useState<FinanceKpis>({
     totalBudget: 0,
     totalSpent: 0,
@@ -94,12 +140,14 @@ export const FinancePage: React.FC = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [reqsData, budgetsData, txnsData, kpisData, staffData] = await Promise.all([
+      const [reqsData, budgetsData, txnsData, kpisData, staffData, incomeData, docsData] = await Promise.all([
         getFinancialRequests({ search: searchQuery, status: statusFilter }),
         getBudgets(),
         getTransactions(),
         getFinanceKpis(),
         getStaffProfiles(),
+        getIncomeRecords(),
+        getFinancialDocuments(),
       ]);
 
       setRequests(reqsData);
@@ -107,6 +155,8 @@ export const FinancePage: React.FC = () => {
       setTransactions(txnsData);
       setKpis(kpisData);
       setStaffList(staffData);
+      setIncomeRecords(incomeData);
+      setDocuments(docsData);
     } finally {
       setLoading(false);
     }
@@ -228,14 +278,14 @@ export const FinancePage: React.FC = () => {
       {/* KPI Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Budget */}
-        <Card className="p-4 bg-white min-w-0">
+        <Card className="p-4 bg-white min-w-0 shadow-xs border-slate-200">
           <div className="flex items-center justify-between gap-2 text-charcoal-muted min-w-0">
             <span className="text-xs font-semibold uppercase tracking-wider truncate">
               {t('finance.kpi.totalBudget', 'Authorized Budget')}
             </span>
-            <Wallet className="h-4 w-4 shrink-0 text-forest-700" />
+            <Wallet className="h-4 w-4 shrink-0 text-[#374151]" />
           </div>
-          <div className="mt-2 text-[26px] sm:text-[32px] font-bold text-charcoal leading-[1.2] font-mono tabular-nums truncate">
+          <div className="mt-2 text-[26px] sm:text-[32px] font-bold text-charcoal-900 leading-[1.2] font-mono tabular-nums truncate">
             {kpis.totalBudget.toLocaleString()} <span className="text-xs font-normal text-charcoal-muted">TZS</span>
           </div>
           <div className="text-2xs text-charcoal-muted mt-1 truncate">
@@ -244,14 +294,14 @@ export const FinancePage: React.FC = () => {
         </Card>
 
         {/* Total Spent */}
-        <Card className="p-4 bg-white min-w-0">
+        <Card className="p-4 bg-white min-w-0 shadow-xs border-slate-200">
           <div className="flex items-center justify-between gap-2 text-charcoal-muted min-w-0">
             <span className="text-xs font-semibold uppercase tracking-wider truncate">
               {t('finance.kpi.totalSpent', 'Actual Disbursed')}
             </span>
-            <CreditCard className="h-4 w-4 shrink-0 text-forest-700" />
+            <CreditCard className="h-4 w-4 shrink-0 text-[#374151]" />
           </div>
-          <div className="mt-2 text-[26px] sm:text-[32px] font-bold text-forest-800 leading-[1.2] font-mono tabular-nums truncate">
+          <div className="mt-2 text-[26px] sm:text-[32px] font-bold text-charcoal-900 leading-[1.2] font-mono tabular-nums truncate">
             {kpis.totalSpent.toLocaleString()} <span className="text-xs font-normal text-charcoal-muted">TZS</span>
           </div>
           <div className="text-2xs text-charcoal-muted mt-1 truncate">
@@ -260,12 +310,12 @@ export const FinancePage: React.FC = () => {
         </Card>
 
         {/* Committed Amount */}
-        <Card className="p-4 bg-white min-w-0">
+        <Card className="p-4 bg-white min-w-0 shadow-xs border-slate-200">
           <div className="flex items-center justify-between gap-2 text-charcoal-muted min-w-0">
             <span className="text-xs font-semibold uppercase tracking-wider truncate">
               {t('finance.kpi.totalCommitted', 'Approved Commitments')}
             </span>
-            <CheckCircle className="h-4 w-4 shrink-0 text-[#F2A507]" />
+            <CheckCircle className="h-4 w-4 shrink-0 text-[#374151]" />
           </div>
           <div className="mt-2 text-[26px] sm:text-[32px] font-bold text-charcoal-900 leading-[1.2] font-mono tabular-nums truncate">
             {kpis.totalCommitted.toLocaleString()} <span className="text-xs font-normal text-charcoal-muted">TZS</span>
@@ -276,12 +326,12 @@ export const FinancePage: React.FC = () => {
         </Card>
 
         {/* Available Balance */}
-        <Card className="p-4 bg-white min-w-0">
+        <Card className="p-4 bg-white min-w-0 shadow-xs border-slate-200">
           <div className="flex items-center justify-between gap-2 text-charcoal-muted min-w-0">
             <span className="text-xs font-semibold uppercase tracking-wider truncate">
               {t('finance.kpi.availableBalance', 'Available Balance')}
             </span>
-            <TrendingUp className="h-4 w-4 shrink-0 text-emerald-600" />
+            <TrendingUp className="h-4 w-4 shrink-0 text-[#374151]" />
           </div>
           <div className="mt-2 text-[26px] sm:text-[32px] font-bold text-emerald-800 leading-[1.2] font-mono tabular-nums truncate">
             {kpis.availableBalance.toLocaleString()} <span className="text-xs font-normal text-charcoal-muted">TZS</span>
@@ -293,19 +343,19 @@ export const FinancePage: React.FC = () => {
       </div>
 
       {/* Main Tab Navigation */}
-      <div className="border-b border-surface-border">
-        <nav className="flex space-x-6">
+      <div className="border-b border-surface-border overflow-x-auto no-scrollbar">
+        <nav className="flex space-x-6 min-w-max pb-0.5">
           <button
             onClick={() => setActiveTab('requests')}
             className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'requests'
-                ? 'border-forest-700 text-forest-800'
+                ? 'border-[#D68904] text-charcoal-900'
                 : 'border-transparent text-charcoal-muted hover:text-charcoal'
             }`}
           >
-            <FileText className="h-4 w-4" />
+            <FileText className="h-4 w-4 text-[#374151]" />
             <span>{t('finance.tabs.requests', 'Requisitions')}</span>
-            <span className="rounded-full bg-forest-50 text-forest-800 text-xs px-2 py-0.5 font-bold">
+            <span className="rounded-full bg-slate-100 text-charcoal-800 text-xs px-2 py-0.5 font-bold">
               {requests.length}
             </span>
           </button>
@@ -314,14 +364,29 @@ export const FinancePage: React.FC = () => {
             onClick={() => setActiveTab('budgets')}
             className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'budgets'
-                ? 'border-forest-700 text-forest-800'
+                ? 'border-[#D68904] text-charcoal-900'
                 : 'border-transparent text-charcoal-muted hover:text-charcoal'
             }`}
           >
-            <Wallet className="h-4 w-4" />
+            <Wallet className="h-4 w-4 text-[#374151]" />
             <span>{t('finance.tabs.budgets', 'Budget Utilization')}</span>
-            <span className="rounded-full bg-surface-muted text-charcoal-muted text-xs px-2 py-0.5 font-bold">
+            <span className="rounded-full bg-slate-100 text-charcoal-muted text-xs px-2 py-0.5 font-bold">
               {budgets.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('income')}
+            className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
+              activeTab === 'income'
+                ? 'border-[#D68904] text-charcoal-900'
+                : 'border-transparent text-charcoal-muted hover:text-charcoal'
+            }`}
+          >
+            <TrendingUp className="h-4 w-4 text-[#374151]" />
+            <span>Income & Receipts</span>
+            <span className="rounded-full bg-slate-100 text-charcoal-muted text-xs px-2 py-0.5 font-bold">
+              {incomeRecords.length}
             </span>
           </button>
 
@@ -329,30 +394,98 @@ export const FinancePage: React.FC = () => {
             onClick={() => setActiveTab('transactions')}
             className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'transactions'
-                ? 'border-forest-700 text-forest-800'
+                ? 'border-[#D68904] text-charcoal-900'
                 : 'border-transparent text-charcoal-muted hover:text-charcoal'
             }`}
           >
-            <CreditCard className="h-4 w-4" />
+            <CreditCard className="h-4 w-4 text-[#374151]" />
             <span>{t('finance.tabs.transactions', 'Disbursements Register')}</span>
-            <span className="rounded-full bg-surface-muted text-charcoal-muted text-xs px-2 py-0.5 font-bold">
+            <span className="rounded-full bg-slate-100 text-charcoal-muted text-xs px-2 py-0.5 font-bold">
               {transactions.length}
             </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('projects')}
+            className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
+              activeTab === 'projects'
+                ? 'border-[#D68904] text-charcoal-900'
+                : 'border-transparent text-charcoal-muted hover:text-charcoal'
+            }`}
+          >
+            <Briefcase className="h-4 w-4 text-[#374151]" />
+            <span>Project Financials</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('procurement')}
+            className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
+              activeTab === 'procurement'
+                ? 'border-[#D68904] text-charcoal-900'
+                : 'border-transparent text-charcoal-muted hover:text-charcoal'
+            }`}
+          >
+            <Scale className="h-4 w-4 text-[#374151]" />
+            <span>Procurement Invoices</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('approvals')}
+            className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
+              activeTab === 'approvals'
+                ? 'border-[#D68904] text-charcoal-900'
+                : 'border-transparent text-charcoal-muted hover:text-charcoal'
+            }`}
+          >
+            <CheckSquare className="h-4 w-4 text-[#374151]" />
+            <span>Approvals</span>
+            {requests.filter((r) => r.status === 'submitted' || r.status === 'under_review').length > 0 && (
+              <span className="rounded-full bg-amber-100 text-amber-800 text-xs px-2 py-0.5 font-bold">
+                {requests.filter((r) => r.status === 'submitted' || r.status === 'under_review').length}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('documents')}
+            className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
+              activeTab === 'documents'
+                ? 'border-[#D68904] text-charcoal-900'
+                : 'border-transparent text-charcoal-muted hover:text-charcoal'
+            }`}
+          >
+            <FileSpreadsheet className="h-4 w-4 text-[#374151]" />
+            <span>Documents & Vouchers</span>
+            <span className="rounded-full bg-slate-100 text-charcoal-muted text-xs px-2 py-0.5 font-bold">
+              {documents.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('reports')}
+            className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
+              activeTab === 'reports'
+                ? 'border-[#D68904] text-charcoal-900'
+                : 'border-transparent text-charcoal-muted hover:text-charcoal'
+            }`}
+          >
+            <LineChart className="h-4 w-4 text-[#374151]" />
+            <span>Financial Reports</span>
           </button>
 
           <button
             onClick={() => setActiveTab('statutory')}
             className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'statutory'
-                ? 'border-forest-700 text-forest-800'
+                ? 'border-[#D68904] text-charcoal-900'
                 : 'border-transparent text-charcoal-muted hover:text-charcoal'
             }`}
           >
-            <ShieldCheck className="h-4 w-4" />
-            <span>Staff Statutory & Payroll Registry</span>
+            <ShieldCheck className="h-4 w-4 text-[#374151]" />
+            <span>Statutory & Payroll</span>
             {staffList.filter((s) => s.onboardingStatus === 'pending_finance').length > 0 ? (
               <span className="rounded-full bg-amber-100 text-amber-800 text-xs px-2 py-0.5 font-bold">
-                {staffList.filter((s) => s.onboardingStatus === 'pending_finance').length} pending
+                {staffList.filter((s) => s.onboardingStatus === 'pending_finance').length}
               </span>
             ) : (
               <span className="rounded-full bg-surface-muted text-charcoal-muted text-xs px-2 py-0.5 font-bold">
@@ -671,6 +804,143 @@ export const FinancePage: React.FC = () => {
         </div>
       )}
 
+      {/* TAB: Income & Receipts Register */}
+      {activeTab === 'income' && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card className="p-4 bg-white border-slate-200 shadow-xs">
+              <div className="text-xs font-semibold uppercase tracking-wider text-charcoal-muted">
+                Total Recorded Income
+              </div>
+              <div className="mt-1 text-2xl font-bold font-mono text-charcoal-900 tabular-nums">
+                {incomeRecords.reduce((sum, r) => sum + r.amount, 0).toLocaleString()} <span className="text-xs font-normal text-charcoal-muted">TZS</span>
+              </div>
+              <div className="text-2xs text-charcoal-muted mt-0.5">Across all authorized revenue streams</div>
+            </Card>
+
+            <Card className="p-4 bg-white border-slate-200 shadow-xs">
+              <div className="text-xs font-semibold uppercase tracking-wider text-charcoal-muted">
+                Confirmed Receipts
+              </div>
+              <div className="mt-1 text-2xl font-bold font-mono text-emerald-800 tabular-nums">
+                {incomeRecords.filter((r) => r.status === 'confirmed').reduce((sum, r) => sum + r.amount, 0).toLocaleString()} <span className="text-xs font-normal text-charcoal-muted">TZS</span>
+              </div>
+              <div className="text-2xs text-charcoal-muted mt-0.5">Cleared & recognized allocations</div>
+            </Card>
+
+            <Card className="p-4 bg-white border-slate-200 shadow-xs">
+              <div className="text-xs font-semibold uppercase tracking-wider text-charcoal-muted">
+                Funding Allocations
+              </div>
+              <div className="mt-1 text-2xl font-bold font-mono text-charcoal-900">
+                {incomeRecords.length}
+              </div>
+              <div className="text-2xs text-charcoal-muted mt-0.5">Institutional grants & donor allocations</div>
+            </Card>
+          </div>
+
+          {/* Search & Filter */}
+          <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+            <div className="relative w-full sm:w-80">
+              <Search className="h-4 w-4 text-charcoal-muted absolute left-3 top-1/2 -translate-y-1/2" />
+              <Input
+                value={incomeSearch}
+                onChange={(e) => setIncomeSearch(e.target.value)}
+                placeholder="Search income, donor, reference..."
+                className="pl-9 text-xs"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Filter className="h-4 w-4 text-charcoal-muted shrink-0" />
+              <Select
+                value={incomeFilter}
+                onChange={(e) => setIncomeFilter(e.target.value as any)}
+                className="text-xs"
+              >
+                <option value="all">All Receipt Statuses</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="pending">Pending Reconciliation</option>
+              </Select>
+            </div>
+          </div>
+
+          {/* Income Table */}
+          <Card className="overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-surface-muted/50 border-b border-surface-border text-charcoal-muted">
+                  <tr>
+                    <th className="py-3 px-4">Reference #</th>
+                    <th className="py-3 px-4">Funding Stream</th>
+                    <th className="py-3 px-4">Partner / Donor</th>
+                    <th className="py-3 px-4">Allocated Project</th>
+                    <th className="py-3 px-4">Recognition Date</th>
+                    <th className="py-3 px-4 text-right">Amount (TZS)</th>
+                    <th className="py-3 px-4 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-surface-border text-charcoal">
+                  {incomeRecords.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-8 text-center text-charcoal-muted">
+                        No income or receipt allocations recorded.
+                      </td>
+                    </tr>
+                  ) : (
+                    incomeRecords
+                      .filter((r) => {
+                        const matchSearch =
+                          !incomeSearch.trim() ||
+                          r.referenceNumber.toLowerCase().includes(incomeSearch.toLowerCase()) ||
+                          r.donorName.toLowerCase().includes(incomeSearch.toLowerCase()) ||
+                          (r.projectName && r.projectName.toLowerCase().includes(incomeSearch.toLowerCase())) ||
+                          r.source.toLowerCase().includes(incomeSearch.toLowerCase());
+                        const matchFilter = incomeFilter === 'all' || r.status === incomeFilter;
+                        return matchSearch && matchFilter;
+                      })
+                      .map((inc) => (
+                        <tr key={inc.id} className="hover:bg-surface-muted/20">
+                          <td className="py-3 px-4 font-mono font-bold text-forest-800">
+                            {inc.referenceNumber}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="font-semibold text-charcoal">{inc.source}</div>
+                            <div className="text-2xs text-charcoal-muted capitalize">{inc.category}</div>
+                          </td>
+                          <td className="py-3 px-4 font-medium text-charcoal">
+                            {inc.donorName}
+                          </td>
+                          <td className="py-3 px-4 text-charcoal-muted">
+                            {inc.projectName}
+                          </td>
+                          <td className="py-3 px-4 text-charcoal-muted tabular-nums">
+                            {inc.date}
+                          </td>
+                          <td className="py-3 px-4 text-right font-mono font-bold text-charcoal-900 tabular-nums">
+                            {inc.amount.toLocaleString()} {inc.currency}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <span
+                              className={`inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-semibold ${
+                                inc.status === 'confirmed'
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : 'bg-amber-100 text-amber-800'
+                              }`}
+                            >
+                              {inc.status === 'confirmed' ? 'Confirmed' : 'Pending'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </div>
+      )}
+
       {/* TAB 3: Disbursements Register */}
       {activeTab === 'transactions' && (
         <Card className="overflow-hidden">
@@ -728,7 +998,310 @@ export const FinancePage: React.FC = () => {
         </Card>
       )}
 
-      {/* TAB 4: Staff Statutory & Payroll Registry */}
+      {/* TAB: Project Financial Tracking */}
+      {activeTab === 'projects' && (
+        <ProjectFinancialTrackingView />
+      )}
+
+      {/* TAB: Procurement Payments Handover */}
+      {activeTab === 'procurement' && (
+        <ProcurementPaymentsView />
+      )}
+
+      {/* TAB: Financial Approvals */}
+      {activeTab === 'approvals' && (
+        <FinancialApprovalsView
+          requests={requests}
+          onSelectRequest={(req) => {
+            setSelectedRequest(req);
+            setIsDetailOpen(true);
+          }}
+          onOpenReviewModal={(req) => {
+            setSelectedRequest(req);
+            setIsReviewOpen(true);
+          }}
+        />
+      )}
+
+      {/* TAB: Financial Documents & Vouchers */}
+      {activeTab === 'documents' && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card className="p-4 bg-white border-slate-200 shadow-xs">
+              <div className="text-xs font-semibold uppercase tracking-wider text-charcoal-muted">
+                Total Financial Documents
+              </div>
+              <div className="mt-1 text-2xl font-bold font-mono text-charcoal-900">
+                {documents.length}
+              </div>
+              <div className="text-2xs text-charcoal-muted mt-0.5">Vouchers, invoices, & attached evidence</div>
+            </Card>
+
+            <Card className="p-4 bg-white border-slate-200 shadow-xs">
+              <div className="text-xs font-semibold uppercase tracking-wider text-charcoal-muted">
+                Payment Vouchers
+              </div>
+              <div className="mt-1 text-2xl font-bold font-mono text-charcoal-900">
+                {documents.filter((d) => d.source === 'transaction_receipt').length}
+              </div>
+              <div className="text-2xs text-charcoal-muted mt-0.5">Disbursement payment receipts</div>
+            </Card>
+
+            <Card className="p-4 bg-white border-slate-200 shadow-xs">
+              <div className="text-xs font-semibold uppercase tracking-wider text-charcoal-muted">
+                Requisition Invoices
+              </div>
+              <div className="mt-1 text-2xl font-bold font-mono text-charcoal-900">
+                {documents.filter((d) => d.source === 'requisition_attachment').length}
+              </div>
+              <div className="text-2xs text-charcoal-muted mt-0.5">Audited claim documentation</div>
+            </Card>
+          </div>
+
+          {/* Search & Filter */}
+          <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+            <div className="relative w-full sm:w-80">
+              <Search className="h-4 w-4 text-charcoal-muted absolute left-3 top-1/2 -translate-y-1/2" />
+              <Input
+                value={docSearch}
+                onChange={(e) => setDocSearch(e.target.value)}
+                placeholder="Search document title, reference, payee..."
+                className="pl-9 text-xs"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Filter className="h-4 w-4 text-charcoal-muted shrink-0" />
+              <Select
+                value={docFilter}
+                onChange={(e) => setDocFilter(e.target.value as any)}
+                className="text-xs"
+              >
+                <option value="all">All Document Types</option>
+                <option value="Payment Voucher">Payment Vouchers</option>
+                <option value="Receipt / Invoice">Receipts & Invoices</option>
+              </Select>
+            </div>
+          </div>
+
+          {/* Document Table */}
+          <Card className="overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-surface-muted/50 border-b border-surface-border text-charcoal-muted">
+                  <tr>
+                    <th className="py-3 px-4">Reference #</th>
+                    <th className="py-3 px-4">Document Title</th>
+                    <th className="py-3 px-4">Type</th>
+                    <th className="py-3 px-4">Related Entity</th>
+                    <th className="py-3 px-4">Date Logged</th>
+                    <th className="py-3 px-4">Source</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-surface-border text-charcoal">
+                  {documents.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-8 text-center text-charcoal-muted">
+                        No financial documents found in repository.
+                      </td>
+                    </tr>
+                  ) : (
+                    documents
+                      .filter((d) => {
+                        const matchSearch =
+                          !docSearch.trim() ||
+                          d.title.toLowerCase().includes(docSearch.toLowerCase()) ||
+                          d.referenceNumber.toLowerCase().includes(docSearch.toLowerCase()) ||
+                          d.relatedEntity.toLowerCase().includes(docSearch.toLowerCase());
+                        const matchFilter = docFilter === 'all' || d.documentType === docFilter;
+                        return matchSearch && matchFilter;
+                      })
+                      .map((doc) => (
+                        <tr key={doc.id} className="hover:bg-surface-muted/20">
+                          <td className="py-3 px-4 font-mono font-bold text-forest-800">
+                            {doc.referenceNumber}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="font-semibold text-charcoal">{doc.title}</div>
+                            {doc.fileSize && (
+                              <div className="text-2xs text-charcoal-muted">{doc.fileSize}</div>
+                            )}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-2xs font-medium bg-slate-100 text-slate-800">
+                              {doc.documentType}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-charcoal">
+                            {doc.relatedEntity}
+                          </td>
+                          <td className="py-3 px-4 text-charcoal-muted tabular-nums">
+                            {doc.uploadedAt ? doc.uploadedAt.slice(0, 10) : '—'}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-2xs text-charcoal-muted capitalize">
+                              {doc.source.replace('_', ' ')}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => showSuccess('Document verified in secure audit repository.')}
+                              className="h-7 px-2 text-xs"
+                              title="Verify Record"
+                            >
+                              <Eye className="h-3.5 w-3.5 text-[#374151]" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* TAB: Financial Reports & Analytics */}
+      {activeTab === 'reports' && (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-4 rounded-lg border border-slate-200">
+            <div>
+              <h3 className="text-sm font-bold text-charcoal-900">
+                Executive Financial Accountability & Performance Report
+              </h3>
+              <p className="text-xs text-charcoal-muted mt-0.5">
+                Consolidated financial summary, budget utilization analysis, and fund absorption rates across BAOMS operations.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.print()}
+                className="flex items-center gap-1.5 text-xs"
+              >
+                <Printer className="h-3.5 w-3.5 text-[#374151]" />
+                <span>Print Report</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Key Accountability Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="p-4 bg-white border-slate-200 shadow-xs">
+              <div className="text-xs font-semibold uppercase tracking-wider text-charcoal-muted">
+                Authorized Budget
+              </div>
+              <div className="mt-1 text-2xl font-bold font-mono text-charcoal-900 tabular-nums">
+                {kpis.totalBudget.toLocaleString()} <span className="text-xs font-normal text-charcoal-muted">TZS</span>
+              </div>
+              <div className="text-2xs text-charcoal-muted mt-0.5">Total approved funding envelope</div>
+            </Card>
+
+            <Card className="p-4 bg-white border-slate-200 shadow-xs">
+              <div className="text-xs font-semibold uppercase tracking-wider text-charcoal-muted">
+                Actual Expenditure
+              </div>
+              <div className="mt-1 text-2xl font-bold font-mono text-charcoal-900 tabular-nums">
+                {kpis.totalSpent.toLocaleString()} <span className="text-xs font-normal text-charcoal-muted">TZS</span>
+              </div>
+              <div className="text-2xs text-charcoal-muted mt-0.5">Total disbursed funds</div>
+            </Card>
+
+            <Card className="p-4 bg-white border-slate-200 shadow-xs">
+              <div className="text-xs font-semibold uppercase tracking-wider text-charcoal-muted">
+                Approved Commitments
+              </div>
+              <div className="mt-1 text-2xl font-bold font-mono text-amber-800 tabular-nums">
+                {kpis.totalCommitted.toLocaleString()} <span className="text-xs font-normal text-charcoal-muted">TZS</span>
+              </div>
+              <div className="text-2xs text-charcoal-muted mt-0.5">Pending disbursement release</div>
+            </Card>
+
+            <Card className="p-4 bg-white border-slate-200 shadow-xs">
+              <div className="text-xs font-semibold uppercase tracking-wider text-charcoal-muted">
+                Budget Absorption Rate
+              </div>
+              <div className="mt-1 text-2xl font-bold font-mono text-emerald-800 tabular-nums">
+                {kpis.totalBudget > 0
+                  ? ((kpis.totalSpent / kpis.totalBudget) * 100).toFixed(1)
+                  : '0.0'}%
+              </div>
+              <div className="text-2xs text-charcoal-muted mt-0.5">Disbursement execution index</div>
+            </Card>
+          </div>
+
+          {/* Visual Breakdown */}
+          {requests.length > 0 && (
+            <AnalyticsVisualizer
+              title="Expenditure Breakdown by Requisition Category"
+              description="Real-time multi-dimensional financial visualization (Bar, Line, Distribution, Table)"
+              data={financialAnalyticsData}
+              valuePrefix="TZS "
+              defaultMode="bar"
+              availableModes={['bar', 'line', 'pie', 'table']}
+              height={260}
+            />
+          )}
+
+          {/* Budget Line Ledger Table */}
+          <Card className="overflow-hidden">
+            <div className="px-4 py-3 bg-surface-muted/30 border-b border-surface-border">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-charcoal-800">
+                Operational & Project Budget Line Ledger
+              </h4>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-surface-muted/50 border-b border-surface-border text-charcoal-muted">
+                  <tr>
+                    <th className="py-3 px-4">Code</th>
+                    <th className="py-3 px-4">Budget Line</th>
+                    <th className="py-3 px-4">Category</th>
+                    <th className="py-3 px-4 text-right">Allocated (TZS)</th>
+                    <th className="py-3 px-4 text-right">Committed (TZS)</th>
+                    <th className="py-3 px-4 text-right">Disbursed (TZS)</th>
+                    <th className="py-3 px-4 text-right">Remaining (TZS)</th>
+                    <th className="py-3 px-4 text-right">Utilization</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-surface-border text-charcoal">
+                  {budgets.map((b) => (
+                    <tr key={b.id} className="hover:bg-surface-muted/20">
+                      <td className="py-3 px-4 font-mono font-bold text-forest-800">{b.code}</td>
+                      <td className="py-3 px-4 font-semibold text-charcoal">{b.name}</td>
+                      <td className="py-3 px-4 capitalize text-charcoal-muted">{b.category}</td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums">{b.allocatedAmount.toLocaleString()}</td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums text-amber-700">{b.totalCommitted.toLocaleString()}</td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums text-forest-700">{b.totalSpent.toLocaleString()}</td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums font-bold text-emerald-800">{b.availableBalance.toLocaleString()}</td>
+                      <td className="py-3 px-4 text-right font-mono font-bold">
+                        <span
+                          className={
+                            b.utilizationPercentage >= 80
+                              ? 'text-crimson-600'
+                              : b.utilizationPercentage >= 60
+                              ? 'text-amber-600'
+                              : 'text-emerald-700'
+                          }
+                        >
+                          {b.utilizationPercentage}%
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* TAB: Staff Statutory & Payroll Registry */}
       {activeTab === 'statutory' && (
         <Card className="p-6 bg-white space-y-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-surface-border pb-3">
@@ -898,12 +1471,27 @@ export const FinancePage: React.FC = () => {
         </Card>
       )}
 
-      {/* Modals */}
-      <CreateFinancialRequestModal
-        isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
-        onSubmit={handleCreateSubmit}
-      />
+      {/* Full-Page Steppers */}
+      {isCreateOpen && (
+        <CreateFinancialRequestPage
+          onSuccess={async () => {
+            setIsCreateOpen(false);
+            await loadData();
+          }}
+          onCancel={() => setIsCreateOpen(false)}
+        />
+      )}
+
+      {isPaymentOpen && (
+        <RecordPaymentPage
+          initialRequest={selectedRequest}
+          onSuccess={async () => {
+            setIsPaymentOpen(false);
+            await loadData();
+          }}
+          onCancel={() => setIsPaymentOpen(false)}
+        />
+      )}
 
       <FinancialRequestDetailModal
         isOpen={isDetailOpen}
@@ -924,13 +1512,6 @@ export const FinancePage: React.FC = () => {
         onClose={() => setIsReviewOpen(false)}
         request={selectedRequest}
         onSubmitDecision={handleReviewSubmit}
-      />
-
-      <RecordPaymentModal
-        isOpen={isPaymentOpen}
-        onClose={() => setIsPaymentOpen(false)}
-        request={selectedRequest}
-        onSubmitPayment={handlePaymentSubmit}
       />
 
       <CompleteStatutoryModal

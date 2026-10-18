@@ -20,6 +20,22 @@ interface GlyphData {
 }
 
 export const FA_GLYPHS: Record<string, GlyphData> = {
+  'star': {
+    viewBox: '0 0 576 512',
+    d: 'M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 327 113.2 470c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.1-67.3 128.1 67.3c10.8 5.7 23.9 4.7 33.8-2.3s14.9-19.3 12.9-31.3l-24.6-143 104.2-101.5c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z'
+  },
+  'scale-balanced': {
+    viewBox: '0 0 512 512',
+    d: 'M224 48a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm128 0a64 64 0 1 0 -128 0 64 64 0 1 0 128 0zM32 176c0-8.8 7.2-16 16-16l144 0 0-48-64 0c-8.8 0-16-7.2-16-16s7.2-16 16-16l176 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-64 0 0 48 144 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-144 0 0 256 96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L160 480c-17.7 0-32-14.3-32-32s14.3-32 32-32l96 0 0-256-144 0c-8.8 0-16-7.2-16-16zM96 240l80 0-40 80-40-80zm240 0l80 0-40 80-40-80z'
+  },
+  'award': {
+    viewBox: '0 0 384 512',
+    d: 'M173.8 5.5c11-7.3 25.4-7.3 36.4 0L228 17.4c6 4 13 5.8 20.1 5.4l21.3-1.3c13.2-.8 25.6 6.4 31.5 18.2l9.6 19.1c3.2 6.4 8.4 11.5 14.8 14.8l19.1 9.6c11.8 5.9 19 18.3 18.2 31.5l-1.3 21.3c-.4 7.1 1.4 14.2 5.4 20.1l11.9 17.8c7.3 11 7.3 25.4 0 36.4L366.6 228c-4 6-5.8 13-5.4 20.1l1.3 21.3c.8 13.2-6.4 25.6-18.2 31.5l-19.1 9.6c-6.4 3.2-11.5 8.4-14.8 14.8l-9.6 19.1c-5.9 11.8-18.3 19-31.5 18.2l-21.3-1.3c-7.1-.4-14.2 1.4-20.1 5.4l-17.8 11.9c-11 7.3-25.4 7.3-36.4 0L156 366.6c-6-4-13-5.8-20.1-5.4l-21.3 1.3c-13.2.8-25.6-6.4-31.5-18.2l-9.6-19.1c-3.2-6.4-8.4-11.5-14.8-14.8l-19.1-9.6c-11.8-5.9-19-18.3-18.2-31.5l1.3-21.3c.4-7.1-1.4-14.2-5.4-20.1L5.5 208.6c-7.3-11-7.3-25.4 0-36.4L17.4 156c4-6 5.8-13 5.4-20.1l-1.3-21.3c-.8-13.2 6.4-25.6 18.2-31.5l19.1-9.6c6.4-3.2 11.5-8.4 14.8-14.8l9.6-19.1c5.9-11.8 18.3-19 31.5-18.2l21.3 1.3c7.1.4 14.2-1.4 20.1-5.4l17.8-11.9zM224 445.7l0 34.3c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-34.3c-42.5-9.4-78.3-36.2-97.4-73.7l38.2-22.1c13.7 26.8 39.3 45.9 69.8 52.6l0-61.9c-38.3-12-64-47.5-64-88.6c0-53 43-96 96-96s96 43 96 96c0 41.1-25.7 76.6-64 88.6l0 61.9c30.5-6.7 56.1-25.8 69.8-52.6l38.2 22.1c-19.1 37.5-54.9 64.3-97.4 73.7z'
+  },
+  'graduation-cap': {
+    viewBox: '0 0 640 512',
+    d: 'M320 32c-8.1 0-16.1 2.3-23 6.9L10 173.9C3.8 178 0 184.8 0 192s3.8 14 10 18.1l287 135c6.9 4.6 14.9 6.9 23 6.9s16.1-2.3 23-6.9l287-135c6.2-4.1 10-10.9 10-18.1s-3.8-14-10-18.1L343 38.9c-6.9-4.6-14.9-6.9-23-6.9zM112 288l0 80c0 44.2 93.1 80 208 80s208-35.8 208-80l0-80c-25.5 17-69.8 32-128 32s-102.5-15-128-32l0 0c-25.5 17-69.8 32-128 32s-102.5-15-128-32z'
+  },
   'copy': {
     viewBox: '0 0 448 512',
     d: 'M384 336l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L384 96.1 384 320c0 8.8-7.2 16-16 16zM192 0C156.7 0 128 28.7 128 64l0 256c0 35.3 28.7 64 64 64l192 0c35.3 0 64-28.7 64-64l0-223.9c0-17-6.7-33.3-18.7-45.3L387.9 18.7C375.9 6.7 359.6 0 342.6 0L192 0zM64 128c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l192 0c35.3 0 64-28.7 64-64l0-32-64 0 0 32c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l32 0 0-64-32 0z'
@@ -654,7 +670,11 @@ export const CreditCard = createIcon('CreditCard', 'credit-card');
 export const Database = createIcon('Database', 'database');
 export const DollarSign = createIcon('DollarSign', 'dollar-sign');
 export const Download = createIcon('Download', 'download');
+export const Edit = createIcon('Edit', 'pen-to-square');
 export const Edit2 = createIcon('Edit2', 'pen-to-square');
+export const Edit3 = createIcon('Edit3', 'pen-to-square');
+export const Languages = createIcon('Languages', 'globe');
+export const Sliders = createIcon('Sliders', 'gear');
 export const ExternalLink = createIcon('ExternalLink', 'arrow-up-right-from-square');
 export const Eye = createIcon('Eye', 'eye');
 export const EyeOff = createIcon('EyeOff', 'eye-slash');
@@ -735,6 +755,15 @@ export const Printer = createIcon('Printer', 'print');
 export const Quote = createIcon('Quote', 'quote-left');
 export const Truck = createIcon('Truck', 'truck');
 export const Target = createIcon('Target', 'chart-simple');
+export const Award = createIcon('Award', 'award');
+export const GraduationCap = createIcon('GraduationCap', 'graduation-cap');
+export const FileStack = createIcon('FileStack', 'layer-group');
+export const ListPlus = createIcon('ListPlus', 'list-check');
+export const FilePlus = createIcon('FilePlus', 'file-lines');
+export const Star = createIcon('Star', 'star');
+export const FileBadge = createIcon('FileBadge', 'file-circle-check');
+export const FileImage = createIcon('FileImage', 'palette');
+export const Scale = createIcon('Scale', 'scale-balanced');
 
 // Generic fallback proxy for any unlisted Lucide icons
 const fallbackIcon = createIcon('FallbackIcon', 'circle-question');
