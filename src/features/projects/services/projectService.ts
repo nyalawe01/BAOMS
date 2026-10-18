@@ -251,15 +251,23 @@ export async function getProjects(
     };
   });
 
-  // Filter by user membership if user is not an admin, director, or finance
+  // Filter by user membership if user is not an admin, director, finance, or project manager
   if (currentUser?.id && currentUser?.role) {
-    const isPrivileged = ['system_admin', 'executive_director', 'finance_officer'].includes(
-      currentUser.role
-    );
+    const isPrivileged = [
+      'system_admin',
+      'executive_director',
+      'finance_officer',
+      'project_manager',
+    ].includes(currentUser.role);
     if (!isPrivileged) {
-      projects = projects.filter(
+      const assignedProjects = projects.filter(
         (p) => p.members.some((m) => m.userId === currentUser.id) || p.createdBy === currentUser.id
       );
+      // If user has specific assigned project memberships, scope to those;
+      // otherwise, retain active projects so operational coordinators can plan and record activities.
+      if (assignedProjects.length > 0) {
+        projects = assignedProjects;
+      }
     }
   }
 

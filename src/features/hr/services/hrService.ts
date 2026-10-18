@@ -600,23 +600,57 @@ export async function getLeaveRequests(
 ): Promise<LeaveRequestRecord[]> {
   if (!isSupabaseConfigured) return [];
 
-  let query = supabase.from('leave_requests').select(`
-    *,
-    leave_types(name_en, code),
-    staff:staff_profiles!staff_id(id, full_name, staff_number, user_id, supervisor_id),
-    decision_maker:profiles!decision_by(display_name)
-  `).order('created_at', { ascending: false });
+  let data: any[] | null = null;
+  let error: any = null;
 
-  if (filters?.status && filters.status !== 'all') {
-    query = query.eq('status', filters.status);
-  }
-  if (filters?.staffId) {
-    query = query.eq('staff_id', filters.staffId);
+  try {
+    let query = supabase.from('leave_requests').select(`
+      *,
+      leave_types(name_en, code),
+      staff:staff_profiles!staff_id(id, full_name, staff_number, user_id, supervisor_id),
+      decision_maker:profiles!decision_by(display_name)
+    `).order('created_at', { ascending: false });
+
+    if (filters?.status && filters.status !== 'all') {
+      query = query.eq('status', filters.status);
+    }
+    if (filters?.staffId) {
+      query = query.eq('staff_id', filters.staffId);
+    }
+
+    const res = await query;
+    data = res.data;
+    error = res.error;
+  } catch (err: any) {
+    error = err;
   }
 
-  const { data, error } = await query;
+  if (error) {
+    console.warn('[hrService] Join query warning, falling back to direct leave query:', error.message);
+    try {
+      let fallbackQuery = supabase.from('leave_requests').select(`
+        *,
+        leave_types(name_en, code),
+        decision_maker:profiles!decision_by(display_name)
+      `).order('created_at', { ascending: false });
+
+      if (filters?.status && filters.status !== 'all') {
+        fallbackQuery = fallbackQuery.eq('status', filters.status);
+      }
+      if (filters?.staffId) {
+        fallbackQuery = fallbackQuery.eq('staff_id', filters.staffId);
+      }
+
+      const fbRes = await fallbackQuery;
+      data = fbRes.data || [];
+      error = fbRes.error;
+    } catch (fbErr: any) {
+      error = fbErr;
+    }
+  }
+
   if (error || !data) {
-    console.error('[hrService] Failed to fetch leave requests:', error);
+    console.warn('[hrService] Failed to fetch leave requests:', error?.message);
     return [];
   }
 

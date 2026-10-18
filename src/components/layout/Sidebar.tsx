@@ -407,7 +407,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <li key={`${item.to}-${item.label}`}>
                   <NavLink
                     to={item.to}
-                    end={item.to === '/'}
+                    end={true}
                     title={item.label}
                     className={({ isActive }) =>
                       cn(
