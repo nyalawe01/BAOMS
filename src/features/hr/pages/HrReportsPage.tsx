@@ -12,7 +12,6 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
-  RefreshCw,
   Search,
   PieChart,
 } from 'lucide-react';
@@ -168,10 +167,6 @@ export const HrReportsPage: React.FC = () => {
         ]}
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={loadData} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
             <Button variant="primary" size="sm" onClick={exportCurrentReport}>
               <Download className="h-4 w-4 mr-1.5" />
               Export Report (CSV)

@@ -15,11 +15,11 @@ export const Badge: React.FC<BadgeProps> = ({
   ...props
 }) => {
   const variantStyles = {
-    default: 'bg-slate-100 text-charcoal-700 border border-slate-200',
-    success: 'bg-emerald-50 text-emerald-800 border border-emerald-200',
-    warning: 'bg-amber-50 text-amber-800 border border-amber-200',
-    danger: 'bg-rose-50 text-rose-800 border border-rose-200',
-    info: 'bg-slate-100 text-slate-700 border border-slate-200',
+    default: 'bg-white text-charcoal-700 border-0',
+    success: 'bg-white text-emerald-700 font-semibold border-0',
+    warning: 'bg-white text-amber-700 font-semibold border-0',
+    danger: 'bg-white text-rose-700 font-semibold border-0',
+    info: 'bg-white text-slate-700 border-0',
   };
 
   const dotColors = {

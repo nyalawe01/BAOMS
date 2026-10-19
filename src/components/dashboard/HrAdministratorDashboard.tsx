@@ -12,7 +12,6 @@ import {
   X,
   FileCheck,
   UserCog,
-  RefreshCw,
   Search,
   Shield,
   Mail,
@@ -30,6 +29,7 @@ import Swal from 'sweetalert2';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { Skeleton, SkeletonKPI } from '@/components/ui/Skeleton';
 import {
   getStaffProfiles,
   getLeaveRequests,
@@ -52,7 +52,7 @@ export const HrAdministratorDashboard: React.FC = () => {
   const [staff, setStaff] = useState<StaffProfileRecord[]>([]);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequestRecord[]>([]);
   const [pendingCandidates, setPendingCandidates] = useState<PendingUserCandidate[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<string>('Just now');
 
   // Filter states
@@ -302,11 +302,6 @@ export const HrAdministratorDashboard: React.FC = () => {
               <option value="annual_2026">Full Year 2026</option>
             </select>
 
-            <Button variant="outline" size="sm" onClick={loadData} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Updated {lastUpdated}</span>
-            </Button>
-
             <Button variant="primary" size="sm" onClick={() => navigate('/hr/staff/new')}>
               <UserPlus className="h-4 w-4 mr-1.5" />
               Register Staff
@@ -316,144 +311,104 @@ export const HrAdministratorDashboard: React.FC = () => {
       />
 
       {/* 6 Compact Enterprise KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        {/* KPI 1: Total Staff */}
-        <div
-          onClick={() => navigate('/hr')}
-          className="bg-white border border-surface-border rounded-lg p-3.5 hover:border-charcoal-400 cursor-pointer transition-all"
-        >
-          <div className="flex items-center justify-between text-[11px] font-semibold text-charcoal-500 uppercase tracking-wider">
-            <span>Total Staff</span>
-            <Users className="h-4 w-4 text-charcoal-600" />
-          </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-charcoal-900 tabular-nums">
-            {staff.length}
-          </div>
-          <span className="text-[11px] text-charcoal-muted mt-1 block">Roster records</span>
-        </div>
-
-        {/* KPI 2: Active Staff */}
-        <div
-          onClick={() => navigate('/hr')}
-          className="bg-white border border-surface-border rounded-lg p-3.5 hover:border-charcoal-400 cursor-pointer transition-all"
-        >
-          <div className="flex items-center justify-between text-[11px] font-semibold text-charcoal-500 uppercase tracking-wider">
-            <span>Active Staff</span>
-            <CheckCircle2 className="h-4 w-4 text-charcoal-600" />
-          </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-emerald-700 tabular-nums">
-            {activeStaff.length}
-          </div>
-          <span className="text-[11px] text-charcoal-muted mt-1 block">In service today</span>
-        </div>
-
-        {/* KPI 3: Departments */}
-        <div
-          onClick={() => navigate('/hr/departments')}
-          className="bg-white border border-surface-border rounded-lg p-3.5 hover:border-charcoal-400 cursor-pointer transition-all"
-        >
-          <div className="flex items-center justify-between text-[11px] font-semibold text-charcoal-500 uppercase tracking-wider">
-            <span>Departments</span>
-            <Building className="h-4 w-4 text-charcoal-600" />
-          </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-charcoal-900 tabular-nums">
-            {uniqueDepartmentsCount}
-          </div>
-          <span className="text-[11px] text-charcoal-muted mt-1 block">Organized units</span>
-        </div>
-
-        {/* KPI 4: Contracts Nearing Expiry */}
-        <div
-          onClick={() => navigate('/hr/contracts')}
-          className="bg-white border border-surface-border rounded-lg p-3.5 hover:border-charcoal-400 cursor-pointer transition-all"
-        >
-          <div className="flex items-center justify-between text-[11px] font-semibold text-charcoal-500 uppercase tracking-wider">
-            <span>Contract Expiry</span>
-            <AlertCircle className="h-4 w-4 text-charcoal-600" />
-          </div>
-          <div className={`mt-2 text-2xl font-bold font-mono tabular-nums ${expiringContracts.length > 0 ? 'text-rose-600' : 'text-charcoal-900'}`}>
-            {expiringContracts.length}
-          </div>
-          <span className="text-[11px] text-charcoal-muted mt-1 block">Due in &le;60 days</span>
-        </div>
-
-        {/* KPI 5: Pending Leave Requests */}
-        <div
-          onClick={() => navigate('/hr/leave')}
-          className="bg-white border border-surface-border rounded-lg p-3.5 hover:border-charcoal-400 cursor-pointer transition-all"
-        >
-          <div className="flex items-center justify-between text-[11px] font-semibold text-charcoal-500 uppercase tracking-wider">
-            <span>Pending Leave</span>
-            <Clock className="h-4 w-4 text-charcoal-600" />
-          </div>
-          <div className={`mt-2 text-2xl font-bold font-mono tabular-nums ${pendingLeaves.length > 0 ? 'text-amber-600' : 'text-charcoal-900'}`}>
-            {pendingLeaves.length}
-          </div>
-          <span className="text-[11px] text-charcoal-muted mt-1 block">Awaiting sign-off</span>
-        </div>
-
-        {/* KPI 6: Clearance Vetting */}
-        <div
-          onClick={() => navigate('/hr/onboarding')}
-          className="bg-white border border-surface-border rounded-lg p-3.5 hover:border-charcoal-400 cursor-pointer transition-all"
-        >
-          <div className="flex items-center justify-between text-[11px] font-semibold text-charcoal-500 uppercase tracking-wider">
-            <span>Pending Vetting</span>
-            <Shield className="h-4 w-4 text-charcoal-600" />
-          </div>
-          <div className={`mt-2 text-2xl font-bold font-mono tabular-nums ${pendingCandidates.length > 0 ? 'text-amber-600' : 'text-charcoal-900'}`}>
-            {pendingCandidates.length}
-          </div>
-          <span className="text-[11px] text-charcoal-muted mt-1 block">Onboarding dossiers</span>
-        </div>
-      </div>
-
-      {/* Workforce Analytics Row (AdminCN horizontal bar + segmented distributions) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Chart 1: Staff Headcount by Department (Horizontal Bar Chart) */}
-        <div className="bg-white border border-surface-border rounded-lg p-4 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-charcoal-900">Staff Headcount by Department</h3>
-              <span className="text-xs font-mono text-charcoal-muted">{staff.length} Total</span>
+      {isLoading ? (
+        <SkeletonKPI count={6} />
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {/* KPI 1: Total Staff */}
+          <div
+            onClick={() => navigate('/hr')}
+            className="bg-white border border-surface-border rounded-lg p-3.5 hover:border-charcoal-400 cursor-pointer transition-all"
+          >
+            <div className="flex items-center justify-between text-[11px] font-semibold text-charcoal-500 uppercase tracking-wider">
+              <span>Total Staff</span>
+              <Users className="h-4 w-4 text-charcoal-600" />
             </div>
-            <p className="text-xs text-charcoal-muted mt-0.5">Distribution across institutional units</p>
+            <div className="mt-2 text-2xl font-bold font-mono text-charcoal-900 tabular-nums">
+              {staff.length}
+            </div>
+            <span className="text-[11px] text-charcoal-muted mt-1 block">Roster records</span>
           </div>
 
-          <div className="mt-4 space-y-2.5">
-            {Object.entries(departmentCounts).map(([deptName, count]) => {
-              const maxCount = Math.max(...Object.values(departmentCounts), 1);
-              const percentage = Math.round((count / (staff.length || 1)) * 100);
-              const barWidth = Math.round((count / maxCount) * 100);
-
-              return (
-                <div key={deptName} className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="font-medium text-charcoal-800 truncate max-w-[200px]">{deptName}</span>
-                    <span className="font-mono text-charcoal-600 font-bold">{count} ({percentage}%)</span>
-                  </div>
-                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-charcoal-800 rounded-full transition-all duration-500"
-                      style={{ width: `${barWidth}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+          {/* KPI 2: Active Staff */}
+          <div
+            onClick={() => navigate('/hr')}
+            className="bg-white border border-surface-border rounded-lg p-3.5 hover:border-charcoal-400 cursor-pointer transition-all"
+          >
+            <div className="flex items-center justify-between text-[11px] font-semibold text-charcoal-500 uppercase tracking-wider">
+              <span>Active Staff</span>
+              <CheckCircle2 className="h-4 w-4 text-charcoal-600" />
+            </div>
+            <div className="mt-2 text-2xl font-bold font-mono text-emerald-700 tabular-nums">
+              {activeStaff.length}
+            </div>
+            <span className="text-[11px] text-charcoal-muted mt-1 block">In service today</span>
           </div>
 
-          <div className="pt-3 border-t border-surface-border mt-4 text-right">
-            <button
-              type="button"
-              onClick={() => navigate('/hr/departments')}
-              className="text-xs font-semibold text-charcoal-800 hover:text-black inline-flex items-center gap-1"
-            >
-              <span>View Department Hierarchy</span>
-              <ArrowRight className="h-3 w-3" />
-            </button>
+          {/* KPI 3: Departments */}
+          <div
+            onClick={() => navigate('/hr/departments')}
+            className="bg-white border border-surface-border rounded-lg p-3.5 hover:border-charcoal-400 cursor-pointer transition-all"
+          >
+            <div className="flex items-center justify-between text-[11px] font-semibold text-charcoal-500 uppercase tracking-wider">
+              <span>Departments</span>
+              <Building className="h-4 w-4 text-charcoal-600" />
+            </div>
+            <div className="mt-2 text-2xl font-bold font-mono text-charcoal-900 tabular-nums">
+              {uniqueDepartmentsCount}
+            </div>
+            <span className="text-[11px] text-charcoal-muted mt-1 block">Organized units</span>
+          </div>
+
+          {/* KPI 4: Contracts Nearing Expiry */}
+          <div
+            onClick={() => navigate('/hr/contracts')}
+            className="bg-white border border-surface-border rounded-lg p-3.5 hover:border-charcoal-400 cursor-pointer transition-all"
+          >
+            <div className="flex items-center justify-between text-[11px] font-semibold text-charcoal-500 uppercase tracking-wider">
+              <span>Contract Expiry</span>
+              <AlertCircle className="h-4 w-4 text-charcoal-600" />
+            </div>
+            <div className={`mt-2 text-2xl font-bold font-mono tabular-nums ${expiringContracts.length > 0 ? 'text-rose-600' : 'text-charcoal-900'}`}>
+              {expiringContracts.length}
+            </div>
+            <span className="text-[11px] text-charcoal-muted mt-1 block">Due in &le;60 days</span>
+          </div>
+
+          {/* KPI 5: Pending Leave Requests */}
+          <div
+            onClick={() => navigate('/hr/leave')}
+            className="bg-white border border-surface-border rounded-lg p-3.5 hover:border-charcoal-400 cursor-pointer transition-all"
+          >
+            <div className="flex items-center justify-between text-[11px] font-semibold text-charcoal-500 uppercase tracking-wider">
+              <span>Pending Leave</span>
+              <Clock className="h-4 w-4 text-charcoal-600" />
+            </div>
+            <div className={`mt-2 text-2xl font-bold font-mono tabular-nums ${pendingLeaves.length > 0 ? 'text-amber-600' : 'text-charcoal-900'}`}>
+              {pendingLeaves.length}
+            </div>
+            <span className="text-[11px] text-charcoal-muted mt-1 block">Awaiting sign-off</span>
+          </div>
+
+          {/* KPI 6: Clearance Vetting */}
+          <div
+            onClick={() => navigate('/hr/onboarding')}
+            className="bg-white border border-surface-border rounded-lg p-3.5 hover:border-charcoal-400 cursor-pointer transition-all"
+          >
+            <div className="flex items-center justify-between text-[11px] font-semibold text-charcoal-500 uppercase tracking-wider">
+              <span>Pending Vetting</span>
+              <Shield className="h-4 w-4 text-charcoal-600" />
+            </div>
+            <div className={`mt-2 text-2xl font-bold font-mono tabular-nums ${pendingCandidates.length > 0 ? 'text-amber-600' : 'text-charcoal-900'}`}>
+              {pendingCandidates.length}
+            </div>
+            <span className="text-[11px] text-charcoal-muted mt-1 block">Onboarding dossiers</span>
           </div>
         </div>
+      )}
+
+      {/* Workforce Analytics Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Chart 2: Tenure & Employment Type Distribution */}
         <div className="bg-white border border-surface-border rounded-lg p-4 flex flex-col justify-between">
@@ -646,12 +601,31 @@ export const HrAdministratorDashboard: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-surface-border">
               {isLoading ? (
-                <tr>
-                  <td colSpan={6} className="py-12 text-center text-charcoal-muted text-xs">
-                    <RefreshCw className="h-6 w-6 animate-spin mx-auto text-charcoal-400 mb-2" />
-                    Synchronizing staff records with database...
-                  </td>
-                </tr>
+                Array.from({ length: 6 }).map((_, idx) => (
+                  <tr key={idx} className="animate-pulse">
+                    <td className="py-3 px-4">
+                      <div className="h-3.5 w-32 bg-slate-200 rounded mb-1.5" />
+                      <div className="h-2.5 w-16 bg-slate-100 rounded" />
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="h-3.5 w-28 bg-slate-200 rounded mb-1.5" />
+                      <div className="h-2.5 w-20 bg-slate-100 rounded" />
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="h-3.5 w-24 bg-slate-200 rounded" />
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="h-3 w-36 bg-slate-200 rounded mb-1" />
+                      <div className="h-2.5 w-20 bg-slate-100 rounded" />
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="h-4 w-14 bg-slate-200 rounded-full" />
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <div className="h-6 w-20 bg-slate-200 rounded ml-auto" />
+                    </td>
+                  </tr>
+                ))
               ) : staff.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-charcoal-muted text-xs">
@@ -688,11 +662,11 @@ export const HrAdministratorDashboard: React.FC = () => {
                     </td>
                     <td className="py-3 px-4">
                       {s.employmentStatus === 'active' ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-emerald-700">
                           Active
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-slate-600">
                           {s.employmentStatus}
                         </span>
                       )}
@@ -708,7 +682,7 @@ export const HrAdministratorDashboard: React.FC = () => {
                           className="inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold bg-slate-100 text-charcoal-800 hover:bg-slate-200 transition-colors"
                         >
                           <Eye className="h-3.5 w-3.5 mr-1" />
-                          Dossier
+                          View
                         </button>
                         <button
                           type="button"

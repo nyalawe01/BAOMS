@@ -21,7 +21,6 @@ import {
   ShieldCheck,
   Paperclip,
   Eye,
-  RefreshCw,
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -232,8 +231,8 @@ export const ProjectDocumentsView: React.FC = () => {
               </h3>
               <p className="text-xs text-gray-500 mt-1">RLS Encrypted Access</p>
             </div>
-            <div className="p-2.5 rounded-lg border border-gray-200 text-gray-700 bg-gray-50">
-              <RefreshCw className="w-5 h-5 text-gray-700 cursor-pointer" onClick={loadData} />
+            <div className="p-2.5 rounded-lg border border-gray-200 text-emerald-700 bg-emerald-50">
+              <ShieldCheck className="w-5 h-5 text-emerald-700" />
             </div>
           </div>
         </Card>

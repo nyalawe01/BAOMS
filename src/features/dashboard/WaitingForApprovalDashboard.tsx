@@ -5,7 +5,6 @@ import {
   ShieldCheck,
   CheckCircle2,
   Lock,
-  RefreshCw,
   LogOut,
   Mail,
   User,
@@ -169,7 +168,7 @@ export const WaitingForApprovalDashboard: React.FC = () => {
               disabled={isRefreshing}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#D68904] hover:bg-[#b86e03] text-white font-semibold text-xs transition shadow-lg shadow-amber-500/10 shrink-0 self-start sm:self-auto disabled:opacity-50"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <Clock className="w-3.5 h-3.5" />
               <span>{isRefreshing ? 'Checking...' : 'Check Approval Status'}</span>
             </button>
           </div>

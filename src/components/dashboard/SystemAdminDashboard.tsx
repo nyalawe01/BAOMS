@@ -5,12 +5,12 @@ import {
   Users,
   ArrowRight,
   UserPlus,
-  RefreshCw,
   UserCheck,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
+import { SkeletonKPI } from '@/components/ui/Skeleton';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 interface AdminStaffUser {
@@ -28,7 +28,7 @@ export const SystemAdminDashboard: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [users, setUsers] = useState<AdminStaffUser[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [dbLatency, setDbLatency] = useState<number | null>(null);
   const [isLiveConnected, setIsLiveConnected] = useState(false);
 
@@ -115,10 +115,6 @@ export const SystemAdminDashboard: React.FC = () => {
         ]}
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={loadData} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
-              {t('common.refresh', 'Refresh Telemetry')}
-            </Button>
             <Button variant="primary" size="sm" onClick={() => navigate('/users')}>
               <UserPlus className="h-4 w-4 mr-1.5" />
               {t('admin.manageUsers', 'Manage Users & Roles')}
@@ -128,37 +124,41 @@ export const SystemAdminDashboard: React.FC = () => {
       />
 
       {/* Primary User Account Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white border border-surface-border rounded-lg p-4">
-          <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
-            <span>Active User Accounts</span>
-            <Users className="h-4 w-4 text-charcoal-400" />
+      {isLoading ? (
+        <SkeletonKPI count={2} />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-white border border-surface-border rounded-lg p-4">
+            <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
+              <span>Active User Accounts</span>
+              <Users className="h-4 w-4 text-charcoal-400" />
+            </div>
+            <div className="mt-2 text-2xl font-bold text-charcoal-900 font-mono tabular-nums leading-tight">
+              {activeUsers} <span className="text-sm font-normal text-charcoal-muted">/ {totalUsers}</span>
+            </div>
+            <p className="mt-1 text-xs text-charcoal-muted truncate">
+              {pendingApprovalsCount > 0 ? (
+                <span className="text-amber-600 font-medium">{pendingApprovalsCount} awaiting approval</span>
+              ) : (
+                <span>{deactivatedCount} deactivated accounts</span>
+              )}
+            </p>
           </div>
-          <div className="mt-2 text-2xl font-bold text-charcoal-900 font-mono tabular-nums leading-tight">
-            {activeUsers} <span className="text-sm font-normal text-charcoal-muted">/ {totalUsers}</span>
-          </div>
-          <p className="mt-1 text-xs text-charcoal-muted truncate">
-            {pendingApprovalsCount > 0 ? (
-              <span className="text-amber-600 font-medium">{pendingApprovalsCount} awaiting approval</span>
-            ) : (
-              <span>{deactivatedCount} deactivated accounts</span>
-            )}
-          </p>
-        </div>
 
-        <div className="bg-white border border-surface-border rounded-lg p-4">
-          <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
-            <span>Pending Approvals</span>
-            <UserCheck className="h-4 w-4 text-charcoal-400" />
+          <div className="bg-white border border-surface-border rounded-lg p-4">
+            <div className="flex items-center justify-between text-xs font-semibold text-charcoal-500 uppercase tracking-wider">
+              <span>Pending Authorizations</span>
+              <UserCheck className="h-4 w-4 text-charcoal-400" />
+            </div>
+            <div className="mt-2 text-2xl font-bold font-mono tabular-nums leading-tight text-amber-600">
+              {pendingApprovalsCount}
+            </div>
+            <p className="mt-1 text-xs text-charcoal-muted truncate">
+              Registration candidates requiring HR/ED sign-off
+            </p>
           </div>
-          <div className={`mt-2 text-2xl font-bold font-mono tabular-nums leading-tight ${pendingApprovalsCount > 0 ? 'text-amber-600' : 'text-charcoal-900'}`}>
-            {pendingApprovalsCount}
-          </div>
-          <p className="mt-1 text-xs text-charcoal-muted truncate">
-            {pendingApprovalsCount > 0 ? 'Awaiting HR or ED authorization' : 'All accounts verified'}
-          </p>
         </div>
-      </div>
+      )}
 
       {/* Staff Accounts Management */}
       <div className="bg-white border border-surface-border rounded-lg overflow-hidden flex flex-col">
@@ -189,26 +189,46 @@ export const SystemAdminDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border">
-              {users.slice(0, 8).map((u) => (
-                <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="py-2.5 px-3">
-                    <div className="font-semibold text-charcoal-900">{u.displayName}</div>
-                    <div className="text-xs text-charcoal-muted font-mono">{u.email}</div>
-                  </td>
-                  <td className="py-2.5 px-3">
-                    <span className="font-mono text-xs font-semibold text-charcoal-800">
-                      {u.role}
-                    </span>
-                  </td>
-                  <td className="py-2.5 px-3 text-xs text-charcoal-700">{u.departmentName}</td>
-                  <td className="py-2.5 px-3 text-right">
-                    <StatusIndicator
-                      status={u.isActive ? 'approved' : 'rejected'}
-                      label={u.isActive ? 'ACTIVE' : 'INACTIVE'}
-                    />
-                  </td>
-                </tr>
-              ))}
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <tr key={idx} className="animate-pulse">
+                    <td className="py-2.5 px-3">
+                      <div className="h-3.5 w-28 bg-slate-200 rounded mb-1" />
+                      <div className="h-2.5 w-36 bg-slate-100 rounded" />
+                    </td>
+                    <td className="py-2.5 px-3">
+                      <div className="h-3.5 w-20 bg-slate-200 rounded" />
+                    </td>
+                    <td className="py-2.5 px-3">
+                      <div className="h-3.5 w-24 bg-slate-200 rounded" />
+                    </td>
+                    <td className="py-2.5 px-3 text-right">
+                      <div className="h-4 w-14 bg-slate-200 rounded ml-auto" />
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                users.slice(0, 8).map((u) => (
+                  <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="py-2.5 px-3">
+                      <div className="font-semibold text-charcoal-900">{u.displayName}</div>
+                      <div className="text-xs text-charcoal-muted font-mono">{u.email}</div>
+                    </td>
+                    <td className="py-2.5 px-3">
+                      <span className="font-mono text-xs font-semibold text-charcoal-800">
+                        {u.role}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3 text-xs text-charcoal-700">{u.departmentName}</td>
+                    <td className="py-2.5 px-3 text-right">
+                      <StatusIndicator
+                        status={u.isActive ? 'approved' : 'rejected'}
+                        label={u.isActive ? 'ACTIVE' : 'INACTIVE'}
+                      />
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

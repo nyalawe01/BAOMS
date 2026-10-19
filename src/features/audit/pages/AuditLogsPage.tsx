@@ -4,7 +4,6 @@ import {
   ShieldAlert,
   Download,
   Eye,
-  RefreshCw,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
@@ -115,15 +114,6 @@ export const AuditLogsPage: React.FC = () => {
         ]}
         actions={
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fetchLogs}
-              disabled={isLoading}
-            >
-              <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
-              <span>{t('common.refresh', 'Refresh')}</span>
-            </Button>
             <Button
               variant="primary"
               size="sm"

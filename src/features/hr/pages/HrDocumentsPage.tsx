@@ -9,7 +9,6 @@ import {
   Download,
   Eye,
   Plus,
-  RefreshCw,
   Building,
   User,
   Shield,
@@ -23,6 +22,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
+import { SkeletonTable } from '@/components/ui/Skeleton';
 import { getStaffProfiles } from '../services/hrService';
 import { StaffProfileRecord } from '../types/hr';
 
@@ -47,98 +47,98 @@ const STATIC_DOCUMENTS: PersonnelDocument[] = [
   {
     id: 'doc-1',
     staffId: 'stf-001',
-    staffName: 'Emmanuel S. Kimaro',
+    staffName: 'Hussein Hamza',
     staffNumber: 'STF-001',
     department: 'Programs & Delivery',
-    title: 'Fixed-Term Employment Contract (2026-2027)',
+    title: 'Fixed-Term Employment Contract — Project Manager (2026-2027)',
     category: 'contract',
     referenceNumber: 'BAOMS-CON-2026-001',
-    fileName: 'Emmanuel_Kimaro_Employment_Contract_Signed.pdf',
+    fileName: 'Hussein_Hamza_Employment_Contract_Signed.pdf',
     fileSize: '1.4 MB',
     uploadDate: '2026-01-10',
-    uploadedBy: 'Elinami Munuo (HR)',
+    uploadedBy: 'Elinami Munuo (HR Administrator)',
     verified: true,
     notes: 'Signed and countersigned by Executive Director.',
   },
   {
     id: 'doc-2',
     staffId: 'stf-001',
-    staffName: 'Emmanuel S. Kimaro',
+    staffName: 'Hussein Hamza',
     staffNumber: 'STF-001',
     department: 'Programs & Delivery',
     title: 'Certified National Identity Card (NIDA Copy)',
     category: 'id_nida',
     referenceNumber: 'NIDA-19850412-14101-00004-21',
-    fileName: 'Kimaro_NIDA_Verified_Copy.pdf',
+    fileName: 'Hussein_Hamza_NIDA_Verified_Copy.pdf',
     fileSize: '420 KB',
     uploadDate: '2026-01-12',
-    uploadedBy: 'Elinami Munuo (HR)',
+    uploadedBy: 'Elinami Munuo (HR Administrator)',
     verified: true,
     notes: 'Verified against NIDA national database.',
   },
   {
     id: 'doc-3',
     staffId: 'stf-002',
-    staffName: 'Amina Salum',
+    staffName: 'Lugano Maclean',
     staffNumber: 'STF-002',
-    department: 'Finance & Operations',
-    title: 'Official Appointment Letter — Head of Finance',
+    department: 'Programs & Delivery',
+    title: 'Official Appointment Letter — Senior Project Coordinator',
     category: 'appointment',
     referenceNumber: 'BAOMS-HR-APPT-2025-014',
-    fileName: 'Amina_Salum_Appointment_Letter.pdf',
+    fileName: 'Lugano_Maclean_Appointment_Letter.pdf',
     fileSize: '890 KB',
     uploadDate: '2025-06-01',
-    uploadedBy: 'Rehema Mwenda (ED)',
+    uploadedBy: 'Mgunga Mwamnyenyelwa (Executive Director)',
     verified: true,
-    notes: 'Executive appointment letter with salary band details.',
+    notes: 'Executive appointment letter with project coordination portfolio.',
   },
   {
     id: 'doc-4',
     staffId: 'stf-002',
-    staffName: 'Amina Salum',
+    staffName: 'Lugano Maclean',
     staffNumber: 'STF-002',
-    department: 'Finance & Operations',
+    department: 'Programs & Delivery',
     title: 'NSSF Member Registration & Remittance Confirmation',
     category: 'statutory',
     referenceNumber: 'NSSF-TZ-88492014',
-    fileName: 'Amina_Salum_NSSF_Membership.pdf',
+    fileName: 'Lugano_Maclean_NSSF_Membership.pdf',
     fileSize: '510 KB',
     uploadDate: '2025-06-05',
-    uploadedBy: 'Elinami Munuo (HR)',
+    uploadedBy: 'Elinami Munuo (HR Administrator)',
     verified: true,
     notes: 'Direct statutory filing confirmation.',
   },
   {
     id: 'doc-5',
     staffId: 'stf-003',
-    staffName: 'Geofrey M. Temba',
+    staffName: 'Mgunga Mwamnyenyelwa',
     staffNumber: 'STF-003',
-    department: 'Procurement & Logistics',
-    title: 'Authorized Job Description — Procurement & Logistics Officer',
-    category: 'job_description',
-    referenceNumber: 'BAOMS-JD-PROC-01',
-    fileName: 'JD_Procurement_Logistics_Officer_2026.pdf',
-    fileSize: '650 KB',
-    uploadDate: '2026-02-15',
-    uploadedBy: 'Elinami Munuo (HR)',
+    department: 'Executive Office',
+    title: 'Executive Directorate Mandate & Statutory Charter',
+    category: 'appointment',
+    referenceNumber: 'BAOMS-EXEC-DIR-001',
+    fileName: 'Executive_Director_Mandate_Charter.pdf',
+    fileSize: '1.8 MB',
+    uploadDate: '2025-01-15',
+    uploadedBy: 'Board of Directors',
     verified: true,
-    notes: 'Countersigned by employee upon induction.',
+    notes: 'Countersigned by Board Governance Committee.',
   },
   {
     id: 'doc-6',
     staffId: 'stf-004',
-    staffName: 'Neema Mwita',
+    staffName: 'Elinami Munuo',
     staffNumber: 'STF-004',
-    department: 'Monitoring & Evaluation',
-    title: 'Certified Academic Credentials & M&E Degree',
-    category: 'certificate',
-    referenceNumber: 'UDSM-CERT-2022-77491',
-    fileName: 'Neema_Mwita_Degree_Certificate.pdf',
-    fileSize: '2.1 MB',
-    uploadDate: '2026-03-01',
-    uploadedBy: 'Elinami Munuo (HR)',
+    department: 'Human Resources',
+    title: 'Authorized Job Description — HR Administrator',
+    category: 'job_description',
+    referenceNumber: 'BAOMS-JD-HR-01',
+    fileName: 'JD_HR_Administrator_2026.pdf',
+    fileSize: '650 KB',
+    uploadDate: '2026-02-15',
+    uploadedBy: 'Mgunga Mwamnyenyelwa (Executive Director)',
     verified: true,
-    notes: 'University of Dar es Salaam verified transcript.',
+    notes: 'HR governance and institutional staff compliance scope.',
   },
 ];
 
@@ -273,10 +273,6 @@ export const HrDocumentsPage: React.FC = () => {
         ]}
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={loadData} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
-              Sync
-            </Button>
             <Button variant="primary" size="sm" onClick={() => setIsUploadOpen(true)}>
               <Upload className="h-4 w-4 mr-1.5" />
               Upload Personnel Document
@@ -386,49 +382,52 @@ export const HrDocumentsPage: React.FC = () => {
       </div>
 
       {/* Main Document Register Table */}
-      <div className="bg-white border border-surface-border rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm min-w-[750px]">
-            <thead className="bg-surface-muted/60 text-xs font-semibold text-charcoal-600 border-b border-surface-border">
-              <tr>
-                <th className="py-2.5 px-4">Document Title</th>
-                <th className="py-2.5 px-4">Associated Employee</th>
-                <th className="py-2.5 px-4">Category</th>
-                <th className="py-2.5 px-4">Reference Number</th>
-                <th className="py-2.5 px-4">Upload Date</th>
-                <th className="py-2.5 px-4">Size</th>
-                <th className="py-2.5 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-surface-border">
-              {filteredDocuments.length === 0 ? (
+      {isLoading ? (
+        <SkeletonTable rows={6} columns={7} />
+      ) : (
+        <div className="bg-white border border-surface-border rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm min-w-[750px]">
+              <thead className="bg-surface-muted/60 text-xs font-semibold text-charcoal-600 border-b border-surface-border">
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-charcoal-muted text-xs">
-                    No documents found matching the filter criteria.
-                  </td>
+                  <th className="py-2.5 px-4">Document Title</th>
+                  <th className="py-2.5 px-4">Associated Employee</th>
+                  <th className="py-2.5 px-4">Category</th>
+                  <th className="py-2.5 px-4">Reference Number</th>
+                  <th className="py-2.5 px-4">Upload Date</th>
+                  <th className="py-2.5 px-4">Size</th>
+                  <th className="py-2.5 px-4 text-right">Actions</th>
                 </tr>
-              ) : (
-                filteredDocuments.map((doc) => (
-                  <tr key={doc.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="font-semibold text-charcoal-900 text-xs flex items-center gap-1.5">
-                        <FileText className="h-4 w-4 text-charcoal-500 shrink-0" />
-                        <span>{doc.title}</span>
-                      </div>
-                      <div className="text-[11px] text-charcoal-muted font-mono pl-5.5">{doc.fileName}</div>
+              </thead>
+              <tbody className="divide-y divide-surface-border">
+                {filteredDocuments.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-charcoal-muted text-xs">
+                      No documents found matching the filter criteria.
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-charcoal-900 text-xs">{doc.staffName}</div>
-                      <div className="text-[11px] text-charcoal-muted">{doc.department}</div>
-                    </td>
-                    <td className="py-3 px-4 text-xs font-medium capitalize text-charcoal-700">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-charcoal-800">
-                        {doc.category.replace('_', ' ')}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-xs font-mono text-charcoal-600">
-                      {doc.referenceNumber}
-                    </td>
+                  </tr>
+                ) : (
+                  filteredDocuments.map((doc) => (
+                    <tr key={doc.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="py-3 px-4">
+                        <div className="font-semibold text-charcoal-900 text-xs flex items-center gap-1.5">
+                          <FileText className="h-4 w-4 text-charcoal-500 shrink-0" />
+                          <span>{doc.title}</span>
+                        </div>
+                        <div className="text-[11px] text-charcoal-muted font-mono pl-5.5">{doc.fileName}</div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="font-medium text-charcoal-900 text-xs">{doc.staffName}</div>
+                        <div className="text-[11px] text-charcoal-muted">{doc.department}</div>
+                      </td>
+                      <td className="py-3 px-4 text-xs font-medium capitalize text-charcoal-700">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-charcoal-800">
+                          {doc.category.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-xs font-mono text-charcoal-600">
+                        {doc.referenceNumber}
+                      </td>
                     <td className="py-3 px-4 text-xs font-mono text-charcoal-600">
                       {doc.uploadDate}
                     </td>
@@ -467,6 +466,7 @@ export const HrDocumentsPage: React.FC = () => {
           </table>
         </div>
       </div>
+      )}
 
       {/* Document Detail Modal */}
       <Modal

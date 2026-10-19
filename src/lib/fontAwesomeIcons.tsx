@@ -20,6 +20,22 @@ interface GlyphData {
 }
 
 export const FA_GLYPHS: Record<string, GlyphData> = {
+  'play': {
+    viewBox: '0 0 384 512',
+    d: 'M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z'
+  },
+  'landmark': {
+    viewBox: '0 0 512 512',
+    d: 'M240.1 4.2c9.8-5.6 21.9-5.6 31.8 0l216 123.4C497.1 132.9 503 142.1 503 152c0 13.3-10.7 24-24 24l-446 0c-13.3 0-24-10.7-24-24c0-9.9 5.9-19.1 15.1-24.4L240.1 4.2zM64 224l32 0 0 192-32 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-32 0 0-192 32 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 160c-17.7 0-32 14.3-32 32s14.3 32 32 32l32 0zm112 0l32 0 0 192-32 0 0-192zm112 0l32 0 0 192-32 0 0-192z'
+  },
+  'calendar-check': {
+    viewBox: '0 0 448 512',
+    d: 'M128 0c17.7 0 32 14.3 32 32l0 32 128 0 0-32c0-17.7 14.3-32 32-32s32 14.3 32 32l0 32 48 0c26.5 0 48 21.5 48 48l0 48L0 160l0-48C0 85.5 21.5 64 48 64l48 0 0-32c0-17.7 14.3-32 32-32zM0 192l448 0 0 272c0 26.5-21.5 48-48 48L48 512c-26.5 0-48-21.5-48-48L0 192zm313.4 121.4c-6.2-6.2-16.4-6.2-22.6 0L208 396.1l-42.7-42.7c-6.2-6.2-16.4-6.2-22.6 0s-6.2 16.4 0 22.6l54 54c6.2 6.2 16.4 6.2 22.6 0l94-94c6.2-6.2 6.2-16.4 0-22.6z'
+  },
+  'arrows-up-down': {
+    viewBox: '0 0 512 512',
+    d: 'M137.4 41.4c12.5-12.5 32.8-12.5 45.3 0l96 96c9.2 9.2 11.9 22.9 6.9 34.9s-16.6 19.8-29.6 19.8l-32 0 0 288c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-288-32 0c-12.9 0-24.6-7.8-29.6-19.8s-2.2-25.7 6.9-34.9l96-96zm284 374.6c-9.2-9.2-11.9-22.9-6.9-34.9s16.6-19.8 29.6-19.8l32 0 0-288c0-17.7 14.3-32 32-32s32 14.3 32 32l0 288 32 0c12.9 0 24.6 7.8 29.6 19.8s2.2 25.7-6.9 34.9l-96 96c-12.5 12.5-32.8 12.5-45.3 0l-96-96z'
+  },
   'star': {
     viewBox: '0 0 576 512',
     d: 'M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 327 113.2 470c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.1-67.3 128.1 67.3c10.8 5.7 23.9 4.7 33.8-2.3s14.9-19.3 12.9-31.3l-24.6-143 104.2-101.5c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z'
@@ -764,6 +780,11 @@ export const Star = createIcon('Star', 'star');
 export const FileBadge = createIcon('FileBadge', 'file-circle-check');
 export const FileImage = createIcon('FileImage', 'palette');
 export const Scale = createIcon('Scale', 'scale-balanced');
+export const Play = createIcon('Play', 'play');
+export const Landmark = createIcon('Landmark', 'landmark');
+export const User2 = createIcon('User2', 'user');
+export const ArrowUpDown = createIcon('ArrowUpDown', 'arrows-up-down');
+export const CalendarCheck = createIcon('CalendarCheck', 'calendar-check');
 
 // Generic fallback proxy for any unlisted Lucide icons
 const fallbackIcon = createIcon('FallbackIcon', 'circle-question');

@@ -11,7 +11,6 @@ import {
   Filter,
   Download,
   Plus,
-  RefreshCw,
   Eye,
   Building,
   User,
@@ -23,6 +22,7 @@ import Swal from 'sweetalert2';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { SkeletonTable } from '@/components/ui/Skeleton';
 import { Modal } from '@/components/ui/Modal';
 import { getStaffProfiles, updateStaffProfile } from '../services/hrService';
 import { StaffProfileRecord, ContractType } from '../types/hr';
@@ -191,10 +191,6 @@ export const HrContractsPage: React.FC = () => {
         ]}
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={loadData} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
-              Sync
-            </Button>
             <Button variant="outline" size="sm" onClick={exportCsv}>
               <Download className="h-4 w-4 mr-1.5" />
               Export Register
@@ -378,7 +374,25 @@ export const HrContractsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border">
-              {filteredContracts.length === 0 ? (
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <tr key={idx} className="animate-pulse">
+                    <td className="py-3 px-4">
+                      <div className="h-3.5 w-28 bg-slate-200 rounded mb-1" />
+                      <div className="h-2.5 w-16 bg-slate-100 rounded" />
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="h-3.5 w-24 bg-slate-200 rounded mb-1" />
+                      <div className="h-2.5 w-20 bg-slate-100 rounded" />
+                    </td>
+                    <td className="py-3 px-4"><div className="h-3.5 w-20 bg-slate-200 rounded" /></td>
+                    <td className="py-3 px-4"><div className="h-3.5 w-20 bg-slate-200 rounded" /></td>
+                    <td className="py-3 px-4"><div className="h-3.5 w-20 bg-slate-200 rounded" /></td>
+                    <td className="py-3 px-4"><div className="h-4 w-20 bg-slate-200 rounded-full" /></td>
+                    <td className="py-3 px-4 text-right"><div className="h-6 w-20 bg-slate-200 rounded ml-auto" /></td>
+                  </tr>
+                ))
+              ) : filteredContracts.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-charcoal-muted text-xs">
                     No contract records found matching current criteria.
@@ -410,19 +424,19 @@ export const HrContractsPage: React.FC = () => {
                       </td>
                       <td className="py-3 px-4">
                         {staff.contractType === 'permanent' ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-emerald-700">
                             Permanent
                           </span>
                         ) : isCritical ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-white text-rose-700">
                             Expires in &le;30d
                           </span>
                         ) : isExpiring ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-white text-amber-700">
                             Renewal Due (&le;60d)
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-charcoal-700">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-charcoal-700">
                             Active
                           </span>
                         )}
@@ -436,10 +450,10 @@ export const HrContractsPage: React.FC = () => {
                               setIsDetailOpen(true);
                             }}
                             className="inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold bg-slate-100 text-charcoal-800 hover:bg-slate-200"
-                            title="View Staff Dossier"
+                            title="View Staff Details"
                           >
                             <Eye className="h-3.5 w-3.5 mr-1" />
-                            Dossier
+                            View
                           </button>
                           <button
                             type="button"

@@ -9,7 +9,6 @@ import {
   FileText,
   Users,
   Check,
-  RefreshCw,
   ExternalLink,
   Filter,
 } from 'lucide-react';
@@ -72,18 +71,14 @@ export const NotificationsPage: React.FC = () => {
           { label: 'Notifications' },
         ]}
         actions={
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={loadNotifs}>
-              <RefreshCw className="h-4 w-4 mr-1.5" />
-              Refresh
-            </Button>
-            {unreadCount > 0 && (
+          unreadCount > 0 ? (
+            <div className="flex items-center gap-2">
               <Button variant="primary" size="sm" onClick={handleMarkAll}>
                 <Check className="h-4 w-4 mr-1.5" />
                 Mark All as Read ({unreadCount})
               </Button>
-            )}
-          </div>
+            </div>
+          ) : undefined
         }
       />
 

@@ -10,7 +10,6 @@ import {
   Filter,
   Check,
   X,
-  RefreshCw,
   Plus,
   Eye,
   FileText,
@@ -238,10 +237,6 @@ export const HrLeavePage: React.FC = () => {
         ]}
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={loadData} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
-              Sync
-            </Button>
             <Button variant="outline" size="sm" onClick={exportCsv}>
               <Download className="h-4 w-4 mr-1.5" />
               Export CSV
@@ -371,12 +366,21 @@ export const HrLeavePage: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-surface-border">
               {isLoading ? (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-charcoal-muted text-xs">
-                    <RefreshCw className="h-6 w-6 animate-spin mx-auto text-charcoal-400 mb-2" />
-                    Loading leave requests from database...
-                  </td>
-                </tr>
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <tr key={idx} className="animate-pulse">
+                    <td className="py-3 px-4"><div className="h-3.5 w-16 bg-slate-200 rounded" /></td>
+                    <td className="py-3 px-4">
+                      <div className="h-3.5 w-28 bg-slate-200 rounded mb-1" />
+                      <div className="h-2.5 w-16 bg-slate-100 rounded" />
+                    </td>
+                    <td className="py-3 px-4"><div className="h-3.5 w-24 bg-slate-200 rounded" /></td>
+                    <td className="py-3 px-4"><div className="h-3.5 w-20 bg-slate-200 rounded" /></td>
+                    <td className="py-3 px-4"><div className="h-3.5 w-28 bg-slate-200 rounded" /></td>
+                    <td className="py-3 px-4 text-center"><div className="h-4 w-8 bg-slate-200 rounded mx-auto" /></td>
+                    <td className="py-3 px-4"><div className="h-4 w-16 bg-slate-200 rounded-full" /></td>
+                    <td className="py-3 px-4 text-right"><div className="h-6 w-20 bg-slate-200 rounded ml-auto" /></td>
+                  </tr>
+                ))
               ) : filteredRequests.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-12 text-center text-charcoal-muted text-xs">
@@ -407,19 +411,19 @@ export const HrLeavePage: React.FC = () => {
                     </td>
                     <td className="py-3 px-4">
                       {req.status === 'pending' ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-amber-700">
                           Pending Review
                         </span>
                       ) : req.status === 'approved' ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-emerald-700">
                           Approved
                         </span>
                       ) : req.status === 'rejected' ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-rose-700">
                           Rejected
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-slate-700">
                           {req.status}
                         </span>
                       )}

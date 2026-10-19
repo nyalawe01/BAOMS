@@ -146,7 +146,6 @@ export const SettingsPage: React.FC = () => {
             { id: 'preferences', label: 'Appearance & Localization' },
             { id: 'notifications', label: 'Notifications' },
             { id: 'security', label: 'Security & Sessions' },
-            { id: 'organization', label: 'Authorized Org Defaults' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -465,41 +464,6 @@ export const SettingsPage: React.FC = () => {
               <LogOut className="h-4 w-4 mr-1.5 text-[#374151]" />
               Sign Out of Session
             </Button>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 5: AUTHORIZED ORGANIZATIONAL PREFERENCES */}
-      {activeTab === 'organization' && (
-        <div className="bg-white border border-surface-border rounded-lg p-6 shadow-xs space-y-4">
-          <div>
-            <h3 className="text-sm font-bold text-charcoal-900 mb-1">Authorized Organizational Defaults</h3>
-            <p className="text-xs text-charcoal-muted">
-              Executive Directorate configuration parameters applied across all program registers.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-2">
-            <div className="p-3.5 rounded-lg border border-slate-200 bg-slate-50/50">
-              <span className="text-[10px] font-bold text-charcoal-muted uppercase tracking-wider">Fiscal Year Cycle</span>
-              <p className="font-semibold text-charcoal-900 mt-1">January 1 – December 31</p>
-              <span className="text-[11px] text-charcoal-muted">Synchronized with Tanzanian NGO calendar</span>
-            </div>
-            <div className="p-3.5 rounded-lg border border-slate-200 bg-slate-50/50">
-              <span className="text-[10px] font-bold text-charcoal-muted uppercase tracking-wider">Default Operational Currency</span>
-              <p className="font-semibold text-charcoal-900 mt-1">TZS (Tanzanian Shillings)</p>
-              <span className="text-[11px] text-charcoal-muted">All ledger records stored in base currency</span>
-            </div>
-            <div className="p-3.5 rounded-lg border border-slate-200 bg-slate-50/50">
-              <span className="text-[10px] font-bold text-charcoal-muted uppercase tracking-wider">Dual Approval Threshold</span>
-              <p className="font-semibold text-charcoal-900 mt-1">TZS 10,000,000</p>
-              <span className="text-[11px] text-charcoal-muted">Requisitions above this limit mandate Executive Director signature</span>
-            </div>
-            <div className="p-3.5 rounded-lg border border-slate-200 bg-slate-50/50">
-              <span className="text-[10px] font-bold text-charcoal-muted uppercase tracking-wider">Access Model</span>
-              <p className="font-semibold text-charcoal-900 mt-1">PostgreSQL Row-Level Security (RLS)</p>
-              <span className="text-[11px] text-charcoal-muted">Strict role-based authorization enforced</span>
-            </div>
           </div>
         </div>
       )}

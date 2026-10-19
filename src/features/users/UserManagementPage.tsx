@@ -11,7 +11,6 @@ import {
   Mail,
   Building,
   Trash2,
-  RefreshCw,
   WifiOff,
   Clock,
   CheckCircle2,
@@ -20,6 +19,7 @@ import {
   ShieldCheck,
   AlertCircle,
 } from 'lucide-react';
+import { SkeletonTable } from '@/components/ui/Skeleton';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
@@ -620,16 +620,6 @@ export const UserManagementPage: React.FC = () => {
               <Copy className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Self-Registration Link</span>
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              isIconOnly
-              onClick={loadStaff}
-              disabled={isFetching}
-              title="Refresh user list from database"
-            >
-              <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
-            </Button>
             <Button variant="primary" size="sm" onClick={() => setIsInviteModalOpen(true)}>
               <UserPlus className="h-4 w-4 mr-1.5" />
               <span>{t('users.inviteButton', 'Provision Staff Member')}</span>
@@ -686,10 +676,7 @@ export const UserManagementPage: React.FC = () => {
         </CardHeader>
         <CardContent className="p-0">
           {isFetching ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <RefreshCw className="h-8 w-8 text-slate-300 mb-3 animate-spin" />
-              <p className="text-sm text-slate-500">Loading staff from database...</p>
-            </div>
+            <SkeletonTable rows={5} columns={5} />
           ) : filteredStaff.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <User className="h-10 w-10 text-slate-300 mb-3" />
@@ -717,7 +704,7 @@ export const UserManagementPage: React.FC = () => {
                     const actionItems: DropdownMenuItem[] = [
                       {
                         id: 'view-profile',
-                        label: 'View Profile & Dossier',
+                        label: 'View Profile',
                         icon: User,
                         onClick: () => navigate(`/profile/${staff.id}`),
                       },

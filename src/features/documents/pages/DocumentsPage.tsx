@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   FileText,
@@ -60,6 +61,7 @@ import { WorkflowApprovalModal } from '../components/WorkflowApprovalModal';
 import { CategoryManagementModal } from '../components/CategoryManagementModal';
 
 export const DocumentsPage: React.FC = () => {
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { user, profile, hasPermission, isAdmin } = useAuth();
   const currentLang = i18n.language.startsWith('sw') ? 'sw' : 'en';
@@ -305,7 +307,7 @@ export const DocumentsPage: React.FC = () => {
               <Button
                 variant="primary"
                 size="sm"
-                onClick={() => setIsUploadModalOpen(true)}
+                onClick={() => navigate('/documents/upload')}
                 className="bg-forest-700 hover:bg-forest-800 text-white text-xs"
               >
                 <Plus className="h-4 w-4 mr-1.5" />

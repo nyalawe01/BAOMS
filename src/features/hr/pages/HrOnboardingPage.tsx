@@ -15,11 +15,11 @@ import {
   Building,
   Mail,
   Phone,
-  RefreshCw,
   Eye,
   CheckSquare,
   Square,
 } from 'lucide-react';
+import { SkeletonTable } from '@/components/ui/Skeleton';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -131,10 +131,6 @@ export const HrOnboardingPage: React.FC = () => {
         ]}
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={loadData} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
-              Sync Data
-            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate('/users')}>
               Manage Accounts & Roles
             </Button>
@@ -291,7 +287,7 @@ export const HrOnboardingPage: React.FC = () => {
                         {candidate.createdAt ? new Date(candidate.createdAt).toLocaleDateString() : 'Recent'}
                       </td>
                       <td className="py-3 px-4">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-amber-800">
                           Pending HR Review
                         </span>
                       </td>
@@ -461,7 +457,7 @@ export const HrOnboardingPage: React.FC = () => {
                       {staff.startDate}
                     </td>
                     <td className="py-3 px-4">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-emerald-700">
                         Fully Onboarded
                       </span>
                     </td>
@@ -475,7 +471,7 @@ export const HrOnboardingPage: React.FC = () => {
                         className="inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold bg-slate-100 text-charcoal-800 hover:bg-slate-200"
                       >
                         <Eye className="h-3.5 w-3.5 mr-1" />
-                        Dossier
+                        View
                       </button>
                     </td>
                   </tr>

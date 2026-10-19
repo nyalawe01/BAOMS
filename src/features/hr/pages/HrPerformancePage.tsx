@@ -9,7 +9,6 @@ import {
   Search,
   Filter,
   Plus,
-  RefreshCw,
   Eye,
   Building,
   User,
@@ -288,10 +287,6 @@ export const HrPerformancePage: React.FC = () => {
         ]}
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={loadData} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
-              Sync
-            </Button>
             <Button variant="outline" size="sm" onClick={() => setIsAddTrainingOpen(true)}>
               <GraduationCap className="h-4 w-4 mr-1.5" />
               Schedule Training

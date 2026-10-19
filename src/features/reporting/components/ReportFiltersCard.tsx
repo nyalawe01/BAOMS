@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import {
   FileSpreadsheet,
-  RefreshCw,
+  Play,
   Search,
   Filter,
 } from 'lucide-react';
@@ -138,7 +138,7 @@ export const ReportFiltersCard: React.FC<ReportFiltersCardProps> = ({
             isLoading={isLoading}
             className="text-[#374151]"
           >
-            <RefreshCw className="h-4 w-4 mr-1.5 text-[#374151]" />
+            <Play className="h-4 w-4 mr-1.5 text-[#374151]" />
             {t('reports.refreshReport', 'Run Report')}
           </Button>
 

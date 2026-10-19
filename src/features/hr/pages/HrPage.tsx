@@ -37,7 +37,6 @@ import {
   ClipboardList,
   Download,
   X,
-  RefreshCw,
 } from 'lucide-react';
 
 interface HrPageProps {

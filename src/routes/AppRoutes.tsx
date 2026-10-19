@@ -9,6 +9,7 @@ import { AccountDeactivatedPage } from '@/features/auth/pages/AccountDeactivated
 import { AccessDeniedPage } from '@/features/auth/pages/AccessDeniedPage';
 import { UserManagementPage } from '@/features/users/UserManagementPage';
 import { DocumentsPage } from '@/features/documents/pages/DocumentsPage';
+import { UploadDocumentPage } from '@/features/documents/pages/UploadDocumentPage';
 import { ProjectsPage } from '@/features/projects/pages/ProjectsPage';
 import { ProjectWorkspacePage } from '@/features/projects/pages/ProjectWorkspacePage';
 import { RegisterProjectPage } from '@/features/projects/pages/RegisterProjectPage';
@@ -134,6 +135,14 @@ export const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute requiredPermissions={['documents.view']}>
               <DocumentsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/documents/upload"
+          element={
+            <ProtectedRoute requiredPermissions={['documents.upload']}>
+              <UploadDocumentPage />
             </ProtectedRoute>
           }
         />

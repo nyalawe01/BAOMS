@@ -15,7 +15,6 @@ import {
   Shield,
   Download,
   Plus,
-  RefreshCw,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
@@ -24,6 +23,7 @@ import { Modal } from '@/components/ui/Modal';
 import { getStaffProfiles } from '../services/hrService';
 import { StaffProfileRecord } from '../types/hr';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { SkeletonTable } from '@/components/ui/Skeleton';
 
 interface DepartmentItem {
   id: string;
@@ -49,93 +49,6 @@ interface PositionItem {
   status: 'active' | 'vacant' | 'frozen';
 }
 
-const STATIC_DEPARTMENTS: DepartmentItem[] = [
-  {
-    id: 'dept-exec',
-    code: 'EXEC',
-    nameEn: 'Executive Office & Governance',
-    nameSw: 'Ofisi ya Utendaji na Utawala',
-    headName: 'Rehema Mwenda',
-    headTitle: 'Executive Director',
-    description: 'Strategic leadership, governance, external stakeholder relations, and institutional compliance.',
-    staffCount: 3,
-    isActive: true,
-    lastUpdated: '2026-10-15',
-  },
-  {
-    id: 'dept-prj',
-    code: 'PRJ',
-    nameEn: 'Programs & Project Delivery',
-    nameSw: 'Programu na Miradi',
-    headName: 'Emmanuel S. Kimaro',
-    headTitle: 'Head of Programs & Project Manager',
-    description: 'Field execution of community welfare, child development, and youth education initiatives.',
-    staffCount: 14,
-    isActive: true,
-    lastUpdated: '2026-10-16',
-  },
-  {
-    id: 'dept-fin',
-    code: 'FIN',
-    nameEn: 'Finance & Financial Operations',
-    nameSw: 'Fedha na Uendeshaji',
-    headName: 'Amina Salum',
-    headTitle: 'Finance Officer',
-    description: 'Financial accounting, donor grant reconciliation, disbursements, audit defense, and statutory payroll.',
-    staffCount: 4,
-    isActive: true,
-    lastUpdated: '2026-10-14',
-  },
-  {
-    id: 'dept-hr',
-    code: 'HR',
-    nameEn: 'Human Resources & Personnel',
-    nameSw: 'Rasilimali Watu na Tawala',
-    headName: 'Elinami Munuo',
-    headTitle: 'HR Administrator',
-    description: 'Workforce governance, talent onboarding, employee welfare, statutory social funds, and leave control.',
-    staffCount: 3,
-    isActive: true,
-    lastUpdated: '2026-10-17',
-  },
-  {
-    id: 'dept-proc',
-    code: 'PROC',
-    nameEn: 'Procurement & Logistics',
-    nameSw: 'Ununuzi na Ugavi',
-    headName: 'Geofrey M. Temba',
-    headTitle: 'Procurement & Logistics Officer',
-    description: 'Supply chain management, vendor tenders, quotation comparative analysis, and asset tracking.',
-    staffCount: 3,
-    isActive: true,
-    lastUpdated: '2026-10-12',
-  },
-  {
-    id: 'dept-me',
-    code: 'ME',
-    nameEn: 'Monitoring & Evaluation (M&E)',
-    nameSw: 'Ufuatiliaji na Tathmini',
-    headName: 'Neema Mwita',
-    headTitle: 'M&E Specialist',
-    description: 'Impact metrics, project indicator verification, donor reporting, and qualitative beneficiary evaluations.',
-    staffCount: 2,
-    isActive: true,
-    lastUpdated: '2026-10-13',
-  },
-  {
-    id: 'dept-admin',
-    code: 'ADMIN',
-    nameEn: 'Information Systems & Administration',
-    nameSw: 'Mifumo ya Habari na Utawala',
-    headName: 'Godfrey Mbilinyi',
-    headTitle: 'Systems Administrator',
-    description: 'Core IT infrastructure, database security, server telemetry, and access credentials governance.',
-    staffCount: 2,
-    isActive: true,
-    lastUpdated: '2026-10-16',
-  },
-];
-
 const STANDARD_POSITIONS: PositionItem[] = [
   { id: 'pos-1', code: 'POS-EXEC-01', title: 'Executive Director', departmentCode: 'EXEC', departmentName: 'Executive Office', assignedStaffCount: 1, reportsTo: 'Board of Directors', status: 'active' },
   { id: 'pos-2', code: 'POS-PRJ-01', title: 'Head of Programs / Project Manager', departmentCode: 'PRJ', departmentName: 'Programs & Delivery', assignedStaffCount: 1, reportsTo: 'Executive Director', status: 'active' },
@@ -154,14 +67,14 @@ export const HrDepartmentsPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const [departments, setDepartments] = useState<DepartmentItem[]>(STATIC_DEPARTMENTS);
+  const [departments, setDepartments] = useState<DepartmentItem[]>([]);
   const [positions, setPositions] = useState<PositionItem[]>(STANDARD_POSITIONS);
   const [allStaff, setAllStaff] = useState<StaffProfileRecord[]>([]);
   const [activeTab, setActiveTab] = useState<'departments' | 'positions' | 'hierarchy'>('departments');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState<DepartmentItem | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({ 'EXEC': true, 'PRJ': true, 'FIN': true, 'HR': true });
 
   const loadData = async () => {
@@ -260,10 +173,6 @@ export const HrDepartmentsPage: React.FC = () => {
         ]}
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={loadData} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate('/hr/staff/new')}>
               <Plus className="h-4 w-4 mr-1.5" />
               New Staff Assignment
@@ -335,66 +244,70 @@ export const HrDepartmentsPage: React.FC = () => {
 
       {/* TAB 1: Department Register */}
       {activeTab === 'departments' && (
-        <div className="bg-white border border-surface-border rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm min-w-[700px]">
-              <thead className="bg-surface-muted/60 text-xs font-semibold text-charcoal-600 border-b border-surface-border">
-                <tr>
-                  <th className="py-2.5 px-4">Code</th>
-                  <th className="py-2.5 px-4">Department Name</th>
-                  <th className="py-2.5 px-4">Department Head</th>
-                  <th className="py-2.5 px-4 text-center">Staff Count</th>
-                  <th className="py-2.5 px-4">Status</th>
-                  <th className="py-2.5 px-4">Last Updated</th>
-                  <th className="py-2.5 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-surface-border">
-                {filteredDepartments.map((dept) => (
-                  <tr key={dept.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-xs text-charcoal-800">
-                      {dept.code}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="font-semibold text-charcoal-900">{dept.nameEn}</div>
-                      <div className="text-xs text-charcoal-muted">{dept.nameSw}</div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-xs text-charcoal-800">{dept.headName}</div>
-                      <div className="text-[11px] text-charcoal-muted">{dept.headTitle}</div>
-                    </td>
-                    <td className="py-3 px-4 text-center font-mono font-bold text-xs text-charcoal-900">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-charcoal-800">
-                        {dept.staffCount}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        Active
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-xs font-mono text-charcoal-500">
-                      {dept.lastUpdated}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedDepartment(dept);
-                          setIsDetailOpen(true);
-                        }}
-                        className="inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold bg-slate-100 text-charcoal-800 hover:bg-slate-200 transition-colors"
-                      >
-                        <Eye className="h-3.5 w-3.5 mr-1" />
-                        Details
-                      </button>
-                    </td>
+        isLoading ? (
+          <SkeletonTable rows={6} columns={7} />
+        ) : (
+          <div className="bg-white border border-surface-border rounded-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm min-w-[700px]">
+                <thead className="bg-surface-muted/60 text-xs font-semibold text-charcoal-600 border-b border-surface-border">
+                  <tr>
+                    <th className="py-2.5 px-4">Code</th>
+                    <th className="py-2.5 px-4">Department Name</th>
+                    <th className="py-2.5 px-4">Department Head</th>
+                    <th className="py-2.5 px-4 text-center">Staff Count</th>
+                    <th className="py-2.5 px-4">Status</th>
+                    <th className="py-2.5 px-4">Last Updated</th>
+                    <th className="py-2.5 px-4 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-surface-border">
+                  {filteredDepartments.map((dept) => (
+                    <tr key={dept.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="py-3 px-4 font-mono font-bold text-xs text-charcoal-800">
+                        {dept.code}
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="font-semibold text-charcoal-900">{dept.nameEn}</div>
+                        <div className="text-xs text-charcoal-muted">{dept.nameSw}</div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="font-medium text-xs text-charcoal-800">{dept.headName}</div>
+                        <div className="text-[11px] text-charcoal-muted">{dept.headTitle}</div>
+                      </td>
+                      <td className="py-3 px-4 text-center font-mono font-bold text-xs text-charcoal-900">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-charcoal-800">
+                          {dept.staffCount}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-emerald-700">
+                          Active
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-xs font-mono text-charcoal-500">
+                        {dept.lastUpdated}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedDepartment(dept);
+                            setIsDetailOpen(true);
+                          }}
+                          className="inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold bg-slate-100 text-charcoal-800 hover:bg-slate-200 transition-colors"
+                        >
+                          <Eye className="h-3.5 w-3.5 mr-1" />
+                          Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )
       )}
 
       {/* TAB 2: Positions Register */}
@@ -431,7 +344,7 @@ export const HrDepartmentsPage: React.FC = () => {
                       {pos.assignedStaffCount}
                     </td>
                     <td className="py-3 px-4 text-right">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-emerald-700">
                         {pos.status.toUpperCase()}
                       </span>
                     </td>

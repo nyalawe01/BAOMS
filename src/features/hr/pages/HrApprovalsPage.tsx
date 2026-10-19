@@ -10,7 +10,6 @@ import {
   Filter,
   Check,
   X,
-  RefreshCw,
   Eye,
   Building,
   User,
@@ -23,6 +22,7 @@ import Swal from 'sweetalert2';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { SkeletonTable } from '@/components/ui/Skeleton';
 import { Modal } from '@/components/ui/Modal';
 import {
   getLeaveRequests,
@@ -231,10 +231,6 @@ export const HrApprovalsPage: React.FC = () => {
         ]}
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={loadData} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
-              Sync Queue
-            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate('/approvals')}>
               All Org Approvals
             </Button>
@@ -391,7 +387,20 @@ export const HrApprovalsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border">
-              {filteredRequests.length === 0 ? (
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <tr key={idx} className="animate-pulse">
+                    <td className="py-3 px-4"><div className="h-3.5 w-20 bg-slate-200 rounded" /></td>
+                    <td className="py-3 px-4"><div className="h-4 w-16 bg-slate-200 rounded-full" /></td>
+                    <td className="py-3 px-4"><div className="h-3.5 w-28 bg-slate-200 rounded" /></td>
+                    <td className="py-3 px-4"><div className="h-3.5 w-24 bg-slate-200 rounded" /></td>
+                    <td className="py-3 px-4"><div className="h-3.5 w-40 bg-slate-200 rounded" /></td>
+                    <td className="py-3 px-4"><div className="h-3.5 w-20 bg-slate-200 rounded" /></td>
+                    <td className="py-3 px-4"><div className="h-4 w-16 bg-slate-200 rounded-full" /></td>
+                    <td className="py-3 px-4 text-right"><div className="h-6 w-16 bg-slate-200 rounded ml-auto" /></td>
+                  </tr>
+                ))
+              ) : filteredRequests.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-12 text-center text-charcoal-muted text-xs">
                     No requests pending in this queue view.
@@ -404,7 +413,7 @@ export const HrApprovalsPage: React.FC = () => {
                       {req.reference}
                     </td>
                     <td className="py-3 px-4">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-charcoal-800">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-white text-charcoal-800">
                         {req.type}
                       </span>
                     </td>
@@ -422,15 +431,15 @@ export const HrApprovalsPage: React.FC = () => {
                     </td>
                     <td className="py-3 px-4">
                       {req.status === 'pending' ? (
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white ${
                           req.urgency === 'high'
-                            ? 'bg-rose-50 text-rose-800 border border-rose-200'
-                            : 'bg-amber-50 text-amber-800 border border-amber-200'
+                            ? 'text-rose-700'
+                            : 'text-amber-700'
                         }`}>
                           {req.urgency === 'high' ? 'Urgent Review' : 'Pending'}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-emerald-700">
                           {req.status}
                         </span>
                       )}
