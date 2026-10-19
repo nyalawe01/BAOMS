@@ -85,7 +85,7 @@ export const UserProfileMenu: React.FC = () => {
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white border border-slate-200 text-slate-500 font-semibold text-xs shrink-0">
               {initials}
             </div>
-            <div className="hidden md:flex flex-col text-left">
+            <div className="hidden lg:flex flex-col text-left">
               <span className="text-xs font-semibold text-charcoal leading-none truncate max-w-[140px]">
                 {displayName}
               </span>

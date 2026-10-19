@@ -93,31 +93,32 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           )}
 
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-slate-500">
-            <Link to="/" className="hover:text-slate-900 transition-colors font-medium">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-1 sm:gap-1.5 text-xs text-slate-500 min-w-0">
+            <Link to="/" className="hover:text-slate-900 transition-colors font-medium hidden sm:inline">
               Dashboard
             </Link>
-            <ChevronRight className="h-3 w-3 text-slate-400 shrink-0" />
-            <span className="font-semibold text-slate-900 truncate">
+            <ChevronRight className="h-3 w-3 text-slate-400 shrink-0 hidden sm:inline" />
+            <span className="font-semibold text-slate-900 truncate max-w-[110px] sm:max-w-[180px] md:max-w-none">
               {currentSectionLabel}
             </span>
             {subSection && (
               <>
                 <ChevronRight className="h-3 w-3 text-slate-400 shrink-0" />
-                <span className="text-slate-600 truncate">{subSection}</span>
+                <span className="text-slate-600 truncate max-w-[80px] sm:max-w-[140px] md:max-w-none">{subSection}</span>
               </>
             )}
           </nav>
         </div>
 
         {/* Center / Right: Quick Search + LanguageSwitch + Notifications + UserProfile */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           {/* Quick Search Trigger */}
           <button
             type="button"
             onClick={() => setIsSearchOpen(true)}
-            className="flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50/60 px-2.5 sm:px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#D68904]"
+            className="flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50/60 p-2 sm:px-3 sm:py-1.5 text-xs text-slate-600 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#D68904]"
             aria-label="Search"
+            title="Search (Press / to focus)"
           >
             <Search className="h-3.5 w-3.5 text-[#374151]" />
             <span className="hidden md:inline truncate">{t('search.placeholder', 'Quick search...')}</span>

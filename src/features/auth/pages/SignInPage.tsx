@@ -66,18 +66,18 @@ export const SignInPage: React.FC = () => {
   };
 
   return (
-    <main className="bg-slate-50 min-h-screen flex items-center justify-center px-4 py-8 relative">
-      <div className="bg-white rounded-3xl shadow-xl border border-slate-200 flex flex-col md:flex-row overflow-hidden max-w-screen-xl w-full mx-4 min-h-[620px]">
+    <main className="bg-slate-50 min-h-screen flex items-center justify-center p-3 sm:p-6 lg:p-8 relative">
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-200 flex flex-col md:flex-row overflow-hidden max-w-screen-xl w-full min-h-[520px] md:min-h-[620px]">
         {/* Left Side: Lottie Image & Institutional Branding */}
-        <div className="md:w-1/2 w-full bg-slate-50 flex flex-col items-center justify-center p-8 sm:p-12 border-b md:border-b-0 md:border-r border-slate-200 relative overflow-hidden">
-          <div className="flex items-center gap-3 mb-6">
+        <div className="md:w-1/2 w-full bg-slate-50 flex flex-col items-center justify-center p-6 sm:p-8 md:p-12 border-b md:border-b-0 md:border-r border-slate-200 relative overflow-hidden">
+          <div className="flex items-center gap-3 mb-2 md:mb-6">
             <img
               src="/logo.png"
               alt="BAOMS Logo"
-              className="h-12 w-12 object-contain"
+              className="h-10 w-10 sm:h-12 sm:w-12 object-contain"
             />
             <div>
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-none">
+              <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight leading-none">
                 BAOMS
               </h1>
               <p className="text-xs text-slate-500 mt-1">
@@ -86,8 +86,8 @@ export const SignInPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Embedded Lottie Animation */}
-          <div className="w-full max-w-sm aspect-square flex items-center justify-center overflow-hidden">
+          {/* Embedded Lottie Animation - Visible on Tablets & Laptops */}
+          <div className="hidden md:flex w-full max-w-sm aspect-square items-center justify-center overflow-hidden">
             <iframe
               src="https://lottie.host/embed/5cf8b905-5a7f-462c-b066-96626bb67908/FhKmmHOj6w.lottie"
               className="w-full h-full border-0 pointer-events-none"
@@ -95,18 +95,18 @@ export const SignInPage: React.FC = () => {
             />
           </div>
 
-          <div className="text-center mt-6 max-w-xs">
-            <h3 className="text-base font-semibold text-slate-800">
+          <div className="text-center mt-2 md:mt-6 max-w-xs">
+            <h3 className="text-sm sm:text-base font-semibold text-slate-800">
               Management & Records Portal
             </h3>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 mt-0.5 sm:mt-1 hidden sm:block">
               Secure administrative access for operations, finances, personnel, and correspondence.
             </p>
           </div>
         </div>
 
-        {/* Right Side: Formulario */}
-        <div className="md:w-1/2 w-full flex flex-col justify-center p-8 sm:p-12 bg-white">
+        {/* Right Side: Form */}
+        <div className="md:w-1/2 w-full flex flex-col justify-center p-6 sm:p-8 md:p-12 bg-white">
           {mfaPending ? (
             <div className="max-w-md mx-auto w-full">
               <div className="text-center space-y-1 mb-6">

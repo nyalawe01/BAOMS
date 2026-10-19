@@ -156,7 +156,7 @@ export const FinanceOfficerDashboard: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => navigate('/finance/reports')} className="text-xs text-slate-700">
             <FileSpreadsheet className="h-3.5 w-3.5 mr-1.5 text-slate-600" />
             {t('finance.auditReport', 'Audit Reports')}

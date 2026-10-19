@@ -68,7 +68,7 @@ export const Modal: React.FC<ModalProps> = ({
       {/* Centering wrapper */}
       <div
         className={cn(
-          'min-h-[calc(100%-56px)] m-3 sm:mx-auto flex items-center justify-center p-3 sm:p-4 sm:w-full transition-all duration-200',
+          'min-h-[calc(100%-32px)] m-2 sm:m-4 sm:mx-auto flex items-center justify-center p-1 sm:p-4 sm:w-full transition-all duration-200',
           sizeStyles[size]
         )}
       >
@@ -76,21 +76,21 @@ export const Modal: React.FC<ModalProps> = ({
         <div
           ref={modalRef}
           className={cn(
-            'w-full flex flex-col bg-white border border-gray-200 shadow-xl rounded-xl pointer-events-auto relative z-10 overflow-hidden',
+            'w-full flex flex-col bg-white border border-gray-200 shadow-xl rounded-xl pointer-events-auto relative z-10 overflow-hidden max-h-[92vh]',
             className
           )}
         >
           {/* Header */}
           {(title || description) && (
-            <div className="flex justify-between items-center py-3.5 px-5 border-b border-gray-200">
-              <div className="pr-4">
+            <div className="flex justify-between items-center py-3 px-4 sm:py-3.5 sm:px-5 border-b border-gray-200">
+              <div className="pr-3 min-w-0 flex-1">
                 {title && (
-                  <h3 className="font-bold text-gray-800 text-base">
+                  <h3 className="font-bold text-gray-800 text-sm sm:text-base truncate">
                     {title}
                   </h3>
                 )}
                 {description && (
-                  <p className="mt-1 text-xs text-gray-500">{description}</p>
+                  <p className="mt-0.5 text-xs text-gray-500 line-clamp-2">{description}</p>
                 )}
               </div>
               <button
@@ -106,11 +106,11 @@ export const Modal: React.FC<ModalProps> = ({
           )}
 
           {/* Content */}
-          <div className="p-5 overflow-y-auto max-h-[75vh]">{children}</div>
+          <div className="p-3.5 sm:p-5 overflow-y-auto max-h-[72vh] sm:max-h-[75vh]">{children}</div>
 
           {/* Footer */}
           {footer && (
-            <div className="flex justify-end items-center gap-x-2.5 py-3 px-5 border-t border-gray-200 bg-gray-50/60 rounded-b-xl">
+            <div className="flex flex-wrap justify-end items-center gap-2 py-2.5 px-4 sm:py-3 sm:px-5 border-t border-gray-200 bg-gray-50/60 rounded-b-xl">
               {footer}
             </div>
           )}

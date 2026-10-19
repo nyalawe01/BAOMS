@@ -696,8 +696,8 @@ export const UserManagementPage: React.FC = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Staff Member</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Roles</TableHead>
+                  <TableHead className="hidden md:table-cell">Department</TableHead>
+                  <TableHead className="hidden sm:table-cell">Roles</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -753,31 +753,34 @@ export const UserManagementPage: React.FC = () => {
                     return (
                       <TableRow key={staff.id}>
                         <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 font-semibold text-xs">
+                          <div className="flex items-center gap-2.5 sm:gap-3">
+                            <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 font-semibold text-xs">
                               {staff.avatarInitials}
                             </div>
-                            <div className="space-y-0.5">
-                              <span className="font-semibold text-xs text-charcoal block">{staff.displayName}</span>
+                            <div className="space-y-0.5 min-w-0">
+                              <span className="font-semibold text-xs text-charcoal block truncate max-w-[130px] sm:max-w-none">{staff.displayName}</span>
                               {staff.email ? (
-                                <span className="text-[11px] text-charcoal-muted flex items-center gap-1">
-                                  <Mail className="h-3 w-3" />
-                                  {staff.email}
+                                <span className="text-[11px] text-charcoal-muted flex items-center gap-1 truncate max-w-[130px] sm:max-w-none">
+                                  <Mail className="h-3 w-3 shrink-0" />
+                                  <span className="truncate">{staff.email}</span>
                                 </span>
                               ) : (
                                 <span className="text-[11px] text-slate-400 italic">ID: {staff.id.substring(0, 8)}…</span>
                               )}
+                              <span className="text-[10px] text-slate-500 font-medium sm:hidden block truncate max-w-[140px]">
+                                {ROLE_TITLES[staff.roleCode] || staff.roleCode}
+                              </span>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden md:table-cell">
                           <div className="flex items-center gap-1.5 text-xs text-charcoal-muted">
-                            <Building className="h-3.5 w-3.5 text-charcoal-light" />
-                            <span>{staff.departmentName}</span>
+                            <Building className="h-3.5 w-3.5 text-charcoal-light shrink-0" />
+                            <span className="truncate">{staff.departmentName}</span>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <span className="font-mono text-xs font-semibold text-charcoal-900">
+                        <TableCell className="hidden sm:table-cell">
+                          <span className="font-mono text-xs font-semibold text-charcoal-900 block truncate max-w-[160px]">
                             {ROLE_TITLES[staff.roleCode] || staff.roleCode}
                           </span>
                         </TableCell>

@@ -31,6 +31,7 @@ import {
   Truck,
   Package,
   Scale,
+  X,
 } from 'lucide-react';
 import { BentoDashboardIcon } from '@/components/icons/BentoDashboardIcon';
 import { cn } from '@/lib/utils';
@@ -70,7 +71,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
 
   const activeRole = roles[0] || 'project_coordinator';
-  const isExpanded = isOpen;
+  const isExpanded = isMobileOpen ? true : isOpen;
 
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'Staff Member';
   const roleDisplay = activeRole.replace(/_/g, ' ').toUpperCase();
@@ -369,17 +370,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </span>
                 </div>
               </div>
-              {onToggleCollapse && (
+              {isMobileOpen ? (
+                <button
+                  type="button"
+                  onClick={onMobileClose || onClose}
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors md:hidden"
+                  title="Close navigation menu"
+                  aria-label="Close navigation menu"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              ) : onToggleCollapse ? (
                 <button
                   type="button"
                   onClick={onToggleCollapse}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors hidden md:block"
                   title="Collapse sidebar (show icons only)"
                   aria-label="Collapse sidebar"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
-              )}
+              ) : null}
             </div>
           ) : (
             <div className="w-full flex justify-center">
@@ -407,6 +418,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     to={item.to}
                     end={true}
                     title={item.label}
+                    onClick={() => {
+                      if (isMobileOpen && onMobileClose) {
+                        onMobileClose();
+                      }
+                    }}
                     className={({ isActive }) =>
                       cn(
                         'flex items-center rounded-md transition-colors duration-150 select-none relative group',
@@ -464,7 +480,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-white border border-surface-border">
               <button
                 type="button"
-                onClick={() => navigate('/profile')}
+                onClick={() => {
+                  if (isMobileOpen && onMobileClose) onMobileClose();
+                  navigate('/profile');
+                }}
                 className="flex items-center gap-2.5 min-w-0 flex-1 text-left hover:opacity-85 transition-opacity"
                 title="View My Profile"
               >
@@ -484,7 +503,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="flex items-center gap-1 shrink-0">
                 <button
                   type="button"
-                  onClick={() => navigate('/settings')}
+                  onClick={() => {
+                    if (isMobileOpen && onMobileClose) onMobileClose();
+                    navigate('/settings');
+                  }}
                   className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
                   title="System Settings"
                   aria-label="System Settings"
@@ -493,7 +515,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowSignOutDialog(true)}
+                  onClick={() => {
+                    if (isMobileOpen && onMobileClose) onMobileClose();
+                    setShowSignOutDialog(true);
+                  }}
                   className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors"
                   title="Sign Out"
                   aria-label="Sign Out"

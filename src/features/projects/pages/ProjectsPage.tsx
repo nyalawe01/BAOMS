@@ -277,8 +277,8 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({ initialTab = 'projec
       />
 
       {/* AdminCN Inspired Horizontal Tab Strip */}
-      <div className="border-b border-gray-200 bg-white px-2 rounded-t-lg shadow-2xs overflow-x-auto scrollbar-thin">
-        <nav className="flex space-x-1" aria-label="Project Submodules">
+      <div className="border-b border-gray-200 bg-white px-2 rounded-t-lg shadow-2xs overflow-x-auto touch-pan-x -mx-1 sm:mx-0">
+        <nav className="flex space-x-1 min-w-max py-0.5" aria-label="Project Submodules">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;

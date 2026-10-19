@@ -162,36 +162,36 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <main className="bg-slate-50 min-h-screen flex items-center justify-center px-4 py-8 relative">
-      <div className="bg-white rounded-3xl shadow-xl border border-slate-200 flex flex-col md:flex-row overflow-hidden max-w-screen-xl w-full mx-4 min-h-[640px]">
+    <main className="bg-slate-50 min-h-screen flex items-center justify-center p-3 sm:p-6 lg:p-8 relative">
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-200 flex flex-col md:flex-row overflow-hidden max-w-screen-xl w-full min-h-[560px] md:min-h-[640px]">
         {/* Left Side: Institutional Context & Workflow Timeline */}
-        <div className="md:w-5/12 w-full bg-slate-900 text-white flex flex-col justify-between p-8 sm:p-12 relative overflow-hidden">
+        <div className="md:w-5/12 w-full bg-slate-900 text-white flex flex-col justify-between p-6 sm:p-8 md:p-12 relative overflow-hidden">
           <div className="relative z-10">
             {/* Header / Brand */}
-            <div className="flex items-center gap-3 mb-8">
-              <img src="/logo.png" alt="BAOMS Logo" className="h-12 w-12 object-contain" />
+            <div className="flex items-center gap-3 mb-4 md:mb-8">
+              <img src="/logo.png" alt="BAOMS Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain" />
               <div>
-                <h1 className="text-xl font-bold tracking-tight text-white leading-none">BAOMS</h1>
+                <h1 className="text-lg sm:text-xl font-bold tracking-tight text-white leading-none">BAOMS</h1>
                 <p className="text-xs text-amber-400 mt-1 font-medium">Babawatoto Organization</p>
               </div>
             </div>
 
-            <div className="mb-6">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-3">
+            <div className="mb-4 md:mb-6">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-2 md:mb-3">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 Authorized Staff Self-Registration
               </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-snug">
                 Join the Organization Management System
               </h2>
-              <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+              <p className="text-xs text-slate-300 mt-1.5 md:mt-2 leading-relaxed">
                 Staff accounts require an official organization email (<code className="text-amber-300">@babawatoto.or.tz</code>).
                 All registrations undergo multi-stage administrative vetting prior to dashboard provisioning.
               </p>
             </div>
 
-            {/* Stepper overview */}
-            <div className="space-y-4 pt-4 border-t border-slate-800">
+            {/* Stepper overview - Collapsible on small phones, visible on tablets & laptops */}
+            <div className="hidden md:block space-y-4 pt-4 border-t border-slate-800">
               <div className="flex items-start gap-3">
                 <div className="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-400 text-amber-300 flex items-center justify-center text-xs font-bold shrink-0">
                   1
@@ -224,14 +224,14 @@ export const RegisterPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="relative z-10 pt-6 mt-6 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="relative z-10 pt-4 md:pt-6 mt-4 md:mt-6 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
             <span>© 2026 Babawatoto Organization</span>
-            <span className="text-slate-500">Security Standard ISO/IEC 27001</span>
+            <span className="text-slate-500 hidden sm:inline">Security Standard ISO/IEC 27001</span>
           </div>
         </div>
 
         {/* Right Side: Registration Form or Success Screen */}
-        <div className="md:w-7/12 w-full flex flex-col justify-center p-8 sm:p-12 bg-white">
+        <div className="md:w-7/12 w-full flex flex-col justify-center p-6 sm:p-8 md:p-12 bg-white">
           {registrationSuccess ? (
             <div className="max-w-md mx-auto w-full text-center py-6 animate-fadeIn">
               <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center mb-4">
