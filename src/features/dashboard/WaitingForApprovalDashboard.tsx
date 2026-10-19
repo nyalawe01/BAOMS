@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/useAuth';
 import { useToast } from '@/lib/ToastContext';
+import { getRoleTitle } from '@/lib/permissions';
 
 export const WaitingForApprovalDashboard: React.FC = () => {
   const { t } = useTranslation();
@@ -23,9 +24,11 @@ export const WaitingForApprovalDashboard: React.FC = () => {
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const displayName = profile?.display_name || user?.email?.split('@')[0] || 'Staff Member';
-  const email = profile?.official_email || user?.email || '';
+  const staged = (profile?.staged_details as any) || {};
+  const displayName = profile?.display_name || staged.fullName || user?.email?.split('@')[0] || 'Staff Member';
+  const email = profile?.official_email || staged.officialEmail || user?.email || '';
   const currentStage = approvalStatus || 'pending_hr';
+  const assignedRoleTitle = staged.jobTitle || (staged.roleCode ? getRoleTitle(staged.roleCode) : null);
 
   const initials = displayName
     .split(' ')
@@ -308,7 +311,13 @@ export const WaitingForApprovalDashboard: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-slate-500 block text-[11px]">Department & Role</span>
-                  <span className="text-amber-400 italic font-medium">To be assigned by HR during review</span>
+                  {assignedRoleTitle ? (
+                    <span className="text-amber-400 font-semibold">
+                      {assignedRoleTitle} {staged.departmentName ? `• ${staged.departmentName}` : ''}
+                    </span>
+                  ) : (
+                    <span className="text-amber-400/80 italic font-medium">To be appointed by HR during review</span>
+                  )}
                 </div>
                 <div>
                   <span className="text-slate-500 block text-[11px]">Database Authority</span>

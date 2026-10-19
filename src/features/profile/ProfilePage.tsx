@@ -23,6 +23,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { useAuth } from '@/features/auth/useAuth';
+import { getRoleTitle } from '@/lib/permissions';
 import {
   StaffProfileRecord,
 } from '@/features/hr/types/hr';
@@ -49,6 +50,7 @@ interface UserProfileDisplay {
   permissions: string[];
   isActive: boolean;
   avatarInitials: string;
+  stagedDetails?: Record<string, any>;
 }
 
 export const ProfilePage: React.FC = () => {
@@ -108,17 +110,20 @@ export const ProfilePage: React.FC = () => {
       let staff: StaffProfileRecord | null = null;
 
       if (isSelf && authUser) {
+        const selfStaged = (authProfile?.staged_details as any) || {};
+        const appointedRole = roles[0] || selfStaged.roleCode || 'staff';
         account = {
           id: authUser.id,
           email: authUser.email,
           displayName: authProfile?.display_name || authUser.email.split('@')[0],
-          phoneNumber: authProfile?.phone_number || '',
+          phoneNumber: authProfile?.phone_number || selfStaged.phone || '',
           preferredLanguage: authProfile?.preferred_language || 'en',
           departmentId: authProfile?.department_id || '',
-          departmentCode: department?.code || '',
-          departmentName: department?.name || '',
-          role: roles[0] || 'staff',
-          roles: roles,
+          departmentCode: department?.code || selfStaged.departmentCode || '',
+          departmentName: department?.name || selfStaged.departmentName || '',
+          role: appointedRole,
+          roles: roles.length > 0 ? roles : (selfStaged.roleCode ? [selfStaged.roleCode] : []),
+          stagedDetails: selfStaged,
           permissions: [],
           isActive: authProfile?.is_active ?? true,
           avatarInitials: (authProfile?.display_name || authUser.email).substring(0, 2).toUpperCase(),
@@ -139,6 +144,7 @@ export const ProfilePage: React.FC = () => {
             preferred_language,
             is_active,
             department_id,
+            staged_details,
             departments ( code, name_en ),
             user_roles:user_roles!user_roles_user_id_fkey ( roles ( code ) )
           `)
@@ -147,24 +153,27 @@ export const ProfilePage: React.FC = () => {
 
         if (pData) {
           const dept = (pData as any).departments;
+          const userStaged = (pData as any).staged_details || {};
           const roleArr = ((pData as any).user_roles || []).flatMap((ur: any) => {
             const r = Array.isArray(ur.roles) ? ur.roles[0] : ur.roles;
             return r?.code ? [r.code] : [];
           });
+          const effectiveRoleCode = roleArr[0] || userStaged.roleCode || 'staff';
           account = {
             id: pData.id,
             email: pData.official_email || '',
             displayName: pData.display_name,
-            phoneNumber: pData.phone_number || '',
+            phoneNumber: pData.phone_number || userStaged.phone || '',
             preferredLanguage: (pData.preferred_language as any) || 'en',
             departmentId: pData.department_id || '',
-            departmentCode: dept?.code || '',
-            departmentName: dept?.name_en || '',
-            role: roleArr[0] || 'staff',
-            roles: roleArr,
+            departmentCode: dept?.code || userStaged.departmentCode || '',
+            departmentName: dept?.name_en || userStaged.departmentName || '',
+            role: effectiveRoleCode,
+            roles: roleArr.length > 0 ? roleArr : (userStaged.roleCode ? [userStaged.roleCode] : []),
+            stagedDetails: userStaged,
             permissions: [],
             isActive: pData.is_active ?? true,
-            avatarInitials: pData.display_name.substring(0, 2).toUpperCase(),
+            avatarInitials: (pData.display_name || 'ST').substring(0, 2).toUpperCase(),
           };
         }
       }
@@ -232,22 +241,26 @@ export const ProfilePage: React.FC = () => {
     staffRecord?.officialEmail ||
     targetAccount?.email ||
     authUser?.email ||
-    'user@babawatoto.org';
+    'user@babawatoto.or.tz';
+
+  const userStaged = (isSelf ? authProfile?.staged_details : targetAccount?.stagedDetails) as any || {};
 
   const effectiveRole =
-    targetAccount?.role ||
-    roles[0] ||
-    'Authorized User';
+    targetAccount?.role && targetAccount.role !== 'staff'
+      ? targetAccount.role
+      : roles[0] || userStaged.roleCode || 'staff';
 
   const effectiveDept =
     staffRecord?.departmentName ||
     targetAccount?.departmentName ||
+    userStaged.departmentName ||
     department?.name ||
     'Institutional Operations';
 
   const effectiveJobTitle =
     staffRecord?.jobTitle ||
-    effectiveRole.replace(/_/g, ' ').toUpperCase();
+    userStaged.jobTitle ||
+    getRoleTitle(effectiveRole);
 
   const getOnboardingBadge = (status?: string) => {
     switch (status) {
@@ -388,7 +401,7 @@ export const ProfilePage: React.FC = () => {
           <div className="text-left sm:text-right">
             <span className="text-[10px] uppercase font-bold text-charcoal-muted block">Assigned Role</span>
             <span className="font-mono font-bold text-xs text-charcoal-800 uppercase">
-              {effectiveRole.replace(/_/g, ' ')}
+              {getRoleTitle(effectiveRole)}
             </span>
           </div>
         </div>
@@ -474,7 +487,7 @@ export const ProfilePage: React.FC = () => {
                 className="w-full px-3 py-2 border border-surface-border rounded-md text-sm text-charcoal-muted bg-slate-50 cursor-not-allowed font-mono text-xs"
               />
               <span className="text-[10px] text-charcoal-muted mt-1 block">
-                Issued under @babawatoto.org domain. Managed by System Administrator.
+                Issued under @babawatoto.or.tz domain. Managed by System Administrator.
               </span>
             </div>
 

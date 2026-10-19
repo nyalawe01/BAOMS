@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Lock,
@@ -18,19 +18,67 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/features/auth/useAuth';
 import { showSuccess, showError } from '@/lib/sweetAlert';
+import { getRoleTitle } from '@/lib/permissions';
+import { getStaffByEmail } from '@/features/hr/services/hrService';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 export const SettingsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { user, profile, roles, updatePassword, signOut } = useAuth();
+  const { user, profile, roles, department, reloadProfile, updatePassword, signOut } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'profile' | 'preferences' | 'notifications' | 'security' | 'organization'>('profile');
 
+  // Compute initial role title from roles or staged details
+  const initialRole = roles[0] || (profile?.staged_details as any)?.roleCode;
+  const initialRoleTitle = (profile?.staged_details as any)?.jobTitle || getRoleTitle(initialRole);
+
   // Profile Form State
-  const [displayName, setDisplayName] = useState(profile?.display_name || user?.email?.split('@')[0] || 'Executive Director');
-  const [jobTitle, setJobTitle] = useState('Executive Director');
-  const [phone, setPhone] = useState('+255 754 000 111');
+  const [displayName, setDisplayName] = useState(profile?.display_name || user?.email?.split('@')[0] || 'Staff Member');
+  const [jobTitle, setJobTitle] = useState(initialRoleTitle);
+  const [phone, setPhone] = useState(profile?.phone_number || '');
   const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'sw'>(i18n.language?.startsWith('sw') ? 'sw' : 'en');
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
+  // Synchronize user profile & role from database
+  useEffect(() => {
+    let isMounted = true;
+    const fetchUserData = async () => {
+      if (profile?.display_name) {
+        setDisplayName(profile.display_name);
+      } else if (user?.email) {
+        setDisplayName(user.email.split('@')[0]);
+      }
+
+      if (profile?.phone_number) {
+        setPhone(profile.phone_number);
+      }
+
+      const activeRole = roles[0] || (profile?.staged_details as any)?.roleCode;
+      let title = (profile?.staged_details as any)?.jobTitle || getRoleTitle(activeRole);
+
+      if (user?.email) {
+        try {
+          const staff = await getStaffByEmail(user.email);
+          if (isMounted && staff) {
+            if (staff.fullName) setDisplayName(staff.fullName);
+            if (staff.jobTitle) title = staff.jobTitle;
+            if (staff.phoneNumber) setPhone(staff.phoneNumber);
+          }
+        } catch {
+          // Ignore lookup fallback
+        }
+      }
+
+      if (isMounted) {
+        setJobTitle(title);
+      }
+    };
+
+    fetchUserData();
+    return () => {
+      isMounted = false;
+    };
+  }, [profile, user, roles]);
 
   // Preferences State
   const [currencyFormat, setCurrencyFormat] = useState('TZS');
@@ -52,6 +100,20 @@ export const SettingsPage: React.FC = () => {
     e.preventDefault();
     setIsUpdatingProfile(true);
     try {
+      if (isSupabaseConfigured && user) {
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            display_name: displayName.trim(),
+            phone_number: phone.trim(),
+            preferred_language: selectedLanguage,
+          })
+          .eq('id', user.id);
+
+        if (error) throw error;
+        await reloadProfile();
+      }
+
       if (selectedLanguage !== i18n.language) {
         i18n.changeLanguage(selectedLanguage);
         if (typeof window !== 'undefined' && window.localStorage) {
@@ -192,10 +254,10 @@ export const SettingsPage: React.FC = () => {
               <input
                 type="text"
                 value={jobTitle}
-                onChange={(e) => setJobTitle(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-md text-charcoal-900 bg-white"
-                required
+                disabled
+                className="w-full px-3 py-2 border border-slate-200 rounded-md text-charcoal-700 bg-slate-50 cursor-not-allowed font-medium"
               />
+              <span className="text-[10px] text-charcoal-muted mt-1 block">Appointed by Human Resources & ratified by Executive Directorate.</span>
             </div>
             <div>
               <label className="block font-semibold text-charcoal-700 mb-1">Official Email Address</label>
@@ -328,7 +390,7 @@ export const SettingsPage: React.FC = () => {
               <div>
                 <span className="text-xs font-semibold text-charcoal-900 block">Approval Assignments</span>
                 <span className="text-[11px] text-charcoal-muted block">
-                  Notify immediately when a requisition, purchase order, or staff onboarding requires Executive Director decision.
+                  Notify immediately when a requisition, purchase order, or staff onboarding requires your decision or review.
                 </span>
               </div>
             </label>

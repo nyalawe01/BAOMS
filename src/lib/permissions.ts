@@ -19,6 +19,22 @@ export const ROLES = {
 
 export type RoleCode = (typeof ROLES)[keyof typeof ROLES];
 
+export const ROLE_TITLES: Record<string, string> = {
+  [ROLES.SYSTEM_ADMIN]: 'System Administrator',
+  [ROLES.EXECUTIVE_DIRECTOR]: 'Executive Director',
+  [ROLES.FINANCE_OFFICER]: 'Finance Officer',
+  [ROLES.PROJECT_MANAGER]: 'Project Manager',
+  [ROLES.PROJECT_COORDINATOR]: 'Project Coordinator',
+  [ROLES.HR_ADMINISTRATOR]: 'HR Administrator',
+  [ROLES.PROCUREMENT_OFFICER]: 'Procurement and Supply Officer',
+  [ROLES.ME_OFFICER]: 'Monitoring and Evaluation (M&E) Officer',
+};
+
+export function getRoleTitle(roleCode?: string | null): string {
+  if (!roleCode) return 'Staff Member';
+  return ROLE_TITLES[roleCode] || roleCode.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export const PERMISSIONS = {
   // User Management
   USERS_VIEW: 'users.view',

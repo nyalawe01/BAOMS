@@ -6,6 +6,7 @@ import { DropdownMenu, DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 import { useToast } from '@/lib/ToastContext';
 import { useAuth } from '@/features/auth/useAuth';
+import { getRoleTitle } from '@/lib/permissions';
 
 export const UserProfileMenu: React.FC = () => {
   const { t } = useTranslation();
@@ -15,7 +16,8 @@ export const UserProfileMenu: React.FC = () => {
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
 
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'Staff Member';
-  const roleDisplay = roles.length > 0 ? roles[0] : 'Authorized User';
+  const activeRole = roles.length > 0 ? roles[0] : (profile?.staged_details as any)?.roleCode;
+  const roleDisplay = getRoleTitle(activeRole);
   const departmentDisplay = department?.code || '';
 
   const initials = displayName

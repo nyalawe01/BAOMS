@@ -115,6 +115,28 @@ export const RegisterPage: React.FC = () => {
         throw new Error('Registration could not be completed. Please try again.');
       }
 
+      // Explicitly ensure the profile row is present in 'pending_hr' status
+      if (data.user?.id) {
+        await supabase
+          .from('profiles')
+          .upsert({
+            id: data.user.id,
+            display_name: cleanName,
+            official_email: cleanEmail,
+            phone_number: cleanPhone,
+            approval_status: 'pending_hr',
+            is_active: false,
+            staged_details: {
+              fullName: cleanName,
+              officialEmail: cleanEmail,
+              phone: cleanPhone,
+            },
+          })
+          .catch((upsertErr) => {
+            console.warn('Profile upsert note (trigger may have handled):', upsertErr);
+          });
+      }
+
       // Notify HR and Administrators
       createNotification({
         title: 'New Staff Self-Registration',

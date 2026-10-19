@@ -117,27 +117,28 @@ async function fetchStaffFromSupabase(): Promise<StaffUser[]> {
 
   return (data || []).map((row: any) => {
     const dept = row.departments;
+    const staged = row.staged_details || {};
     const roleArr = (row.user_roles || []).flatMap((ur: any) => {
       const r = Array.isArray(ur.roles) ? ur.roles[0] : ur.roles;
       return r?.code ? [r.code as RoleCode] : [];
     });
-    const roleCode: RoleCode = roleArr[0] || ROLES.PROJECT_COORDINATOR;
-    const name: string = row.display_name || '';
-    const email: string = row.official_email || '';
+    const roleCode: RoleCode = roleArr[0] || (staged.roleCode as RoleCode) || ROLES.PROJECT_COORDINATOR;
+    const name: string = row.display_name || staged.fullName || 'Candidate';
+    const email: string = row.official_email || staged.officialEmail || '';
     const approvalStatus = row.approval_status || (roleArr.length > 0 ? 'approved' : 'pending_hr');
 
     return {
       id: row.id,
       email,
       displayName: name,
-      phoneNumber: row.phone_number || '',
-      departmentCode: dept?.code || 'PRJ',
-      departmentName: dept?.name_en || 'Projects & Programs',
+      phoneNumber: row.phone_number || staged.phone || '',
+      departmentCode: dept?.code || staged.departmentCode || 'PRJ',
+      departmentName: dept?.name_en || staged.departmentName || 'Projects & Programs',
       roleCode,
       isActive: row.is_active ?? true,
       approvalStatus,
-      stagedDetails: row.staged_details || {},
-      avatarInitials: name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
+      stagedDetails: staged,
+      avatarInitials: name.split(' ').filter(Boolean).map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || 'ST',
       createdAt: row.created_at,
     };
   });
@@ -196,13 +197,13 @@ export const UserManagementPage: React.FC = () => {
   const { t } = useTranslation();
   const { showToast } = useToast();
   const { user: currentUser, hasRole, isAdmin } = useAuth();
-  // HR Administrator and System Admin can both review (HR vetting step) and authorize (final approval)
-  const canHRReview = hasRole('hr_administrator') || hasRole('system_admin') || isAdmin();
-  const canEDAuthorize =
-    hasRole('executive_director') ||
-    hasRole('hr_administrator') ||
-    hasRole('system_admin') ||
-    isAdmin();
+  // Strict Separation of Roles & Authority:
+  // - HR Officer / HR Admin inserts details, gathers information, appoints role/dept, and saves dossier.
+  // - Executive Director ONLY reads and approves or disapproves account creation (strictly read-only on user details).
+  const isHR = hasRole('hr_administrator') || hasRole('system_admin');
+  const isED = hasRole('executive_director');
+  const canHRReview = isHR;
+  const canEDAuthorize = isED || hasRole('system_admin');
 
   // Online/offline connectivity state
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -620,10 +621,12 @@ export const UserManagementPage: React.FC = () => {
               <Copy className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Self-Registration Link</span>
             </Button>
-            <Button variant="primary" size="sm" onClick={() => setIsInviteModalOpen(true)}>
-              <UserPlus className="h-4 w-4 mr-1.5" />
-              <span>{t('users.inviteButton', 'Provision Staff Member')}</span>
-            </Button>
+            {canHRReview && (
+              <Button variant="primary" size="sm" onClick={() => setIsInviteModalOpen(true)}>
+                <UserPlus className="h-4 w-4 mr-1.5" />
+                <span>{t('users.inviteButton', 'Provision Staff Member')}</span>
+              </Button>
+            )}
           </div>
         }
       />
@@ -704,41 +707,45 @@ export const UserManagementPage: React.FC = () => {
                     const actionItems: DropdownMenuItem[] = [
                       {
                         id: 'view-profile',
-                        label: 'View Profile',
+                        label: 'View Personnel Profile',
                         icon: User,
                         onClick: () => navigate(`/profile/${staff.id}`),
                       },
-                      {
-                        id: 'edit-role',
-                        label: 'Assign Role',
-                        icon: Shield,
-                        onClick: () => {
-                          setSelectedStaff(staff);
-                          setEditRoleValue(staff.roleCode);
-                          setIsEditRoleModalOpen(true);
-                        },
-                      },
-                      {
-                        id: 'toggle-status',
-                        label: staff.isActive ? 'Deactivate Account' : 'Reactivate Account',
-                        icon: staff.isActive ? UserX : UserCheck,
-                        dividerAbove: true,
-                        isDestructive: staff.isActive,
-                        onClick: () => {
-                          setSelectedStaff(staff);
-                          setIsDeactivateDialogOpen(true);
-                        },
-                      },
-                      {
-                        id: 'delete-user',
-                        label: 'Remove User',
-                        icon: Trash2,
-                        isDestructive: true,
-                        onClick: () => {
-                          setSelectedStaff(staff);
-                          setIsDeleteDialogOpen(true);
-                        },
-                      },
+                      ...(canHRReview
+                        ? [
+                            {
+                              id: 'edit-role',
+                              label: 'Assign System Role',
+                              icon: Shield,
+                              onClick: () => {
+                                setSelectedStaff(staff);
+                                setEditRoleValue(staff.roleCode);
+                                setIsEditRoleModalOpen(true);
+                              },
+                            },
+                            {
+                              id: 'toggle-status',
+                              label: staff.isActive ? 'Deactivate Account' : 'Reactivate Account',
+                              icon: staff.isActive ? UserX : UserCheck,
+                              dividerAbove: true,
+                              isDestructive: staff.isActive,
+                              onClick: () => {
+                                setSelectedStaff(staff);
+                                setIsDeactivateDialogOpen(true);
+                              },
+                            },
+                            {
+                              id: 'delete-user',
+                              label: 'Remove User',
+                              icon: Trash2,
+                              isDestructive: true,
+                              onClick: () => {
+                                setSelectedStaff(staff);
+                                setIsDeleteDialogOpen(true);
+                              },
+                            },
+                          ]
+                        : []),
                     ];
 
                     return (
@@ -776,7 +783,7 @@ export const UserManagementPage: React.FC = () => {
                           {staff.approvalStatus === 'pending_hr' ? (
                             <StatusIndicator
                               status="pending_review"
-                              label="Pending Review"
+                              label="Pending HR Dossier"
                             />
                           ) : staff.approvalStatus === 'pending_ed' ? (
                             <StatusIndicator
@@ -797,33 +804,45 @@ export const UserManagementPage: React.FC = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1.5">
-                            {staff.approvalStatus === 'pending_hr' && canHRReview && (
-                              <Button
-                                size="xs"
-                                variant="primary"
-                                onClick={() => {
-                                  setSelectedCandidate(staff);
-                                  setIsOnboardingModalOpen(true);
-                                }}
-                                className="bg-charcoal-900 hover:bg-black text-white text-[11px] py-1 px-2.5 h-auto flex items-center gap-1 shrink-0"
-                              >
-                                <span>Review & Onboard</span>
-                              </Button>
+                            {staff.approvalStatus === 'pending_hr' && (
+                              canHRReview ? (
+                                <Button
+                                  size="xs"
+                                  variant="primary"
+                                  onClick={() => {
+                                    setSelectedCandidate(staff);
+                                    setIsOnboardingModalOpen(true);
+                                  }}
+                                  className="bg-charcoal-900 hover:bg-black text-white text-[11px] py-1 px-2.5 h-auto flex items-center gap-1 shrink-0"
+                                >
+                                  <span>Insert Details & Review</span>
+                                </Button>
+                              ) : (
+                                <span className="text-[10px] text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded font-medium">
+                                  Awaiting HR Dossier
+                                </span>
+                              )
                             )}
 
-                            {staff.approvalStatus === 'pending_ed' && canEDAuthorize && (
-                              <Button
-                                size="xs"
-                                variant="primary"
-                                onClick={() => {
-                                  setSelectedCandidate(staff);
-                                  setIsExecutiveModalOpen(true);
-                                }}
-                                className="bg-charcoal-900 hover:bg-black text-white text-[11px] py-1 px-2.5 h-auto flex items-center gap-1 shrink-0"
-                              >
-                                <ShieldCheck className="w-3 h-3" />
-                                <span>Authorize</span>
-                              </Button>
+                            {staff.approvalStatus === 'pending_ed' && (
+                              canEDAuthorize ? (
+                                <Button
+                                  size="xs"
+                                  variant="primary"
+                                  onClick={() => {
+                                    setSelectedCandidate(staff);
+                                    setIsExecutiveModalOpen(true);
+                                  }}
+                                  className="bg-[#D68904] hover:bg-[#b86e03] text-white text-[11px] py-1 px-2.5 h-auto flex items-center gap-1 shrink-0 shadow-xs"
+                                >
+                                  <ShieldCheck className="w-3 h-3" />
+                                  <span>Review & Authorize</span>
+                                </Button>
+                              ) : (
+                                <span className="text-[10px] text-blue-800 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded font-medium">
+                                  Submitted to ED
+                                </span>
+                              )
                             )}
 
                             <DropdownMenu

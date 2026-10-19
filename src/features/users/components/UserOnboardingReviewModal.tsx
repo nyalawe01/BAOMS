@@ -91,10 +91,9 @@ export const UserOnboardingReviewModal: React.FC<UserOnboardingReviewModalProps>
   const { user: currentActor, hasRole, isAdmin } = useAuth();
   const { showToast } = useToast();
 
-  const isExecutiveDirectorOnly =
-    hasRole('executive_director') &&
-    !hasRole('hr_administrator') &&
-    !isAdmin();
+  // Only HR Administrators (and System Admin) can insert details and configure dossiers.
+  // The Executive Director does NOT edit or write candidate details.
+  const canEditDossier = hasRole('hr_administrator') || hasRole('system_admin');
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -139,7 +138,7 @@ export const UserOnboardingReviewModal: React.FC<UserOnboardingReviewModalProps>
     }
   }, [user]);
 
-  if (!isOpen || !user || isExecutiveDirectorOnly) return null;
+  if (!isOpen || !user || !canEditDossier) return null;
 
   const toggleDocScope = (id: string) => {
     setSelectedDocScopes((prev) =>
