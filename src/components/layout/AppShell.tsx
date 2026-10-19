@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, NavLink } from 'react-router-dom';
+import { LayoutDashboard, Briefcase, CheckSquare, Users, Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { cn } from '@/lib/utils';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -74,11 +76,90 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         />
 
         {/* Content Workspace: 14px on mobile phones, 20px on tablets, 24px on laptops/desktops */}
-        <main className="flex-1 overflow-y-auto p-3.5 sm:p-5 lg:p-6 min-w-0 bg-[#f9fafb]">
+        <main className="flex-1 overflow-y-auto p-3.5 sm:p-5 lg:p-6 pb-20 md:pb-6 min-w-0 bg-[#f9fafb]">
           <div className="mx-auto max-w-7xl w-full">
             {children}
           </div>
         </main>
+
+        {/* Mobile Bottom Navigation Bar (Persistent Thumb Navigation on Phones) */}
+        <nav
+          aria-label="Mobile Navigation"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-2 py-1.5 flex items-center justify-around shadow-lg"
+        >
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) =>
+              cn(
+                'flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-lg text-[10px] font-medium transition-colors',
+                isActive
+                  ? 'text-[#D68904] font-bold bg-amber-500/10'
+                  : 'text-slate-500 hover:text-slate-800'
+              )
+            }
+          >
+            <LayoutDashboard className="w-4 h-4" />
+            <span>Console</span>
+          </NavLink>
+
+          <NavLink
+            to="/projects"
+            className={({ isActive }) =>
+              cn(
+                'flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-lg text-[10px] font-medium transition-colors',
+                isActive
+                  ? 'text-[#D68904] font-bold bg-amber-500/10'
+                  : 'text-slate-500 hover:text-slate-800'
+              )
+            }
+          >
+            <Briefcase className="w-4 h-4" />
+            <span>Projects</span>
+          </NavLink>
+
+          <NavLink
+            to="/approvals"
+            className={({ isActive }) =>
+              cn(
+                'flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-lg text-[10px] font-medium transition-colors',
+                isActive
+                  ? 'text-[#D68904] font-bold bg-amber-500/10'
+                  : 'text-slate-500 hover:text-slate-800'
+              )
+            }
+          >
+            <CheckSquare className="w-4 h-4" />
+            <span>Approvals</span>
+          </NavLink>
+
+          <NavLink
+            to="/users"
+            className={({ isActive }) =>
+              cn(
+                'flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-lg text-[10px] font-medium transition-colors',
+                isActive
+                  ? 'text-[#D68904] font-bold bg-amber-500/10'
+                  : 'text-slate-500 hover:text-slate-800'
+              )
+            }
+          >
+            <Users className="w-4 h-4" />
+            <span>Staff</span>
+          </NavLink>
+
+          <button
+            type="button"
+            onClick={handleToggleMobile}
+            className="flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-lg text-[10px] font-semibold text-slate-700 hover:text-slate-900 transition-colors"
+            aria-label="Open full navigation drawer"
+          >
+            <div className="w-6 h-4 rounded bg-slate-100 flex items-center justify-center text-slate-700">
+              <Menu className="w-3.5 h-3.5" />
+            </div>
+            <span>All Menus</span>
+          </button>
+        </nav>
       </div>
     </div>
   );

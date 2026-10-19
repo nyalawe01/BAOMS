@@ -74,10 +74,12 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={onOpenMobileNav}
-            className="p-1.5 rounded-md text-[#374151] hover:text-[#111827] hover:bg-slate-100 md:hidden transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-200/90 md:hidden transition-colors shrink-0 shadow-2xs"
             aria-label="Open navigation menu"
+            title="Open Navigation Menu"
           >
-            <Menu className="h-5 w-5 text-[#374151]" />
+            <Menu className="h-4 w-4 text-slate-800 shrink-0" />
+            <span className="text-xs font-semibold text-slate-800">Menu</span>
           </button>
 
           {/* Desktop collapse toggle */}

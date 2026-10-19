@@ -12,6 +12,8 @@ import {
   AlertCircle,
   HelpCircle,
   ExternalLink,
+  Menu,
+  X,
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/useAuth';
 import { useToast } from '@/lib/ToastContext';
@@ -23,6 +25,7 @@ export const WaitingForApprovalDashboard: React.FC = () => {
   const { showToast } = useToast();
 
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   const staged = (profile?.staged_details as any) || {};
   const displayName = profile?.display_name || staged.fullName || user?.email?.split('@')[0] || 'Staff Member';
@@ -60,18 +63,41 @@ export const WaitingForApprovalDashboard: React.FC = () => {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 font-sans">
+      {/* Mobile Drawer Overlay */}
+      {isMobileDrawerOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs md:hidden"
+          onClick={() => setIsMobileDrawerOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* ────────────────────────────────────────────────────────────────────────── */}
-      {/* Left Sidebar: Minimal Dark Sidebar for Waiting Users                      */}
+      {/* Left Sidebar: Mobile Slide-out Drawer & Desktop Sidebar                   */}
       {/* ────────────────────────────────────────────────────────────────────────── */}
-      <aside className="w-72 bg-slate-900 border-r border-slate-800/80 flex flex-col justify-between p-6 shrink-0 z-20">
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 md:static md:z-20 w-72 bg-slate-900 border-r border-slate-800/80 flex flex-col justify-between p-6 shrink-0 transition-transform duration-240 ease-out select-none ${
+          isMobileDrawerOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        }`}
+      >
         <div>
-          {/* Brand Header */}
-          <div className="flex items-center gap-3 pb-6 border-b border-slate-800">
-            <img src="/logo.png" alt="BAOMS Logo" className="h-10 w-10 object-contain" />
-            <div>
-              <h1 className="text-base font-bold text-white tracking-tight">BAOMS</h1>
-              <p className="text-[11px] text-amber-400 font-medium">Babawatoto Organization</p>
+          {/* Brand Header & Mobile Close Button */}
+          <div className="flex items-center justify-between pb-6 border-b border-slate-800">
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="BAOMS Logo" className="h-10 w-10 object-contain" />
+              <div>
+                <h1 className="text-base font-bold text-white tracking-tight">BAOMS</h1>
+                <p className="text-[11px] text-amber-400 font-medium">Babawatoto Organization</p>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={() => setIsMobileDrawerOpen(false)}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white md:hidden"
+              aria-label="Close menu"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
           {/* User Profile Summary */}
@@ -141,15 +167,45 @@ export const WaitingForApprovalDashboard: React.FC = () => {
       </aside>
 
       {/* ────────────────────────────────────────────────────────────────────────── */}
-      {/* Main Content Area: Dark Waiting Portal                                    */}
+      {/* Main Workspace Column: Mobile Header on phones, Content below             */}
       {/* ────────────────────────────────────────────────────────────────────────── */}
-      <main className="flex-1 overflow-y-auto p-8 sm:p-12 relative flex flex-col justify-between">
-        {/* Decorative background glow */}
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="flex flex-col flex-1 min-w-0 h-full overflow-hidden">
+        {/* Mobile Header Bar */}
+        <header className="md:hidden flex items-center justify-between px-3.5 py-3 bg-slate-900 border-b border-slate-800 shrink-0 z-30">
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsMobileDrawerOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 text-amber-400 border border-slate-700/80 hover:bg-slate-700 transition"
+              aria-label="Open navigation menu"
+            >
+              <Menu className="w-4 h-4 text-amber-400 shrink-0" />
+              <span className="text-xs font-semibold text-slate-200">Menu</span>
+            </button>
+            <div className="flex items-center gap-2">
+              <img src="/logo.png" alt="BAOMS Logo" className="h-6 w-6 object-contain" />
+              <span className="font-bold text-sm text-white">BAOMS</span>
+            </div>
+          </div>
 
-        <div className="max-w-4xl mx-auto w-full relative z-10">
-          {/* Header Banner */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-8 border-b border-slate-800">
+          <button
+            type="button"
+            onClick={signOut}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800/80 hover:bg-red-500/10 text-slate-300 hover:text-red-400 border border-slate-700/60 transition text-xs"
+            title="Sign Out"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="text-[11px] font-medium hidden sm:inline">Sign Out</span>
+          </button>
+        </header>
+
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8 md:p-12 relative flex flex-col justify-between">
+          {/* Decorative background glow */}
+          <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="max-w-4xl mx-auto w-full relative z-10">
+            {/* Header Banner */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 sm:pb-8 border-b border-slate-800">
             <div>
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-3">
                 <ShieldCheck className="w-4 h-4" />
@@ -361,6 +417,7 @@ export const WaitingForApprovalDashboard: React.FC = () => {
           <span>Dar es Salaam, Tanzania • Confidential Internal System</span>
         </div>
       </main>
+      </div>
     </div>
   );
 };
