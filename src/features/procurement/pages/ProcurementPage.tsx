@@ -188,19 +188,19 @@ export const ProcurementPage: React.FC<ProcurementPageProps> = ({ initialTab = '
     }));
   }, [inventory]);
 
-  const tabs: Array<{ id: ProcurementTab; label: string; count?: number; icon: any }> = [
-    { id: 'orders', label: 'Purchase Orders', count: orders.length, icon: ShoppingCart },
-    { id: 'requests', label: 'Purchase Requests', count: requests.length, icon: FileText },
-    { id: 'plans', label: 'Procurement Plans', count: plans.length, icon: Calendar },
-    { id: 'quotations', label: 'Quotations', count: quotations.length, icon: FileSpreadsheet },
-    { id: 'vendors', label: 'Supplier Register', count: vendors.length, icon: Building2 },
-    { id: 'receiving', label: 'Goods Receiving', count: deliveries.length, icon: Truck },
-    { id: 'inventory', label: 'Inventory & Supplies', count: inventory.length, icon: Package },
-    { id: 'evaluation', label: 'Evaluation', count: quotations.length, icon: Scale },
-    { id: 'approvals', label: 'Approvals', count: orders.filter((o) => o.status === 'pending_approval').length, icon: ShieldCheck },
-    { id: 'invoices', label: 'Invoices & Handover', count: invoices.length, icon: Receipt },
-    { id: 'documents', label: 'Documents', icon: FolderOpen },
-    { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
+  const tabs: Array<{ id: ProcurementTab; label: string; path: string; count?: number; icon: any }> = [
+    { id: 'orders', label: 'Purchase Orders', path: '/procurement/orders', count: orders.length, icon: ShoppingCart },
+    { id: 'requests', label: 'Purchase Requests', path: '/procurement/requests', count: requests.length, icon: FileText },
+    { id: 'plans', label: 'Procurement Plans', path: '/procurement/plans', count: plans.length, icon: Calendar },
+    { id: 'quotations', label: 'Quotations', path: '/procurement/quotations', count: quotations.length, icon: FileSpreadsheet },
+    { id: 'vendors', label: 'Supplier Register', path: '/procurement/vendors', count: vendors.length, icon: Building2 },
+    { id: 'receiving', label: 'Goods Receiving', path: '/procurement/receiving', count: deliveries.length, icon: Truck },
+    { id: 'inventory', label: 'Inventory & Supplies', path: '/procurement/inventory', count: inventory.length, icon: Package },
+    { id: 'evaluation', label: 'Evaluation', path: '/procurement/evaluation', count: quotations.length, icon: Scale },
+    { id: 'approvals', label: 'Approvals', path: '/procurement/approvals', count: orders.filter((o) => o.status === 'pending_approval').length, icon: ShieldCheck },
+    { id: 'invoices', label: 'Invoices & Handover', path: '/procurement/invoices', count: invoices.length, icon: Receipt },
+    { id: 'documents', label: 'Documents', path: '/procurement/documents', icon: FolderOpen },
+    { id: 'reports', label: 'Reports & Analytics', path: '/procurement/reports', icon: BarChart3 },
   ];
 
   return (
@@ -325,6 +325,7 @@ export const ProcurementPage: React.FC<ProcurementPageProps> = ({ initialTab = '
                 onClick={() => {
                   setActiveTab(tab.id);
                   setSearchQuery('');
+                  navigate(tab.path);
                 }}
                 className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-md transition-all border-b-2 ${
                   isActive

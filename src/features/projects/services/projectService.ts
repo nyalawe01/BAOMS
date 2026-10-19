@@ -440,7 +440,7 @@ export async function getProjectActivities(projectId: string): Promise<ActivityR
       submitter:profiles!submitted_by(display_name),
       reviewer:profiles!reviewed_by(display_name),
       activity_documents(
-        id, activity_id, document_id, attached_at, attached_by,
+        activity_id, document_id, attached_at,
         documents(title, reference_number)
       )
     `)
@@ -454,13 +454,13 @@ export async function getProjectActivities(projectId: string): Promise<ActivityR
 
   return (data || []).map((row: any): ActivityRecord => {
     const evidence: ActivityDocumentRecord[] = (row.activity_documents || []).map((ad: any) => ({
-      id: ad.id,
+      id: `${ad.activity_id}-${ad.document_id}`,
       activityId: ad.activity_id,
       documentId: ad.document_id,
       documentTitle: ad.documents?.title || 'Evidence File',
       documentReference: ad.documents?.reference_number || 'REF',
       attachedAt: ad.attached_at,
-      attachedBy: ad.attached_by,
+      attachedBy: '',
     }));
 
     return {
@@ -1044,7 +1044,7 @@ export async function getAllActivities(params?: {
       submitter:profiles!submitted_by(display_name),
       reviewer:profiles!reviewed_by(display_name),
       activity_documents(
-        id, activity_id, document_id, attached_at, attached_by,
+        activity_id, document_id, attached_at,
         documents(title, reference_number)
       )
     `)
@@ -1069,13 +1069,13 @@ export async function getAllActivities(params?: {
 
   return data.map((row: any): ActivityRecord => {
     const evidence: ActivityDocumentRecord[] = (row.activity_documents || []).map((ad: any) => ({
-      id: ad.id,
+      id: `${ad.activity_id}-${ad.document_id}`,
       activityId: ad.activity_id,
       documentId: ad.document_id,
       documentTitle: ad.documents?.title || 'Evidence File',
       documentReference: ad.documents?.reference_number || 'REF',
       attachedAt: ad.attached_at,
-      attachedBy: ad.attached_by,
+      attachedBy: '',
     }));
 
     return {

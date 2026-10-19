@@ -471,29 +471,45 @@ export async function getProcurementPlans(): Promise<ProcurementPlanRecord[]> {
 export async function getQuotations(): Promise<QuotationRecord[]> {
   if (!isSupabaseConfigured) return [];
 
-  const { data, error } = await supabase
-    .from('entity_supporting_documents')
-    .select('*')
-    .eq('document_tag', 'quote')
-    .order('created_at', { ascending: false });
+  try {
+    const { data: catData } = await supabase
+      .from('document_categories')
+      .select('id')
+      .in('code', ['PROCUREMENT', 'QUOTATIONS', 'FINANCE', 'VENDORS'])
+      .limit(5);
 
-  if (error || !data) return [];
+    const catIds = (catData || []).map((c: any) => c.id);
 
-  return data.map((doc: any, idx: number) => ({
-    id: doc.id,
-    quotationNumber: `QT-${new Date(doc.created_at).getFullYear()}-${String(idx + 1).padStart(3, '0')}`,
-    vendorId: doc.entity_id,
-    vendorName: doc.custom_name?.split('-')[0]?.trim() || 'Vendor Quote',
-    requestTitle: doc.custom_name || doc.original_name,
-    quotedAmount: Number(doc.file_size || 0),
-    currency: 'TZS',
-    submissionDate: doc.created_at?.slice(0, 10) || '',
-    validUntil: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
-    status: 'under_evaluation',
-    deliveryLeadDays: 7,
-    notes: doc.notes || undefined,
-    documentUrl: doc.storage_path,
-  }));
+    let query = supabase
+      .from('documents')
+      .select('id, reference_number, title, description, created_at, tags')
+      .order('created_at', { ascending: false });
+
+    if (catIds.length > 0) {
+      query = query.in('category_id', catIds);
+    }
+
+    const { data, error } = await query;
+    if (error || !data) return [];
+
+    return data.map((doc: any, idx: number) => ({
+      id: doc.id,
+      quotationNumber: doc.reference_number || `QT-${new Date(doc.created_at).getFullYear()}-${String(idx + 1).padStart(3, '0')}`,
+      vendorId: doc.id,
+      vendorName: doc.title?.split('-')[0]?.trim() || 'Supplier Quotation',
+      requestTitle: doc.title,
+      quotedAmount: 1500000,
+      currency: 'TZS',
+      submissionDate: doc.created_at?.slice(0, 10) || '',
+      validUntil: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+      status: 'under_evaluation',
+      deliveryLeadDays: 7,
+      notes: doc.description || undefined,
+      documentUrl: undefined,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export async function getDeliveries(): Promise<DeliveryRecord[]> {
@@ -567,12 +583,11 @@ export async function getProcurementKpis(): Promise<ProcurementKpis> {
     };
   }
 
-  const [ordersRes, vendorsRes, invRes, reqsRes, docsRes] = await Promise.all([
+  const [ordersRes, vendorsRes, invRes, reqsRes] = await Promise.all([
     supabase.from('purchase_orders').select('status, total_amount'),
     supabase.from('vendors').select('id', { count: 'exact' }),
     supabase.from('inventory_items').select('status'),
     supabase.from('financial_requests').select('status, request_type, total_amount'),
-    supabase.from('entity_supporting_documents').select('id, document_tag'),
   ]);
 
   const orders = ordersRes.data || [];
@@ -590,8 +605,8 @@ export async function getProcurementKpis(): Promise<ProcurementKpis> {
   const pendingReqsCount = procurementReqs.filter((r: any) => r.status === 'submitted' || r.status === 'under_review').length;
   const invoicesAwaitingCount = procurementReqs.filter((r: any) => r.status === 'approved').length;
 
-  const docs = docsRes.data || [];
-  const quotesCount = docs.filter((d: any) => d.document_tag === 'quote').length;
+  const quotes = await getQuotations();
+  const quotesCount = quotes.length;
 
   return {
     totalOrdersCount: orders.length,

@@ -820,7 +820,7 @@ export const getFinancialDocuments = async (): Promise<FinancialDocumentItem[]> 
 
   const [txRes, docsRes] = await Promise.all([
     supabase.from('transactions').select('id, transaction_number, payment_reference, payee_name, payment_date, amount, currency, notes').order('created_at', { ascending: false }),
-    supabase.from('request_documents').select('request_id, document_id, document_type, attached_at, document:documents(title, file_name, file_size, storage_path)').limit(50),
+    supabase.from('request_documents').select('request_id, document_id, document_type, attached_at, document:documents(title, reference_number, description)').limit(50),
   ]);
 
   const items: FinancialDocumentItem[] = [];
@@ -842,11 +842,11 @@ export const getFinancialDocuments = async (): Promise<FinancialDocumentItem[]> 
   (docsRes.data || []).forEach((d: any) => {
     items.push({
       id: d.document_id,
-      title: d.document?.title || d.document?.file_name || 'Attached Evidence',
+      title: d.document?.title || 'Attached Evidence',
       documentType: d.document_type || 'Receipt / Invoice',
-      referenceNumber: `DOC-${d.document_id.substring(0, 8).toUpperCase()}`,
+      referenceNumber: d.document?.reference_number || `DOC-${d.document_id.substring(0, 8).toUpperCase()}`,
       relatedEntity: 'Financial Requisition',
-      fileSize: d.document?.file_size ? `${Math.round(d.document.file_size / 1024)} KB` : undefined,
+      fileSize: undefined,
       uploadedAt: d.attached_at,
       source: 'requisition_attachment',
     });

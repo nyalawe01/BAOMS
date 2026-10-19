@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Wallet,
@@ -89,6 +90,7 @@ export interface FinancePageProps {
 
 export const FinancePage: React.FC<FinancePageProps> = ({ initialTab = 'requests' }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user, profile, roles, hasPermission, hasRole, isAdmin } = useAuth();
 
   const [activeTab, setActiveTab] = useState<FinanceTab>(initialTab);
@@ -98,6 +100,25 @@ export const FinancePage: React.FC<FinancePageProps> = ({ initialTab = 'requests
       setActiveTab(initialTab);
     }
   }, [initialTab]);
+
+  const handleTabChange = (tab: FinanceTab) => {
+    setActiveTab(tab);
+    const routeMap: Record<FinanceTab, string> = {
+      requests: '/finance/expenditure',
+      budgets: '/finance/budgets',
+      income: '/finance/income',
+      transactions: '/finance/transactions',
+      projects: '/finance/projects',
+      procurement: '/finance/procurement',
+      approvals: '/finance/approvals',
+      documents: '/finance/documents',
+      reports: '/finance/reports',
+      statutory: '/finance/statutory',
+    };
+    if (routeMap[tab]) {
+      navigate(routeMap[tab]);
+    }
+  };
 
   const [requests, setRequests] = useState<FinancialRequestRecord[]>([]);
   const [budgets, setBudgets] = useState<BudgetRecord[]>([]);
@@ -346,7 +367,7 @@ export const FinancePage: React.FC<FinancePageProps> = ({ initialTab = 'requests
       <div className="border-b border-surface-border overflow-x-auto no-scrollbar">
         <nav className="flex space-x-6 min-w-max pb-0.5">
           <button
-            onClick={() => setActiveTab('requests')}
+            onClick={() => handleTabChange('requests')}
             className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'requests'
                 ? 'border-[#D68904] text-charcoal-900'
@@ -361,7 +382,7 @@ export const FinancePage: React.FC<FinancePageProps> = ({ initialTab = 'requests
           </button>
 
           <button
-            onClick={() => setActiveTab('budgets')}
+            onClick={() => handleTabChange('budgets')}
             className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'budgets'
                 ? 'border-[#D68904] text-charcoal-900'
@@ -376,7 +397,7 @@ export const FinancePage: React.FC<FinancePageProps> = ({ initialTab = 'requests
           </button>
 
           <button
-            onClick={() => setActiveTab('income')}
+            onClick={() => handleTabChange('income')}
             className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'income'
                 ? 'border-[#D68904] text-charcoal-900'
@@ -391,7 +412,7 @@ export const FinancePage: React.FC<FinancePageProps> = ({ initialTab = 'requests
           </button>
 
           <button
-            onClick={() => setActiveTab('transactions')}
+            onClick={() => handleTabChange('transactions')}
             className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'transactions'
                 ? 'border-[#D68904] text-charcoal-900'
@@ -406,7 +427,7 @@ export const FinancePage: React.FC<FinancePageProps> = ({ initialTab = 'requests
           </button>
 
           <button
-            onClick={() => setActiveTab('projects')}
+            onClick={() => handleTabChange('projects')}
             className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'projects'
                 ? 'border-[#D68904] text-charcoal-900'
@@ -418,7 +439,7 @@ export const FinancePage: React.FC<FinancePageProps> = ({ initialTab = 'requests
           </button>
 
           <button
-            onClick={() => setActiveTab('procurement')}
+            onClick={() => handleTabChange('procurement')}
             className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'procurement'
                 ? 'border-[#D68904] text-charcoal-900'
@@ -430,7 +451,7 @@ export const FinancePage: React.FC<FinancePageProps> = ({ initialTab = 'requests
           </button>
 
           <button
-            onClick={() => setActiveTab('approvals')}
+            onClick={() => handleTabChange('approvals')}
             className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'approvals'
                 ? 'border-[#D68904] text-charcoal-900'
@@ -447,7 +468,7 @@ export const FinancePage: React.FC<FinancePageProps> = ({ initialTab = 'requests
           </button>
 
           <button
-            onClick={() => setActiveTab('documents')}
+            onClick={() => handleTabChange('documents')}
             className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'documents'
                 ? 'border-[#D68904] text-charcoal-900'
@@ -462,7 +483,7 @@ export const FinancePage: React.FC<FinancePageProps> = ({ initialTab = 'requests
           </button>
 
           <button
-            onClick={() => setActiveTab('reports')}
+            onClick={() => handleTabChange('reports')}
             className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'reports'
                 ? 'border-[#D68904] text-charcoal-900'
@@ -474,7 +495,7 @@ export const FinancePage: React.FC<FinancePageProps> = ({ initialTab = 'requests
           </button>
 
           <button
-            onClick={() => setActiveTab('statutory')}
+            onClick={() => handleTabChange('statutory')}
             className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'statutory'
                 ? 'border-[#D68904] text-charcoal-900'
