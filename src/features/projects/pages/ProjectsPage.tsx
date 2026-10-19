@@ -308,15 +308,15 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({ initialTab = 'projec
       )}
 
       {/* Tab View Switching */}
-      {activeTab === 'planning' && <ProjectPlanningView />}
-      {activeTab === 'activities' && <WorkPlansActivitiesView />}
+      {activeTab === 'planning' && <ProjectPlanningView projects={projects} />}
+      {activeTab === 'activities' && <WorkPlansActivitiesView projects={projects} />}
       {activeTab === 'tasks' && <CoordinatorTasksView />}
       {activeTab === 'field-updates' && <FieldUpdatesView />}
-      {activeTab === 'team' && <ProjectTeamView />}
-      {activeTab === 'beneficiaries' && <BeneficiariesView />}
-      {activeTab === 'risks' && <ProjectRisksView />}
-      {activeTab === 'budgets' && <ProjectBudgetsView />}
-      {activeTab === 'reports' && <ProjectReportsDeliverablesView />}
+      {activeTab === 'team' && <ProjectTeamView projects={projects} />}
+      {activeTab === 'beneficiaries' && <BeneficiariesView projects={projects} />}
+      {activeTab === 'risks' && <ProjectRisksView projects={projects} />}
+      {activeTab === 'budgets' && <ProjectBudgetsView projects={projects} />}
+      {activeTab === 'reports' && <ProjectReportsDeliverablesView projects={projects} />}
       {activeTab === 'documents' && <ProjectDocumentsView />}
 
       {activeTab === 'projects' && (

@@ -7,17 +7,17 @@ import { Button } from '@/components/ui/Button';
 import { ProjectRecord } from '../types/project';
 
 interface ProjectPlanningViewProps {
-  projects: ProjectRecord[];
+  projects?: ProjectRecord[];
 }
 
-export const ProjectPlanningView: React.FC<ProjectPlanningViewProps> = ({ projects }) => {
+export const ProjectPlanningView: React.FC<ProjectPlanningViewProps> = ({ projects = [] }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
   const filteredProjects = useMemo(() => {
-    return projects.filter((p) => {
+    return (projects || []).filter((p) => {
       const matchSearch =
         !searchQuery.trim() ||
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

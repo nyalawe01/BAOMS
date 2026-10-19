@@ -95,10 +95,12 @@ export const MonitoringEvaluationPage: React.FC = () => {
         getProjects(),
         getAllActivities(),
       ]);
-      setProjects(projList);
-      setActivities(actList);
+      setProjects(projList || []);
+      setActivities(actList || []);
     } catch (err: any) {
       console.error('[ME Page] Error loading data from Supabase:', err);
+      setProjects([]);
+      setActivities([]);
     } finally {
       setIsLoading(false);
     }
@@ -110,10 +112,10 @@ export const MonitoringEvaluationPage: React.FC = () => {
 
   // Derived Indicators from Database Projects & Activities
   const indicators = useMemo<IndicatorRecord[]>(() => {
-    if (projects.length === 0) return [];
+    if (!projects || projects.length === 0) return [];
 
     return projects.map((p, idx) => {
-      const projActivities = activities.filter((a) => a.projectId === p.id);
+      const projActivities = (activities || []).filter((a) => a.projectId === p.id);
       const totalParticipants = projActivities.reduce(
         (sum, a) => sum + (Number(a.participantsCount) || 0),
         0
@@ -159,7 +161,7 @@ export const MonitoringEvaluationPage: React.FC = () => {
 
   // Derived Activity Result Reports from Database Activities
   const resultsReports = useMemo<ActivityResultReport[]>(() => {
-    return activities.map((act) => {
+    return (activities || []).map((act) => {
       let verificationStatus: 'verified' | 'pending_verification' | 'returned_for_correction' =
         'pending_verification';
       if (act.submissionStatus === 'approved') verificationStatus = 'verified';

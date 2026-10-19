@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/Button';
 import { ProjectRecord } from '../types/project';
 
 interface ProjectBudgetsViewProps {
-  projects: ProjectRecord[];
+  projects?: ProjectRecord[];
 }
 
-export const ProjectBudgetsView: React.FC<ProjectBudgetsViewProps> = ({ projects }) => {
+export const ProjectBudgetsView: React.FC<ProjectBudgetsViewProps> = ({ projects = [] }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
@@ -18,14 +18,14 @@ export const ProjectBudgetsView: React.FC<ProjectBudgetsViewProps> = ({ projects
 
   const funders = useMemo(() => {
     const set = new Set<string>();
-    projects.forEach((p) => {
+    (projects || []).forEach((p) => {
       if (p.funder) set.add(p.funder);
     });
     return Array.from(set);
   }, [projects]);
 
   const filteredProjects = useMemo(() => {
-    return projects.filter((p) => {
+    return (projects || []).filter((p) => {
       const matchSearch =
         !searchQuery.trim() ||
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

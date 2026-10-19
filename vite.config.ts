@@ -11,6 +11,9 @@ export default defineConfig({
       'lucide-react': path.resolve(__dirname, './src/lib/fontAwesomeIcons.tsx'),
     },
   },
+  build: {
+    sourcemap: true,
+  },
   server: {
     watch: {
       ignored: ['**/*.crdownload', '**/.git/**'],

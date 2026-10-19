@@ -6,10 +6,10 @@ import { ActivityRecord, ProjectRecord } from '../types/project';
 import { getAllActivities } from '../services/projectService';
 
 interface ProjectRisksViewProps {
-  projects: ProjectRecord[];
+  projects?: ProjectRecord[];
 }
 
-export const ProjectRisksView: React.FC<ProjectRisksViewProps> = ({ projects }) => {
+export const ProjectRisksView: React.FC<ProjectRisksViewProps> = ({ projects = [] }) => {
   const { t } = useTranslation();
   const [activities, setActivities] = useState<ActivityRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -126,7 +126,7 @@ export const ProjectRisksView: React.FC<ProjectRisksViewProps> = ({ projects }) 
             className="text-xs border border-slate-200 rounded-md px-2.5 py-1.5 bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#D68904]"
           >
             <option value="all">All Projects</option>
-            {projects.map((p) => (
+            {(projects || []).map((p) => (
               <option key={p.id} value={p.id}>
                 {p.projectCode} - {p.name.substring(0, 24)}...
               </option>

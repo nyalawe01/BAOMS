@@ -8,10 +8,10 @@ import { ProjectMemberRecord, ProjectRecord } from '../types/project';
 import { getAllTeamMembers } from '../services/projectService';
 
 interface ProjectTeamViewProps {
-  projects: ProjectRecord[];
+  projects?: ProjectRecord[];
 }
 
-export const ProjectTeamView: React.FC<ProjectTeamViewProps> = ({ projects }) => {
+export const ProjectTeamView: React.FC<ProjectTeamViewProps> = ({ projects = [] }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [members, setMembers] = useState<ProjectMemberRecord[]>([]);
@@ -112,7 +112,7 @@ export const ProjectTeamView: React.FC<ProjectTeamViewProps> = ({ projects }) =>
             className="text-xs border border-slate-200 rounded-md px-2.5 py-1.5 bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#D68904]"
           >
             <option value="all">All Projects</option>
-            {projects.map((p) => (
+            {(projects || []).map((p) => (
               <option key={p.id} value={p.id}>
                 {p.projectCode} - {p.name.substring(0, 24)}...
               </option>

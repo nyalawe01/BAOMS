@@ -42,6 +42,7 @@ import { supabase, isSupabaseConfigured, supabaseUrl } from '@/lib/supabase';
 import { useAuth } from '@/features/auth/useAuth';
 import { UserOnboardingReviewModal, PendingUserCandidate } from './components/UserOnboardingReviewModal';
 import { ExecutiveApprovalModal } from './components/ExecutiveApprovalModal';
+import { setPersistentItem } from '@/lib/storageSync';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -67,6 +68,7 @@ export interface StaffUser {
 // ---------------------------------------------------------------------------
 
 const ALLOWED_EMAIL_DOMAIN = '@babawatoto.or.tz';
+const USER_STORAGE_KEY = 'baoms_staff_users_v2';
 
 const DEPT_NAMES: Record<string, string> = {
   EXEC: 'Executive Office',
@@ -138,7 +140,7 @@ async function fetchStaffFromSupabase(): Promise<StaffUser[]> {
       isActive: row.is_active ?? true,
       approvalStatus,
       stagedDetails: staged,
-      avatarInitials: name.split(' ').filter(Boolean).map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || 'ST',
+      avatarInitials: (name || 'ST').split(' ').filter(Boolean).map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || 'ST',
       createdAt: row.created_at,
     };
   });

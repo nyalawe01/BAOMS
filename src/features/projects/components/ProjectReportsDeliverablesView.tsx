@@ -8,10 +8,10 @@ import { ProjectRecord, ProjectReportRecord } from '../types/project';
 import { getAllReports } from '../services/projectService';
 
 interface ProjectReportsDeliverablesViewProps {
-  projects: ProjectRecord[];
+  projects?: ProjectRecord[];
 }
 
-export const ProjectReportsDeliverablesView: React.FC<ProjectReportsDeliverablesViewProps> = ({ projects }) => {
+export const ProjectReportsDeliverablesView: React.FC<ProjectReportsDeliverablesViewProps> = ({ projects = [] }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [reports, setReports] = useState<ProjectReportRecord[]>([]);
@@ -112,7 +112,7 @@ export const ProjectReportsDeliverablesView: React.FC<ProjectReportsDeliverables
             className="text-xs border border-slate-200 rounded-md px-2.5 py-1.5 bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#D68904]"
           >
             <option value="all">All Projects</option>
-            {projects.map((p) => (
+            {(projects || []).map((p) => (
               <option key={p.id} value={p.id}>
                 {p.projectCode} - {p.name.substring(0, 24)}...
               </option>

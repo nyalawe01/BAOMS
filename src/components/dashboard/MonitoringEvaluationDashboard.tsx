@@ -72,10 +72,12 @@ export const MonitoringEvaluationDashboard: React.FC = () => {
         getProjects(),
         getAllActivities(),
       ]);
-      setProjects(projList);
-      setActivities(actList);
+      setProjects(projList || []);
+      setActivities(actList || []);
     } catch (err: any) {
       console.error('[MEDashboard] Failed to load telemetry from Supabase:', err);
+      setProjects([]);
+      setActivities([]);
     } finally {
       setIsLoading(false);
     }
@@ -87,10 +89,10 @@ export const MonitoringEvaluationDashboard: React.FC = () => {
 
   // Derived Indicators from Database Projects & Activities
   const derivedIndicators = useMemo<DerivedIndicator[]>(() => {
-    if (projects.length === 0) return [];
+    if (!projects || projects.length === 0) return [];
 
     return projects.map((p, idx) => {
-      const projActivities = activities.filter((a) => a.projectId === p.id);
+      const projActivities = (activities || []).filter((a) => a.projectId === p.id);
       const totalParticipants = projActivities.reduce(
         (sum, a) => sum + (Number(a.participantsCount) || 0),
         0
@@ -177,10 +179,10 @@ export const MonitoringEvaluationDashboard: React.FC = () => {
   }, [activities]);
 
   const projectDistributionData = useMemo<AnalyticsDataPoint[]>(() => {
-    if (projects.length === 0) return [];
+    if (!projects || projects.length === 0) return [];
 
     return projects.map((p, i) => {
-      const pActs = activities.filter((a) => a.projectId === p.id);
+      const pActs = (activities || []).filter((a) => a.projectId === p.id);
       const reach = pActs.reduce((sum, a) => sum + (Number(a.participantsCount) || 0), 0);
       return {
         label: p.projectCode,

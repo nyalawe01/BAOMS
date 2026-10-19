@@ -711,7 +711,7 @@ export const ProfilePage: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-surface-border">
-                        {staffRecord!.certifications!.map((cert) => (
+                        {(staffRecord?.certifications || []).map((cert) => (
                           <tr key={cert.id} className="hover:bg-slate-50">
                             <td className="py-2.5 px-3 font-semibold text-charcoal-900 flex items-center gap-1.5">
                               <CheckCircle2 className="h-3.5 w-3.5 text-forest-700 shrink-0" />

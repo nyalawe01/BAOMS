@@ -674,7 +674,7 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {projects.map((p) => (
+                {(projects || []).map((p) => (
                   <tr key={p.id} className="hover:bg-slate-50/60 transition-colors">
                     <td className="py-3 px-4 font-mono font-bold text-slate-800">{p.projectCode}</td>
                     <td className="py-3 px-4">
