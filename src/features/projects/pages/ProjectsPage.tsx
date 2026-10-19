@@ -37,6 +37,7 @@ import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Pagination } from '@/components/ui/Pagination';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
+import { SkeletonCard } from '@/components/ui/Skeleton';
 import { useAuth } from '@/features/auth/useAuth';
 import { PERMISSIONS } from '@/lib/permissions';
 import { ProjectRecord, ProjectStatus } from '../types/project';
@@ -404,9 +405,10 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({ initialTab = 'projec
 
           {/* Project Grid */}
           {isLoading ? (
-            <div className="py-20 text-center text-sm text-gray-500">
-              <div className="inline-block animate-spin w-6 h-6 border-2 border-gray-300 border-t-[#D68904] rounded-full mb-2" />
-              <p>{t('projects.loading', 'Loading portfolio projects...')}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
             </div>
           ) : projects.length === 0 ? (
             <div className="py-12">

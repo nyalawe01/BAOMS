@@ -409,23 +409,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     title={item.label}
                     className={({ isActive }) =>
                       cn(
-                        'flex items-center rounded-md transition-all duration-150 group select-none relative',
+                        'flex items-center rounded-md transition-colors duration-150 select-none relative group',
                         isExpanded
-                          ? 'w-full px-3 py-2 gap-3 text-xs sm:text-sm font-medium'
+                          ? 'w-full px-3 py-2 gap-3 text-xs sm:text-sm'
                           : 'w-10 h-10 mx-auto justify-center p-0',
                         isActive
-                          ? 'bg-amber-500/10 text-charcoal-900 font-semibold border-l-2 border-[#D68904]'
-                          : 'text-charcoal-muted hover:bg-slate-50 hover:text-charcoal-900 border-l-2 border-transparent'
+                          ? 'bg-slate-100 text-slate-900 font-medium'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-normal'
                       )
                     }
                   >
                     {({ isActive }) => (
                       <>
-                        {/* Restrained monochrome icon (never colored tiles or borders) */}
+                        {/* Clean monochrome icon without excessive scaling or bright colors */}
                         <Icon
                           className={cn(
-                            'w-[18px] h-[18px] shrink-0 transition-transform group-hover:scale-105',
-                            isActive ? 'text-[#111827]' : 'text-[#4B5563] group-hover:text-[#111827]'
+                            'w-[18px] h-[18px] shrink-0',
+                            isActive ? 'text-slate-900' : 'text-slate-500 group-hover:text-slate-800'
                           )}
                         />
 
@@ -436,8 +436,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                               className={cn(
                                 'truncate text-xs',
                                 isActive
-                                  ? 'font-semibold text-charcoal-900'
-                                  : 'font-medium text-charcoal-muted group-hover:text-charcoal-900'
+                                  ? 'font-medium text-slate-900'
+                                  : 'font-normal text-slate-600 group-hover:text-slate-900'
                               )}
                             >
                               {item.label}

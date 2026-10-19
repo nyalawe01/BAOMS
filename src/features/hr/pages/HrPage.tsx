@@ -18,6 +18,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
+import { SkeletonDashboard } from '@/components/ui/Skeleton';
 import { Pagination } from '@/components/ui/Pagination';
 import { StaffDetailModal } from '../components/StaffDetailModal';
 import { CreateStaffModal } from '../components/CreateStaffModal';
@@ -89,6 +90,8 @@ export const HrPage: React.FC<HrPageProps> = ({ defaultTab = 'staff' }) => {
     roles.includes('system_admin') ||
     isAdmin();
 
+  const [loading, setLoading] = useState(true);
+
   const loadData = React.useCallback(async () => {
     try {
       const currentUserContext = user ? { id: user.id, roles } : undefined;
@@ -102,6 +105,8 @@ export const HrPage: React.FC<HrPageProps> = ({ defaultTab = 'staff' }) => {
       setExpiringStaff(expiring);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   }, [user, roles]);
 
@@ -174,6 +179,10 @@ export const HrPage: React.FC<HrPageProps> = ({ defaultTab = 'staff' }) => {
     link.click();
     document.body.removeChild(link);
   };
+
+  if (loading) {
+    return <SkeletonDashboard kpiCount={4} />;
+  }
 
   return (
     <div className="space-y-6">

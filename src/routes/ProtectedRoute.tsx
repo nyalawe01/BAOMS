@@ -21,12 +21,21 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-surface-bg">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#D68904] border-t-transparent" />
-          <span className="text-xs font-medium text-charcoal-muted">
-            Verifying secure session...
-          </span>
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-50">
+        <div className="flex flex-col items-center gap-4 max-w-xs text-center p-6">
+          <div className="relative flex items-center justify-center">
+            <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-center">
+              <img src="/logo.png" alt="BAOMS" className="w-8 h-8 object-contain" />
+            </div>
+            <div className="absolute inset-0 rounded-2xl border-2 border-slate-300 animate-ping opacity-25" />
+          </div>
+          <div className="space-y-1">
+            <div className="text-sm font-semibold text-slate-800">BAOMS Enterprise</div>
+            <div className="text-xs text-slate-500">Verifying secure organization session...</div>
+          </div>
+          <div className="w-32 h-1 bg-slate-200 rounded-full overflow-hidden">
+            <div className="h-full bg-slate-400 rounded-full animate-pulse" />
+          </div>
         </div>
       </div>
     );

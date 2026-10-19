@@ -17,9 +17,15 @@ import {
   ChevronRight,
   ShoppingCart,
   AlertTriangle,
+  Eye,
+  CheckCircle2,
+  X,
+  FileText,
+  Filter,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { KPICard } from '@/components/ui/KPICard';
+import { Modal } from '@/components/ui/Modal';
+import { SkeletonDashboard } from '@/components/ui/Skeleton';
 import { AnalyticsVisualizer, AnalyticsDataPoint } from '@/components/ui/AnalyticsVisualizer';
 import {
   getBudgets,
@@ -40,11 +46,17 @@ export const FinanceOfficerDashboard: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  const [isLoading, setIsLoading] = useState(true);
   const [kpis, setKpis] = useState<FinanceKpis | null>(null);
   const [budgets, setBudgets] = useState<BudgetRecord[]>([]);
   const [requisitions, setRequisitions] = useState<FinancialRequestRecord[]>([]);
   const [transactions, setTransactions] = useState<PaymentTransaction[]>([]);
   const [procurementItems, setProcurementItems] = useState<ProcurementFinancialHandoverItem[]>([]);
+
+  // Preview Drawer/Modal State
+  const [previewType, setPreviewType] = useState<
+    'budget' | 'expenditure' | 'available' | 'income' | 'approvals' | 'disbursements' | null
+  >(null);
 
   // Table search and pagination
   const [searchQuery, setSearchQuery] = useState('');
@@ -67,6 +79,8 @@ export const FinanceOfficerDashboard: React.FC = () => {
       setProcurementItems(pList);
     } catch (e) {
       console.error('Failed loading finance telemetry:', e);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -81,6 +95,14 @@ export const FinanceOfficerDashboard: React.FC = () => {
     (r) => r.status === 'approved' || r.status === 'partially_paid'
   );
   const unpaidProcurement = procurementItems.filter((p) => p.paymentStatus !== 'paid');
+
+  const pendingRequisitionsAmount = useMemo(() => {
+    return pendingRequisitions.reduce((sum, r) => sum + (r.totalAmount || 0), 0);
+  }, [pendingRequisitions]);
+
+  const approvedDisbursementAmount = useMemo(() => {
+    return approvedForDisbursement.reduce((sum, r) => sum + (r.totalAmount || 0), 0);
+  }, [approvedForDisbursement]);
 
   // Budget vs Actual chart points from real budgets
   const chartData: AnalyticsDataPoint[] = useMemo(() => {
@@ -113,25 +135,33 @@ export const FinanceOfficerDashboard: React.FC = () => {
     ? ((kpis.totalSpent / kpis.totalBudget) * 100).toFixed(1)
     : '0';
 
+  const uncommittedPercentage = kpis && kpis.totalBudget > 0
+    ? Math.max(0, Math.min(100, Math.round(((kpis.availableBalance || 0) / kpis.totalBudget) * 100)))
+    : 100;
+
+  if (isLoading) {
+    return <SkeletonDashboard kpiCount={6} />;
+  }
+
   return (
     <div className="space-y-6">
       {/* Top Header - AdminCN Title & Action Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-slate-200/80">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-200/80">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            {t('finance.dashboardTitle', 'Finance Dashboard')}
+            {t('finance.dashboardTitle', 'Finance & Accounting Operations')}
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Budget allocations, expenditure tracking, payment disbursements, and funding balances.
+            Real-time ledger overview, grant budget allocations, expenditure tracking, and disbursement verification.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigate('/finance/reports')}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/finance/reports')} className="text-xs text-slate-700">
             <FileSpreadsheet className="h-3.5 w-3.5 mr-1.5 text-slate-600" />
             {t('finance.auditReport', 'Audit Reports')}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/finance/payments/new')}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/finance/payments/new')} className="text-xs text-slate-700">
             <CreditCard className="h-3.5 w-3.5 mr-1.5 text-slate-600" />
             Issue Payment
           </Button>
@@ -139,7 +169,7 @@ export const FinanceOfficerDashboard: React.FC = () => {
             variant="primary"
             size="sm"
             onClick={() => navigate('/finance/requisitions/new')}
-            className="bg-[#D68904] hover:bg-[#b45309] text-white font-semibold"
+            className="bg-[#D68904] hover:bg-[#b45309] text-white font-semibold text-xs"
           >
             <Plus className="h-3.5 w-3.5 mr-1.5 text-white" />
             {t('finance.newRequest', 'New Requisition')}
@@ -147,86 +177,366 @@ export const FinanceOfficerDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Row 1: The 6 Required KPI Cards (AdminCN Style) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-        <KPICard
-          label="Total Approved Budget"
-          value={`TZS ${((kpis?.totalBudget || 0) / 1000000).toFixed(1)}M`}
-          subValue={`/ ${budgets.length} lines`}
-          change={{
-            value: `${budgets.length} Accounts`,
-            isPositive: true,
-            label: 'across active grants',
-          }}
-          icon={Building2}
-          onClick={() => navigate('/finance/budgets')}
-        />
+      {/* Row 1: Expansive, Non-Compacted Financial Cards with Rich Preview & Status Indicators */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {/* Card 1: Total Approved Budget */}
+        <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
+          <div>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700">
+                  <Building2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                    Total Approved Budget
+                  </span>
+                  <span className="text-[11px] text-slate-400">Ledger Accounts</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewType('budget')}
+                className="flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 px-2 py-1 rounded transition-colors"
+                title="Quick preview budget lines"
+              >
+                <Eye className="w-3.5 h-3.5 text-slate-600" />
+                <span>Preview</span>
+              </button>
+            </div>
 
-        <KPICard
-          label="Actual Expenditure"
-          value={`TZS ${((kpis?.totalSpent || 0) / 1000000).toFixed(1)}M`}
-          change={{
-            value: `${burnRate}% burn rate`,
-            isPositive: true,
-            label: 'of total budget',
-          }}
-          icon={CreditCard}
-          onClick={() => navigate('/finance/transactions')}
-        />
+            <div className="mt-4">
+              <div className="text-2xl font-bold text-slate-900 font-mono tabular-nums">
+                TZS {(kpis?.totalBudget || 0).toLocaleString()}
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                <span className="font-semibold text-slate-800">{budgets.length}</span> active grant allocation lines
+              </div>
+            </div>
 
-        <KPICard
-          label="Available Budget"
-          value={`TZS ${((kpis?.availableBalance || 0) / 1000000).toFixed(1)}M`}
-          change={{
-            value: 'Uncommitted',
-            isPositive: (kpis?.availableBalance || 0) > 0,
-            label: 'available funds',
-          }}
-          icon={Wallet}
-          onClick={() => navigate('/finance/budgets')}
-        />
+            {/* Sub-metric preview */}
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span className="text-slate-500">Major Grant Line</span>
+              <span className="font-medium text-slate-800 truncate max-w-[150px]">
+                {budgets[0]?.name || 'Standard Operational'}
+              </span>
+            </div>
+          </div>
 
-        <KPICard
-          label="Recorded Income"
-          value={`TZS ${((kpis?.recordedIncome || kpis?.totalBudget || 0) / 1000000).toFixed(1)}M`}
-          change={{
-            value: 'Secured',
-            isPositive: true,
-            label: 'grant allocations',
-          }}
-          icon={TrendingUp}
-          onClick={() => navigate('/finance/income')}
-        />
+          <div className="mt-4 pt-2">
+            <button
+              type="button"
+              onClick={() => navigate('/finance/budgets')}
+              className="text-xs font-semibold text-[#D68904] hover:text-[#b45309] flex items-center gap-1 transition-colors"
+            >
+              <span>Manage Budgets</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
 
-        <KPICard
-          label="Pending Financial Approvals"
-          value={kpis?.pendingApprovalsCount ?? pendingRequisitions.length}
-          change={{
-            value: pendingRequisitions.length > 0 ? `${pendingRequisitions.length} In Queue` : 'Clear',
-            isPositive: pendingRequisitions.length === 0,
-            label: pendingRequisitions.length > 0 ? 'claims awaiting review' : 'all claims cleared',
-          }}
-          icon={CheckSquare}
-          onClick={() => navigate('/finance/approvals')}
-        />
+        {/* Card 2: Actual Disbursed Expenditure */}
+        <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
+          <div>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-700">
+                  <CreditCard className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                    Actual Disbursed
+                  </span>
+                  <span className="text-[11px] text-slate-400">Total Disbursements</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewType('expenditure')}
+                className="flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 px-2 py-1 rounded transition-colors"
+                title="Quick preview expenditure vouchers"
+              >
+                <Eye className="w-3.5 h-3.5 text-slate-600" />
+                <span>Preview</span>
+              </button>
+            </div>
 
-        <KPICard
-          label="Outstanding Payments"
-          value={`TZS ${((kpis?.outstandingPaymentsAmount || 0) / 1000000).toFixed(1)}M`}
-          change={{
-            value: `${approvedForDisbursement.length} Approved`,
-            isPositive: approvedForDisbursement.length === 0,
-            label: 'ready for disbursement',
-          }}
-          icon={Receipt}
-          onClick={() => navigate('/finance/expenditure')}
-        />
+            <div className="mt-4">
+              <div className="text-2xl font-bold text-slate-900 font-mono tabular-nums">
+                TZS {(kpis?.totalSpent || 0).toLocaleString()}
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                <span className="font-semibold text-slate-800">{transactions.length}</span> completed disbursement transactions
+              </div>
+            </div>
+
+            {/* Burn rate progress bar */}
+            <div className="mt-4 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-between text-xs mb-1.5">
+                <span className="text-slate-500">Burn Rate</span>
+                <span className="font-semibold text-slate-800 font-mono">{burnRate}% of budget</span>
+              </div>
+              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-emerald-600 rounded-full transition-all"
+                  style={{ width: `${Math.min(100, Math.max(0, Number(burnRate)))}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-2">
+            <button
+              type="button"
+              onClick={() => navigate('/finance/transactions')}
+              className="text-xs font-semibold text-[#D68904] hover:text-[#b45309] flex items-center gap-1 transition-colors"
+            >
+              <span>View Disbursements</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Card 3: Available Uncommitted Balance */}
+        <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
+          <div>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-700">
+                  <Wallet className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                    Available Balance
+                  </span>
+                  <span className="text-[11px] text-slate-400">Unencumbered Funds</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewType('available')}
+                className="flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 px-2 py-1 rounded transition-colors"
+                title="Quick preview available funds"
+              >
+                <Eye className="w-3.5 h-3.5 text-slate-600" />
+                <span>Preview</span>
+              </button>
+            </div>
+
+            <div className="mt-4">
+              <div className="text-2xl font-bold text-slate-900 font-mono tabular-nums">
+                TZS {(kpis?.availableBalance || 0).toLocaleString()}
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                Uncommitted organizational funds
+              </div>
+            </div>
+
+            {/* Available balance ratio bar */}
+            <div className="mt-4 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-between text-xs mb-1.5">
+                <span className="text-slate-500">Unencumbered Ratio</span>
+                <span className="font-semibold text-blue-700 font-mono">{uncommittedPercentage}% safe</span>
+              </div>
+              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-blue-600 rounded-full transition-all"
+                  style={{ width: `${uncommittedPercentage}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-2">
+            <button
+              type="button"
+              onClick={() => navigate('/finance/budgets')}
+              className="text-xs font-semibold text-[#D68904] hover:text-[#b45309] flex items-center gap-1 transition-colors"
+            >
+              <span>Ledger Allocations</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Card 4: Recorded Income & Receipts */}
+        <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
+          <div>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center text-teal-700">
+                  <TrendingUp className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                    Recorded Income
+                  </span>
+                  <span className="text-[11px] text-slate-400">Grant Tranches</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewType('income')}
+                className="flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 px-2 py-1 rounded transition-colors"
+                title="Quick preview grant income"
+              >
+                <Eye className="w-3.5 h-3.5 text-slate-600" />
+                <span>Preview</span>
+              </button>
+            </div>
+
+            <div className="mt-4">
+              <div className="text-2xl font-bold text-slate-900 font-mono tabular-nums">
+                TZS {(kpis?.recordedIncome || kpis?.totalBudget || 0).toLocaleString()}
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                Secured funding & institutional grants
+              </div>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span className="text-slate-500">Fund Verification</span>
+              <span className="inline-flex items-center gap-1 text-emerald-700 font-medium">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Confirmed Tranches
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-2">
+            <button
+              type="button"
+              onClick={() => navigate('/finance/income')}
+              className="text-xs font-semibold text-[#D68904] hover:text-[#b45309] flex items-center gap-1 transition-colors"
+            >
+              <span>Income & Receipts</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Card 5: Pending Financial Approvals */}
+        <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
+          <div>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-700">
+                  <CheckSquare className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                    Pending Approvals
+                  </span>
+                  <span className="text-[11px] text-slate-400">Claims in Queue</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewType('approvals')}
+                className="flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 px-2 py-1 rounded transition-colors"
+                title="Quick preview pending claims"
+              >
+                <Eye className="w-3.5 h-3.5 text-slate-600" />
+                <span>Preview</span>
+              </button>
+            </div>
+
+            <div className="mt-4 flex items-baseline justify-between">
+              <div className="text-2xl font-bold text-slate-900 font-mono tabular-nums">
+                {pendingRequisitions.length}
+              </div>
+              {pendingRequisitions.length > 0 && (
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                  Requires Review
+                </span>
+              )}
+            </div>
+
+            <div className="text-xs text-slate-500 mt-1">
+              Total volume: <span className="font-semibold text-slate-800 font-mono">TZS {pendingRequisitionsAmount.toLocaleString()}</span>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span className="text-slate-500">Urgency Level</span>
+              <span className={`font-semibold ${pendingRequisitions.length > 0 ? 'text-amber-700' : 'text-slate-400'}`}>
+                {pendingRequisitions.length > 0 ? `${pendingRequisitions.length} pending clearance` : 'Queue Cleared'}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-2">
+            <button
+              type="button"
+              onClick={() => navigate('/finance/approvals')}
+              className="text-xs font-semibold text-[#D68904] hover:text-[#b45309] flex items-center gap-1 transition-colors"
+            >
+              <span>Review Claims</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Card 6: Disbursement Release Queue */}
+        <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
+          <div>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-700">
+                  <Receipt className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                    Disbursement Release
+                  </span>
+                  <span className="text-[11px] text-slate-400">Ready for Payment</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewType('disbursements')}
+                className="flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 px-2 py-1 rounded transition-colors"
+                title="Quick preview approved vouchers"
+              >
+                <Eye className="w-3.5 h-3.5 text-slate-600" />
+                <span>Preview</span>
+              </button>
+            </div>
+
+            <div className="mt-4 flex items-baseline justify-between">
+              <div className="text-2xl font-bold text-slate-900 font-mono tabular-nums">
+                {approvedForDisbursement.length}
+              </div>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">
+                Approved
+              </span>
+            </div>
+
+            <div className="text-xs text-slate-500 mt-1">
+              Ready for release: <span className="font-semibold text-slate-800 font-mono">TZS {approvedDisbursementAmount.toLocaleString()}</span>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span className="text-slate-500">Procurement Handover</span>
+              <span className="font-semibold text-slate-700 font-mono">{unpaidProcurement.length} POs</span>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-2">
+            <button
+              type="button"
+              onClick={() => navigate('/finance/payments/new')}
+              className="text-xs font-semibold text-[#D68904] hover:text-[#b45309] flex items-center gap-1 transition-colors"
+            >
+              <span>Execute Payment</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Row 2: Action Queue & Budget Allocation Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* Action Queue: Financial Items Requiring Attention */}
-        <div className="lg:col-span-5 xl:col-span-4 bg-white border border-slate-200/80 rounded-lg overflow-hidden flex flex-col shadow-xs">
+        <div className="lg:col-span-5 xl:col-span-4 bg-white border border-slate-200/80 rounded-xl overflow-hidden flex flex-col shadow-xs">
           <div className="p-4 sm:px-5 sm:py-3.5 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/50">
             <div>
               <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-1.5">
@@ -239,14 +549,16 @@ export const FinanceOfficerDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="divide-y divide-slate-100 flex-1 overflow-y-auto max-h-[300px]">
+          <div className="divide-y divide-slate-100 flex-1 overflow-y-auto max-h-[340px]">
             {/* Action Item 1: Claims awaiting verification */}
             <div
               onClick={() => navigate('/finance/approvals')}
               className="p-3.5 hover:bg-slate-50/60 transition-colors flex items-center justify-between cursor-pointer"
             >
               <div className="flex items-center gap-3">
-                <CheckSquare className="h-4 w-4 text-slate-500 shrink-0" />
+                <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
+                  <CheckSquare className="h-4 w-4" />
+                </div>
                 <div>
                   <div className="text-xs font-semibold text-slate-900">
                     Claims Awaiting Approval
@@ -265,7 +577,9 @@ export const FinanceOfficerDashboard: React.FC = () => {
               className="p-3.5 hover:bg-slate-50/60 transition-colors flex items-center justify-between cursor-pointer"
             >
               <div className="flex items-center gap-3">
-                <CreditCard className="h-4 w-4 text-slate-500 shrink-0" />
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0">
+                  <CreditCard className="h-4 w-4" />
+                </div>
                 <div>
                   <div className="text-xs font-semibold text-slate-900">
                     Ready for Payment Release
@@ -284,7 +598,9 @@ export const FinanceOfficerDashboard: React.FC = () => {
               className="p-3.5 hover:bg-slate-50/60 transition-colors flex items-center justify-between cursor-pointer"
             >
               <div className="flex items-center gap-3">
-                <ShoppingCart className="h-4 w-4 text-slate-500 shrink-0" />
+                <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+                  <ShoppingCart className="h-4 w-4" />
+                </div>
                 <div>
                   <div className="text-xs font-semibold text-slate-900">
                     Procurement Payment Handover
@@ -303,7 +619,9 @@ export const FinanceOfficerDashboard: React.FC = () => {
               className="p-3.5 hover:bg-slate-50/60 transition-colors flex items-center justify-between cursor-pointer"
             >
               <div className="flex items-center gap-3">
-                <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="h-4 w-4" />
+                </div>
                 <div>
                   <div className="text-xs font-semibold text-slate-900">
                     Project Budget Tracking
@@ -319,7 +637,7 @@ export const FinanceOfficerDashboard: React.FC = () => {
         </div>
 
         {/* Budget Allocation Breakdown Chart */}
-        <div className="lg:col-span-7 xl:col-span-8 bg-white border border-slate-200/80 rounded-lg overflow-hidden flex flex-col shadow-xs">
+        <div className="lg:col-span-7 xl:col-span-8 bg-white border border-slate-200/80 rounded-xl overflow-hidden flex flex-col shadow-xs">
           <div className="p-4 sm:px-5 sm:py-3.5 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/50">
             <div>
               <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-1.5">
@@ -330,7 +648,7 @@ export const FinanceOfficerDashboard: React.FC = () => {
                 Operational allocation comparison across primary budget lines
               </p>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/finance/budgets')}>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/finance/budgets')} className="text-xs text-slate-700">
               Ledger <ArrowRight className="h-3 w-3 ml-0.5" />
             </Button>
           </div>
@@ -343,7 +661,7 @@ export const FinanceOfficerDashboard: React.FC = () => {
                 valueSuffix="M"
                 defaultMode="bar"
                 availableModes={['bar', 'line', 'table']}
-                height={220}
+                height={230}
               />
             ) : (
               <div className="py-12 text-center text-xs text-slate-400">
@@ -355,7 +673,7 @@ export const FinanceOfficerDashboard: React.FC = () => {
       </div>
 
       {/* Row 3: Recent Payment Disbursements Table (AdminCN Style) */}
-      <div className="bg-white border border-slate-200/80 rounded-lg overflow-hidden shadow-xs">
+      <div className="bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-xs">
         <div className="p-4 sm:px-5 sm:py-3.5 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-50/50">
           <div>
             <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-1.5">
@@ -381,7 +699,7 @@ export const FinanceOfficerDashboard: React.FC = () => {
                 className="pl-8 pr-3 py-1.5 text-xs rounded-md border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-[#D68904]"
               />
             </div>
-            <Button variant="outline" size="sm" onClick={() => navigate('/finance/transactions')}>
+            <Button variant="outline" size="sm" onClick={() => navigate('/finance/transactions')} className="text-xs text-slate-700">
               All Transactions <ExternalLink className="h-3 w-3 ml-1" />
             </Button>
           </div>
@@ -469,6 +787,162 @@ export const FinanceOfficerDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* QUICK PREVIEW MODAL */}
+      <Modal
+        isOpen={previewType !== null}
+        onClose={() => setPreviewType(null)}
+        title={
+          <div className="flex items-center gap-2 text-base font-bold text-slate-900">
+            <Eye className="w-5 h-5 text-[#D68904]" />
+            <span>
+              {previewType === 'budget' && 'Approved Budget Lines Preview'}
+              {previewType === 'expenditure' && 'Expenditure & Disbursement Vouchers'}
+              {previewType === 'available' && 'Available Balance Allocation'}
+              {previewType === 'income' && 'Recorded Grant Receipts Preview'}
+              {previewType === 'approvals' && 'Pending Financial Requisitions Preview'}
+              {previewType === 'disbursements' && 'Approved Vouchers Awaiting Disbursement'}
+            </span>
+          </div>
+        }
+        size="lg"
+      >
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+          {previewType === 'budget' && (
+            <div className="space-y-3">
+              <p className="text-xs text-slate-500">
+                Detailed view of current operational ledger budget accounts and their utilization:
+              </p>
+              <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden">
+                {budgets.map((b) => (
+                  <div key={b.id} className="p-3 bg-white hover:bg-slate-50 flex items-center justify-between text-xs">
+                    <div>
+                      <div className="font-semibold text-slate-900">{b.name}</div>
+                      <div className="text-[11px] text-slate-500">Code: {b.code} | Year: {b.fiscalYear}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-mono font-bold text-slate-900">TZS {b.allocatedAmount.toLocaleString()}</div>
+                      <div className="text-[11px] text-emerald-700">Spent: TZS {b.spentAmount.toLocaleString()}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {previewType === 'approvals' && (
+            <div className="space-y-3">
+              <p className="text-xs text-slate-500">
+                The following requisitions are currently awaiting finance clearance or approval:
+              </p>
+              {pendingRequisitions.length === 0 ? (
+                <div className="p-6 text-center text-xs text-slate-400 border border-dashed rounded-lg">
+                  No claims currently awaiting approval.
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden">
+                  {pendingRequisitions.map((r) => (
+                    <div key={r.id} className="p-3 bg-white hover:bg-slate-50 flex items-center justify-between text-xs">
+                      <div>
+                        <div className="font-semibold text-slate-900">{r.title}</div>
+                        <div className="text-[11px] text-slate-500">
+                          Ref: {r.requestNumber} | By: {r.requesterName} | Date: {r.createdAt?.slice(0, 10)}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-mono font-bold text-slate-900">TZS {r.totalAmount.toLocaleString()}</div>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">
+                          {r.status.replace(/_/g, ' ').toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {previewType === 'disbursements' && (
+            <div className="space-y-3">
+              <p className="text-xs text-slate-500">
+                Approved expenditure vouchers verified and waiting for payment disbursement:
+              </p>
+              {approvedForDisbursement.length === 0 ? (
+                <div className="p-6 text-center text-xs text-slate-400 border border-dashed rounded-lg">
+                  All approved vouchers have already been disbursed.
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden">
+                  {approvedForDisbursement.map((r) => (
+                    <div key={r.id} className="p-3 bg-white hover:bg-slate-50 flex items-center justify-between text-xs">
+                      <div>
+                        <div className="font-semibold text-slate-900">{r.title}</div>
+                        <div className="text-[11px] text-slate-500">
+                          Ref: {r.requestNumber} | Payee: {r.requesterName}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-mono font-bold text-slate-900">TZS {r.totalAmount.toLocaleString()}</div>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-medium">
+                          READY TO PAY
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {(previewType === 'expenditure' || previewType === 'available' || previewType === 'income') && (
+            <div className="space-y-3">
+              <p className="text-xs text-slate-500">
+                Summary of ledger transactions and grant disbursements:
+              </p>
+              <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden">
+                {transactions.slice(0, 8).map((t) => (
+                  <div key={t.id} className="p-3 bg-white hover:bg-slate-50 flex items-center justify-between text-xs">
+                    <div>
+                      <div className="font-semibold text-slate-900">{t.payeeName}</div>
+                      <div className="text-[11px] text-slate-500">Voucher: {t.transactionNumber} | {t.paymentDate}</div>
+                    </div>
+                    <div className="text-right font-mono font-bold text-slate-900">
+                      TZS {t.amount.toLocaleString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4 pt-3 border-t border-slate-200 flex justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={() => setPreviewType(null)} className="text-xs">
+            Close Preview
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => {
+              const target =
+                previewType === 'approvals'
+                  ? '/finance/approvals'
+                  : previewType === 'disbursements'
+                  ? '/finance/payments/new'
+                  : previewType === 'income'
+                  ? '/finance/income'
+                  : previewType === 'expenditure'
+                  ? '/finance/transactions'
+                  : '/finance/budgets';
+              setPreviewType(null);
+              navigate(target);
+            }}
+            className="bg-[#D68904] hover:bg-[#b45309] text-white text-xs font-semibold"
+          >
+            Open Full Portal
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

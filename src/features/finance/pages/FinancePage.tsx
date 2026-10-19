@@ -35,6 +35,7 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Pagination } from '@/components/ui/Pagination';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
+import { SkeletonDashboard } from '@/components/ui/Skeleton';
 import { AnalyticsVisualizer, AnalyticsDataPoint } from '@/components/ui/AnalyticsVisualizer';
 import { useAuth } from '@/features/auth/useAuth';
 import { showSuccess, showError } from '@/lib/sweetAlert';
@@ -271,6 +272,10 @@ export const FinancePage: React.FC<FinancePageProps> = ({ initialTab = 'requests
         return <StatusIndicator status={status} label={status} />;
     }
   };
+
+  if (loading) {
+    return <SkeletonDashboard kpiCount={4} />;
+  }
 
   return (
     <div className="space-y-6">

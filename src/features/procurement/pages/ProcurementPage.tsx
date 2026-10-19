@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
+import { SkeletonDashboard } from '@/components/ui/Skeleton';
 import { AnalyticsVisualizer, AnalyticsDataPoint } from '@/components/ui/AnalyticsVisualizer';
 import { useAuth } from '@/features/auth/useAuth';
 import { showSuccess, showError } from '@/lib/sweetAlert';
@@ -107,6 +108,7 @@ export const ProcurementPage: React.FC<ProcurementPageProps> = ({ initialTab = '
     invoicesAwaitingHandoverCount: 0,
   });
 
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -140,6 +142,8 @@ export const ProcurementPage: React.FC<ProcurementPageProps> = ({ initialTab = '
       setInvoices(invList);
     } catch (err) {
       console.error('Failed to load procurement data:', err);
+    } finally {
+      setLoading(false);
     }
   }, [searchQuery, statusFilter]);
 
@@ -202,6 +206,10 @@ export const ProcurementPage: React.FC<ProcurementPageProps> = ({ initialTab = '
     { id: 'documents', label: 'Documents', path: '/procurement/documents', icon: FolderOpen },
     { id: 'reports', label: 'Reports & Analytics', path: '/procurement/reports', icon: BarChart3 },
   ];
+
+  if (loading) {
+    return <SkeletonDashboard kpiCount={6} />;
+  }
 
   return (
     <div className="space-y-6">
