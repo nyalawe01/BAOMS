@@ -325,6 +325,22 @@ export const ApprovalsPage: React.FC = () => {
               role: 'executive_director',
             }
           );
+        } else if (item.id.startsWith('hr-staff-') && isSupabaseConfigured) {
+          await supabase
+            .from('profiles')
+            .update({
+              approval_status: 'rejected',
+              is_active: false,
+              ed_approval_notes: comment,
+              ed_approved_by: user?.id,
+              ed_approved_at: new Date().toISOString(),
+            })
+            .eq('id', item.rawRecord.id);
+        } else if (item.id.startsWith('leave-')) {
+          await reviewLeaveRequest(item.rawRecord.id, {
+            status: 'rejected',
+            reviewerComments: comment,
+          });
         }
 
         showSuccess('Request Rejected', `${item.referenceNumber} has been rejected with audit remarks.`);
@@ -369,6 +385,22 @@ export const ApprovalsPage: React.FC = () => {
               role: 'executive_director',
             }
           );
+        } else if (item.id.startsWith('hr-staff-') && isSupabaseConfigured) {
+          await supabase
+            .from('profiles')
+            .update({
+              approval_status: 'returned_for_revision',
+              is_active: false,
+              ed_approval_notes: feedback,
+              ed_approved_by: user?.id,
+              ed_approved_at: new Date().toISOString(),
+            })
+            .eq('id', item.rawRecord.id);
+        } else if (item.id.startsWith('leave-')) {
+          await reviewLeaveRequest(item.rawRecord.id, {
+            status: 'rejected',
+            reviewerComments: feedback,
+          });
         }
 
         showSuccess('Returned for Revision', `${item.referenceNumber} returned to requester with remarks.`);

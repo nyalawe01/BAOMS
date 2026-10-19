@@ -743,6 +743,8 @@ export async function reviewActivitySubmission(
   );
 }
 
+export type EnrichedActivityRecord = ActivityRecord;
+
 /**
  * Get tasks for a specific project
  */
