@@ -135,7 +135,7 @@ serve(async (req) => {
 
     if (roleLookupErr || !roleRow) {
       await adminClient.auth.admin.deleteUser(newUserId);
-      return new Response(JSON.stringify({ error: Role '' not found. Apply migrations first. }), {
+      return new Response(JSON.stringify({ error: `Role '${roleCode}' not found. Apply migrations first.` }), {
         status: 422, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -148,7 +148,7 @@ serve(async (req) => {
 
     if (userRoleErr) {
       await adminClient.auth.admin.deleteUser(newUserId);
-      return new Response(JSON.stringify({ error: Role assignment failed:  }), {
+      return new Response(JSON.stringify({ error: `Role assignment failed: ${userRoleErr.message}` }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -168,7 +168,7 @@ serve(async (req) => {
 
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    return new Response(JSON.stringify({ error: Internal server error:  }), {
+    return new Response(JSON.stringify({ error: `Internal server error: ${message}` }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
