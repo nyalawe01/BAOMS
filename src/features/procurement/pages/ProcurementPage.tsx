@@ -75,8 +75,14 @@ interface ProcurementPageProps {
 }
 
 export const ProcurementPage: React.FC<ProcurementPageProps> = ({ initialTab = 'orders' }) => {
-  const { user, profile, hasRole } = useAuth();
+  const { user, profile, hasRole, hasPermission, isAdmin } = useAuth();
   const navigate = useNavigate();
+
+  const canManageProcurement =
+    hasPermission('procurement.manage') ||
+    hasRole('procurement_officer') ||
+    hasRole('system_admin') ||
+    isAdmin();
 
   const [activeTab, setActiveTab] = useState<ProcurementTab>(initialTab);
 
@@ -221,27 +227,33 @@ export const ProcurementPage: React.FC<ProcurementPageProps> = ({ initialTab = '
           { label: 'Procurement & Supply Chain' },
         ]}
         actions={
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsVendorModalOpen(true)}
-              className="flex items-center gap-1.5 text-xs text-slate-700"
-            >
-              <Building2 className="w-4 h-4 text-[#374151]" />
-              <span>Register Vendor</span>
-            </Button>
+          canManageProcurement ? (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsVendorModalOpen(true)}
+                className="flex items-center gap-1.5 text-xs text-slate-700"
+              >
+                <Building2 className="w-4 h-4 text-[#374151]" />
+                <span>Register Vendor</span>
+              </Button>
 
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setIsPOModalOpen(true)}
-              className="bg-[#D68904] hover:bg-[#b45309] text-white flex items-center gap-1.5 text-xs font-semibold"
-            >
-              <Plus className="w-4 h-4 text-white" />
-              <span>Issue Purchase Order</span>
-            </Button>
-          </div>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setIsPOModalOpen(true)}
+                className="bg-[#D68904] hover:bg-[#b45309] text-white flex items-center gap-1.5 text-xs font-semibold"
+              >
+                <Plus className="w-4 h-4 text-white" />
+                <span>Issue Purchase Order</span>
+              </Button>
+            </div>
+          ) : (
+            <span className="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full font-medium border border-slate-200">
+              Executive Read-Only Oversight
+            </span>
+          )
         }
       />
 
@@ -448,25 +460,37 @@ export const ProcurementPage: React.FC<ProcurementPageProps> = ({ initialTab = '
                             )}
 
                             {po.status === 'approved' && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleUpdateStatus(po.id, 'ordered')}
-                                className="text-xs text-blue-700 hover:bg-blue-50 h-7 px-2"
-                              >
-                                Mark Ordered
-                              </Button>
+                              canManageProcurement ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleUpdateStatus(po.id, 'ordered')}
+                                  className="text-xs text-blue-700 hover:bg-blue-50 h-7 px-2"
+                                >
+                                  Mark Ordered
+                                </Button>
+                              ) : (
+                                <span className="text-[11px] text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                  Approved
+                                </span>
+                              )
                             )}
 
                             {po.status === 'ordered' && (
-                              <Button
-                                size="sm"
-                                variant="primary"
-                                onClick={() => handleUpdateStatus(po.id, 'delivered')}
-                                className="text-xs bg-[#D68904] hover:bg-[#b45309] text-white h-7 px-2"
-                              >
-                                Confirm Delivery
-                              </Button>
+                              canManageProcurement ? (
+                                <Button
+                                  size="sm"
+                                  variant="primary"
+                                  onClick={() => handleUpdateStatus(po.id, 'delivered')}
+                                  className="text-xs bg-[#D68904] hover:bg-[#b45309] text-white h-7 px-2"
+                                >
+                                  Confirm Delivery
+                                </Button>
+                              ) : (
+                                <span className="text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                  In Transit
+                                </span>
+                              )
                             )}
 
                             {po.status === 'delivered' && (
@@ -761,7 +785,7 @@ export const ProcurementPage: React.FC<ProcurementPageProps> = ({ initialTab = '
                         </span>
                       </td>
                       <td className="py-2.5 px-4 text-right">
-                        {d.verificationStatus !== 'verified_complete' && (
+                        {canManageProcurement && d.verificationStatus !== 'verified_complete' ? (
                           <Button
                             size="sm"
                             variant="primary"
@@ -770,6 +794,10 @@ export const ProcurementPage: React.FC<ProcurementPageProps> = ({ initialTab = '
                           >
                             Verify Intake
                           </Button>
+                        ) : (
+                          <span className="text-[11px] text-slate-400">
+                            {d.verificationStatus === 'verified_complete' ? 'Complete' : 'Read-only'}
+                          </span>
                         )}
                       </td>
                     </tr>
@@ -831,14 +859,18 @@ export const ProcurementPage: React.FC<ProcurementPageProps> = ({ initialTab = '
                         <StatusIndicator status={item.status} />
                       </td>
                       <td className="py-2.5 px-4 text-right">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setSelectedInventoryItem(item)}
-                          className="text-xs h-7 px-2.5 text-slate-700 hover:text-slate-900"
-                        >
-                          Adjust Stock
-                        </Button>
+                        {canManageProcurement ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setSelectedInventoryItem(item)}
+                            className="text-xs h-7 px-2.5 text-slate-700 hover:text-slate-900"
+                          >
+                            Adjust Stock
+                          </Button>
+                        ) : (
+                          <span className="text-[11px] text-slate-400">Read-only</span>
+                        )}
                       </td>
                     </tr>
                   ))

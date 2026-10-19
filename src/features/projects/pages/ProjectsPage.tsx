@@ -103,7 +103,6 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({ initialTab = 'projec
     hasPermission(PERMISSIONS.PROJECTS_CREATE) ||
     hasPermission(PERMISSIONS.PROJECTS_MANAGE) ||
     roles.includes('system_admin') ||
-    roles.includes('executive_director') ||
     roles.includes('project_manager');
 
   const loadProjects = useCallback(async () => {
@@ -260,7 +259,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({ initialTab = 'projec
           ...(activeTab !== 'projects' ? [{ label: tabs.find((t) => t.id === activeTab)?.label || '' }] : []),
         ]}
         actions={
-          canCreateProject && (
+          canCreateProject ? (
             <Button
               variant="primary"
               onClick={() => navigate('/projects/new')}
@@ -269,7 +268,11 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({ initialTab = 'projec
               <Plus className="w-4 h-4 text-black" />
               <span>{t('projects.newProject', 'New Project')}</span>
             </Button>
-          )
+          ) : roles.includes('executive_director') ? (
+            <span className="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full font-medium border border-slate-200">
+              Executive Read-Only Oversight
+            </span>
+          ) : null
         }
       />
 
