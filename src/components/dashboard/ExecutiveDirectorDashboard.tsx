@@ -35,8 +35,15 @@ import { KPICard } from '@/components/ui/KPICard';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
 import { SkeletonDashboard } from '@/components/ui/Skeleton';
 import { AnalyticsVisualizer, AnalyticsDataPoint } from '@/components/ui/AnalyticsVisualizer';
-import { getProjects } from '@/features/projects/services/projectService';
-import { ProjectRecord } from '@/features/projects/types/project';
+import {
+  getProjects,
+  approveProject,
+  rejectProject,
+  getAllActivities,
+  authorizeActivityRequest,
+} from '@/features/projects/services/projectService';
+import { ProjectRecord, ActivityRecord } from '@/features/projects/types/project';
+import { ActivityLifecycleWorkspaceModal } from '@/features/projects/components/ActivityLifecycleWorkspaceModal';
 import {
   getRequisitions,
   getBudgets,
@@ -92,6 +99,9 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
 
   // Multi-department Data State
   const [projects, setProjects] = useState<ProjectRecord[]>([]);
+  const [activities, setActivities] = useState<ActivityRecord[]>([]);
+  const [selectedActivityForLifecycle, setSelectedActivityForLifecycle] = useState<ActivityRecord | null>(null);
+  const [isLifecycleModalOpen, setIsLifecycleModalOpen] = useState(false);
   const [requisitions, setRequisitions] = useState<FinancialRequestRecord[]>([]);
   const [budgets, setBudgets] = useState<BudgetRecord[]>([]);
   const [financeKpis, setFinanceKpis] = useState<FinanceKpis | null>(null);
@@ -121,6 +131,7 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
     try {
       const [
         pList,
+        actList,
         rList,
         bList,
         fKpis,
@@ -135,6 +146,7 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
         auditData,
       ] = await Promise.all([
         getProjects(),
+        getAllActivities(),
         getRequisitions(),
         getBudgets(),
         getFinanceKpis(),
@@ -150,6 +162,7 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
       ]);
 
       setProjects(pList);
+      setActivities(actList);
       setRequisitions(rList);
       setBudgets(bList);
       setFinanceKpis(fKpis);
@@ -196,12 +209,24 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
   }, []);
 
   // Strategic Calculations
+  const pendingProjectCharters = projects.filter((p) => p.status === 'planning');
+  const pendingActivities = activities.filter(
+    (a) => a.requestStatus === 'submitted' || a.submissionStatus === 'submitted'
+  );
+  const pendingActivityRetirements = activities.filter(
+    (a) => a.retirementStatus === 'submitted' || a.retirementStatus === 'finance_review'
+  );
   const pendingFinancialApprovals = requisitions.filter(
     (r) => r.status === 'submitted' || r.status === 'under_review'
   );
   const pendingLeaveApprovals = leaveRequests.filter((l) => l.status === 'pending');
   const totalPendingDecisionsCount =
-    pendingFinancialApprovals.length + pendingStaffAuth.length + pendingLeaveApprovals.length;
+    pendingProjectCharters.length +
+    pendingActivities.length +
+    pendingActivityRetirements.length +
+    pendingFinancialApprovals.length +
+    pendingStaffAuth.length +
+    pendingLeaveApprovals.length;
 
   const totalPortfolioBudget = projects.reduce((acc, p) => acc + (p.totalBudget || 0), 0);
   const totalSpentBudget = projects.reduce((acc, p) => acc + (p.budgetSummary?.totalSpent || 0), 0);
@@ -212,6 +237,121 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
   const totalActivePOAmount = purchaseOrders
     .filter((po) => po.status === 'ordered' || po.status === 'approved')
     .reduce((acc, po) => acc + po.totalAmount, 0);
+
+  // Executive Decision on Project Charter
+  const handleAuthorizeProject = async (project: ProjectRecord) => {
+    const result = await Swal.fire({
+      title: 'Authorize Project Charter?',
+      text: `Grant official Executive Director sign-off for "${project.name}" (${project.projectCode})? This transitions status to Active and authorizes project operations.`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#10b981',
+      confirmButtonText: 'Yes, Authorize & Activate',
+      cancelButtonText: 'Cancel',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await approveProject(
+          project.id,
+          { id: user?.id || '', name: user?.email || 'Executive Director' },
+          'Authorized and activated by Executive Director'
+        );
+        showSuccess('Charter Authorized', `${project.name} is now formally active.`);
+        loadDashboardData();
+      } catch (err: any) {
+        showError('Approval Failed', err.message || 'Could not record project authorization.');
+      }
+    }
+  };
+
+  const handleRejectProject = async (project: ProjectRecord) => {
+    const { value: comment } = await Swal.fire({
+      title: 'Return Project Charter for Revision',
+      input: 'textarea',
+      inputLabel: 'Executive Notes & Instructions',
+      inputPlaceholder: 'Enter required modifications to budget, objectives, or activities...',
+      inputValidator: (value) => {
+        if (!value || value.trim().length < 5) return 'A detailed explanation is required.';
+      },
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      confirmButtonText: 'Return Charter',
+    });
+
+    if (comment) {
+      try {
+        await rejectProject(
+          project.id,
+          { id: user?.id || '', name: user?.email || 'Executive Director' },
+          comment
+        );
+        showSuccess('Returned', `${project.name} returned for revision with audit remarks.`);
+        loadDashboardData();
+      } catch (err: any) {
+        showError('Action Failed', err.message);
+      }
+    }
+  };
+
+  // Executive Decision on Activity ToR
+  const handleAuthorizeActivity = async (activity: ActivityRecord) => {
+    const result = await Swal.fire({
+      title: 'Authorize Activity ToR?',
+      text: `Grant official sign-off for "${activity.title}" (${activity.activityCode || 'BAOMS-ACT'})?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#10b981',
+      confirmButtonText: 'Yes, Authorize Activity',
+      cancelButtonText: 'Cancel',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await authorizeActivityRequest(
+          activity.id,
+          'approved',
+          'Authorized by Executive Director',
+          user?.id || ''
+        );
+        showSuccess('Activity Authorized', `${activity.title} has been authorized.`);
+        loadDashboardData();
+      } catch (err: any) {
+        showError('Authorization Failed', err.message);
+      }
+    }
+  };
+
+  const handleRejectActivity = async (activity: ActivityRecord) => {
+    const { value: comment } = await Swal.fire({
+      title: 'Return Activity ToR',
+      input: 'textarea',
+      inputLabel: 'Executive Feedback / Return Notes',
+      inputPlaceholder: 'Reason for returning this activity request...',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      confirmButtonText: 'Return ToR',
+      cancelButtonText: 'Cancel',
+      inputValidator: (value) => {
+        if (!value || value.trim().length < 5) return 'A detailed explanation is required.';
+      },
+    });
+
+    if (comment) {
+      try {
+        await authorizeActivityRequest(
+          activity.id,
+          'rejected',
+          comment,
+          user?.id || ''
+        );
+        showSuccess('Returned', `${activity.title} returned to project manager for revision.`);
+        loadDashboardData();
+      } catch (err: any) {
+        showError('Action Failed', err.message);
+      }
+    }
+  };
 
   // Chart 1: Budget vs Actual per Project
   const budgetChartData: AnalyticsDataPoint[] = useMemo(() => {
@@ -410,6 +550,52 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
       {/* TAB 1: EXECUTIVE OVERVIEW */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
+          {/* Critical Executive Alert Banner */}
+          {(pendingProjectCharters.length > 0 || pendingActivities.length > 0) && (
+            <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-amber-100 rounded-lg text-amber-800 shrink-0">
+                  <AlertTriangle className="w-5 h-5 text-amber-700" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-amber-950">
+                    Institutional Actions Awaiting Executive Director Authorization
+                  </h3>
+                  <p className="text-xs text-amber-800 mt-0.5">
+                    {pendingProjectCharters.length > 0 && (
+                      <span className="font-semibold underline mr-2">
+                        {pendingProjectCharters.length} Project Charter(s) awaiting activation
+                      </span>
+                    )}
+                    {pendingActivities.length > 0 && (
+                      <span className="font-semibold underline">
+                        {pendingActivities.length} Activity ToR Request(s) awaiting approval
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => setActiveTab('approvals')}
+                  className="bg-[#D68904] hover:bg-[#b45309] text-white text-xs font-semibold"
+                >
+                  View Approvals Tab ({pendingProjectCharters.length + pendingActivities.length})
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/approvals')}
+                  className="text-xs border-amber-300 text-amber-900 hover:bg-amber-100"
+                >
+                  Open Full Hub
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Executive Strategic Metric Cards (Spacious 4-column Grid) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card 1: Projects Portfolio */}
@@ -556,7 +742,80 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className="divide-y divide-slate-100 flex-1 overflow-y-auto max-h-[320px]">
+              <div className="divide-y divide-slate-100 flex-1 overflow-y-auto max-h-[380px]">
+                {/* 1. Project Charters in Planning requiring ED Authorization */}
+                {pendingProjectCharters.map((p) => (
+                  <div key={p.id} className="p-3.5 hover:bg-amber-50/40 transition-colors flex items-center justify-between gap-3 border-l-2 border-l-amber-500">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900">
+                          {p.projectCode}
+                        </span>
+                        <span className="text-xs font-bold text-slate-900 truncate">{p.name}</span>
+                      </div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">
+                        Charter Sign-off | Budget: <span className="font-semibold text-slate-700">TZS {(p.totalBudget || 0).toLocaleString()}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handleAuthorizeProject(p)}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-7 px-2 font-medium"
+                      >
+                        Authorize
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRejectProject(p)}
+                        className="text-xs text-red-700 hover:bg-red-50 h-7 px-2 font-medium"
+                      >
+                        Return
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+
+                {/* 2. Activity Requests requiring ED Sign-off */}
+                {pendingActivities.map((act) => (
+                  <div key={act.id} className="p-3.5 hover:bg-blue-50/40 transition-colors flex items-center justify-between gap-3 border-l-2 border-l-blue-500">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-900">
+                          {act.activityCode || 'ACT'}
+                        </span>
+                        <span className="text-xs font-bold text-slate-900 truncate">{act.title}</span>
+                      </div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">
+                        Activity ToR | Budget: <span className="font-semibold text-slate-700">TZS {(act.allocatedBudget || 0).toLocaleString()}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handleAuthorizeActivity(act)}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-7 px-2 font-medium"
+                      >
+                        Approve ToR
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedActivityForLifecycle(act);
+                          setIsLifecycleModalOpen(true);
+                        }}
+                        className="text-xs h-7 px-2 text-slate-700 hover:bg-slate-100"
+                      >
+                        Lifecycle
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+
                 {/* Onboarding Candidate Sign-offs */}
                 {pendingStaffAuth.map((candidate) => (
                   <div key={candidate.id} className="p-3.5 hover:bg-slate-50/60 transition-colors flex items-center justify-between">
@@ -691,14 +950,28 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
                       {(p.actualBeneficiaries || p.targetBeneficiaries || 0).toLocaleString()}
                     </td>
                     <td className="py-3 px-4 text-right">
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/projects/${p.id}`)}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#D68904] hover:text-[#b45309]"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>Inspect</span>
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        {p.status === 'planning' && (
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => handleAuthorizeProject(p)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] h-7 px-2 font-medium"
+                            title="Authorize Project Charter and Transition to Active"
+                          >
+                            <CheckSquare className="w-3 h-3 mr-1" />
+                            <span>Authorize</span>
+                          </Button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/projects/${p.id}`)}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-[#D68904] hover:text-[#b45309]"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Inspect</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -875,16 +1148,171 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
       {activeTab === 'approvals' && (
         <div className="space-y-6">
           <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-xs">
-            <h2 className="text-base font-semibold text-slate-900">Executive Authorization Hub</h2>
-            <p className="text-xs text-slate-500 mt-1">
-              Final executive approvals for organizational spending, staff onboarding, and executive leave sign-offs.
-            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4">
+              <div>
+                <h2 className="text-base font-semibold text-slate-900">Executive Authorization Hub</h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Institutional sign-offs for project charters, activity ToRs, spend requisitions, and personnel.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/approvals')}
+                className="text-xs text-[#D68904] border-amber-300 hover:bg-amber-50 flex items-center gap-1.5 self-start sm:self-auto"
+              >
+                <span>Launch Master Approvals Hub</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </Button>
+            </div>
 
             <div className="mt-6 space-y-6">
-              {/* Financial Requisitions */}
+              {/* Section 1: Project Charters Pending Activation */}
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
-                  Requisitions Requiring Final Approval ({pendingFinancialApprovals.length})
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <Briefcase className="w-4 h-4 text-amber-600" />
+                    <span>Project Charters Pending Authorization ({pendingProjectCharters.length})</span>
+                  </h3>
+                  <span className="text-[11px] text-slate-500">Status: Planning → Active</span>
+                </div>
+                {pendingProjectCharters.length === 0 ? (
+                  <div className="p-4 text-xs text-slate-400 bg-slate-50 rounded-lg border border-dashed">
+                    No project charters currently awaiting executive activation.
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden">
+                    {pendingProjectCharters.map((p) => (
+                      <div key={p.id} className="p-4 bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-900">
+                              {p.projectCode}
+                            </span>
+                            <span className="font-bold text-slate-900 text-sm">{p.name}</span>
+                          </div>
+                          <div className="text-slate-500 text-[11px]">
+                            Funder: <span className="font-semibold text-slate-700">{p.funder || 'Direct / Institutional'}</span> | 
+                            Duration: {p.startDate} to {p.endDate} | 
+                            Target Beneficiaries: <span className="font-semibold text-slate-700">{(p.targetBeneficiaries || 0).toLocaleString()}</span>
+                          </div>
+                          {p.objectives && p.objectives.length > 0 && (
+                            <div className="text-[11px] text-slate-600 line-clamp-1">
+                              Goal: {p.objectives[0]}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="font-mono font-bold text-slate-900 text-sm mr-2">
+                            TZS {(p.totalBudget || 0).toLocaleString()}
+                          </div>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => handleAuthorizeProject(p)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs"
+                          >
+                            Authorize Charter
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRejectProject(p)}
+                            className="text-xs text-red-700 border-red-200 hover:bg-red-50"
+                          >
+                            Return
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigate(`/projects/${p.id}`)}
+                            className="text-xs text-slate-600 hover:bg-slate-100"
+                          >
+                            Inspect
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Section 2: Activity Requests / ToRs */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <Activity className="w-4 h-4 text-blue-600" />
+                    <span>Activity Terms of Reference (ToRs) Submitted ({pendingActivities.length})</span>
+                  </h3>
+                  <span className="text-[11px] text-slate-500">Sign-off required prior to field disbursement</span>
+                </div>
+                {pendingActivities.length === 0 ? (
+                  <div className="p-4 text-xs text-slate-400 bg-slate-50 rounded-lg border border-dashed">
+                    No field activity requests currently awaiting executive sign-off.
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden">
+                    {pendingActivities.map((act) => (
+                      <div key={act.id} className="p-4 bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-900">
+                              {act.activityCode || 'ACT'}
+                            </span>
+                            <span className="font-bold text-slate-900 text-sm">{act.title}</span>
+                          </div>
+                          <div className="text-slate-500 text-[11px]">
+                            Venue: <span className="font-medium text-slate-700">{act.location || 'Field Location'}</span> | 
+                            Timeline: {act.startDate} to {act.endDate} | 
+                            Beneficiaries: <span className="font-semibold text-slate-700">{act.targetBeneficiaries || 0}</span>
+                          </div>
+                          {act.description && (
+                            <div className="text-[11px] text-slate-600 line-clamp-1">{act.description}</div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="font-mono font-bold text-slate-900 text-sm mr-2">
+                            TZS {(act.allocatedBudget || 0).toLocaleString()}
+                          </div>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => handleAuthorizeActivity(act)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs"
+                          >
+                            Authorize ToR
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRejectActivity(act)}
+                            className="text-xs text-red-700 border-red-200 hover:bg-red-50"
+                          >
+                            Return
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedActivityForLifecycle(act);
+                              setIsLifecycleModalOpen(true);
+                            }}
+                            className="text-xs text-slate-700 hover:bg-slate-100"
+                          >
+                            Lifecycle Hub
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Section 3: Financial Requisitions */}
+              <div>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700 mb-3 flex items-center gap-1.5">
+                  <Wallet className="w-4 h-4 text-emerald-600" />
+                  <span>Requisitions Requiring Final Approval ({pendingFinancialApprovals.length})</span>
                 </h3>
                 {pendingFinancialApprovals.length === 0 ? (
                   <div className="p-4 text-xs text-slate-400 bg-slate-50 rounded-lg border border-dashed">
@@ -927,7 +1355,7 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
                 )}
               </div>
 
-              {/* Staff Onboarding Sign-offs */}
+              {/* Section 4: Staff Onboarding Sign-offs */}
               <div>
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
                   New Staff Accounts Requiring Executive Sign-Off ({pendingStaffAuth.length})
@@ -977,6 +1405,22 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
           onSuccess={() => {
             setIsApprovalModalOpen(false);
             setSelectedStaffCandidate(null);
+            loadDashboardData();
+          }}
+        />
+      )}
+
+      {/* Activity Lifecycle Workspace Modal */}
+      {isLifecycleModalOpen && selectedActivityForLifecycle && (
+        <ActivityLifecycleWorkspaceModal
+          isOpen={isLifecycleModalOpen}
+          onClose={() => {
+            setIsLifecycleModalOpen(false);
+            setSelectedActivityForLifecycle(null);
+          }}
+          activity={selectedActivityForLifecycle}
+          project={projects.find((p) => p.id === selectedActivityForLifecycle.projectId)}
+          onUpdated={() => {
             loadDashboardData();
           }}
         />

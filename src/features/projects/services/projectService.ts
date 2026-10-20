@@ -265,12 +265,13 @@ export async function getProjects(
 
   // Filter by user membership if user is not an admin, director, finance, or project manager
   if (currentUser?.id && currentUser?.role) {
+    const roleNormalized = (currentUser.role || '').toLowerCase().replace(/\s+/g, '_');
     const isPrivileged = [
       'system_admin',
       'executive_director',
       'finance_officer',
       'project_manager',
-    ].includes(currentUser.role);
+    ].includes(roleNormalized) || roleNormalized.includes('director') || roleNormalized.includes('admin');
     if (!isPrivileged) {
       const assignedProjects = projects.filter(
         (p) => p.members.some((m) => m.userId === currentUser.id) || p.createdBy === currentUser.id
@@ -609,10 +610,10 @@ export async function getAllActivities(params?: {
       budgetEstimated: row.budget_estimated ? Number(row.budget_estimated) : 0,
       wardLocation: row.ward_location || null,
       assignedStaffId: row.assigned_staff_id || null,
-      requestStatus: row.request_status || 'not_submitted',
+      requestStatus: row.request_status || (row.submission_status === 'submitted' ? 'submitted' : (row.submission_status === 'approved' ? 'approved' : 'not_submitted')),
       procurementStatus: row.procurement_status || 'not_required',
-      implementationStatus: row.implementation_status || 'planned',
-      meStatus: row.me_status || 'draft',
+      implementationStatus: row.implementation_status || (row.submission_status === 'approved' ? 'in_progress' : 'planned'),
+      meStatus: row.me_status || (row.submission_status === 'approved' ? 'verified' : 'draft'),
       retirementStatus: row.retirement_status || 'not_started',
       requestTitle: row.request_title || null,
       requestDescription: row.request_description || null,
@@ -675,11 +676,10 @@ export async function getAllActivities(params?: {
       budgetEstimated: row.budget_estimated ? Number(row.budget_estimated) : 0,
       wardLocation: row.ward_location || null,
       assignedStaffId: row.assigned_staff_id || null,
-      assignedStaffName: row.assigned_staff?.display_name || undefined,
-      requestStatus: row.request_status || 'not_submitted',
+      requestStatus: row.request_status || (row.submission_status === 'submitted' ? 'submitted' : (row.submission_status === 'approved' ? 'approved' : 'not_submitted')),
       procurementStatus: row.procurement_status || 'not_required',
-      implementationStatus: row.implementation_status || 'planned',
-      meStatus: row.me_status || 'draft',
+      implementationStatus: row.implementation_status || (row.submission_status === 'approved' ? 'in_progress' : 'planned'),
+      meStatus: row.me_status || (row.submission_status === 'approved' ? 'verified' : 'draft'),
       retirementStatus: row.retirement_status || 'not_started',
       requestTitle: row.request_title || null,
       requestDescription: row.request_description || null,

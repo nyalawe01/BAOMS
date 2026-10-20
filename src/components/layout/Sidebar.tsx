@@ -92,6 +92,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           heading: t('nav.section.overview', 'System Overview'),
           items: [
             { to: '/', label: t('nav.dashboard', 'System Console'), icon: BentoDashboardIcon },
+            { to: '/approvals', label: 'Executive Approvals Hub', icon: CheckSquare },
+            { to: '/projects', label: 'Projects & Programs', icon: Briefcase },
           ],
         },
         {
@@ -105,6 +107,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           heading: t('nav.section.orgRecords', 'Organization & Governance'),
           items: [
             { to: '/organization', label: t('nav.departments', 'Organization Structure'), icon: Building2 },
+            { to: '/finance', label: 'Finance & Budgets', icon: Wallet },
+            { to: '/me-impact', label: 'M&E & Impact', icon: Target },
             { to: '/documents', label: t('nav.documents', 'Document Registry & Storage'), icon: FileText },
           ],
         },

@@ -166,7 +166,7 @@ export const ApprovalsPage: React.FC = () => {
 
       fetchedActivities.forEach((act) => {
         // Stage 1: Submitted Pre-implementation ToR
-        if (act.requestStatus === 'submitted') {
+        if (act.requestStatus === 'submitted' || act.submissionStatus === 'submitted') {
           items.push({
             id: `act-req-${act.id}`,
             referenceNumber: act.activityCode || `ACT-${act.id.substring(0, 8).toUpperCase()}`,
