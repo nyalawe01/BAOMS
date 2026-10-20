@@ -37,6 +37,7 @@ import type {
   DraftOutputItem,
   DraftActivityItem,
 } from '../components/ProjectResultsFrameworkBuilder';
+import { addNotification } from '@/services/notificationsService';
 
 // Compatibility stubs for legacy tests
 export const resetMockProjectState = (): void => {};
@@ -436,6 +437,269 @@ export async function deleteProject(id: string): Promise<void> {
   if (error) {
     throw new Error(`Failed to delete project: ${error.message}`);
   }
+}
+
+/**
+ * Executive Director approves and officially activates a project charter
+ */
+export async function approveProject(
+  projectId: string,
+  user: { id: string; name?: string },
+  comments?: string
+): Promise<ProjectRecord> {
+  if (!isSupabaseConfigured) throw new Error('Database is not configured.');
+
+  const now = new Date().toISOString();
+  const { error } = await supabase
+    .from('projects')
+    .update({
+      status: 'active',
+      updated_at: now,
+    })
+    .eq('id', projectId);
+
+  if (error) {
+    throw new Error(`Failed to approve project: ${error.message}`);
+  }
+
+  addNotification({
+    title: 'Project Charter Approved by Executive Director',
+    message: comments
+      ? `Project has been formally activated: ${comments}`
+      : 'Project charter has been formally authorized and activated for field operations.',
+    type: 'project',
+    targetRole: 'all',
+    link: `/projects/${projectId}`,
+  });
+
+  const refreshed = await getProjectById(projectId);
+  if (!refreshed) throw new Error('Project not found after approval.');
+  return refreshed;
+}
+
+/**
+ * Executive Director rejects or returns a project charter for revision
+ */
+export async function rejectProject(
+  projectId: string,
+  user: { id: string; name?: string },
+  comments: string
+): Promise<ProjectRecord> {
+  if (!isSupabaseConfigured) throw new Error('Database is not configured.');
+
+  const now = new Date().toISOString();
+  const { error } = await supabase
+    .from('projects')
+    .update({
+      status: 'on_hold',
+      updated_at: now,
+    })
+    .eq('id', projectId);
+
+  if (error) {
+    throw new Error(`Failed to reject project: ${error.message}`);
+  }
+
+  addNotification({
+    title: 'Project Charter Returned for Revision',
+    message: `Executive Director note: ${comments}`,
+    type: 'project',
+    targetRole: 'project_manager',
+    link: `/projects/${projectId}`,
+  });
+
+  const refreshed = await getProjectById(projectId);
+  if (!refreshed) throw new Error('Project not found after rejection.');
+  return refreshed;
+}
+
+/**
+ * Fetch all activities across all organizational projects with lifecycle statuses
+ */
+export async function getAllActivities(params?: {
+  projectId?: string;
+  status?: string;
+  submittedBy?: string;
+  requestStatus?: string;
+  implementationStatus?: string;
+  meStatus?: string;
+  retirementStatus?: string;
+  searchQuery?: string;
+}): Promise<ActivityRecord[]> {
+  if (!isSupabaseConfigured) return [];
+
+  let query = supabase
+    .from('activities')
+    .select(`
+      *,
+      project:projects(id, project_code, name, funder),
+      submitter:profiles!submitted_by(display_name),
+      reviewer:profiles!reviewed_by(display_name),
+      assigned_staff:profiles!assigned_staff_id(display_name),
+      authorizer:profiles!authorized_by(display_name),
+      retirement_approver:profiles!retirement_approved_by(display_name),
+      outcome:project_outcomes(title),
+      output:project_outputs(title),
+      activity_documents(
+        activity_id, document_id, attached_at,
+        documents(title, reference_number)
+      )
+    `)
+    .order('activity_date', { ascending: false });
+
+  if (params?.projectId && params.projectId !== 'all') {
+    query = query.eq('project_id', params.projectId);
+  }
+  if (params?.status && params.status !== 'all') {
+    query = query.eq('submission_status', params.status);
+  }
+  if (params?.submittedBy) {
+    query = query.eq('submitted_by', params.submittedBy);
+  }
+  if (params?.requestStatus && params.requestStatus !== 'all') {
+    query = query.eq('request_status', params.requestStatus);
+  }
+  if (params?.implementationStatus && params.implementationStatus !== 'all') {
+    query = query.eq('implementation_status', params.implementationStatus);
+  }
+  if (params?.meStatus && params.meStatus !== 'all') {
+    query = query.eq('me_status', params.meStatus);
+  }
+  if (params?.retirementStatus && params.retirementStatus !== 'all') {
+    query = query.eq('retirement_status', params.retirementStatus);
+  }
+  if (params?.searchQuery) {
+    const q = params.searchQuery.trim();
+    query = query.or(`title.ilike.%${q}%,progress.ilike.%${q}%,activity_code.ilike.%${q}%,location.ilike.%${q}%`);
+  }
+
+  const { data, error } = await query;
+  if (error || !data) {
+    const fallback = await supabase
+      .from('activities')
+      .select('*, project:projects(id, project_code, name)')
+      .order('activity_date', { ascending: false });
+    if (fallback.error || !fallback.data) return [];
+    return fallback.data.map((row: any): ActivityRecord => ({
+      id: row.id,
+      projectId: row.project_id,
+      projectName: row.project?.name,
+      projectCode: row.project?.project_code,
+      title: row.title,
+      description: row.description,
+      activityDate: row.activity_date,
+      location: row.location,
+      participantsCount: row.participants_count || 0,
+      progress: row.progress || '',
+      challenges: row.challenges,
+      followUpActions: row.follow_up_actions,
+      submissionStatus: row.submission_status,
+      submittedBy: row.submitted_by,
+      submittedByName: 'Staff Member',
+      submittedAt: row.submitted_at,
+      reviewedBy: row.reviewed_by,
+      reviewedAt: row.reviewed_at,
+      reviewComments: row.review_comments,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      activityCode: row.activity_code || undefined,
+      outcomeId: row.outcome_id || null,
+      outputId: row.output_id || null,
+      targetParticipants: row.target_participants ?? 0,
+      budgetEstimated: row.budget_estimated ? Number(row.budget_estimated) : 0,
+      wardLocation: row.ward_location || null,
+      assignedStaffId: row.assigned_staff_id || null,
+      requestStatus: row.request_status || 'not_submitted',
+      procurementStatus: row.procurement_status || 'not_required',
+      implementationStatus: row.implementation_status || 'planned',
+      meStatus: row.me_status || 'draft',
+      retirementStatus: row.retirement_status || 'not_started',
+      requestTitle: row.request_title || null,
+      requestDescription: row.request_description || null,
+      requestedDate: row.requested_date || null,
+      torDocumentId: row.tor_document_id || null,
+      authorizedBy: row.authorized_by || null,
+      authorizedAt: row.authorized_at || null,
+      authorizationComments: row.authorization_comments || null,
+      retiredAmount: row.retired_amount ? Number(row.retired_amount) : 0,
+      retirementVariance: row.retirement_variance ? Number(row.retirement_variance) : 0,
+      retirementReceiptsCount: row.retirement_receipts_count ?? 0,
+      retiredBy: row.retired_by || null,
+      retiredAt: row.retired_at || null,
+      retirementApprovedBy: row.retirement_approved_by || null,
+      retirementApprovedAt: row.retirement_approved_at || null,
+      evidenceDocuments: [],
+    }));
+  }
+
+  return data.map((row: any): ActivityRecord => {
+    const evidence: ActivityDocumentRecord[] = (row.activity_documents || []).map((ad: any) => ({
+      id: `${ad.activity_id}-${ad.document_id}`,
+      activityId: ad.activity_id,
+      documentId: ad.document_id,
+      documentTitle: ad.documents?.title || 'Evidence File',
+      documentReference: ad.documents?.reference_number || 'REF',
+      attachedAt: ad.attached_at,
+      attachedBy: '',
+    }));
+
+    return {
+      id: row.id,
+      projectId: row.project_id,
+      projectName: row.project?.name,
+      projectCode: row.project?.project_code,
+      title: row.title,
+      description: row.description,
+      activityDate: row.activity_date,
+      location: row.location,
+      participantsCount: row.participants_count || 0,
+      progress: row.progress || '',
+      challenges: row.challenges,
+      followUpActions: row.follow_up_actions,
+      submissionStatus: row.submission_status,
+      submittedBy: row.submitted_by,
+      submittedByName: row.submitter?.display_name || 'Staff Member',
+      submittedAt: row.submitted_at,
+      reviewedBy: row.reviewed_by,
+      reviewedByName: row.reviewer?.display_name,
+      reviewedAt: row.reviewed_at,
+      reviewComments: row.review_comments,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      activityCode: row.activity_code || undefined,
+      outcomeId: row.outcome_id || null,
+      outcomeTitle: row.outcome?.title || null,
+      outputId: row.output_id || null,
+      outputTitle: row.output?.title || null,
+      targetParticipants: row.target_participants ?? 0,
+      budgetEstimated: row.budget_estimated ? Number(row.budget_estimated) : 0,
+      wardLocation: row.ward_location || null,
+      assignedStaffId: row.assigned_staff_id || null,
+      assignedStaffName: row.assigned_staff?.display_name || undefined,
+      requestStatus: row.request_status || 'not_submitted',
+      procurementStatus: row.procurement_status || 'not_required',
+      implementationStatus: row.implementation_status || 'planned',
+      meStatus: row.me_status || 'draft',
+      retirementStatus: row.retirement_status || 'not_started',
+      requestTitle: row.request_title || null,
+      requestDescription: row.request_description || null,
+      requestedDate: row.requested_date || null,
+      torDocumentId: row.tor_document_id || null,
+      authorizedBy: row.authorized_by || null,
+      authorizedByName: row.authorizer?.display_name || undefined,
+      authorizedAt: row.authorized_at || null,
+      authorizationComments: row.authorization_comments || null,
+      retiredAmount: row.retired_amount ? Number(row.retired_amount) : 0,
+      retirementVariance: row.retirement_variance ? Number(row.retirement_variance) : 0,
+      retirementReceiptsCount: row.retirement_receipts_count ?? 0,
+      retiredBy: row.retired_by || null,
+      retiredAt: row.retired_at || null,
+      retirementApprovedBy: row.retirement_approved_by || null,
+      retirementApprovedByName: row.retirement_approver?.display_name || undefined,
+      retirementApprovedAt: row.retirement_approved_at || null,
+      evidenceDocuments: evidence,
+    };
+  });
 }
 
 /**
@@ -1130,86 +1394,6 @@ export async function removeProjectMember(
   }
 }
 
-/**
- * Fetch all field activities across all projects with project name and coordinator info
- */
-export async function getAllActivities(params?: {
-  projectId?: string;
-  status?: string;
-  submittedBy?: string;
-  searchQuery?: string;
-}): Promise<ActivityRecord[]> {
-  if (!isSupabaseConfigured) return [];
-
-  let query = supabase
-    .from('activities')
-    .select(`
-      *,
-      project:projects(id, project_code, name),
-      submitter:profiles!submitted_by(display_name),
-      reviewer:profiles!reviewed_by(display_name),
-      activity_documents(
-        activity_id, document_id, attached_at,
-        documents(title, reference_number)
-      )
-    `)
-    .order('activity_date', { ascending: false });
-
-  if (params?.projectId && params.projectId !== 'all') {
-    query = query.eq('project_id', params.projectId);
-  }
-  if (params?.status && params.status !== 'all') {
-    query = query.eq('submission_status', params.status);
-  }
-  if (params?.submittedBy) {
-    query = query.eq('submitted_by', params.submittedBy);
-  }
-  if (params?.searchQuery) {
-    const q = params.searchQuery.trim();
-    query = query.or(`title.ilike.%${q}%,location.ilike.%${q}%,progress.ilike.%${q}%`);
-  }
-
-  const { data, error } = await query;
-  if (error || !data) return [];
-
-  return data.map((row: any): ActivityRecord => {
-    const evidence: ActivityDocumentRecord[] = (row.activity_documents || []).map((ad: any) => ({
-      id: `${ad.activity_id}-${ad.document_id}`,
-      activityId: ad.activity_id,
-      documentId: ad.document_id,
-      documentTitle: ad.documents?.title || 'Evidence File',
-      documentReference: ad.documents?.reference_number || 'REF',
-      attachedAt: ad.attached_at,
-      attachedBy: '',
-    }));
-
-    return {
-      id: row.id,
-      projectId: row.project_id,
-      projectName: row.project?.name,
-      projectCode: row.project?.project_code,
-      title: row.title,
-      description: row.description,
-      activityDate: row.activity_date,
-      location: row.location,
-      participantsCount: row.participants_count || 0,
-      progress: row.progress || '',
-      challenges: row.challenges,
-      followUpActions: row.follow_up_actions,
-      submissionStatus: row.submission_status,
-      submittedBy: row.submitted_by,
-      submittedByName: row.submitter?.display_name || 'Staff Member',
-      submittedAt: row.submitted_at,
-      reviewedBy: row.reviewed_by,
-      reviewedByName: row.reviewer?.display_name,
-      reviewedAt: row.reviewed_at,
-      reviewComments: row.review_comments,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      evidenceDocuments: evidence,
-    };
-  });
-}
 
 /**
  * Fetch all workplan tasks across projects

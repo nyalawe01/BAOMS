@@ -30,6 +30,7 @@ import {
   FolderOpen,
   CheckSquare,
   MapPin,
+  ShieldCheck,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
@@ -41,8 +42,10 @@ import { SkeletonCard } from '@/components/ui/Skeleton';
 import { useAuth } from '@/features/auth/useAuth';
 import { PERMISSIONS } from '@/lib/permissions';
 import { ProjectRecord, ProjectStatus } from '../types/project';
-import { getProjects, createProject } from '../services/projectService';
+import { getProjects, createProject, approveProject } from '../services/projectService';
 import { CreateProjectModal } from '../components/CreateProjectModal';
+import Swal from 'sweetalert2';
+import { showSuccess, showError } from '@/lib/sweetAlert';
 
 // Sub-views
 import { ProjectPlanningView } from '../components/ProjectPlanningView';
@@ -259,22 +262,52 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({ initialTab = 'projec
           ...(activeTab !== 'projects' ? [{ label: tabs.find((t) => t.id === activeTab)?.label || '' }] : []),
         ]}
         actions={
-          canCreateProject ? (
-            <Button
-              variant="primary"
-              onClick={() => navigate('/projects/new')}
-              className="flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4 text-black" />
-              <span>{t('projects.newProject', 'New Project')}</span>
-            </Button>
-          ) : roles.includes('executive_director') ? (
-            <span className="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full font-medium border border-slate-200">
-              Executive Read-Only Oversight
-            </span>
-          ) : null
+          <div className="flex items-center gap-2">
+            {(roles.includes('executive_director') || roles.includes('system_admin')) && (
+              <Button
+                variant="outline"
+                onClick={() => navigate('/approvals?mode=portfolio')}
+                className="flex items-center gap-1.5 border-[#D68904] text-[#D68904] hover:bg-[#D68904]/10"
+              >
+                <CheckSquare className="w-4 h-4 text-[#D68904]" />
+                <span>Executive Approvals Hub</span>
+              </Button>
+            )}
+            {canCreateProject && (
+              <Button
+                variant="primary"
+                onClick={() => navigate('/projects/new')}
+                className="flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4 text-black" />
+                <span>{t('projects.newProject', 'New Project')}</span>
+              </Button>
+            )}
+          </div>
         }
       />
+
+      {/* Executive Director Pending Charters Alert Banner */}
+      {projects.some((p) => p.status === 'planning') && (roles.includes('executive_director') || roles.includes('system_admin')) && (
+        <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-950 shadow-2xs">
+          <div className="flex items-center gap-2.5">
+            <ShieldCheck className="w-5 h-5 text-amber-700 flex-shrink-0" />
+            <span>
+              <strong>Executive Governance Gate:</strong> There are{' '}
+              <span className="font-bold underline">{projects.filter((p) => p.status === 'planning').length} project charter(s)</span> in
+              planning awaiting your formal Executive Director authorization before operational activities can commence.
+            </span>
+          </div>
+          <Button
+            size="xs"
+            variant="primary"
+            onClick={() => navigate('/approvals?tab=projects')}
+            className="whitespace-nowrap font-bold"
+          >
+            Review &amp; Authorize Charters
+          </Button>
+        </div>
+      )}
 
       {/* AdminCN Inspired Horizontal Tab Strip */}
       <div className="border-b border-gray-200 bg-white px-2 rounded-t-lg shadow-2xs overflow-x-auto touch-pan-x -mx-1 sm:mx-0">
@@ -483,11 +516,46 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({ initialTab = 'projec
                       </div>
                     </div>
 
-                    <div className="px-5 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-                      <div className="text-xs text-gray-600 truncate max-w-[180px]">
-                        {(project.members || []).find((m) => m.projectRole === 'manager')?.userName ||
-                          t('projects.unassignedManager', 'Unassigned Manager')}
-                      </div>
+                    <div className="px-5 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between gap-2">
+                      {project.status === 'planning' && (roles.includes('executive_director') || roles.includes('system_admin')) ? (
+                        <Button
+                          size="xs"
+                          variant="primary"
+                          onClick={async () => {
+                            const conf = await Swal.fire({
+                              title: 'Authorize Project Charter?',
+                              text: `Grant formal Executive Director approval to activate "${project.name}" (${project.projectCode})?`,
+                              icon: 'question',
+                              showCancelButton: true,
+                              confirmButtonColor: '#10b981',
+                              confirmButtonText: 'Yes, Activate Charter',
+                              cancelButtonText: 'Cancel',
+                            });
+                            if (conf.isConfirmed) {
+                              try {
+                                await approveProject(
+                                  project.id,
+                                  { id: user?.id || '', name: user?.name || user?.email || 'Executive Director' },
+                                  'Authorized by Executive Director'
+                                );
+                                showSuccess('Charter Authorized', `${project.name} is now Active.`);
+                                loadProjects();
+                              } catch (e: any) {
+                                showError('Approval Failed', e.message);
+                              }
+                            }
+                          }}
+                          className="flex items-center gap-1.5 font-bold text-xs"
+                        >
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                          <span>Authorize Charter</span>
+                        </Button>
+                      ) : (
+                        <div className="text-xs text-gray-600 truncate max-w-[180px]">
+                          {(project.members || []).find((m) => m.projectRole === 'manager')?.userName ||
+                            t('projects.unassignedManager', 'Unassigned Manager')}
+                        </div>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"

@@ -29,6 +29,7 @@ import {
   BarChart3,
   Sparkles,
   Layers,
+  ShieldCheck,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
@@ -43,6 +44,7 @@ import { ActivityLifecycleWorkspaceModal } from '../components/ActivityLifecycle
 import { exportSingleActivityToWord, exportSingleActivityToExcel } from '../utils/exportProjectDossier';
 import { useAuth } from '@/features/auth/useAuth';
 import { confirmAction, showSuccess, showError } from '@/lib/sweetAlert';
+import Swal from 'sweetalert2';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getProjectEngineData, type ProjectEngineData } from '../dynamic/service';
 import { calculateIndicator } from '../dynamic/calculations';
@@ -68,6 +70,8 @@ import {
   updateTask,
   assignProjectMember,
   removeProjectMember,
+  approveProject,
+  rejectProject,
 } from '../services/projectService';
 import { RecordActivityModal } from '../components/RecordActivityModal';
 import { ReviewActivityModal } from '../components/ReviewActivityModal';
@@ -403,6 +407,96 @@ export const ProjectWorkspacePage: React.FC = () => {
           </div>
         }
       />
+
+      {/* Executive Director Charter Approval Callout */}
+      {project.status === 'planning' && (
+        <div className="p-4 bg-amber-50 border border-amber-300 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-full bg-amber-200/80 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <ShieldCheck className="w-5 h-5 text-amber-900" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-amber-950">
+                Project Charter Pending Executive Director Sign-off (Planning Phase)
+              </h4>
+              <p className="text-xs text-amber-800 mt-0.5 max-w-2xl">
+                This project was registered in planning status. Formal Executive Director authorization is required to transition this charter to Active, unlocking field implementation workplans, requisitions, and financial drawdown.
+              </p>
+            </div>
+          </div>
+
+          {(roles.includes('executive_director') || roles.includes('system_admin')) ? (
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={async () => {
+                  const { value: comment } = await Swal.fire({
+                    title: 'Return Project for Revision',
+                    input: 'textarea',
+                    inputLabel: 'Reason or Requirements',
+                    inputPlaceholder: 'Specify required modifications to objectives, logframe, or budget...',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: 'Return Charter',
+                  });
+                  if (comment) {
+                    try {
+                      await rejectProject(
+                        project.id,
+                        { id: user?.id || '', name: user?.name || user?.email || 'Executive Director' },
+                        comment
+                      );
+                      showSuccess('Returned', 'Project charter has been returned for revision.');
+                      loadData();
+                    } catch (e: any) {
+                      showError('Action Failed', e.message);
+                    }
+                  }
+                }}
+                className="text-amber-800 border-amber-300 hover:bg-amber-100"
+              >
+                Return for Revision
+              </Button>
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={async () => {
+                  const conf = await Swal.fire({
+                    title: 'Authorize Project Charter?',
+                    text: `Formally authorize "${project.name}" (${project.projectCode})? This transitions status to Active and authorizes project operations.`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#10b981',
+                    confirmButtonText: 'Yes, Authorize & Activate',
+                  });
+                  if (conf.isConfirmed) {
+                    try {
+                      await approveProject(
+                        project.id,
+                        { id: user?.id || '', name: user?.name || user?.email || 'Executive Director' },
+                        'Authorized by Executive Director'
+                      );
+                      showSuccess('Project Activated', `${project.name} is now formally active.`);
+                      loadData();
+                    } catch (e: any) {
+                      showError('Approval Failed', e.message);
+                    }
+                  }
+                }}
+                className="flex items-center gap-1.5 font-bold"
+              >
+                <CheckCircle2 className="w-4 h-4 text-black" />
+                <span>Authorize &amp; Activate Charter</span>
+              </Button>
+            </div>
+          ) : (
+            <span className="text-xs font-semibold px-3 py-1 bg-amber-200/60 text-amber-900 rounded-md border border-amber-300">
+              Awaiting Executive Director Decision
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Tabs Navigation */}
       <Tabs tabs={tabsConfig} activeTab={activeTab} onChange={setActiveTab} />
