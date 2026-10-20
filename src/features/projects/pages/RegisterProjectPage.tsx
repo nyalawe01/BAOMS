@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Check,
   FileStack,
+  Sparkles,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
@@ -29,6 +30,14 @@ import { createProject } from '../services/projectService';
 import { fetchActiveStaffMembers, StaffMemberOption } from '@/services/staffService';
 import { addNotification } from '@/services/notificationsService';
 import { useAuth } from '@/features/auth/useAuth';
+import { applyOrganizationTemplate, getOrganizationProjectTemplates, initializeProjectEngine } from '../dynamic/service';
+import type { OrganizationProjectTemplate } from '../dynamic/types';
+import {
+  ProjectBlueprintBuilderStep,
+  ProjectBlueprintState,
+} from '../components/ProjectBlueprintBuilderStep';
+import { ORGANIZATIONAL_TEMPLATES } from '../dynamic/templates';
+import { initializeProjectBlueprint } from '../dynamic/service';
 
 const DRAFT_STORAGE_KEY = 'baoms_project_registration_draft';
 
@@ -46,6 +55,7 @@ const AVAILABLE_DISTRICTS = [
 interface ProjectDraftState {
   step: number;
   savedAt: string;
+  templateVersionId?: string;
   identity: {
     projectCode: string;
     name: string;
@@ -69,11 +79,13 @@ interface ProjectDraftState {
     targetRegions: string[];
     partnerOrganizations: string;
   };
+  blueprint: ProjectBlueprintState;
 }
 
 const INITIAL_PROJECT_DRAFT: ProjectDraftState = {
   step: 0,
   savedAt: '',
+  templateVersionId: '',
   identity: {
     projectCode: '',
     name: '',
@@ -97,6 +109,30 @@ const INITIAL_PROJECT_DRAFT: ProjectDraftState = {
     targetRegions: ['Dar es Salaam - Kigamboni', 'Dar es Salaam - Temeke'],
     partnerOrganizations: 'Local Ward Development Committees, CBO Coalition',
   },
+  blueprint: {
+    templateId: ORGANIZATIONAL_TEMPLATES[0].id,
+    collectionCadence: 'monthly',
+    assignedRole: 'coordinator',
+    indicators: ORGANIZATIONAL_TEMPLATES[0].indicators.map((ind) => ({
+      code: ind.code,
+      name: ind.name,
+      description: ind.description,
+      unit: ind.unit,
+      target: String(ind.defaultTarget),
+      baseline: '0',
+      calculationType: ind.calculationType,
+      sourceFieldKey: ind.sourceFieldKey,
+    })),
+    formName: ORGANIZATIONAL_TEMPLATES[0].form.name,
+    formFields: ORGANIZATIONAL_TEMPLATES[0].form.fields.map((f) => ({
+      key: f.key,
+      label: f.label,
+      type: f.type,
+      required: f.required,
+      helpText: f.helpText,
+    })),
+    checklists: [...ORGANIZATIONAL_TEMPLATES[0].checklists],
+  },
 };
 
 export const RegisterProjectPage: React.FC = () => {
@@ -105,6 +141,7 @@ export const RegisterProjectPage: React.FC = () => {
   const { user, profile } = useAuth();
 
   const [activeStaff, setActiveStaff] = useState<StaffMemberOption[]>([]);
+  const [approvedTemplates, setApprovedTemplates] = useState<OrganizationProjectTemplate[]>([]);
 
   useEffect(() => {
     fetchActiveStaffMembers().then((staff) => {
@@ -120,6 +157,12 @@ export const RegisterProjectPage: React.FC = () => {
         },
       }));
     });
+  }, []);
+
+  useEffect(() => {
+    getOrganizationProjectTemplates()
+      .then((templates) => setApprovedTemplates(templates.filter((template) => template.status === 'active')))
+      .catch(() => setApprovedTemplates([]));
   }, []);
 
   const [formData, setFormData] = useState<ProjectDraftState>({
@@ -145,7 +188,11 @@ export const RegisterProjectPage: React.FC = () => {
       try {
         const parsed = JSON.parse(rawDraft) as ProjectDraftState;
         if (parsed && (parsed.identity?.name || parsed.identity?.projectCode)) {
-          setFormData(parsed);
+          setFormData({
+            ...INITIAL_PROJECT_DRAFT,
+            ...parsed,
+            blueprint: parsed.blueprint || INITIAL_PROJECT_DRAFT.blueprint,
+          });
           setHasDraftRestored(true);
           setSaveTimestamp(parsed.savedAt);
           const standardSectors = [
@@ -191,12 +238,18 @@ export const RegisterProjectPage: React.FC = () => {
     },
     {
       id: 3,
+      title: 'M&E Blueprint & Forms',
+      subtitle: 'Dynamic Metrics, Registers & KPIs',
+      icon: <Sparkles className="w-4 h-4" />,
+    },
+    {
+      id: 4,
       title: t('projects.stepper.documents', 'Supporting Documents'),
       subtitle: t('projects.stepper.documentsSub', 'Charters, MoUs & Grants'),
       icon: <FileStack className="w-4 h-4" />,
     },
     {
-      id: 4,
+      id: 5,
       title: t('projects.stepper.review', 'Review & Approval'),
       subtitle: t('projects.stepper.reviewSub', 'Final Verification'),
       icon: <CheckCircle2 className="w-4 h-4" />,
@@ -287,6 +340,24 @@ export const RegisterProjectPage: React.FC = () => {
       return true;
     }
 
+    if (step === 3) {
+      if (
+        formData.blueprint.indicators.some(
+          (ind) => !ind.code.trim() || !ind.name.trim() || !ind.sourceFieldKey.trim()
+        )
+      ) {
+        setValidationError('Every performance indicator must have a valid Code, Title, and Source Field Key.');
+        return false;
+      }
+      if (
+        formData.blueprint.formFields.some((f) => !f.key.trim() || !f.label.trim())
+      ) {
+        setValidationError('Every question in the collection form must have a Field Key and Label.');
+        return false;
+      }
+      return true;
+    }
+
     return true;
   };
 
@@ -363,6 +434,60 @@ export const RegisterProjectPage: React.FC = () => {
 
       const created = await createProject(input, actor);
 
+      let templateApplyError: string | null = null;
+      if (formData.templateVersionId) {
+        try {
+          // An approved database template is a complete starter configuration.
+          // Do not also apply the wizard's local blueprint or it would duplicate forms and indicators.
+          await applyOrganizationTemplate(created.id, formData.templateVersionId);
+        } catch (templateError) {
+          templateApplyError = templateError instanceof Error ? templateError.message : String(templateError);
+        }
+      } else {
+        try {
+          // Every project receives an immutable initial configuration snapshot,
+          // including projects whose indicators/forms come from the wizard.
+          await initializeProjectEngine(created.id);
+          if (formData.blueprint && (formData.blueprint.indicators.length > 0 || formData.blueprint.formFields.length > 0)) {
+            await initializeProjectBlueprint({
+              projectId: created.id,
+              userId: user?.id || 'admin',
+              indicators: formData.blueprint.indicators.map((ind) => ({
+                code: ind.code.trim().toUpperCase(),
+                name: ind.name.trim(),
+                description: ind.description.trim(),
+                unit: ind.unit.trim() || 'count',
+                target: ind.target ? parseFloat(ind.target) : null,
+                baseline: ind.baseline ? parseFloat(ind.baseline) : null,
+                calculationType: ind.calculationType,
+                sourceFieldKey: ind.sourceFieldKey.trim(),
+                aggregation:
+                  ind.calculationType === 'average'
+                    ? 'average'
+                    : ind.calculationType === 'latest_value_or_milestone_state'
+                    ? 'latest'
+                    : 'sum',
+              })),
+              forms: formData.blueprint.formFields.length
+                ? [{
+                    name: formData.blueprint.formName.trim() || `${created.name} Activity Log`,
+                    fields: formData.blueprint.formFields.map((f) => ({
+                      key: f.key.trim(),
+                      label: f.label.trim(),
+                      type: f.type,
+                      required: f.required,
+                      helpText: f.helpText,
+                    })),
+                    publishImmediately: true,
+                  }]
+                : [],
+            });
+          }
+        } catch (engineError) {
+          templateApplyError = engineError instanceof Error ? engineError.message : String(engineError);
+        }
+      }
+
       // Organizational notification
       addNotification({
         title: `New Project Launched: ${created.name}`,
@@ -371,6 +496,16 @@ export const RegisterProjectPage: React.FC = () => {
         targetRole: 'all',
         link: `/projects/${created.id}`,
       });
+
+      if (templateApplyError) {
+        addNotification({
+          title: 'Project registered; dynamic setup needs attention',
+          message: `Project ${created.projectCode} was created, but its dynamic configuration could not be initialized: ${templateApplyError}`,
+          type: 'project',
+          targetRole: 'project_manager',
+          link: `/projects/${created.id}/engine`,
+        });
+      }
 
       // Clear draft
       localStorage.removeItem(DRAFT_STORAGE_KEY);
@@ -497,6 +632,18 @@ export const RegisterProjectPage: React.FC = () => {
               </p>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
+              <Select
+                label="Project setup template"
+                value={formData.templateVersionId || ''}
+                onChange={(e) => setFormData({ ...formData, templateVersionId: e.target.value })}
+                options={[
+                  { value: '', label: 'Build from scratch' },
+                  ...approvedTemplates.flatMap((template) => template.versions
+                    .filter((version) => version.status === 'published')
+                    .map((version) => ({ value: version.id, label: `${template.name} · v${version.versionNumber}` }))),
+                ]}
+                helperText="Approved templates preconfigure indicators and published field forms. You can customize them in the project workspace."
+              />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
                   label={`${t('projects.fields.projectCode', 'Project Code')} *`}
@@ -852,8 +999,18 @@ export const RegisterProjectPage: React.FC = () => {
           </div>
         )}
 
-        {/* Step 3: Supporting Documents (Optional with custom rename) */}
+        {/* Step 3: Dynamic M&E Blueprint, Indicators & Form Builder */}
         {formData.step === 3 && (
+          <div className="p-6">
+            <ProjectBlueprintBuilderStep
+              blueprint={formData.blueprint}
+              onChange={(bp) => setFormData((prev) => ({ ...prev, blueprint: bp }))}
+            />
+          </div>
+        )}
+
+        {/* Step 4: Supporting Documents (Optional with custom rename) */}
+        {formData.step === 4 && (
           <div>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -875,8 +1032,8 @@ export const RegisterProjectPage: React.FC = () => {
           </div>
         )}
 
-        {/* Step 4: Review, Budget Allocation & Final Approval */}
-        {formData.step === 4 && (
+        {/* Step 5: Review, Budget Allocation & Final Approval */}
+        {formData.step === 5 && (
           <div>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -1021,6 +1178,45 @@ export const RegisterProjectPage: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Dynamic M&E Blueprint & Indicators Box */}
+                <div className="p-4 rounded-lg border border-surface-border bg-surface-muted/20 space-y-2 md:col-span-2">
+                  <div className="flex items-center justify-between border-b border-surface-border pb-1.5">
+                    <span className="text-xs font-bold text-charcoal-800 uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-forest-700" />
+                      Dynamic M&amp;E Blueprint ({formData.blueprint?.indicators.length || 0} Performance Indicators)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, step: 3 })}
+                      className="text-xs text-forest-700 hover:underline font-semibold"
+                    >
+                      Edit Blueprint
+                    </button>
+                  </div>
+                  <div className="text-xs space-y-2 text-charcoal-700 pt-1">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span><strong>Collection Form:</strong> {formData.blueprint?.formName} ({formData.blueprint?.formFields.length || 0} questions)</span>
+                      <span>•</span>
+                      <span><strong>Checklists:</strong> {formData.blueprint?.checklists.length || 0} quality criteria</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 pt-1">
+                      {formData.blueprint?.indicators.map((ind, i) => (
+                        <div key={i} className="p-2 rounded bg-white border border-surface-border flex items-center justify-between">
+                          <div>
+                            <span className="font-mono text-[10px] font-bold text-forest-800 bg-forest-50 px-1 py-0.5 rounded mr-1.5">{ind.code}</span>
+                            <span className="font-medium text-slate-800 text-[11px]">{ind.name}</span>
+                          </div>
+                          {ind.target && (
+                            <span className="text-[11px] font-bold text-forest-700 whitespace-nowrap ml-2">
+                              Goal: {ind.target} {ind.unit}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 {/* Supporting Documents Box */}
                 <div className="p-4 rounded-lg border border-surface-border bg-surface-muted/20 space-y-2 md:col-span-2">
                   <div className="flex items-center justify-between border-b border-surface-border pb-1.5">
@@ -1030,7 +1226,7 @@ export const RegisterProjectPage: React.FC = () => {
                     </span>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, step: 3 })}
+                      onClick={() => setFormData({ ...formData, step: 4 })}
                       className="text-xs text-forest-700 hover:underline font-semibold"
                     >
                       Edit
@@ -1105,7 +1301,7 @@ export const RegisterProjectPage: React.FC = () => {
               <span>{t('common.saveDraft', 'Save Draft')}</span>
             </Button>
 
-            {formData.step < 4 ? (
+            {formData.step < 5 ? (
               <Button
                 type="button"
                 variant="primary"

@@ -12,6 +12,7 @@ import { DocumentsPage } from '@/features/documents/pages/DocumentsPage';
 import { UploadDocumentPage } from '@/features/documents/pages/UploadDocumentPage';
 import { ProjectsPage } from '@/features/projects/pages/ProjectsPage';
 import { ProjectWorkspacePage } from '@/features/projects/pages/ProjectWorkspacePage';
+import { ProjectEnginePage } from '@/features/projects/dynamic/ProjectEnginePage';
 import { RegisterProjectPage } from '@/features/projects/pages/RegisterProjectPage';
 import { FinancePage } from '@/features/finance/pages/FinancePage';
 import { CreateFinancialRequestPage } from '@/features/finance/pages/CreateFinancialRequestPage';
@@ -240,6 +241,14 @@ export const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute requiredPermissions={['projects.view']}>
               <ProjectsPage initialTab="documents" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/:id/engine"
+          element={
+            <ProtectedRoute requiredPermissions={['projects.view']}>
+              <ProjectEnginePage />
             </ProtectedRoute>
           }
         />

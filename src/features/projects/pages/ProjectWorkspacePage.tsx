@@ -27,6 +27,7 @@ import {
   ExternalLink,
   Download,
   BarChart3,
+  Sparkles,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
@@ -41,6 +42,9 @@ import { exportSingleActivityToWord, exportSingleActivityToExcel } from '../util
 import { useAuth } from '@/features/auth/useAuth';
 import { confirmAction, showSuccess, showError } from '@/lib/sweetAlert';
 import { PERMISSIONS } from '@/lib/permissions';
+import { getProjectEngineData, type ProjectEngineData } from '../dynamic/service';
+import { calculateIndicator } from '../dynamic/calculations';
+import { ProjectEngineVisualizer } from '../dynamic/ProjectEngineVisualizer';
 import {
   ProjectRecord,
   ActivityRecord,
@@ -79,6 +83,7 @@ export const ProjectWorkspacePage: React.FC = () => {
   const [tasks, setTasks] = useState<TaskRecord[]>([]);
   const [reports, setReports] = useState<ProjectReportRecord[]>([]);
   const [budget, setBudget] = useState<ProjectBudgetRecord | null>(null);
+  const [engineData, setEngineData] = useState<ProjectEngineData | null>(null);
 
   const [activeTab, setActiveTab] = useState('overview');
   const [isLoading, setIsLoading] = useState(true);
@@ -153,6 +158,13 @@ export const ProjectWorkspacePage: React.FC = () => {
       setTasks(tsks);
       setReports(reps);
       setBudget(bdg);
+
+      try {
+        const engine = await getProjectEngineData(id);
+        setEngineData(engine);
+      } catch (engineErr) {
+        console.warn('Could not load dynamic engine data for project workspace:', engineErr);
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       setError(msg || 'Failed to load project details');
@@ -160,6 +172,40 @@ export const ProjectWorkspacePage: React.FC = () => {
       setIsLoading(false);
     }
   }, [id, user, roles]);
+
+  const indicatorResults = useMemo(() => {
+    if (!engineData) return [];
+    const versionsById = new Map(engineData.versions.map((v) => [v.id, v]));
+    return engineData.indicators.map((indicator) => {
+      const observations = engineData.submissions
+        .filter((sub) => sub.status === 'verified')
+        .flatMap((sub) => {
+          const version = versionsById.get(sub.formVersionId);
+          if (!version?.schema.fields.some((f) => f.key === indicator.sourceFieldKey)) return [];
+          return [
+            {
+              value: sub.values[indicator.sourceFieldKey] as number | string | null,
+              observedAt: sub.collectedOn,
+              verifiedAt: sub.verifiedAt || sub.createdAt,
+              recordId: sub.id,
+              status: sub.status,
+            },
+          ];
+        });
+      return {
+        indicator,
+        result: calculateIndicator(
+          {
+            type: indicator.calculationType,
+            target: indicator.target,
+            aggregation: indicator.aggregation,
+          },
+          observations
+        ),
+      };
+    });
+  }, [engineData]);
+
 
   useEffect(() => {
     loadData();
@@ -263,6 +309,11 @@ export const ProjectWorkspacePage: React.FC = () => {
       label: t('projects.tabs.reports', 'Progress Reports'),
       count: reports.length,
     },
+    {
+      id: 'dynamic-me',
+      label: 'Dynamic M&E & KPIs',
+      count: indicatorResults.length,
+    },
   ];
 
   return (
@@ -302,6 +353,15 @@ export const ProjectWorkspacePage: React.FC = () => {
         ]}
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`/projects/${project.id}/engine`)}
+              className="flex items-center gap-1.5"
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>Dynamic M&amp;E</span>
+            </Button>
             {canRecordActivity && (
               <Button
                 variant="primary"
@@ -391,6 +451,82 @@ export const ProjectWorkspacePage: React.FC = () => {
                   </div>
                 </div>
               </Card>
+
+              {/* Dynamic M&E KPIs Highlight */}
+              {indicatorResults.length > 0 && (
+                <Card className="p-5 bg-white border border-forest-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-forest-700" />
+                      <h3 className="text-sm font-semibold uppercase tracking-wider text-forest-950">
+                        Dynamic M&amp;E Performance Indicators ({indicatorResults.length} KPIs)
+                      </h3>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setActiveTab('dynamic-me')}
+                      className="text-xs text-forest-700 p-0 font-semibold"
+                    >
+                      View All M&amp;E Analytics →
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {indicatorResults.slice(0, 4).map(({ indicator, result }) => {
+                      const numVal = typeof result.value === 'number' ? result.value : null;
+                      const target = indicator.target;
+                      let pct = 0;
+                      if (indicator.calculationType === 'percentage_of_target' && numVal != null) {
+                        pct = Math.min(Math.max(numVal, 0), 100);
+                      } else if (target && target > 0 && numVal != null) {
+                        pct = Math.min(Math.max((numVal / target) * 100, 0), 100);
+                      }
+
+                      return (
+                        <div
+                          key={indicator.id}
+                          className="p-3 rounded-lg border border-slate-200 bg-slate-50/50 space-y-1.5"
+                        >
+                          <div className="flex items-start justify-between">
+                            <span className="font-semibold text-xs text-slate-900 line-clamp-1">
+                              {indicator.name}
+                            </span>
+                            <span className="font-mono text-[9px] bg-slate-200 text-slate-700 px-1 py-0.5 rounded">
+                              {indicator.code}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline justify-between pt-1">
+                            <span className="text-base font-bold text-slate-900">
+                              {result.value != null
+                                ? typeof result.value === 'number'
+                                  ? result.value.toLocaleString(undefined, { maximumFractionDigits: 1 })
+                                  : result.value
+                                : '—'}
+                              <span className="text-[10px] font-normal text-slate-500 ml-1">
+                                {indicator.calculationType === 'percentage_of_target' ? '%' : indicator.unit}
+                              </span>
+                            </span>
+                            {target != null && (
+                              <span className="text-[11px] text-slate-500 font-medium">
+                                Target: {target.toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+                          {target != null && target > 0 && (
+                            <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                              <div
+                                className="bg-forest-600 h-full rounded-full transition-all"
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Card>
+              )}
 
               {/* Recent Field Activities */}
               <Card className="p-5 bg-white border border-surface-border">
@@ -1337,6 +1473,39 @@ export const ProjectWorkspacePage: React.FC = () => {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* TAB: DYNAMIC M&E & KPIS */}
+      {activeTab === 'dynamic-me' && (
+        <div className="space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-forest-50 border border-forest-200 rounded-xl">
+            <div className="space-y-0.5">
+              <h3 className="text-sm font-bold text-forest-950 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-forest-700" />
+                <span>Dynamic Data Collection &amp; Field Verification Engine</span>
+              </h3>
+              <p className="text-xs text-forest-800">
+                Data forms and KPI indicators configured for this project. Field officers log observations; M&amp;E officers verify them.
+              </p>
+            </div>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => navigate(`/projects/${project.id}/engine`)}
+              className="flex items-center gap-1.5"
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>Open Data Collection &amp; Review Studio</span>
+            </Button>
+          </div>
+
+          <ProjectEngineVisualizer
+            indicators={indicatorResults}
+            submissions={engineData?.submissions || []}
+            projectName={project.name}
+            projectCode={project.projectCode}
+          />
         </div>
       )}
 
