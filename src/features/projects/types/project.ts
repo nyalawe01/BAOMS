@@ -11,6 +11,93 @@ export type TaskStatus = 'todo' | 'in_progress' | 'completed';
 export type ProjectReportType = 'monthly' | 'quarterly' | 'annual' | 'donor' | 'milestone';
 export type ProjectReportStatus = 'draft' | 'submitted' | 'approved';
 
+// Decoupled Multi-Workflow Lifecycle Statuses
+export type ActivityRequestStatus =
+  | 'not_submitted'
+  | 'draft'
+  | 'submitted'
+  | 'under_review'
+  | 'returned'
+  | 'approved'
+  | 'rejected';
+
+export type ProcurementStatus =
+  | 'not_required'
+  | 'not_started'
+  | 'requisition'
+  | 'quotations'
+  | 'order_approved'
+  | 'ordered'
+  | 'partially_delivered'
+  | 'delivered';
+
+export type ImplementationStatus =
+  | 'planned'
+  | 'ready'
+  | 'in_progress'
+  | 'conducted_pending_verification'
+  | 'verified';
+
+export type MeStatus =
+  | 'draft'
+  | 'submitted'
+  | 'pending_review'
+  | 'verified'
+  | 'returned_for_correction';
+
+export type RetirementStatus =
+  | 'not_started'
+  | 'draft'
+  | 'submitted'
+  | 'finance_review'
+  | 'returned'
+  | 'approved'
+  | 'closed';
+
+export interface ProjectOutcomeRecord {
+  id: string;
+  projectId: string;
+  outcomeCode: string;
+  title: string;
+  description: string | null;
+  targetIndicator?: string | null;
+  sortOrder: number;
+  outputs?: ProjectOutputRecord[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectOutputRecord {
+  id: string;
+  outcomeId: string;
+  projectId: string;
+  outputCode: string;
+  title: string;
+  description: string | null;
+  targetQuantity: number;
+  targetUnit: string;
+  sortOrder: number;
+  activities?: ActivityRecord[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ActivityParticipantRecord {
+  id: string;
+  activityId: string;
+  projectId: string;
+  fullName: string;
+  gender?: 'male' | 'female' | 'other';
+  ageGroup?: 'children_0_12' | 'youth_13_24' | 'adults_25_59' | 'elderly_60_plus' | 'unknown';
+  phoneNumber?: string | null;
+  disabilityStatus?: string;
+  ward?: string | null;
+  attendanceConfirmed: boolean;
+  perDiemReceived: number;
+  verifiedByMe: boolean;
+  createdAt: string;
+}
+
 export interface ProjectBudgetRecord {
   id: string;
   projectId: string;
@@ -102,6 +189,41 @@ export interface ActivityRecord {
   budgetAllocated?: number | null;
   budgetSpent?: number | null;
   beneficiarySatisfactionScore?: number | null;
+  // End-to-End Activity Lifecycle & Results Framework Fields
+  activityCode?: string;
+  outcomeId?: string | null;
+  outcomeTitle?: string | null;
+  outputId?: string | null;
+  outputTitle?: string | null;
+  targetParticipants?: number;
+  budgetEstimated?: number;
+  wardLocation?: string | null;
+  assignedStaffId?: string | null;
+  assignedStaffName?: string | null;
+  requestStatus?: ActivityRequestStatus;
+  procurementStatus?: ProcurementStatus;
+  implementationStatus?: ImplementationStatus;
+  meStatus?: MeStatus;
+  retirementStatus?: RetirementStatus;
+  // Pre-implementation Request & Authorization
+  requestTitle?: string | null;
+  requestDescription?: string | null;
+  requestedDate?: string | null;
+  torDocumentId?: string | null;
+  authorizedBy?: string | null;
+  authorizedByName?: string | null;
+  authorizedAt?: string | null;
+  authorizationComments?: string | null;
+  // Financial Retirement Details
+  retiredAmount?: number;
+  retirementVariance?: number;
+  retirementReceiptsCount?: number;
+  retiredBy?: string | null;
+  retiredByName?: string | null;
+  retiredAt?: string | null;
+  retirementApprovedBy?: string | null;
+  retirementApprovedByName?: string | null;
+  retirementApprovedAt?: string | null;
 }
 
 export interface TaskRecord {

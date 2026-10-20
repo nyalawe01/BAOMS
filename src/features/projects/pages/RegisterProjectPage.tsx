@@ -16,6 +16,7 @@ import {
   Check,
   FileStack,
   Sparkles,
+  Layers,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
@@ -26,7 +27,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Stepper, StepItem } from '@/components/ui/Stepper';
 import { DocumentUploadSection, UploadedDocument } from '@/components/ui/DocumentUploadSection';
 import { CreateProjectInput } from '../types/project';
-import { createProject } from '../services/projectService';
+import { createProject, saveProjectResultsFramework } from '../services/projectService';
 import { fetchActiveStaffMembers, StaffMemberOption } from '@/services/staffService';
 import { addNotification } from '@/services/notificationsService';
 import { useAuth } from '@/features/auth/useAuth';
@@ -36,6 +37,10 @@ import {
   ProjectBlueprintBuilderStep,
   ProjectBlueprintState,
 } from '../components/ProjectBlueprintBuilderStep';
+import {
+  ProjectResultsFrameworkBuilder,
+  DraftOutcomeItem,
+} from '../components/ProjectResultsFrameworkBuilder';
 import { ORGANIZATIONAL_TEMPLATES } from '../dynamic/templates';
 import { initializeProjectBlueprint } from '../dynamic/service';
 
@@ -79,6 +84,7 @@ interface ProjectDraftState {
     targetRegions: string[];
     partnerOrganizations: string;
   };
+  resultsFramework: DraftOutcomeItem[];
   blueprint: ProjectBlueprintState;
 }
 
@@ -109,6 +115,51 @@ const INITIAL_PROJECT_DRAFT: ProjectDraftState = {
     targetRegions: ['Dar es Salaam - Kigamboni', 'Dar es Salaam - Temeke'],
     partnerOrganizations: 'Local Ward Development Committees, CBO Coalition',
   },
+  resultsFramework: [
+    {
+      id: 'out-1',
+      code: 'OUT-1',
+      title: 'Community Empowerment & Youth Competency Development',
+      description: 'Strengthen community livelihoods, vocational skills, and child protection capacities.',
+      targetIndicator: 'Number of youth successfully completing vocational readiness program',
+      outputs: [
+        {
+          id: 'outp-1.1',
+          code: 'OUTP-1.1',
+          title: 'Direct Practical Skills and Entrepreneurship Training Cohorts',
+          description: 'Delivery of structured hands-on modules in target municipal wards.',
+          targetQuantity: 150,
+          targetUnit: 'youth participants',
+          activities: [
+            {
+              id: 'act-1.1.1',
+              code: 'ACT-1.1.1',
+              title: 'Community Stakeholder Mobilization & Candidate Onboarding',
+              description: 'Ward-level introductory briefing and enrollment of eligible youth participants.',
+              activityDate: new Date().toISOString().slice(0, 10),
+              wardLocation: 'Dar es Salaam - Kigamboni',
+              targetParticipants: 60,
+              budgetEstimated: 2500000,
+              assignedStaffId: '',
+              procurementRequired: true,
+            },
+            {
+              id: 'act-1.1.2',
+              code: 'ACT-1.1.2',
+              title: '5-Day Intensive Practical Skills & Financial Literacy Training',
+              description: 'Hands-on training sessions in entrepreneurship, small business management, and life skills.',
+              activityDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+              wardLocation: 'Dar es Salaam - Temeke',
+              targetParticipants: 50,
+              budgetEstimated: 4800000,
+              assignedStaffId: '',
+              procurementRequired: true,
+            },
+          ],
+        },
+      ],
+    },
+  ],
   blueprint: {
     templateId: ORGANIZATIONAL_TEMPLATES[0].id,
     collectionCadence: 'monthly',
@@ -192,6 +243,7 @@ export const RegisterProjectPage: React.FC = () => {
             ...INITIAL_PROJECT_DRAFT,
             ...parsed,
             blueprint: parsed.blueprint || INITIAL_PROJECT_DRAFT.blueprint,
+            resultsFramework: parsed.resultsFramework || INITIAL_PROJECT_DRAFT.resultsFramework,
           });
           setHasDraftRestored(true);
           setSaveTimestamp(parsed.savedAt);
@@ -238,18 +290,24 @@ export const RegisterProjectPage: React.FC = () => {
     },
     {
       id: 3,
+      title: 'Results Framework',
+      subtitle: 'Outcomes, Outputs & Activities',
+      icon: <Layers className="w-4 h-4" />,
+    },
+    {
+      id: 4,
       title: 'M&E Blueprint & Forms',
       subtitle: 'Dynamic Metrics, Registers & KPIs',
       icon: <Sparkles className="w-4 h-4" />,
     },
     {
-      id: 4,
+      id: 5,
       title: t('projects.stepper.documents', 'Supporting Documents'),
       subtitle: t('projects.stepper.documentsSub', 'Charters, MoUs & Grants'),
       icon: <FileStack className="w-4 h-4" />,
     },
     {
-      id: 5,
+      id: 6,
       title: t('projects.stepper.review', 'Review & Approval'),
       subtitle: t('projects.stepper.reviewSub', 'Final Verification'),
       icon: <CheckCircle2 className="w-4 h-4" />,
@@ -341,6 +399,32 @@ export const RegisterProjectPage: React.FC = () => {
     }
 
     if (step === 3) {
+      if (!formData.resultsFramework || formData.resultsFramework.length === 0) {
+        setValidationError('At least one Strategic Outcome is required in the Results Framework.');
+        return false;
+      }
+      for (const outcome of formData.resultsFramework) {
+        if (!outcome.code.trim() || !outcome.title.trim()) {
+          setValidationError('All Outcomes must have a valid Code and Title.');
+          return false;
+        }
+        for (const output of outcome.outputs) {
+          if (!output.code.trim() || !output.title.trim()) {
+            setValidationError('All Outputs must have a valid Code and Title.');
+            return false;
+          }
+          for (const act of output.activities) {
+            if (!act.code.trim() || !act.title.trim()) {
+              setValidationError('All Activities must have an Activity Code and Title.');
+              return false;
+            }
+          }
+        }
+      }
+      return true;
+    }
+
+    if (step === 4) {
       if (
         formData.blueprint.indicators.some(
           (ind) => !ind.code.trim() || !ind.name.trim() || !ind.sourceFieldKey.trim()
@@ -488,6 +572,15 @@ export const RegisterProjectPage: React.FC = () => {
         }
       }
 
+      // Persist Results Framework (Outcomes -> Outputs -> Activities)
+      if (formData.resultsFramework && formData.resultsFramework.length > 0) {
+        try {
+          await saveProjectResultsFramework(created.id, formData.resultsFramework, user?.id);
+        } catch (rfErr) {
+          console.error('[RegisterProjectPage] Failed to save project results framework:', rfErr);
+        }
+      }
+
       // Organizational notification
       addNotification({
         title: `New Project Launched: ${created.name}`,
@@ -521,6 +614,25 @@ export const RegisterProjectPage: React.FC = () => {
 
   const selectedManager = activeStaff.find((s) => s.id === formData.governance.managerId);
   const selectedCoordinator = activeStaff.find((s) => s.id === formData.governance.coordinatorId);
+
+  const totalOutputs = (formData.resultsFramework || []).reduce(
+    (sum, o) => sum + (o.outputs?.length || 0),
+    0
+  );
+  const totalActivities = (formData.resultsFramework || []).reduce(
+    (sum, o) => sum + (o.outputs || []).reduce((actSum, op) => actSum + (op.activities?.length || 0), 0),
+    0
+  );
+  const totalActivityBudget = (formData.resultsFramework || []).reduce(
+    (sum, o) =>
+      sum +
+      (o.outputs || []).reduce(
+        (actSum, op) =>
+          actSum + (op.activities || []).reduce((bSum, a) => bSum + (a.budgetEstimated || 0), 0),
+        0
+      ),
+    0
+  );
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
@@ -999,8 +1111,20 @@ export const RegisterProjectPage: React.FC = () => {
           </div>
         )}
 
-        {/* Step 3: Dynamic M&E Blueprint, Indicators & Form Builder */}
+        {/* Step 4: Results Framework & Activities Hierarchy */}
         {formData.step === 3 && (
+          <div className="p-6">
+            <ProjectResultsFrameworkBuilder
+              outcomes={formData.resultsFramework || []}
+              onChange={(rf) => setFormData((prev) => ({ ...prev, resultsFramework: rf }))}
+              staffList={activeStaff}
+              currency={formData.funding.currency}
+            />
+          </div>
+        )}
+
+        {/* Step 5: Dynamic M&E Blueprint, Indicators & Form Builder */}
+        {formData.step === 4 && (
           <div className="p-6">
             <ProjectBlueprintBuilderStep
               blueprint={formData.blueprint}
@@ -1009,13 +1133,13 @@ export const RegisterProjectPage: React.FC = () => {
           </div>
         )}
 
-        {/* Step 4: Supporting Documents (Optional with custom rename) */}
-        {formData.step === 4 && (
+        {/* Step 6: Supporting Documents (Optional with custom rename) */}
+        {formData.step === 5 && (
           <div>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <FileStack className="w-5 h-5 text-slate-700" />
-                <CardTitle>{t('projects.step3DocsTitle', 'Step 4: Supporting Documentation & Charters')}</CardTitle>
+                <CardTitle>{t('projects.step3DocsTitle', 'Step 6: Supporting Documentation & Charters')}</CardTitle>
               </div>
               <p className="text-xs text-charcoal-muted mt-1">
                 Attach project charters, donor MoUs, concept proposals, and baseline reports. You can rename each document by custom name.
@@ -1032,13 +1156,13 @@ export const RegisterProjectPage: React.FC = () => {
           </div>
         )}
 
-        {/* Step 5: Review, Budget Allocation & Final Approval */}
-        {formData.step === 5 && (
+        {/* Step 7: Review, Budget Allocation & Final Approval */}
+        {formData.step === 6 && (
           <div>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-forest-700" />
-                <CardTitle>{t('projects.step4Title', 'Step 5: Review Project Charter & Finalize')}</CardTitle>
+                <CardTitle>{t('projects.step4Title', 'Step 7: Review Project Charter & Finalize')}</CardTitle>
               </div>
               <p className="text-xs text-charcoal-muted mt-1">
                 Verify all operational metrics, financial appropriations, and team assignments before creating the workspace.
@@ -1178,6 +1302,34 @@ export const RegisterProjectPage: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Results Framework Summary Box */}
+                <div className="p-4 rounded-lg border border-surface-border bg-surface-muted/20 space-y-2 md:col-span-2">
+                  <div className="flex items-center justify-between border-b border-surface-border pb-1.5">
+                    <span className="text-xs font-bold text-charcoal-800 uppercase tracking-wider flex items-center gap-1.5">
+                      <Layers className="w-3.5 h-3.5 text-forest-700" />
+                      Results Framework &amp; Activities ({totalActivities} Activities planned)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, step: 3 })}
+                      className="text-xs text-forest-700 hover:underline font-semibold"
+                    >
+                      Edit Framework
+                    </button>
+                  </div>
+                  <div className="text-xs space-y-2 text-charcoal-700 pt-1">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span><strong>Strategic Outcomes:</strong> {formData.resultsFramework?.length || 0}</span>
+                      <span>•</span>
+                      <span><strong>Deliverable Outputs:</strong> {totalOutputs}</span>
+                      <span>•</span>
+                      <span><strong>Activities:</strong> {totalActivities}</span>
+                      <span>•</span>
+                      <span><strong>Estimated Activity Budget:</strong> <span className="font-mono font-bold text-emerald-800">{formData.funding.currency} {totalActivityBudget.toLocaleString()}</span></span>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Dynamic M&E Blueprint & Indicators Box */}
                 <div className="p-4 rounded-lg border border-surface-border bg-surface-muted/20 space-y-2 md:col-span-2">
                   <div className="flex items-center justify-between border-b border-surface-border pb-1.5">
@@ -1187,7 +1339,7 @@ export const RegisterProjectPage: React.FC = () => {
                     </span>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, step: 3 })}
+                      onClick={() => setFormData({ ...formData, step: 4 })}
                       className="text-xs text-forest-700 hover:underline font-semibold"
                     >
                       Edit Blueprint
@@ -1226,7 +1378,7 @@ export const RegisterProjectPage: React.FC = () => {
                     </span>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, step: 4 })}
+                      onClick={() => setFormData({ ...formData, step: 5 })}
                       className="text-xs text-forest-700 hover:underline font-semibold"
                     >
                       Edit
@@ -1301,7 +1453,7 @@ export const RegisterProjectPage: React.FC = () => {
               <span>{t('common.saveDraft', 'Save Draft')}</span>
             </Button>
 
-            {formData.step < 5 ? (
+            {formData.step < 6 ? (
               <Button
                 type="button"
                 variant="primary"

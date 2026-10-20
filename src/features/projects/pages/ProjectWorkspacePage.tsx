@@ -28,6 +28,7 @@ import {
   Download,
   BarChart3,
   Sparkles,
+  Layers,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
@@ -38,6 +39,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { AnalyticsVisualizer, AnalyticsDataPoint } from '@/components/ui/AnalyticsVisualizer';
 import { ActivityDetailModal } from '../components/ActivityDetailModal';
 import { ExportDossierModal } from '../components/ExportDossierModal';
+import { ActivityLifecycleWorkspaceModal } from '../components/ActivityLifecycleWorkspaceModal';
 import { exportSingleActivityToWord, exportSingleActivityToExcel } from '../utils/exportProjectDossier';
 import { useAuth } from '@/features/auth/useAuth';
 import { confirmAction, showSuccess, showError } from '@/lib/sweetAlert';
@@ -96,6 +98,7 @@ export const ProjectWorkspacePage: React.FC = () => {
   const [isExportDossierModalOpen, setIsExportDossierModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [selectedActivityForLifecycle, setSelectedActivityForLifecycle] = useState<ActivityRecord | null>(null);
 
   // Field activities analytical reach data
   const activityReachData: AnalyticsDataPoint[] = useMemo(() => {
@@ -876,14 +879,38 @@ export const ProjectWorkspacePage: React.FC = () => {
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-100 dark:border-neutral-800 pb-3">
                     <div>
                       <div className="flex items-center gap-2 flex-wrap mb-1">
+                        {act.activityCode && (
+                          <span className="font-mono text-xs font-bold bg-[#D68904]/10 text-[#b45309] px-2 py-0.5 rounded border border-[#D68904]/30">
+                            {act.activityCode}
+                          </span>
+                        )}
                         <h4 className="font-bold text-slate-900 dark:text-white text-base">{act.title}</h4>
                         {getActivityBadge(act.submissionStatus)}
                       </div>
                       <p className="text-xs text-slate-500 dark:text-neutral-400">
                         <Calendar className="w-3.5 h-3.5 inline mr-1 text-[#D68904]" />
-                        {act.activityDate} • {act.location || t('projects.locationNotSet', 'Location not specified')} •{' '}
+                        {act.activityDate} • {act.wardLocation || act.location || t('projects.locationNotSet', 'Location not specified')} •{' '}
                         <strong className="text-slate-800 dark:text-neutral-200">{act.participantsCount}</strong> {t('projects.participants', 'participants reached')}
                       </p>
+
+                      {/* Decoupled Lifecycle Status Chips */}
+                      <div className="flex items-center gap-1.5 flex-wrap pt-1.5 text-[10px]">
+                        <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-neutral-800 text-slate-700 font-medium border border-slate-200">
+                          Req: <strong className="capitalize">{act.requestStatus?.replace('_', ' ') || 'Not Submitted'}</strong>
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-neutral-800 text-slate-700 font-medium border border-slate-200">
+                          Proc: <strong className="capitalize">{act.procurementStatus?.replace('_', ' ') || 'Not Required'}</strong>
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-neutral-800 text-slate-700 font-medium border border-slate-200">
+                          Impl: <strong className="capitalize">{act.implementationStatus?.replace('_', ' ') || 'Planned'}</strong>
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-neutral-800 text-slate-700 font-medium border border-slate-200">
+                          M&amp;E: <strong className="capitalize">{act.meStatus?.replace('_', ' ') || 'Draft'}</strong>
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-neutral-800 text-slate-700 font-medium border border-slate-200">
+                          Retire: <strong className="capitalize">{act.retirementStatus?.replace('_', ' ') || 'Not Started'}</strong>
+                        </span>
+                      </div>
                     </div>
 
                     {/* Action Toolbar */}
@@ -891,11 +918,22 @@ export const ProjectWorkspacePage: React.FC = () => {
                       <Button
                         variant="primary"
                         size="sm"
+                        onClick={() => setSelectedActivityForLifecycle(act)}
+                        className="bg-[#D68904] hover:bg-[#b45309] text-white text-xs flex items-center gap-1.5 font-semibold"
+                        title="Open End-to-End Lifecycle: Request, Procurement, Attendance, M&E and Retirement"
+                      >
+                        <Layers className="w-3.5 h-3.5" />
+                        <span>Lifecycle Workspace</span>
+                      </Button>
+
+                      <Button
+                        variant="primary"
+                        size="sm"
                         onClick={() => setSelectedActivityForDetail(act)}
                         className="bg-slate-900 dark:bg-neutral-800 hover:bg-slate-800 text-white text-xs flex items-center gap-1.5"
                       >
                         <BarChart3 className="w-3.5 h-3.5 text-[#F2A507]" />
-                        <span>Open Full Analysis & Metrics</span>
+                        <span>Full Narrative</span>
                       </Button>
 
                       <Button
@@ -1574,6 +1612,25 @@ export const ProjectWorkspacePage: React.FC = () => {
         onClose={() => setSelectedActivityForDetail(null)}
         activity={selectedActivityForDetail}
         projectName={project.name}
+      />
+
+      {/* Activity End-to-End Lifecycle Workspace Modal */}
+      <ActivityLifecycleWorkspaceModal
+        isOpen={!!selectedActivityForLifecycle}
+        onClose={() => setSelectedActivityForLifecycle(null)}
+        activity={selectedActivityForLifecycle}
+        projectName={project.name}
+        currency={project.currency}
+        isManagerOrAbove={isSystemManagerOrAbove}
+        isFinanceOfficer={roles.includes('finance_manager') || roles.includes('finance_officer')}
+        onActivityUpdated={async () => {
+          await loadData();
+          if (selectedActivityForLifecycle && project) {
+            const updated = await getProjectActivities(project.id);
+            const found = updated.find((a) => a.id === selectedActivityForLifecycle.id);
+            if (found) setSelectedActivityForLifecycle(found);
+          }
+        }}
       />
 
       {/* Export Project Analytical Dossier Modal */}
