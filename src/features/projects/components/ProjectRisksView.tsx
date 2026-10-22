@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle, Search, Filter, CheckCircle2, Clock, ShieldAlert } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
+import { Table } from '@/components/ui/Table';
+import { Chip } from '@/components/ui/Chip';
 import { ActivityRecord, ProjectRecord } from '../types/project';
 import { getAllActivities } from '../services/projectService';
 
@@ -136,16 +138,16 @@ export const ProjectRisksView: React.FC<ProjectRisksViewProps> = ({ projects = [
       </div>
 
       {/* Risk & Issue Register */}
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-xs">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs">
+        <Table.ScrollContainer>
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-[11px] font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+            <thead className="bg-slate-50/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200/80">
               <tr>
-                <th className="py-3 px-4">Project & Activity Context</th>
-                <th className="py-3 px-4 w-1/3">Challenge & Operational Issue</th>
-                <th className="py-3 px-4 w-1/3">Mitigation & Follow-up Actions</th>
-                <th className="py-3 px-4 text-center">Status</th>
-                <th className="py-3 px-4 text-right">Reported Date</th>
+                <th className="py-3.5 px-4">Project & Activity Context</th>
+                <th className="py-3.5 px-4 w-1/3">Challenge & Operational Issue</th>
+                <th className="py-3.5 px-4 w-1/3">Mitigation & Follow-up Actions</th>
+                <th className="py-3.5 px-4 text-center">Status</th>
+                <th className="py-3.5 px-4 text-right">Reported Date</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -172,26 +174,24 @@ export const ProjectRisksView: React.FC<ProjectRisksViewProps> = ({ projects = [
                     </td>
                     <td className="py-3 px-4 text-slate-800 font-medium">
                       <div className="flex items-start gap-1.5">
-                        <AlertCircle className="h-3.5 w-3.5 text-[#374151] shrink-0 mt-0.5" />
+                        <AlertCircle className="h-3.5 w-3.5 text-amber-600 shrink-0 mt-0.5" />
                         <span>{r.challenges}</span>
                       </div>
                     </td>
                     <td className="py-3 px-4 text-slate-700">
                       <div className="flex items-start gap-1.5">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-[#374151] shrink-0 mt-0.5" />
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
                         <span>{r.followUpActions}</span>
                       </div>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span
-                        className={`inline-block text-[10px] font-semibold uppercase px-2 py-0.5 rounded border ${
-                          r.status === 'mitigated'
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                            : 'bg-amber-50 text-amber-700 border-amber-200'
-                        }`}
+                      <Chip
+                        color={r.status === 'mitigated' ? 'success' : 'warning'}
+                        variant="soft"
+                        size="sm"
                       >
                         {r.status === 'mitigated' ? 'Intervention Approved' : 'Under Review'}
-                      </span>
+                      </Chip>
                     </td>
                     <td className="py-3 px-4 text-right font-mono text-slate-600 whitespace-nowrap">
                       {r.date}
@@ -201,7 +201,7 @@ export const ProjectRisksView: React.FC<ProjectRisksViewProps> = ({ projects = [
               )}
             </tbody>
           </table>
-        </div>
+        </Table.ScrollContainer>
       </div>
     </div>
   );

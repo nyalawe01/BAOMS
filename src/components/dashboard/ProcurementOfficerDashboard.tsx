@@ -20,6 +20,8 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Table } from '@/components/ui/Table';
+import { Pagination } from '@/components/ui/Pagination';
 import { KPICard } from '@/components/ui/KPICard';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
 import { AnalyticsVisualizer, AnalyticsDataPoint } from '@/components/ui/AnalyticsVisualizer';
@@ -428,15 +430,15 @@ export const ProcurementOfficerDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <Table.ScrollContainer>
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50/70 text-[11px] font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200/80">
+            <thead className="bg-slate-50/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200/80">
               <tr>
-                <th className="py-2.5 px-4">PO Number & Description</th>
-                <th className="py-2.5 px-4">Supplier / Vendor</th>
-                <th className="py-2.5 px-4">Expected Delivery</th>
-                <th className="py-2.5 px-4 text-right">Order Total</th>
-                <th className="py-2.5 px-4 text-right">Status</th>
+                <th className="py-3 px-4">PO Number & Description</th>
+                <th className="py-3 px-4">Supplier / Vendor</th>
+                <th className="py-3 px-4">Expected Delivery</th>
+                <th className="py-3 px-4 text-right">Order Total</th>
+                <th className="py-3 px-4 text-right">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -449,20 +451,20 @@ export const ProcurementOfficerDashboard: React.FC = () => {
               ) : (
                 paginatedOrders.map((o) => (
                   <tr key={o.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-2.5 px-4">
+                    <td className="py-3 px-4">
                       <div className="font-semibold text-slate-900">{o.title}</div>
                       <div className="text-[11px] font-mono text-slate-500">{o.orderNumber}</div>
                     </td>
-                    <td className="py-2.5 px-4 font-medium text-slate-700">
+                    <td className="py-3 px-4 font-medium text-slate-700">
                       {o.vendorName}
                     </td>
-                    <td className="py-2.5 px-4 text-slate-600 whitespace-nowrap">
+                    <td className="py-3 px-4 text-slate-600 whitespace-nowrap">
                       {o.expectedDeliveryDate || 'N/A'}
                     </td>
-                    <td className="py-2.5 px-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
+                    <td className="py-3 px-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
                       {o.currency} {o.totalAmount.toLocaleString()}
                     </td>
-                    <td className="py-2.5 px-4 text-right whitespace-nowrap">
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
                       <StatusIndicator status={o.status} label={o.status.toUpperCase()} />
                     </td>
                   </tr>
@@ -470,48 +472,18 @@ export const ProcurementOfficerDashboard: React.FC = () => {
               )}
             </tbody>
           </table>
-        </div>
+        </Table.ScrollContainer>
 
         {/* Table Pagination Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-slate-200/80 bg-white text-xs text-slate-500">
-          <div>
-            Showing <span className="font-semibold text-slate-800">{filteredOrders.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to{' '}
-            <span className="font-semibold text-slate-800">{Math.min(currentPage * pageSize, filteredOrders.length)}</span> of{' '}
-            <span className="font-semibold text-slate-800">{filteredOrders.length}</span> entries
-          </div>
-
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              disabled={currentPage <= 1}
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="px-2.5 py-1 rounded border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none transition-colors"
-            >
-              Previous
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
-              <button
-                key={pg}
-                type="button"
-                onClick={() => setCurrentPage(pg)}
-                className={`h-7 w-7 rounded text-xs font-medium transition-colors ${
-                  pg === currentPage
-                    ? 'bg-[#D68904] text-white font-semibold'
-                    : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                {pg}
-              </button>
-            ))}
-            <button
-              type="button"
-              disabled={currentPage >= totalPages}
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className="px-2.5 py-1 rounded border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none transition-colors"
-            >
-              Next
-            </button>
-          </div>
+        <div className="px-4 py-3 border-t border-slate-200/80 bg-white">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredOrders.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            size="sm"
+          />
         </div>
       </div>
 

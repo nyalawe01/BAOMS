@@ -17,6 +17,7 @@ import {
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { createNotification } from '@/services/notificationsService';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 
 const ALLOWED_DOMAIN = '@babawatoto.or.tz';
 
@@ -257,14 +258,16 @@ export const RegisterPage: React.FC = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <button
+                <Button
                   type="button"
+                  variant="primary"
+                  size="md"
                   onClick={() => navigate('/login')}
-                  className="w-full sm:w-auto px-6 py-3 bg-[#D68904] text-white font-semibold text-sm rounded-lg hover:bg-[#b86e03] transition shadow-md flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto"
                 >
                   Proceed to Sign In
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                  <ArrowRight className="w-4 h-4 ml-1.5" />
+                </Button>
               </div>
             </div>
           ) : (
@@ -420,13 +423,17 @@ export const RegisterPage: React.FC = () => {
                 </div>
 
                 {/* Submit button */}
-                <button
+                <Button
                   type="submit"
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  isLoading={isLoading}
                   disabled={isLoading || Boolean(domainError)}
-                  className="w-full py-3 bg-[#D68904] text-white font-semibold text-sm rounded-lg hover:bg-[#b86e03] transition duration-200 shadow-md flex items-center justify-center gap-2 disabled:opacity-50 mt-4"
+                  className="mt-4"
                 >
                   {isLoading ? 'Creating Official Account...' : 'Complete Registration'}
-                </button>
+                </Button>
               </form>
 
               <div className="text-center mt-6 pt-4 border-t border-slate-100">

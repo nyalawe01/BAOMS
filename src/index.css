@@ -113,7 +113,89 @@ input[type="checkbox"]:focus-visible {
 /* -------------------------------------------------------------------------- */
 /*                     HEROUI V3 OFFICIAL DESIGN CLASSES                      */
 /* -------------------------------------------------------------------------- */
+@layer base {
+  /* Global HeroUI v3 Button Foundation: all buttons across the entire system */
+  button:not([data-unstyled="true"]) {
+    font-weight: 500;
+    border-radius: 0.75rem; /* rounded-xl */
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  button:not(:disabled):not([data-unstyled="true"]):active {
+    transform: scale(0.98);
+  }
+
+  /* Global HeroUI v3 Table Foundation: all standard tables across the whole system */
+  table {
+    width: 100%;
+    text-align: left;
+    font-size: 0.8125rem; /* 13px */
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  thead th {
+    background-color: rgba(248, 250, 252, 0.85);
+    font-size: 0.6875rem; /* 11px */
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  }
+
+  tbody tr {
+    transition: background-color 0.15s ease;
+  }
+
+  tbody tr:hover {
+    background-color: rgba(248, 250, 252, 0.75);
+  }
+
+  tbody td {
+    padding: 0.75rem 1rem;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  /* Global Select Inputs */
+  select:not([data-unstyled="true"]) {
+    border-radius: 0.75rem;
+    border-color: #e2e8f0;
+    background-color: #ffffff;
+    font-size: 0.75rem;
+    padding-left: 0.75rem;
+    padding-right: 2rem;
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  select:not([data-unstyled="true"]):focus {
+    outline: none;
+    border-color: #D68904 !important;
+    box-shadow: 0 0 0 1px #D68904 !important;
+  }
+}
+
 @layer components {
+  /* HeroUI Button Variants */
+  .btn-primary,
+  button[class*="bg-[#D68904]"],
+  button[class*="bg-primary"],
+  button[class*="bg-amber-600"] {
+    @apply rounded-xl font-medium shadow-2xs hover:shadow-xs active:scale-[0.98] transition-all;
+  }
+
+  .btn-secondary {
+    @apply rounded-xl border border-slate-200/90 bg-slate-100 hover:bg-slate-200 text-slate-800 shadow-2xs active:scale-[0.98] transition-all;
+  }
+
+  .btn-outline {
+    @apply rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs active:scale-[0.98] transition-all;
+  }
+
   /* ButtonGroup */
   .button-group {
     @apply inline-flex items-center isolate rounded-xl shadow-xs;
@@ -188,7 +270,7 @@ input[type="checkbox"]:focus-visible {
 
   /* Table */
   .table-scroll-container {
-    @apply rounded-xl border border-slate-200/90 bg-white shadow-2xs overflow-x-auto;
+    @apply rounded-2xl border border-slate-200/90 bg-white shadow-2xs overflow-x-auto;
   }
 }
 

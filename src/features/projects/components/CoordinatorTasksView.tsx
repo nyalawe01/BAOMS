@@ -26,6 +26,8 @@ import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Pagination } from '@/components/ui/Pagination';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
+import { Table } from '@/components/ui/Table';
+import { Chip } from '@/components/ui/Chip';
 import { getAllTasks, getProjects, updateTask } from '../services/projectService';
 import { TaskRecord, ProjectRecord } from '../types/project';
 import { useAuth } from '@/features/auth/useAuth';
@@ -259,9 +261,9 @@ export const CoordinatorTasksView: React.FC = () => {
           </div>
         ) : (
           <div>
-            <div className="overflow-x-auto">
+            <Table.ScrollContainer>
               <table className="w-full text-left text-sm text-gray-700">
-                <thead className="bg-gray-50 text-xs font-semibold uppercase text-gray-500 border-b border-gray-200">
+                <thead className="bg-gray-50/80 text-xs font-semibold uppercase text-gray-500 border-b border-gray-200">
                   <tr>
                     <th className="px-4 py-3.5 w-10">Done</th>
                     <th className="px-4 py-3.5">{t('projects.tasks.colTitle', 'Deliverable & Activity')}</th>
@@ -318,15 +320,19 @@ export const CoordinatorTasksView: React.FC = () => {
                         </td>
 
                         <td className="px-4 py-3.5 whitespace-nowrap">
-                          <span
-                            className={`font-mono text-xs font-semibold uppercase px-2 py-0.5 rounded border ${
+                          <Chip
+                            color={
                               task.priority === 'urgent' || task.priority === 'high'
-                                ? 'bg-red-50 text-red-700 border-red-200'
-                                : 'bg-gray-50 text-gray-700 border-gray-200'
-                            }`}
+                                ? 'danger'
+                                : task.priority === 'medium'
+                                ? 'warning'
+                                : 'default'
+                            }
+                            variant="soft"
+                            size="sm"
                           >
-                            {task.priority}
-                          </span>
+                            {task.priority.toUpperCase()}
+                          </Chip>
                         </td>
 
                         <td className="px-4 py-3.5 text-xs text-gray-700 whitespace-nowrap">
@@ -334,23 +340,24 @@ export const CoordinatorTasksView: React.FC = () => {
                         </td>
 
                         <td className="px-4 py-3.5 text-right whitespace-nowrap">
-                          <button
+                          <Button
+                            size="sm"
+                            variant={task.status === 'completed' ? 'secondary' : 'primary'}
                             onClick={() => handleStatusToggle(task)}
-                            className="text-xs font-medium px-2.5 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 transition-colors"
                           >
                             {task.status === 'completed'
                               ? 'Mark In Progress'
                               : task.status === 'in_progress'
                               ? 'Mark Completed'
                               : 'Start Task'}
-                          </button>
+                          </Button>
                         </td>
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
-            </div>
+            </Table.ScrollContainer>
 
             {filteredTasks.length > pageSize && (
               <div className="p-4 border-t border-gray-100">

@@ -5,6 +5,7 @@ import { AlertCircle } from 'lucide-react';
 import { useAuth } from '@/features/auth/useAuth';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 
 export const SignInPage: React.FC = () => {
   const { t } = useTranslation();
@@ -157,25 +158,30 @@ export const SignInPage: React.FC = () => {
                   />
                 </div>
 
-                <button
+                <Button
                   type="submit"
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  isLoading={isLoading}
                   disabled={isLoading}
-                  className="w-full py-3 bg-[#D68904] text-white font-semibold text-base rounded-lg hover:bg-[#b86e03] transition duration-300 shadow-md disabled:opacity-50"
                 >
                   {t('auth.verifyMfaButton', 'Verify & Sign In')}
-                </button>
+                </Button>
 
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
+                  fullWidth
                   onClick={() => {
                     cancelMfa();
                     setMfaCode('');
                     setErrorMessage('');
                   }}
-                  className="w-full py-2 text-xs text-slate-600 hover:text-slate-900"
                 >
                   {t('common.cancel', 'Cancel & Back')}
-                </button>
+                </Button>
               </form>
             </div>
           ) : (
@@ -269,17 +275,20 @@ export const SignInPage: React.FC = () => {
                   </Link>
                 </div>
 
-                <button
+                <Button
                   type="submit"
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  isLoading={isLoading}
                   disabled={isLoading}
-                  className="w-full py-3 bg-[#D68904] text-white font-semibold text-lg rounded-lg hover:bg-[#b86e03] transition duration-300 shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {isLoading ? (
                     <span>Signing in...</span>
                   ) : (
                     <span>{t('auth.signInButton', 'Log In')} / Sign In</span>
                   )}
-                </button>
+                </Button>
               </form>
 
               <div className="text-center mt-6">
