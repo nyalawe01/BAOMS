@@ -252,8 +252,8 @@ export const TagComponent: React.FC<TagProps> = ({
         ? 'border-amber-400 bg-amber-50 text-amber-950 dark:bg-amber-950/40 dark:text-amber-200'
         : 'border-transparent bg-slate-100 text-slate-700 hover:bg-slate-200/80 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
       : isSelected
-      ? 'border-[#D68904] bg-[#D68904] text-white shadow-xs'
-      : 'border-slate-300/80 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 shadow-2xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800';
+      ? 'border-[#D68904] bg-[#D68904] text-white shadow-none'
+      : 'border-slate-300/80 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800';
 
   let hasCustomRemoveButton = false;
   if (typeof children !== 'function') {

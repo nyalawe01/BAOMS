@@ -49,15 +49,15 @@ export const ChipRoot: React.FC<ChipProps> = ({
     },
     secondary: {
       default:
-        'bg-white text-slate-700 border border-slate-200/90 shadow-2xs dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300',
+        'bg-white text-slate-700 border border-slate-200/90 shadow-none dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300',
       accent:
-        'bg-white text-amber-800 border border-amber-300 shadow-2xs dark:bg-slate-900 dark:border-amber-700 dark:text-amber-300',
+        'bg-white text-amber-800 border border-amber-300 shadow-none dark:bg-slate-900 dark:border-amber-700 dark:text-amber-300',
       success:
-        'bg-white text-emerald-800 border border-emerald-300 shadow-2xs dark:bg-slate-900 dark:border-emerald-700 dark:text-emerald-300',
+        'bg-white text-emerald-800 border border-emerald-300 shadow-none dark:bg-slate-900 dark:border-emerald-700 dark:text-emerald-300',
       warning:
-        'bg-white text-amber-800 border border-amber-300 shadow-2xs dark:bg-slate-900 dark:border-amber-700 dark:text-amber-300',
+        'bg-white text-amber-800 border border-amber-300 shadow-none dark:bg-slate-900 dark:border-amber-700 dark:text-amber-300',
       danger:
-        'bg-white text-rose-800 border border-rose-300 shadow-2xs dark:bg-slate-900 dark:border-rose-700 dark:text-rose-300',
+        'bg-white text-rose-800 border border-rose-300 shadow-none dark:bg-slate-900 dark:border-rose-700 dark:text-rose-300',
     },
     soft: {
       default: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-transparent',

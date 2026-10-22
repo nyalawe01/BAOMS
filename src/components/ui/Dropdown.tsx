@@ -293,7 +293,7 @@ export const DropdownPopover: React.FC<DropdownPopoverProps> = ({
     <div
       ref={popoverRef}
       className={cn(
-        'dropdown__popover absolute z-50 min-w-[220px] rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-1.5 shadow-xl shadow-slate-900/10 focus:outline-none animate-fadeIn',
+        'dropdown__popover absolute z-50 min-w-[220px] rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-1.5 shadow-sm focus:outline-none animate-fadeIn',
         placementStyles[placement],
         className
       )}

@@ -49,9 +49,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantStyles: Record<ButtonVariant, string> = {
       primary:
-        'bg-[#D68904] text-white border border-[#b86e03] hover:bg-[#b86e03] active:bg-[#915206] shadow-xs hover:shadow font-medium',
+        'bg-[#D68904] text-white border border-[#b86e03] hover:bg-[#b86e03] active:bg-[#915206] font-medium',
       secondary:
-        'bg-white text-slate-800 border border-slate-200/90 hover:bg-slate-50 hover:border-slate-300 active:bg-slate-100 shadow-xs font-medium dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100 dark:hover:bg-slate-800',
+        'bg-white text-slate-800 border border-slate-200/90 hover:bg-slate-50 hover:border-slate-300 active:bg-slate-100 font-medium dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100 dark:hover:bg-slate-800',
       tertiary:
         'bg-slate-100 text-slate-800 border border-transparent hover:bg-slate-200/80 active:bg-slate-300 font-medium dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700',
       outline:
@@ -59,7 +59,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       ghost:
         'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200 font-medium border border-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
       danger:
-        'bg-red-600 text-white border border-red-700 hover:bg-red-700 active:bg-red-800 shadow-xs hover:shadow font-medium',
+        'bg-red-600 text-white border border-red-700 hover:bg-red-700 active:bg-red-800 font-medium',
     };
 
     const sizeStyles = isIconOnly

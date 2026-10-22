@@ -37,7 +37,7 @@ export const TableScrollContainer = forwardRef<
   <div
     ref={ref}
     className={cn(
-      'table-scroll-container relative w-full overflow-x-auto rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs',
+      'table-scroll-container relative w-full overflow-x-auto rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-none',
       className
     )}
     {...props}

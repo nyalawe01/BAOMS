@@ -333,31 +333,35 @@ export const ProcurementPage: React.FC<ProcurementPageProps> = ({ initialTab = '
       </div>
 
       {/* Tab Navigation - Horizontal Scrolling Container */}
-      <div className="border-b border-slate-200/80 overflow-x-auto no-scrollbar">
-        <div className="flex items-center gap-1 min-w-max pb-1">
+      <div className="border-b border-slate-200/90 overflow-x-auto no-scrollbar shadow-none">
+        <div className="flex items-center gap-1 min-w-max -mb-px" role="tablist">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
+                role="tab"
+                data-slot="tab"
+                data-unstyled="true"
                 type="button"
+                aria-selected={isActive}
                 onClick={() => {
                   setActiveTab(tab.id);
                   setSearchQuery('');
                   navigate(tab.path);
                 }}
-                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-md transition-all border-b-2 ${
+                className={`flex items-center gap-1.5 px-3.5 py-3 text-xs font-medium transition-colors border-b-2 rounded-none outline-none shadow-none cursor-pointer bg-transparent ${
                   isActive
-                    ? 'border-[#D68904] text-[#D68904] bg-amber-500/10 font-semibold'
-                    : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    ? 'border-[#D68904] text-[#D68904] font-semibold'
+                    : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#111827]' : 'text-[#4B5563]'}`} />
+                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#D68904]' : 'text-slate-400'}`} />
                 <span>{tab.label}</span>
                 {tab.count !== undefined && (
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                    isActive ? 'bg-[#D68904] text-white' : 'bg-slate-100 text-slate-600'
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-semibold ${
+                    isActive ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
                   }`}>
                     {tab.count}
                   </span>

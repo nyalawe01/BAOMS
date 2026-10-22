@@ -42,7 +42,7 @@ export const Badge: React.FC<BadgeProps> = ({
       color={colorMap[variant] || 'default'}
       variant={badgeStyle}
       size={size}
-      className={cn('shadow-2xs', className)}
+      className={cn('shadow-none', className)}
       {...props}
     >
       {withDot && (

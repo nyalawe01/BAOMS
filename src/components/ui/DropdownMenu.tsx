@@ -63,7 +63,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
       {isOpen && (
         <div
           className={cn(
-            'absolute z-50 mt-1.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-1.5 shadow-xl shadow-slate-900/10 transition-all focus:outline-none animate-fadeIn',
+            'absolute z-50 mt-1.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-1.5 shadow-sm transition-all focus:outline-none animate-fadeIn',
             menuWidth,
             align === 'right' ? 'right-0' : 'left-0'
           )}

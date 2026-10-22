@@ -19,6 +19,7 @@ import { TagGroup, Tag } from './TagGroup';
 import { Switch } from './Switch';
 import { Chip } from './Chip';
 import { Table } from './Table';
+import { Tabs } from './Tabs';
 
 describe('BAOMS Phase 2 Design System Components', () => {
   it('renders Button with variants and loading state', () => {
@@ -413,5 +414,32 @@ describe('HeroUI v3 Design System Components', () => {
     const th = screen.getByText('Name');
     fireEvent.click(th);
     expect(handleSort).toHaveBeenCalledWith({ column: 'name', direction: 'descending' });
+  });
+
+  it('renders Tabs in underlined and solid variants without shadows or distortions', () => {
+    const handleTabChange = vi.fn();
+    const items = [
+      { id: 'tab1', label: 'First Tab' },
+      { id: 'tab2', label: 'Second Tab', count: 5 },
+    ];
+
+    const { rerender } = render(
+      <Tabs variant="underlined" tabs={items} activeTab="tab1" onChange={handleTabChange} />
+    );
+
+    expect(screen.getByText('First Tab')).toBeInTheDocument();
+    expect(screen.getByText('Second Tab')).toBeInTheDocument();
+    expect(screen.getByText('5')).toBeInTheDocument();
+
+    const tab2 = screen.getByText('Second Tab');
+    fireEvent.click(tab2);
+    expect(handleTabChange).toHaveBeenCalledWith('tab2');
+
+    // Test solid variant
+    rerender(
+      <Tabs variant="solid" tabs={items} activeTab="tab2" onChange={handleTabChange} />
+    );
+    expect(screen.getByText('First Tab')).toBeInTheDocument();
+    expect(screen.getByText('Second Tab')).toBeInTheDocument();
   });
 });

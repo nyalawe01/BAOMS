@@ -77,7 +77,7 @@ export const ButtonGroup = Object.assign(
             role="group"
             data-orientation={orientation}
             className={cn(
-              'button-group inline-flex items-center isolate rounded-xl shadow-xs',
+              'button-group inline-flex items-center isolate rounded-xl border border-slate-200/80 shadow-none',
               isHorizontal ? 'flex-row' : 'flex-col items-stretch',
               fullWidth && 'w-full button-group--full-width',
               /* HeroUI Connected Border Radii and Border Deduplication */

@@ -17,3 +17,4 @@ export * from './RadioGroup';
 export * from './Card';
 export * from './StatusIndicator';
 export * from './EmptyState';
+export * from './Tabs';

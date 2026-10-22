@@ -309,23 +309,28 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({ initialTab = 'projec
         </div>
       )}
 
-      {/* AdminCN Inspired Horizontal Tab Strip */}
-      <div className="border-b border-gray-200 bg-white px-2 rounded-t-lg shadow-2xs overflow-x-auto touch-pan-x -mx-1 sm:mx-0">
-        <nav className="flex space-x-1 min-w-max py-0.5" aria-label="Project Submodules">
+      {/* HeroUI v3 Horizontal Tab Strip */}
+      <div className="border-b border-slate-200/90 bg-white px-2 overflow-x-auto touch-pan-x -mx-1 sm:mx-0 shadow-none">
+        <nav className="flex space-x-1 min-w-max -mb-px" aria-label="Project Submodules" role="tablist">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
+                role="tab"
+                data-slot="tab"
+                data-unstyled="true"
+                type="button"
+                aria-selected={isActive}
                 onClick={() => handleTabChange(tab.id, tab.path)}
-                className={`flex items-center gap-2 py-3 px-3.5 text-xs font-semibold whitespace-nowrap border-b-2 transition-colors ${
+                className={`flex items-center gap-2 py-3 px-3.5 text-xs font-medium whitespace-nowrap border-b-2 transition-colors rounded-none outline-none shadow-none cursor-pointer bg-transparent ${
                   isActive
-                    ? 'border-[#D68904] text-gray-900 bg-gray-50/70 font-bold'
-                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                    ? 'border-[#D68904] text-[#D68904] font-semibold'
+                    : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-gray-900' : 'text-gray-500'}`} />
+                <Icon className={`w-4 h-4 ${isActive ? 'text-[#D68904]' : 'text-slate-400'}`} />
                 <span>{tab.label}</span>
               </button>
             );

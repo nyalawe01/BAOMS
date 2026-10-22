@@ -1259,6 +1259,51 @@ export const DesignSystemPreview: React.FC = () => {
               </Table>
             </CardContent>
           </Card>
+
+          {/* Section 8: HeroUI Tabs */}
+          <Card>
+            <CardHeader>
+              <CardTitle>8. HeroUI Tabs (Underlined & Solid)</CardTitle>
+              <CardDescription>
+                Clean, flat, accessible tab navigation with flush borders and zero black shadows.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">
+                  Underlined Variant (Standard Page Navigation)
+                </span>
+                <Tabs
+                  variant="underlined"
+                  activeTab="overview"
+                  tabs={[
+                    { id: 'overview', label: 'Program Overview' },
+                    { id: 'activities', label: 'Field Activities', count: 8 },
+                    { id: 'finance', label: 'Finance & Requisitions' },
+                    { id: 'documents', label: 'Archived Documents' },
+                  ]}
+                  onChange={() => {}}
+                />
+              </div>
+
+              <div>
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">
+                  Solid Variant (Segmented Pill Switcher)
+                </span>
+                <Tabs
+                  variant="solid"
+                  activeTab="day"
+                  tabs={[
+                    { id: 'day', label: 'Daily' },
+                    { id: 'week', label: 'Weekly' },
+                    { id: 'month', label: 'Monthly' },
+                    { id: 'quarter', label: 'Quarterly' },
+                  ]}
+                  onChange={() => {}}
+                />
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>
