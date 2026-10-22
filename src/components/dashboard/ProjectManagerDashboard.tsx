@@ -36,6 +36,7 @@ import {
   ClipboardList,
   ShieldCheck,
   FolderOpen,
+  Target,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
@@ -199,28 +200,56 @@ export const ProjectManagerDashboard: React.FC = () => {
     };
   }, [scopedData]);
 
-  // Chart 1: Project Status & Allocation Breakdown
-  const projectStatusChartData = useMemo((): AnalyticsDataPoint[] => {
-    const statusCounts: Record<string, number> = {
-      Active: 0,
-      Planning: 0,
-      Completed: 0,
-      'On Hold': 0,
-    };
-    scopedData.projects.forEach((p) => {
-      if (p.status === 'active') statusCounts['Active'] += 1;
-      else if (p.status === 'planning') statusCounts['Planning'] += 1;
-      else if (p.status === 'completed') statusCounts['Completed'] += 1;
-      else statusCounts['On Hold'] += 1;
-    });
+  // Indicator Performance Chart: Target vs. Actual achievement for Project Manager
+  const indicatorChartData = useMemo((): AnalyticsDataPoint[] => {
+    // If a specific project is selected, show its activity-level indicator milestones
+    if (selectedProjectId !== 'all' && scopedData.projects.length === 1) {
+      const proj = scopedData.projects[0];
+      const projActivities = scopedData.activities.filter((a) => a.projectId === proj.id);
 
-    return [
-      { label: 'Active Implementation', value: statusCounts['Active'], color: '#D68904' },
-      { label: 'Planning & Setup', value: statusCounts['Planning'], color: '#F2A507' },
-      { label: 'Completed Deliverables', value: statusCounts['Completed'], color: '#15803d' },
-      { label: 'On Hold / Review', value: statusCounts['On Hold'], color: '#64748b' },
-    ];
-  }, [scopedData.projects]);
+      if (projActivities.length === 0) {
+        return [{ label: `${proj.projectCode || 'PRJ'}: Direct Reach Indicator`, value: 0, description: 'No activities recorded yet' }];
+      }
+
+      return projActivities.map((act) => {
+        const actual = Number(act.participantsCount) || 0;
+        const target = Math.max(act.targetParticipants || (act.budgetEstimated ? Math.round(act.budgetEstimated / 200000) : 50), 30);
+        const pct = Math.min(Math.round((actual / target) * 100), 100);
+        return {
+          label: act.title.length > 28 ? act.title.substring(0, 26) + '...' : act.title,
+          value: pct,
+          color: pct >= 80 ? '#15803d' : pct >= 50 ? '#D68904' : '#b91c1c',
+          description: `Actual: ${actual.toLocaleString()} / Target: ${target.toLocaleString()} participants (${pct}% target achieved)`,
+        };
+      });
+    }
+
+    // When viewing portfolio (all projects)
+    if (scopedData.projects.length === 0) {
+      return [{ label: 'No Active Project Indicators', value: 0 }];
+    }
+
+    return scopedData.projects.map((p, idx) => {
+      const projActivities = scopedData.activities.filter((a) => a.projectId === p.id);
+      const actual = projActivities.reduce(
+        (sum, a) => sum + (Number(a.participantsCount) || 0),
+        0
+      );
+      const target = Math.max(
+        p.targetParticipants || Math.round((p.totalBudget || 50000000) / 120000),
+        150
+      );
+      const pct = Math.min(Math.round((actual / target) * 100), 100);
+      const code = p.projectCode ? p.projectCode.replace('PRJ-', 'IND-') : `IND-${idx + 1}`;
+
+      return {
+        label: `${code}: ${p.name.length > 26 ? p.name.substring(0, 24) + '...' : p.name}`,
+        value: pct,
+        color: pct >= 80 ? '#15803d' : pct >= 50 ? '#D68904' : '#b91c1c',
+        description: `Actual: ${actual.toLocaleString()} / Target: ${target.toLocaleString()} participants (${pct}% achieved)`,
+      };
+    });
+  }, [scopedData.projects, scopedData.activities, selectedProjectId]);
 
 
   // Pending Review Desk Submissions
@@ -464,27 +493,30 @@ export const ProjectManagerDashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Analytics Visualizer Row - Portfolio Status Breakdown */}
+      {/* Analytics Visualizer Row - Project Indicator Performance */}
       <Card className="p-5 bg-white border border-slate-200/90 rounded-2xl shadow-xs hover:shadow-sm transition-shadow">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
           <div>
-            <h2 className="text-sm font-bold text-slate-900">
-              {t('pm.charts.portfolioStatus', 'Project Portfolio Status Breakdown')}
-            </h2>
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-[#D68904]" />
+              <h2 className="text-sm font-bold text-slate-900">
+                {t('pm.charts.indicatorsTitle', 'Project Key Performance Indicators (Target vs. Actual Achievement)')}
+              </h2>
+            </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Distribution of managed projects across operational stages
+              Programmatic milestone indicators and beneficiary reach progress
             </p>
           </div>
-          <span className="text-xs font-mono bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-full border border-slate-200">
-            {metrics.assignedProjects} Projects
+          <span className="text-xs font-mono bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200 w-fit">
+            {indicatorChartData.length} {indicatorChartData.length === 1 ? 'Indicator Tracked' : 'Indicators Tracked'}
           </span>
         </div>
 
         <div className="min-h-[220px]">
           <AnalyticsVisualizer
-            data={projectStatusChartData}
-            defaultMode="pie"
-            availableModes={['pie', 'bar', 'table']}
+            data={indicatorChartData}
+            defaultMode="bar"
+            availableModes={['bar', 'table']}
             height={220}
           />
         </div>

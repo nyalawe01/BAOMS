@@ -35,6 +35,7 @@ import {
   RotateCcw,
   FileText,
   Upload,
+  Target,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
@@ -184,28 +185,23 @@ export const ProjectCoordinatorDashboard: React.FC = () => {
     );
   }, [scopedData.activities]);
 
-  // Pipeline Chart Data
-  const activityStatusChartData = useMemo((): AnalyticsDataPoint[] => {
-    const counts = {
-      Approved: 0,
-      'In Review': 0,
-      Draft: 0,
-      Returned: 0,
-    };
+  // Coordinator Field Indicators Performance (Target vs. Actual Achievement)
+  const coordinatorIndicatorChartData = useMemo((): AnalyticsDataPoint[] => {
+    if (scopedData.activities.length === 0) {
+      return [{ label: 'No Assigned Indicators', value: 0 }];
+    }
 
-    scopedData.activities.forEach((a) => {
-      if (a.submissionStatus === 'approved') counts['Approved'] += 1;
-      else if (a.submissionStatus === 'submitted') counts['In Review'] += 1;
-      else if (a.submissionStatus === 'draft') counts['Draft'] += 1;
-      else if (a.submissionStatus === 'returned_for_correction') counts['Returned'] += 1;
+    return scopedData.activities.slice(0, 8).map((act) => {
+      const actual = Number(act.participantsCount) || 0;
+      const target = Math.max(act.targetParticipants || 50, 30);
+      const pct = Math.min(Math.round((actual / target) * 100), 100);
+      return {
+        label: act.title.length > 28 ? act.title.substring(0, 26) + '...' : act.title,
+        value: pct,
+        color: pct >= 80 ? '#15803d' : pct >= 50 ? '#D68904' : '#b91c1c',
+        description: `Reached: ${actual.toLocaleString()} / Target: ${target.toLocaleString()} participants (${pct}%)`,
+      };
     });
-
-    return [
-      { label: 'Verified & Approved', value: counts['Approved'], color: '#15803d' },
-      { label: 'In PM Review', value: counts['In Review'], color: '#D68904' },
-      { label: 'Draft Notes', value: counts['Draft'], color: '#64748b' },
-      { label: 'Action Required', value: counts['Returned'], color: '#b91c1c' },
-    ];
   }, [scopedData.activities]);
 
   // Filtered Activities Table Data
@@ -518,25 +514,28 @@ export const ProjectCoordinatorDashboard: React.FC = () => {
 
       {/* Analytics Visualizer & Tasks Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        {/* Left: Activity Execution Pipeline */}
+        {/* Left: Coordinator Field Indicator Performance */}
         <Card className="lg:col-span-5 p-5 bg-white border border-gray-200 shadow-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <div>
-              <h2 className="text-sm font-bold text-gray-900">
-                {t('coordinator.charts.pipeline', 'Field Execution Pipeline')}
-              </h2>
+              <div className="flex items-center gap-1.5">
+                <Target className="w-4 h-4 text-[#D68904]" />
+                <h2 className="text-sm font-bold text-gray-900">
+                  {t('coordinator.charts.indicatorsTitle', 'Field Execution Pipeline & Indicator Milestones')}
+                </h2>
+              </div>
               <p className="text-xs text-gray-500 mt-0.5">
-                Activity verification status across assigned projects
+                Target vs. actual participant reach across assigned activities
               </p>
             </div>
             <span className="text-xs font-mono bg-gray-100 text-gray-700 px-2 py-0.5 rounded border border-gray-200">
-              {scopedData.activities.length} Total
+              {coordinatorIndicatorChartData.length} Tracked
             </span>
           </div>
 
           <div className="min-h-[220px]">
             <AnalyticsVisualizer
-              data={activityStatusChartData}
+              data={coordinatorIndicatorChartData}
               defaultMode="bar"
               availableModes={['bar', 'table']}
               height={200}
