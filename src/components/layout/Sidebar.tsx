@@ -178,7 +178,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           items: [
             { to: '/me', label: t('nav.monitoringEvaluation', 'Monitoring & Evaluation'), icon: Target },
             { to: '/projects/beneficiaries', label: t('nav.beneficiariesParticipants', 'Beneficiaries & Participants'), icon: Users },
-            { to: '/projects/risks', label: t('nav.risksIssues', 'Risks & Issues'), icon: AlertCircle },
             { to: '/projects/budgets', label: t('nav.budgetsExpenditure', 'Budgets & Expenditure'), icon: Wallet },
             { to: '/projects/reports', label: t('nav.reportsDeliverables', 'Reports & Deliverables'), icon: BarChart3 },
             { to: '/projects/documents', label: t('nav.projectDocuments', 'Project Documents'), icon: FileText },

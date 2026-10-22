@@ -218,11 +218,7 @@ export const AppRoutes: React.FC = () => {
         />
         <Route
           path="/projects/risks"
-          element={
-            <ProtectedRoute requiredPermissions={['projects.view']}>
-              <ProjectsPage initialTab="risks" />
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/projects" replace />}
         />
         <Route
           path="/projects/budgets"

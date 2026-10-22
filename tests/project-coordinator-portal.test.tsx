@@ -216,7 +216,6 @@ describe('Project Coordinator Portal & Sidebar Implementation', () => {
       expect(screen.getByText(/Field Updates/i)).toBeInTheDocument();
       expect(screen.getByText(/Work Plans & Activities/i)).toBeInTheDocument();
       expect(screen.getByText(/Beneficiaries & Participants/i)).toBeInTheDocument();
-      expect(screen.getByText(/Risks & Issues/i)).toBeInTheDocument();
       expect(screen.getByText(/Reports & Deliverables/i)).toBeInTheDocument();
       expect(screen.getByText(/Project Documents/i)).toBeInTheDocument();
     });

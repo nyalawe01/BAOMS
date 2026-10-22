@@ -177,7 +177,6 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({ initialTab = 'projec
     { id: 'field-updates', label: t('nav.fieldUpdates', 'Field Updates'), path: '/projects/field-updates', icon: MapPin },
     { id: 'team', label: t('nav.projectTeam', 'Project Team'), path: '/projects/team', icon: Users },
     { id: 'beneficiaries', label: t('nav.beneficiariesParticipants', 'Beneficiaries & Participants'), path: '/projects/beneficiaries', icon: Users },
-    { id: 'risks', label: t('nav.risksIssues', 'Risks & Issues'), path: '/projects/risks', icon: ShieldAlert },
     { id: 'budgets', label: t('nav.budgetsExpenditure', 'Budgets & Expenditure'), path: '/projects/budgets', icon: Wallet },
     { id: 'reports', label: t('nav.reportsDeliverables', 'Reports & Deliverables'), path: '/projects/reports', icon: ClipboardList },
     { id: 'documents', label: t('nav.projectDocuments', 'Project Documents'), path: '/projects/documents', icon: FolderOpen },

@@ -147,7 +147,6 @@ describe('Project Manager Portal & Sidebar Implementation', () => {
       expect(screen.getByText(/Project Team/i)).toBeInTheDocument();
       expect(screen.getByText(/Monitoring & Evaluation/i)).toBeInTheDocument();
       expect(screen.getByText(/Beneficiaries & Participants/i)).toBeInTheDocument();
-      expect(screen.getByText(/Risks & Issues/i)).toBeInTheDocument();
       expect(screen.getByText(/Budgets & Expenditure/i)).toBeInTheDocument();
       expect(screen.getByText(/Reports & Deliverables/i)).toBeInTheDocument();
       expect(screen.getByText(/Project Documents/i)).toBeInTheDocument();
@@ -218,7 +217,6 @@ describe('Project Manager Portal & Sidebar Implementation', () => {
       expect(screen.getByText(/Work Plans & Activities/i)).toBeInTheDocument();
       expect(screen.getByText(/Project Team/i)).toBeInTheDocument();
       expect(screen.getByText(/Beneficiaries & Participants/i)).toBeInTheDocument();
-      expect(screen.getByText(/Risks & Issues/i)).toBeInTheDocument();
       expect(screen.getByText(/Budgets & Expenditure/i)).toBeInTheDocument();
       expect(screen.getByText(/Reports & Deliverables/i)).toBeInTheDocument();
       expect(screen.getByText(/Project Documents/i)).toBeInTheDocument();
