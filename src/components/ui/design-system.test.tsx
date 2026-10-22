@@ -12,6 +12,13 @@ import { Skeleton, SkeletonKPI, SkeletonTable, SkeletonCard } from './Skeleton';
 import { FileUploadDropzone } from './FileUploadDropzone';
 import { CompactFileInput } from './CompactFileInput';
 import { StatusIndicator } from './StatusIndicator';
+import { ButtonGroup, ButtonGroupSeparator } from './ButtonGroup';
+import { Dropdown } from './Dropdown';
+import { ListBox, Surface } from './ListBox';
+import { TagGroup, Tag } from './TagGroup';
+import { Switch } from './Switch';
+import { Chip } from './Chip';
+import { Table } from './Table';
 
 describe('BAOMS Phase 2 Design System Components', () => {
   it('renders Button with variants and loading state', () => {
@@ -261,5 +268,150 @@ describe('BAOMS Phase 2 Design System Components', () => {
     expect(screen.getByText('Partially Paid')).toBeInTheDocument();
     expect(screen.getByText('Partially Paid')).toHaveClass('text-amber-700');
     expect(document.querySelector('.text-amber-600')).toBeInTheDocument();
+  });
+});
+
+describe('HeroUI v3 Design System Components', () => {
+  it('renders ButtonGroup with separators and button inheritance', () => {
+    render(
+      <ButtonGroup variant="primary" size="sm">
+        <Button>First</Button>
+        <Button>
+          <ButtonGroupSeparator />
+          Second
+        </Button>
+      </ButtonGroup>
+    );
+
+    expect(screen.getByText('First')).toBeInTheDocument();
+    expect(screen.getByText('Second')).toBeInTheDocument();
+    expect(document.querySelector('.button-group')).toBeInTheDocument();
+  });
+
+  it('renders Dropdown with items, labels, and action trigger', () => {
+    const handleAction = vi.fn();
+
+    render(
+      <Dropdown>
+        <Dropdown.Trigger>
+          <button>Open Menu</button>
+        </Dropdown.Trigger>
+        <Dropdown.Popover>
+          <Dropdown.Menu onAction={handleAction}>
+            <Dropdown.Item id="item-1">
+              <span>Item One</span>
+            </Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown.Popover>
+      </Dropdown>
+    );
+
+    const trigger = screen.getByText('Open Menu');
+    expect(screen.queryByText('Item One')).not.toBeInTheDocument();
+
+    fireEvent.click(trigger);
+    expect(screen.getByText('Item One')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Item One'));
+    expect(handleAction).toHaveBeenCalledWith('item-1');
+  });
+
+  it('renders ListBox and handles single selection', () => {
+    const handleSelect = vi.fn();
+
+    render(
+      <Surface>
+        <ListBox selectionMode="single" onSelectionChange={handleSelect}>
+          <ListBox.Item id="1" textValue="Opt 1">
+            <span>Option 1</span>
+          </ListBox.Item>
+          <ListBox.Item id="2" textValue="Opt 2">
+            <span>Option 2</span>
+          </ListBox.Item>
+        </ListBox>
+      </Surface>
+    );
+
+    expect(screen.getByText('Option 1')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Option 1'));
+    expect(handleSelect).toHaveBeenCalled();
+  });
+
+  it('renders TagGroup and supports remove button', () => {
+    const handleRemove = vi.fn();
+
+    render(
+      <TagGroup onRemove={handleRemove}>
+        <TagGroup.List>
+          <Tag id="tag-1" textValue="Tag 1">
+            <span>Tag 1</span>
+            <Tag.RemoveButton />
+          </Tag>
+        </TagGroup.List>
+      </TagGroup>
+    );
+
+    expect(screen.getByText('Tag 1')).toBeInTheDocument();
+    const removeBtn = screen.getByRole('button', { name: /Remove tag/i });
+    fireEvent.click(removeBtn);
+    expect(handleRemove).toHaveBeenCalledWith(new Set(['tag-1']));
+  });
+
+  it('renders Switch and toggles state', () => {
+    const handleChange = vi.fn();
+
+    render(
+      <Switch onChange={handleChange}>
+        <span>Enable Notifications</span>
+      </Switch>
+    );
+
+    const label = screen.getByText('Enable Notifications');
+    fireEvent.click(label);
+    expect(handleChange).toHaveBeenCalledWith(true);
+  });
+
+  it('renders Chip with variants and colors', () => {
+    render(
+      <div>
+        <Chip variant="soft" color="accent">
+          Active Status
+        </Chip>
+        <Chip variant="primary" color="success">
+          Published
+        </Chip>
+      </div>
+    );
+
+    expect(screen.getByText('Active Status')).toBeInTheDocument();
+    expect(screen.getByText('Published')).toBeInTheDocument();
+  });
+
+  it('renders Table with compound ScrollContainer and sortable columns', () => {
+    const handleSort = vi.fn();
+
+    render(
+      <Table>
+        <Table.ScrollContainer>
+          <Table.Content sortDescriptor={{ column: 'name', direction: 'ascending' }} onSortChange={handleSort}>
+            <Table.Header>
+              <Table.Column id="name" allowsSorting>
+                Name
+              </Table.Column>
+            </Table.Header>
+            <Table.Body>
+              <Table.Row id="row-1">
+                <Table.Cell>John Doe</Table.Cell>
+              </Table.Row>
+            </Table.Body>
+          </Table.Content>
+        </Table.ScrollContainer>
+      </Table>
+    );
+
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+    const th = screen.getByText('Name');
+    fireEvent.click(th);
+    expect(handleSort).toHaveBeenCalledWith({ column: 'name', direction: 'descending' });
   });
 });

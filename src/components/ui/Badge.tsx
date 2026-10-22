@@ -1,51 +1,57 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { StatusVariant } from '@/types';
+import { Chip, ChipColor, ChipVariant, ChipSize } from './Chip';
+
+export { Chip };
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: StatusVariant;
   withDot?: boolean;
+  size?: ChipSize;
+  badgeStyle?: ChipVariant;
 }
 
 export const Badge: React.FC<BadgeProps> = ({
   className,
   variant = 'default',
   withDot = false,
+  size = 'sm',
+  badgeStyle = 'soft',
   children,
   ...props
 }) => {
-  const variantStyles = {
-    default: 'bg-white text-charcoal-700 border-0',
-    success: 'bg-white text-emerald-700 font-semibold border-0',
-    warning: 'bg-white text-amber-700 font-semibold border-0',
-    danger: 'bg-white text-rose-700 font-semibold border-0',
-    info: 'bg-white text-slate-700 border-0',
+  const colorMap: Record<StatusVariant, ChipColor> = {
+    default: 'default',
+    success: 'success',
+    warning: 'warning',
+    danger: 'danger',
+    info: 'accent',
   };
 
-  const dotColors = {
-    default: 'bg-charcoal-light',
-    success: 'bg-emerald-600',
-    warning: 'bg-amber-600',
-    danger: 'bg-rose-600',
-    info: 'bg-slate-500',
+  const dotColors: Record<StatusVariant, string> = {
+    default: 'bg-slate-400',
+    success: 'bg-emerald-500',
+    warning: 'bg-amber-500',
+    danger: 'bg-rose-500',
+    info: 'bg-[#D68904]',
   };
 
   return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium leading-none select-none',
-        variantStyles[variant],
-        className
-      )}
+    <Chip
+      color={colorMap[variant] || 'default'}
+      variant={badgeStyle}
+      size={size}
+      className={cn('shadow-2xs', className)}
       {...props}
     >
       {withDot && (
         <span
-          className={cn('w-1.5 h-1.5 rounded-full shrink-0', dotColors[variant])}
+          className={cn('w-1.5 h-1.5 rounded-full shrink-0 -ml-0.5 mr-1', dotColors[variant])}
           aria-hidden="true"
         />
       )}
-      {children}
-    </span>
+      <span>{children}</span>
+    </Chip>
   );
 };

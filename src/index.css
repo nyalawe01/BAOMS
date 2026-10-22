@@ -110,3 +110,85 @@ input[type="checkbox"]:focus-visible {
   box-shadow: none !important;
 }
 
+/* -------------------------------------------------------------------------- */
+/*                     HEROUI V3 OFFICIAL DESIGN CLASSES                      */
+/* -------------------------------------------------------------------------- */
+@layer components {
+  /* ButtonGroup */
+  .button-group {
+    @apply inline-flex items-center isolate rounded-xl shadow-xs;
+  }
+  .button-group__separator {
+    @apply opacity-25;
+  }
+
+  /* Dropdown */
+  .dropdown {
+    @apply relative inline-block text-left;
+  }
+  .dropdown__popover {
+    @apply rounded-2xl border border-slate-200/90 bg-white p-1.5 shadow-xl;
+  }
+  .dropdown__menu {
+    @apply flex flex-col gap-0.5;
+  }
+
+  /* ListBox */
+  .list-box {
+    @apply flex flex-col gap-0.5 p-1;
+  }
+  .list-box-item {
+    @apply rounded-xl px-3 py-2 cursor-pointer transition-colors;
+  }
+  .list-box-item--danger {
+    @apply text-rose-600;
+  }
+  .list-box-item__indicator {
+    @apply text-[#D68904];
+  }
+
+  /* TagGroup */
+  .tag-group {
+    @apply flex flex-col gap-1.5;
+  }
+  .tag-group__list {
+    @apply flex flex-wrap gap-2 items-center;
+  }
+  .tag {
+    @apply rounded-full font-medium transition-all;
+  }
+  .tag__remove-button {
+    @apply ml-1 opacity-70 hover:opacity-100;
+  }
+
+  /* Switch */
+  .switch {
+    @apply inline-flex items-center gap-2.5 cursor-pointer;
+  }
+  .switch__control {
+    @apply inline-flex items-center rounded-full transition-colors duration-200;
+  }
+  .switch__thumb {
+    @apply rounded-full bg-white shadow-xs transition-transform duration-200;
+  }
+  .switch__content {
+    @apply inline-flex items-center gap-2.5;
+  }
+  .switch__icon {
+    @apply flex items-center justify-center;
+  }
+
+  /* Chip */
+  .chip {
+    @apply rounded-full font-medium inline-flex items-center justify-center;
+  }
+  .chip__label {
+    @apply font-medium;
+  }
+
+  /* Table */
+  .table-scroll-container {
+    @apply rounded-xl border border-slate-200/90 bg-white shadow-2xs overflow-x-auto;
+  }
+}
+

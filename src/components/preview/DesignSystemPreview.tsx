@@ -32,6 +32,23 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { KPICard } from '@/components/ui/KPICard';
 import { useToast } from '@/lib/ToastContext';
+import {
+  ButtonGroup,
+  ButtonGroupSeparator,
+  Dropdown,
+  ListBox,
+  Surface,
+  TagGroup,
+  Tag,
+  Switch,
+  SwitchGroup,
+  Chip,
+  Label as HeroLabel,
+  Description as HeroDescription,
+  Kbd,
+  Separator as HeroSeparator,
+  Header as HeroHeader,
+} from '@/components/ui';
 
 export const DesignSystemPreview: React.FC = () => {
   const { t } = useTranslation();
@@ -51,6 +68,25 @@ export const DesignSystemPreview: React.FC = () => {
   const [checkboxChecked, setCheckboxChecked] = useState(true);
   const [radioSelected, setRadioSelected] = useState('official');
 
+  // HeroUI suite states
+  const [heroDropdownKey, setHeroDropdownKey] = useState<Set<string>>(new Set(['merge']));
+  const [heroListBoxSingle, setHeroListBoxSingle] = useState<Set<string | number>>(new Set(['1']));
+  const [heroListBoxMulti, setHeroListBoxMulti] = useState<Set<string | number>>(new Set(['1', '2']));
+  const [heroTags, setHeroTags] = useState<{ id: string; name: string }[]>([
+    { id: 'news', name: 'Child Safeguarding' },
+    { id: 'ecd', name: 'Early Childhood Dev' },
+    { id: 'nutrition', name: 'Community Nutrition' },
+    { id: 'bagamoyo', name: 'Bagamoyo Hub' },
+  ]);
+  const [heroSelectedTags, setHeroSelectedTags] = useState<Set<string | number>>(new Set(['news', 'ecd']));
+  const [heroSwitch1, setHeroSwitch1] = useState(true);
+  const [heroSwitch2, setHeroSwitch2] = useState(false);
+  const [heroTableSort, setHeroTableSort] = useState<{ column?: string; direction?: 'ascending' | 'descending' }>({
+    column: 'name',
+    direction: 'ascending',
+  });
+  const [heroSelectedRows, setHeroSelectedRows] = useState<Set<string | number>>(new Set(['1']));
+
   const previewTabs = [
     { id: 'typography', label: '1. Typography & Tokens' },
     { id: 'kpicards', label: '2. AdminCN KPI Cards' },
@@ -59,6 +95,7 @@ export const DesignSystemPreview: React.FC = () => {
     { id: 'tables', label: '5. Tables & Pagination' },
     { id: 'feedback', label: '6. Alerts, Modals & Toasts' },
     { id: 'states', label: '7. Loading & Empty States' },
+    { id: 'heroui', label: '8. HeroUI v3 Suite' },
   ];
 
   const filterOptions = [
@@ -721,6 +758,505 @@ export const DesignSystemPreview: React.FC = () => {
                   icon: Plus,
                 }}
               />
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* TAB 8: HEROUI V3 COMPONENT SUITE */}
+      {activeTab === 'heroui' && (
+        <div className="space-y-6">
+          {/* Section 1: ButtonGroup */}
+          <Card>
+            <CardHeader>
+              <CardTitle>1. HeroUI ButtonGroup</CardTitle>
+              <CardDescription>
+                Group related buttons together with consistent styling, automatic connected border radii, orientation, and separator dividers.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                  Horizontal Groups with Separators & Dropdowns
+                </span>
+                <div className="flex flex-wrap items-center gap-4">
+                  <ButtonGroup variant="primary">
+                    <Button>Authorize Project</Button>
+                    <Dropdown>
+                      <Dropdown.Trigger>
+                        <Button isIconOnly aria-label="More actions">
+                          <ButtonGroupSeparator />
+                          <ChevronDown className="size-4" />
+                        </Button>
+                      </Dropdown.Trigger>
+                      <Dropdown.Popover>
+                        <Dropdown.Menu onAction={(k) => showToast({ title: 'Action Selected', message: k, variant: 'success' })}>
+                          <Dropdown.Item id="authorize-now">
+                            <HeroLabel>Authorize & Disburse</HeroLabel>
+                            <HeroDescription>Immediately unlocks field funds</HeroDescription>
+                          </Dropdown.Item>
+                          <Dropdown.Item id="conditional">
+                            <HeroLabel>Conditional Approval</HeroLabel>
+                            <HeroDescription>Requires revised expenditure plan</HeroDescription>
+                          </Dropdown.Item>
+                          <HeroSeparator />
+                          <Dropdown.Item id="reject" variant="danger">
+                            <HeroLabel>Return for Revision</HeroLabel>
+                            <HeroDescription>Returns charter to Project Manager</HeroDescription>
+                          </Dropdown.Item>
+                        </Dropdown.Menu>
+                      </Dropdown.Popover>
+                    </Dropdown>
+                  </ButtonGroup>
+
+                  <ButtonGroup variant="secondary">
+                    <Button>Export Dossier</Button>
+                    <Button>
+                      <ButtonGroupSeparator />
+                      PDF Format
+                    </Button>
+                    <Button>
+                      <ButtonGroupSeparator />
+                      Excel Audit
+                    </Button>
+                  </ButtonGroup>
+
+                  <ButtonGroup variant="tertiary">
+                    <Button>Active</Button>
+                    <Button>
+                      <ButtonGroupSeparator />
+                      Completed
+                    </Button>
+                    <Button>
+                      <ButtonGroupSeparator />
+                      All Projects
+                    </Button>
+                  </ButtonGroup>
+                </div>
+              </div>
+
+              <div className="space-y-2 border-t border-slate-100 pt-4">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                  Vertical Orientation & Danger Variants
+                </span>
+                <div className="flex flex-wrap items-start gap-6">
+                  <ButtonGroup orientation="vertical" variant="secondary" className="w-48">
+                    <Button className="justify-start">Personnel Directory</Button>
+                    <Button className="justify-start">
+                      <ButtonGroupSeparator />
+                      Leave Entitlements
+                    </Button>
+                    <Button className="justify-start">
+                      <ButtonGroupSeparator />
+                      Contract Renewals
+                    </Button>
+                  </ButtonGroup>
+
+                  <ButtonGroup variant="danger">
+                    <Button>Deactivate Account</Button>
+                    <Button isIconOnly aria-label="Deactivation options">
+                      <ButtonGroupSeparator />
+                      <ChevronDown className="size-4" />
+                    </Button>
+                  </ButtonGroup>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Section 2: Dropdown */}
+          <Card>
+            <CardHeader>
+              <CardTitle>2. HeroUI Dropdown</CardTitle>
+              <CardDescription>
+                Accessible action menus with sections, labels, descriptions, keyboard shortcut badges, selection indicators, and submenus.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex flex-wrap items-center gap-4">
+                {/* Actions Dropdown */}
+                <Dropdown>
+                  <Dropdown.Trigger>
+                    <Button variant="secondary">
+                      <span>Actions Menu</span>
+                      <ChevronDown className="size-4 ml-1.5" />
+                    </Button>
+                  </Dropdown.Trigger>
+                  <Dropdown.Popover>
+                    <Dropdown.Menu onAction={(k) => showToast({ title: 'Selected', message: k, variant: 'info' })}>
+                      <Dropdown.Section>
+                        <HeroHeader>Project Actions</HeroHeader>
+                        <Dropdown.Item id="new-activity">
+                          <HeroLabel>Add Field Activity</HeroLabel>
+                          <HeroDescription>Define ToR and budget line</HeroDescription>
+                          <Kbd slot="keyboard">⌘N</Kbd>
+                        </Dropdown.Item>
+                        <Dropdown.Item id="export-data">
+                          <HeroLabel>Export Indicators</HeroLabel>
+                          <HeroDescription>Download M&E metrics</HeroDescription>
+                          <Kbd slot="keyboard">⌘E</Kbd>
+                        </Dropdown.Item>
+                      </Dropdown.Section>
+                      <HeroSeparator />
+                      <Dropdown.Section>
+                        <HeroHeader>Governance Gate</HeroHeader>
+                        <Dropdown.Item id="lock-budget" variant="danger">
+                          <HeroLabel>Lock Financial Budget</HeroLabel>
+                          <HeroDescription>Freezes requisitions</HeroDescription>
+                        </Dropdown.Item>
+                      </Dropdown.Section>
+                    </Dropdown.Menu>
+                  </Dropdown.Popover>
+                </Dropdown>
+
+                {/* Multiple Selection Dropdown */}
+                <Dropdown>
+                  <Dropdown.Trigger>
+                    <Button variant="outline">
+                      <span>Preferred Categories</span>
+                      <ChevronDown className="size-4 ml-1.5" />
+                    </Button>
+                  </Dropdown.Trigger>
+                  <Dropdown.Popover>
+                    <Dropdown.Menu
+                      selectionMode="multiple"
+                      selectedKeys={heroDropdownKey}
+                      onSelectionChange={(keys) => setHeroDropdownKey(keys as any)}
+                    >
+                      <Dropdown.Section>
+                        <HeroHeader>Focus Sectors</HeroHeader>
+                        <Dropdown.Item id="safeguarding">
+                          <HeroLabel>Child Protection</HeroLabel>
+                          <Dropdown.ItemIndicator />
+                        </Dropdown.Item>
+                        <Dropdown.Item id="nutrition">
+                          <HeroLabel>Nutrition & Health</HeroLabel>
+                          <Dropdown.ItemIndicator />
+                        </Dropdown.Item>
+                        <Dropdown.Item id="education">
+                          <HeroLabel>Inclusive Education</HeroLabel>
+                          <Dropdown.ItemIndicator />
+                        </Dropdown.Item>
+                      </Dropdown.Section>
+                    </Dropdown.Menu>
+                  </Dropdown.Popover>
+                </Dropdown>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Section 3: ListBox */}
+          <Card>
+            <CardHeader>
+              <CardTitle>3. HeroUI ListBox</CardTitle>
+              <CardDescription>
+                Structured selection lists inside modern surfaces with single and multiple selection modes.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">
+                    Single Selection (Staff Reviewers)
+                  </span>
+                  <Surface className="w-full sm:w-72">
+                    <ListBox
+                      aria-label="Staff Reviewers"
+                      selectionMode="single"
+                      selectedKeys={heroListBoxSingle}
+                      onSelectionChange={setHeroListBoxSingle}
+                    >
+                      <ListBox.Section>
+                        <HeroHeader>Executive Reviewers</HeroHeader>
+                        <ListBox.Item id="1" textValue="Zuberi Kondo">
+                          <div className="size-7 rounded-full bg-amber-100 text-amber-900 font-bold flex items-center justify-center text-xs shrink-0">
+                            ZK
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <HeroLabel>Zuberi Kondo</HeroLabel>
+                            <HeroDescription>Executive Director</HeroDescription>
+                          </div>
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                        <ListBox.Item id="2" textValue="Finance Lead">
+                          <div className="size-7 rounded-full bg-blue-100 text-blue-900 font-bold flex items-center justify-center text-xs shrink-0">
+                            FL
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <HeroLabel>Finance Officer</HeroLabel>
+                            <HeroDescription>finance@babawatoto.or.tz</HeroDescription>
+                          </div>
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                      </ListBox.Section>
+                    </ListBox>
+                  </Surface>
+                </div>
+
+                <div>
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">
+                    Multiple Selection (Project Modules)
+                  </span>
+                  <Surface className="w-full sm:w-72">
+                    <ListBox
+                      aria-label="Project Modules"
+                      selectionMode="multiple"
+                      selectedKeys={heroListBoxMulti}
+                      onSelectionChange={setHeroListBoxMulti}
+                    >
+                      <ListBox.Section>
+                        <HeroHeader>Enabled Operations</HeroHeader>
+                        <ListBox.Item id="1" textValue="Requisitions">
+                          <HeroLabel>Spend Requisitions</HeroLabel>
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                        <ListBox.Item id="2" textValue="Procurement">
+                          <HeroLabel>Purchase Orders</HeroLabel>
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                        <ListBox.Item id="3" textValue="Beneficiaries">
+                          <HeroLabel>Field Attendance Register</HeroLabel>
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                      </ListBox.Section>
+                    </ListBox>
+                  </Surface>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Section 4: TagGroup */}
+          <Card>
+            <CardHeader>
+              <CardTitle>4. HeroUI TagGroup</CardTitle>
+              <CardDescription>
+                Focusable tag pills supporting selection, avatars, icons, and interactive remove buttons.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-3">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                  Interactive Removable Tags
+                </span>
+                <TagGroup
+                  aria-label="Project Tags"
+                  onRemove={(keys) => {
+                    const toDelete = Array.from(keys);
+                    setHeroTags((prev) => prev.filter((t) => !toDelete.includes(t.id)));
+                  }}
+                >
+                  <TagGroup.List items={heroTags}>
+                    {(tag) => (
+                      <Tag key={tag.id} id={tag.id} textValue={tag.name}>
+                        {tag.name}
+                        <Tag.RemoveButton />
+                      </Tag>
+                    )}
+                  </TagGroup.List>
+                </TagGroup>
+              </div>
+
+              <div className="space-y-3 border-t border-slate-100 pt-4">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                  Tag Selection (Surface Variant)
+                </span>
+                <TagGroup
+                  selectionMode="multiple"
+                  variant="surface"
+                  selectedKeys={heroSelectedTags}
+                  onSelectionChange={setHeroSelectedTags}
+                >
+                  <HeroLabel>Choose Operational Sectors</HeroLabel>
+                  <TagGroup.List>
+                    <Tag id="news">Child Protection</Tag>
+                    <Tag id="ecd">Early Learning</Tag>
+                    <Tag id="wash">WASH & Hygiene</Tag>
+                    <Tag id="livelihood">Family Economic Empowerment</Tag>
+                  </TagGroup.List>
+                </TagGroup>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Section 5: Switch & Toggle */}
+          <Card>
+            <CardHeader>
+              <CardTitle>5. HeroUI Switch & SwitchGroup</CardTitle>
+              <CardDescription>
+                Smooth boolean toggle switches with sizes, icons, labels, and descriptions.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex flex-wrap items-center gap-8">
+                <Switch size="sm" isSelected={heroSwitch1} onChange={setHeroSwitch1}>
+                  <HeroLabel>Small Switch</HeroLabel>
+                </Switch>
+
+                <Switch size="md" isSelected={heroSwitch1} onChange={setHeroSwitch1}>
+                  <HeroLabel>Medium (Default)</HeroLabel>
+                </Switch>
+
+                <Switch size="lg" isSelected={heroSwitch1} onChange={setHeroSwitch1}>
+                  <HeroLabel>Large Switch</HeroLabel>
+                </Switch>
+              </div>
+
+              <div className="border-t border-slate-100 pt-4 max-w-md">
+                <SwitchGroup>
+                  <Switch isSelected={heroSwitch1} onChange={setHeroSwitch1}>
+                    <Switch.Content>
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                      <div className="flex flex-col">
+                        <HeroLabel>Activity Notifications</HeroLabel>
+                        <HeroDescription>Alert Executive Director upon field submission</HeroDescription>
+                      </div>
+                    </Switch.Content>
+                  </Switch>
+
+                  <Switch isSelected={heroSwitch2} onChange={setHeroSwitch2}>
+                    <Switch.Content>
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                      <div className="flex flex-col">
+                        <HeroLabel>Automatic Retirement Gate</HeroLabel>
+                        <HeroDescription>Require receipts before issuing next tranche</HeroDescription>
+                      </div>
+                    </Switch.Content>
+                  </Switch>
+                </SwitchGroup>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Section 6: Chip */}
+          <Card>
+            <CardHeader>
+              <CardTitle>6. HeroUI Chip & Informational Badges</CardTitle>
+              <CardDescription>
+                Full color and variant matrix: primary, secondary, soft, and tertiary across all semantic statuses.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                  Soft Variant (Recommended for Modern SaaS)
+                </span>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Chip variant="soft" color="accent">Ochre Accent</Chip>
+                  <Chip variant="soft" color="success">Approved Tranche</Chip>
+                  <Chip variant="soft" color="warning">Pending Sign-off</Chip>
+                  <Chip variant="soft" color="danger">Over Budget</Chip>
+                  <Chip variant="soft" color="default">Standard Draft</Chip>
+                </div>
+              </div>
+
+              <div className="space-y-2 border-t border-slate-100 pt-4">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                  Secondary Variant (Subtle Border)
+                </span>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Chip variant="secondary" color="accent">Grant Agreement</Chip>
+                  <Chip variant="secondary" color="success">Verified Target</Chip>
+                  <Chip variant="secondary" color="warning">Audit Flag</Chip>
+                  <Chip variant="secondary" color="danger">Declined ToR</Chip>
+                  <Chip variant="secondary" color="default">Internal Note</Chip>
+                </div>
+              </div>
+
+              <div className="space-y-2 border-t border-slate-100 pt-4">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                  Primary Variant (Filled Solid)
+                </span>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Chip variant="primary" color="accent">Active Portfolio</Chip>
+                  <Chip variant="primary" color="success">Disbursed</Chip>
+                  <Chip variant="primary" color="warning">Under Review</Chip>
+                  <Chip variant="primary" color="danger">Closed</Chip>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Section 7: Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>7. HeroUI Table with Sorting, Selection & Pagination</CardTitle>
+              <CardDescription>
+                Compound Table component with horizontal scroll container, column sorting indicators, and pagination footer.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <Table.ScrollContainer>
+                  <Table.Content
+                    sortDescriptor={heroTableSort}
+                    onSortChange={(d) => setHeroTableSort(d as any)}
+                    selectedKeys={heroSelectedRows}
+                    selectionMode="single"
+                    onSelectionChange={setHeroSelectedRows}
+                  >
+                    <Table.Header>
+                      <Table.Column id="code" isRowHeader>
+                        Project Code
+                      </Table.Column>
+                      <Table.Column id="name" allowsSorting>
+                        Project Title
+                      </Table.Column>
+                      <Table.Column id="funder">
+                        Donor Funder
+                      </Table.Column>
+                      <Table.Column id="status">
+                        Status
+                      </Table.Column>
+                      <Table.Column id="budget" allowsSorting className="text-right">
+                        Allocated Budget
+                      </Table.Column>
+                    </Table.Header>
+                    <Table.Body>
+                      <Table.Row id="1">
+                        <Table.Cell className="font-mono font-bold text-slate-900">PRJ-2026-001</Table.Cell>
+                        <Table.Cell className="font-medium text-slate-900">Kigamboni Child Care & Education Support</Table.Cell>
+                        <Table.Cell className="text-slate-600">Foundation Partner</Table.Cell>
+                        <Table.Cell>
+                          <Chip variant="soft" color="success">ACTIVE</Chip>
+                        </Table.Cell>
+                        <Table.Cell isNumeric className="font-bold text-slate-900">TZS 150,000,000</Table.Cell>
+                      </Table.Row>
+                      <Table.Row id="2">
+                        <Table.Cell className="font-mono font-bold text-slate-900">PRJ-2026-002</Table.Cell>
+                        <Table.Cell className="font-medium text-slate-900">Bagamoyo Youth Life Skills Initiative</Table.Cell>
+                        <Table.Cell className="text-slate-600">Global Youth Grant</Table.Cell>
+                        <Table.Cell>
+                          <Chip variant="soft" color="success">ACTIVE</Chip>
+                        </Table.Cell>
+                        <Table.Cell isNumeric className="font-bold text-slate-900">TZS 85,000,000</Table.Cell>
+                      </Table.Row>
+                      <Table.Row id="3">
+                        <Table.Cell className="font-mono font-bold text-slate-900">PRJ-2026-003</Table.Cell>
+                        <Table.Cell className="font-medium text-slate-900">Inclusive Education Teachers Capacity Building</Table.Cell>
+                        <Table.Cell className="text-slate-600">Institutional</Table.Cell>
+                        <Table.Cell>
+                          <Chip variant="soft" color="warning">PLANNING</Chip>
+                        </Table.Cell>
+                        <Table.Cell isNumeric className="font-bold text-slate-900">TZS 45,000,000</Table.Cell>
+                      </Table.Row>
+                    </Table.Body>
+                  </Table.Content>
+                </Table.ScrollContainer>
+                <Table.Footer>
+                  <Pagination
+                    currentPage={1}
+                    totalPages={3}
+                    totalItems={3}
+                    pageSize={3}
+                    onPageChange={() => {}}
+                  />
+                </Table.Footer>
+              </Table>
             </CardContent>
           </Card>
         </div>
