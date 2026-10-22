@@ -408,11 +408,6 @@ export const ProjectManagerDashboard: React.FC = () => {
               </select>
             </div>
           </div>
-
-          <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-500"></span>
-            <span>Live Portfolio Tracking · {projects.length} {projects.length === 1 ? 'project' : 'projects'} active</span>
-          </div>
         </div>
       </div>
 
