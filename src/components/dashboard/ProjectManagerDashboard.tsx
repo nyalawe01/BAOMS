@@ -544,164 +544,190 @@ export const ProjectManagerDashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Operational Queues: Coordinator Submissions Review Desk & Tasks Priority */}
-      <div id="action-queue" className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        {/* Left: Coordinator Submissions Awaiting PM Review */}
-        <div className="lg:col-span-7 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm flex flex-col justify-between">
-          <div className="p-4 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
+      {/* 1. Coordinator Submissions Awaiting Review (Full-Width Row) */}
+      <div id="action-queue" className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-xs hover:shadow-sm transition-shadow">
+        <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-forest-50 border border-forest-200/60 text-[#D68904]">
+              <ClipboardList className="w-5 h-5" />
+            </div>
             <div>
-              <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                <ClipboardList className="w-4 h-4 text-[#374151]" />
-                {t('pm.submissions.title', 'Coordinator Submissions Awaiting Review')}
-              </h3>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-slate-900">
+                  {t('pm.submissions.title', 'Coordinator Submissions Awaiting Review')}
+                </h3>
+                {pendingSubmissions.length > 0 && (
+                  <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 border border-amber-200/80">
+                    {pendingSubmissions.length} Pending Sign-off
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
                 Field activity reports requiring programmatic verification & sign-off
               </p>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/projects/activities')}
-              className="text-xs text-gray-700 hover:text-black"
-            >
-              {t('common.viewAll', 'All Submissions')}
-              <ChevronRight className="w-3.5 h-3.5 ml-0.5 text-[#374151]" />
-            </Button>
           </div>
-
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-gray-50 text-[11px] font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                <tr>
-                  <th className="py-2.5 px-4">{t('projects.activities.colTitle', 'Activity & Project')}</th>
-                  <th className="py-2.5 px-3">{t('projects.activities.colSubmitter', 'Submitted By')}</th>
-                  <th className="py-2.5 px-3 text-right">{t('projects.activities.colReach', 'Reach')}</th>
-                  <th className="py-2.5 px-4 text-right">{t('common.actions', 'Review Action')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {pendingSubmissions.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="py-10 text-center text-gray-500 text-xs">
-                      <CheckCircle2 className="w-6 h-6 text-emerald-600 mx-auto mb-2 opacity-80" />
-                      All submitted coordinator reports have been reviewed and verified.
-                    </td>
-                  </tr>
-                ) : (
-                  pendingSubmissions.slice(0, 5).map((act) => (
-                    <tr key={act.id} className="hover:bg-gray-50/70 transition-colors">
-                      <td className="py-2.5 px-4">
-                        <span className="font-semibold text-gray-900 block truncate max-w-[240px]">
-                          {act.title}
-                        </span>
-                        <span className="text-[11px] text-gray-500 truncate block">
-                          {act.projectName} • {act.location || 'Field Location'}
-                        </span>
-                      </td>
-
-                      <td className="py-2.5 px-3 text-gray-700 whitespace-nowrap">
-                        <span className="font-medium text-gray-900 block">{act.submittedByName || 'Coordinator'}</span>
-                        <span className="text-[10px] text-gray-500">{act.activityDate}</span>
-                      </td>
-
-                      <td className="py-2.5 px-3 text-right font-mono font-bold text-gray-900 whitespace-nowrap">
-                        {act.participantsCount} ppl
-                      </td>
-
-                      <td className="py-2.5 px-4 text-right whitespace-nowrap">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => setReviewingActivity(act)}
-                          className="px-2.5 py-1 text-xs border border-gray-300 text-gray-800 hover:bg-gray-100"
-                        >
-                          <Eye className="w-3.5 h-3.5 mr-1 text-[#374151]" />
-                          {t('common.review', 'Review')}
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/projects/activities')}
+            className="text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl"
+          >
+            {t('common.viewAll', 'All Submissions')}
+            <ChevronRight className="w-4 h-4 ml-1 text-slate-500" />
+          </Button>
         </div>
 
-        {/* Right: Workplan Tasks & Milestone Tracker */}
-        <div className="lg:col-span-5 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm flex flex-col justify-between">
-          <div className="p-4 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50/90 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-200/80">
+              <tr>
+                <th className="py-3.5 px-6">{t('projects.activities.colTitle', 'Activity & Project')}</th>
+                <th className="py-3.5 px-6">{t('projects.activities.colSubmitter', 'Submitted By')}</th>
+                <th className="py-3.5 px-6 text-center">{t('projects.activities.colReach', 'Reach')}</th>
+                <th className="py-3.5 px-6 text-right">{t('common.actions', 'Actions')}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {pendingSubmissions.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-12 text-center text-slate-500 text-sm">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto mb-2 opacity-90" />
+                    All submitted coordinator reports have been reviewed and verified.
+                  </td>
+                </tr>
+              ) : (
+                pendingSubmissions.map((act) => (
+                  <tr key={act.id} className="hover:bg-slate-50/70 transition-colors">
+                    <td className="py-4 px-6">
+                      <span className="font-semibold text-slate-900 block text-sm">
+                        {act.title}
+                      </span>
+                      <span className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5 flex-wrap">
+                        <span className="font-medium text-slate-700">{act.projectName}</span>
+                        <span>•</span>
+                        <span>{act.location || 'Field Location'}</span>
+                      </span>
+                    </td>
+
+                    <td className="py-4 px-6 text-slate-700 whitespace-nowrap">
+                      <span className="font-medium text-slate-900 block text-sm">{act.submittedByName || 'Staff Member'}</span>
+                      <span className="text-xs text-slate-500 mt-0.5 block">{act.activityDate}</span>
+                    </td>
+
+                    <td className="py-4 px-6 text-center whitespace-nowrap">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold font-mono bg-forest-50 text-forest-800 border border-forest-200">
+                        {act.participantsCount?.toLocaleString() ?? 0} ppl
+                      </span>
+                    </td>
+
+                    <td className="py-4 px-6 text-right whitespace-nowrap">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setReviewingActivity(act)}
+                        className="h-8.5 px-3.5 text-xs font-semibold border border-slate-300 text-slate-800 hover:bg-slate-100 rounded-xl shadow-none"
+                      >
+                        <Eye className="w-3.5 h-3.5 mr-1.5 text-slate-600" />
+                        {t('common.review', 'Review')}
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 2. Workplan Tasks & Deliverables (Full-Width Row) */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-xs hover:shadow-sm transition-shadow">
+        <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-forest-50 border border-forest-200/60 text-[#D68904]">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
             <div>
-              <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#374151]" />
-                {t('pm.milestones.title', 'Workplan Tasks & Deliverables')}
-              </h3>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-slate-900">
+                  {t('pm.milestones.title', 'Workplan Tasks & Deliverables')}
+                </h3>
+                {urgentTasks.length > 0 && (
+                  <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700 border border-slate-200">
+                    {urgentTasks.length} Milestones
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
                 Priority operational milestones assigned to team members
               </p>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/projects/planning')}
-              className="text-xs text-gray-700 hover:text-black"
-            >
-              {t('common.viewAll', 'Timeline')}
-              <ChevronRight className="w-3.5 h-3.5 ml-0.5 text-[#374151]" />
-            </Button>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/projects/planning')}
+            className="text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl"
+          >
+            {t('common.viewAll', 'Timeline')}
+            <ChevronRight className="w-4 h-4 ml-1 text-slate-500" />
+          </Button>
+        </div>
 
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-gray-50 text-[11px] font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50/90 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-200/80">
+              <tr>
+                <th className="py-3.5 px-6">{t('projects.tasks.colTitle', 'Deliverable & Milestone')}</th>
+                <th className="py-3.5 px-6">{t('projects.tasks.colAssigned', 'Assigned Lead')}</th>
+                <th className="py-3.5 px-6">{t('projects.tasks.colDue', 'Due Date')}</th>
+                <th className="py-3.5 px-6 text-right">{t('projects.tasks.colPriority', 'Priority')}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {urgentTasks.length === 0 ? (
                 <tr>
-                  <th className="py-2.5 px-4">{t('projects.tasks.colTitle', 'Deliverable')}</th>
-                  <th className="py-2.5 px-3">{t('projects.tasks.colDue', 'Due Date')}</th>
-                  <th className="py-2.5 px-4 text-right">{t('projects.tasks.colPriority', 'Priority')}</th>
+                  <td colSpan={4} className="py-12 text-center text-slate-500 text-sm">
+                    No pending workplan tasks registered.
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {urgentTasks.length === 0 ? (
-                  <tr>
-                    <td colSpan={3} className="py-10 text-center text-gray-500 text-xs">
-                      No pending workplan tasks registered.
-                    </td>
-                  </tr>
-                ) : (
-                  urgentTasks.map((tsk) => {
-                    const isLate = tsk.dueDate && new Date(tsk.dueDate) < new Date();
-                    return (
-                      <tr key={tsk.id} className="hover:bg-gray-50/70 transition-colors">
-                        <td className="py-2.5 px-4 font-semibold text-gray-900">
-                          <span className="block truncate max-w-[200px]">{tsk.title}</span>
-                          <span className="text-[10px] text-gray-500 block truncate">
-                            {tsk.assignedToName || 'Unassigned'}
-                          </span>
-                        </td>
+              ) : (
+                urgentTasks.map((tsk) => {
+                  const isLate = tsk.dueDate && new Date(tsk.dueDate) < new Date();
+                  return (
+                    <tr key={tsk.id} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="py-4 px-6 font-semibold text-slate-900">
+                        <span className="block text-sm">{tsk.title}</span>
+                      </td>
 
-                        <td className="py-2.5 px-3 text-xs whitespace-nowrap">
-                          <span className={isLate ? 'text-rose-700 font-bold' : 'text-gray-600'}>
-                            {tsk.dueDate || 'No Date'}
-                          </span>
-                        </td>
+                      <td className="py-4 px-6 text-slate-700 whitespace-nowrap text-sm">
+                        <span className="font-medium text-slate-900">{tsk.assignedToName || 'Unassigned'}</span>
+                      </td>
 
-                        <td className="py-2.5 px-4 text-right whitespace-nowrap">
-                          <span
-                            className={`font-mono text-[10px] font-semibold uppercase px-2 py-0.5 rounded border ${
-                              tsk.priority === 'urgent' || tsk.priority === 'high'
-                                ? 'bg-red-50 text-red-700 border-red-200'
-                                : 'bg-gray-50 text-gray-700 border-gray-200'
-                            }`}
-                          >
-                            {tsk.priority}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                      <td className="py-4 px-6 text-sm whitespace-nowrap">
+                        <span className={isLate ? 'text-rose-700 font-bold flex items-center gap-1.5' : 'text-slate-600'}>
+                          {isLate && <AlertTriangle className="w-3.5 h-3.5 text-rose-600 inline" />}
+                          {tsk.dueDate || 'No Date'}
+                        </span>
+                      </td>
+
+                      <td className="py-4 px-6 text-right whitespace-nowrap">
+                        <span
+                          className={`font-mono text-xs font-semibold uppercase px-2.5 py-1 rounded-full border ${
+                            tsk.priority === 'urgent' || tsk.priority === 'high'
+                              ? 'bg-rose-50 text-rose-700 border-rose-200'
+                              : 'bg-slate-50 text-slate-700 border-slate-200'
+                          }`}
+                        >
+                          {tsk.priority}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
