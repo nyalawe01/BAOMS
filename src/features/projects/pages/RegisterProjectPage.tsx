@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -17,6 +17,7 @@ import {
   FileStack,
   Sparkles,
   Layers,
+  X,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
@@ -1128,146 +1129,246 @@ export const RegisterProjectPage: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Country Dropdown (Required) */}
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     <label className="block text-xs font-semibold text-charcoal-800">
                       Country * <span className="text-rose-600">(Must select at least one)</span>
                     </label>
-                    <div className="p-3 rounded-lg border border-surface-border bg-slate-50/50 space-y-2">
-                      <div className="flex flex-wrap gap-1.5">
-                        {COUNTRY_OPTIONS.map((c) => {
-                          const isSel = formData.governance.countries?.includes(c);
-                          return (
+                    <select
+                      value=""
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (!val) return;
+                        const current = formData.governance.countries || [];
+                        if (!current.includes(val)) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            governance: { ...prev.governance, countries: [...current, val] },
+                          }));
+                        }
+                      }}
+                      className="w-full text-xs rounded-lg border border-surface-border bg-white p-2.5 text-charcoal-800 focus:outline-none focus:ring-1 focus:ring-forest-600"
+                    >
+                      <option value="">-- Add Country to selection --</option>
+                      {COUNTRY_OPTIONS.map((c) => (
+                        <option key={c} value={c} disabled={formData.governance.countries?.includes(c)}>
+                          {c} {formData.governance.countries?.includes(c) ? '✓ (Selected)' : ''}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* TagGroup for Country */}
+                    <div className="min-h-[38px] p-2 rounded-lg border border-surface-border bg-slate-50/50 flex flex-wrap items-center gap-1.5">
+                      {(formData.governance.countries || []).length === 0 ? (
+                        <span className="text-xs text-rose-600 font-medium">Please select at least one country</span>
+                      ) : (
+                        (formData.governance.countries || []).map((c) => (
+                          <span
+                            key={c}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-forest-50 border border-forest-300 text-forest-900 shadow-xs"
+                          >
+                            <span>{c}</span>
                             <button
-                              key={c}
                               type="button"
                               onClick={() => {
-                                const current = formData.governance.countries || [];
-                                const updated = isSel ? current.filter((x) => x !== c) : [...current, c];
                                 setFormData((prev) => ({
                                   ...prev,
-                                  governance: { ...prev.governance, countries: updated },
+                                  governance: {
+                                    ...prev.governance,
+                                    countries: (prev.governance.countries || []).filter((x) => x !== c),
+                                  },
                                 }));
                               }}
-                              className={`px-2.5 py-1 text-xs rounded-md border font-medium flex items-center gap-1 transition-colors ${
-                                isSel
-                                  ? 'bg-forest-50 border-forest-600 text-forest-900 font-bold'
-                                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-                              }`}
+                              className="p-0.5 rounded-full hover:bg-forest-200 text-forest-700 hover:text-forest-950 transition-colors"
+                              title={`Remove ${c}`}
                             >
-                              <span>{c}</span>
-                              {isSel && <Check className="w-3 h-3 text-forest-700" />}
+                              <X className="w-3 h-3" />
                             </button>
-                          );
-                        })}
-                      </div>
+                          </span>
+                        ))
+                      )}
                     </div>
                   </div>
 
                   {/* Region Dropdown (Required) */}
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     <label className="block text-xs font-semibold text-charcoal-800">
                       Region * <span className="text-rose-600">(Must select at least one)</span>
                     </label>
-                    <div className="p-3 rounded-lg border border-surface-border bg-slate-50/50 space-y-2">
-                      <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
-                        {REGION_OPTIONS.map((r) => {
-                          const isSel = formData.governance.regions?.includes(r);
-                          return (
+                    <select
+                      value=""
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (!val) return;
+                        const current = formData.governance.regions || [];
+                        if (!current.includes(val)) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            governance: { ...prev.governance, regions: [...current, val] },
+                          }));
+                        }
+                      }}
+                      className="w-full text-xs rounded-lg border border-surface-border bg-white p-2.5 text-charcoal-800 focus:outline-none focus:ring-1 focus:ring-forest-600"
+                    >
+                      <option value="">-- Add Region to selection --</option>
+                      {REGION_OPTIONS.map((r) => (
+                        <option key={r} value={r} disabled={formData.governance.regions?.includes(r)}>
+                          {r} {formData.governance.regions?.includes(r) ? '✓ (Selected)' : ''}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* TagGroup for Region */}
+                    <div className="min-h-[38px] p-2 rounded-lg border border-surface-border bg-slate-50/50 flex flex-wrap items-center gap-1.5">
+                      {(formData.governance.regions || []).length === 0 ? (
+                        <span className="text-xs text-rose-600 font-medium">Please select at least one region</span>
+                      ) : (
+                        (formData.governance.regions || []).map((r) => (
+                          <span
+                            key={r}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-forest-50 border border-forest-300 text-forest-900 shadow-xs"
+                          >
+                            <span>{r}</span>
                             <button
-                              key={r}
                               type="button"
                               onClick={() => {
-                                const current = formData.governance.regions || [];
-                                const updated = isSel ? current.filter((x) => x !== r) : [...current, r];
                                 setFormData((prev) => ({
                                   ...prev,
-                                  governance: { ...prev.governance, regions: updated },
+                                  governance: {
+                                    ...prev.governance,
+                                    regions: (prev.governance.regions || []).filter((x) => x !== r),
+                                  },
                                 }));
                               }}
-                              className={`px-2.5 py-1 text-xs rounded-md border font-medium flex items-center gap-1 transition-colors ${
-                                isSel
-                                  ? 'bg-forest-50 border-forest-600 text-forest-900 font-bold'
-                                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-                              }`}
+                              className="p-0.5 rounded-full hover:bg-forest-200 text-forest-700 hover:text-forest-950 transition-colors"
+                              title={`Remove ${r}`}
                             >
-                              <span>{r}</span>
-                              {isSel && <Check className="w-3 h-3 text-forest-700" />}
+                              <X className="w-3 h-3" />
                             </button>
-                          );
-                        })}
-                      </div>
+                          </span>
+                        ))
+                      )}
                     </div>
                   </div>
 
                   {/* District Dropdown (Optional) */}
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     <label className="block text-xs font-semibold text-charcoal-800">
                       Districts (Optional multi-select)
                     </label>
-                    <div className="p-3 rounded-lg border border-surface-border bg-slate-50/50 space-y-2">
-                      <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
-                        {DISTRICT_OPTIONS.map((d) => {
-                          const isSel = formData.governance.districts?.includes(d);
-                          return (
+                    <select
+                      value=""
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (!val) return;
+                        const current = formData.governance.districts || [];
+                        if (!current.includes(val)) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            governance: { ...prev.governance, districts: [...current, val] },
+                          }));
+                        }
+                      }}
+                      className="w-full text-xs rounded-lg border border-surface-border bg-white p-2.5 text-charcoal-800 focus:outline-none focus:ring-1 focus:ring-forest-600"
+                    >
+                      <option value="">-- Add District to selection --</option>
+                      {DISTRICT_OPTIONS.map((d) => (
+                        <option key={d} value={d} disabled={formData.governance.districts?.includes(d)}>
+                          {d} {formData.governance.districts?.includes(d) ? '✓ (Selected)' : ''}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* TagGroup for District */}
+                    <div className="min-h-[38px] p-2 rounded-lg border border-surface-border bg-slate-50/50 flex flex-wrap items-center gap-1.5">
+                      {(formData.governance.districts || []).length === 0 ? (
+                        <span className="text-xs text-charcoal-muted italic">Optional: No districts selected</span>
+                      ) : (
+                        (formData.governance.districts || []).map((d) => (
+                          <span
+                            key={d}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-200/80 border border-slate-300 text-slate-800 shadow-xs"
+                          >
+                            <span>{d}</span>
                             <button
-                              key={d}
                               type="button"
                               onClick={() => {
-                                const current = formData.governance.districts || [];
-                                const updated = isSel ? current.filter((x) => x !== d) : [...current, d];
                                 setFormData((prev) => ({
                                   ...prev,
-                                  governance: { ...prev.governance, districts: updated },
+                                  governance: {
+                                    ...prev.governance,
+                                    districts: (prev.governance.districts || []).filter((x) => x !== d),
+                                  },
                                 }));
                               }}
-                              className={`px-2.5 py-1 text-xs rounded-md border font-medium flex items-center gap-1 transition-colors ${
-                                isSel
-                                  ? 'bg-forest-50 border-forest-600 text-forest-900 font-bold'
-                                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-                              }`}
+                              className="p-0.5 rounded-full hover:bg-slate-300 text-slate-600 hover:text-slate-900 transition-colors"
+                              title={`Remove ${d}`}
                             >
-                              <span>{d}</span>
-                              {isSel && <Check className="w-3 h-3 text-forest-700" />}
+                              <X className="w-3 h-3" />
                             </button>
-                          );
-                        })}
-                      </div>
+                          </span>
+                        ))
+                      )}
                     </div>
                   </div>
 
                   {/* Ward Dropdown (Optional) */}
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     <label className="block text-xs font-semibold text-charcoal-800">
                       Wards (Optional multi-select)
                     </label>
-                    <div className="p-3 rounded-lg border border-surface-border bg-slate-50/50 space-y-2">
-                      <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
-                        {WARD_OPTIONS.map((w) => {
-                          const isSel = formData.governance.wards?.includes(w);
-                          return (
+                    <select
+                      value=""
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (!val) return;
+                        const current = formData.governance.wards || [];
+                        if (!current.includes(val)) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            governance: { ...prev.governance, wards: [...current, val] },
+                          }));
+                        }
+                      }}
+                      className="w-full text-xs rounded-lg border border-surface-border bg-white p-2.5 text-charcoal-800 focus:outline-none focus:ring-1 focus:ring-forest-600"
+                    >
+                      <option value="">-- Add Ward to selection --</option>
+                      {WARD_OPTIONS.map((w) => (
+                        <option key={w} value={w} disabled={formData.governance.wards?.includes(w)}>
+                          {w} {formData.governance.wards?.includes(w) ? '✓ (Selected)' : ''}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* TagGroup for Ward */}
+                    <div className="min-h-[38px] p-2 rounded-lg border border-surface-border bg-slate-50/50 flex flex-wrap items-center gap-1.5">
+                      {(formData.governance.wards || []).length === 0 ? (
+                        <span className="text-xs text-charcoal-muted italic">Optional: No wards selected</span>
+                      ) : (
+                        (formData.governance.wards || []).map((w) => (
+                          <span
+                            key={w}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-200/80 border border-slate-300 text-slate-800 shadow-xs"
+                          >
+                            <span>{w}</span>
                             <button
-                              key={w}
                               type="button"
                               onClick={() => {
-                                const current = formData.governance.wards || [];
-                                const updated = isSel ? current.filter((x) => x !== w) : [...current, w];
                                 setFormData((prev) => ({
                                   ...prev,
-                                  governance: { ...prev.governance, wards: updated },
+                                  governance: {
+                                    ...prev.governance,
+                                    wards: (prev.governance.wards || []).filter((x) => x !== w),
+                                  },
                                 }));
                               }}
-                              className={`px-2.5 py-1 text-xs rounded-md border font-medium flex items-center gap-1 transition-colors ${
-                                isSel
-                                  ? 'bg-forest-50 border-forest-600 text-forest-900 font-bold'
-                                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-                              }`}
+                              className="p-0.5 rounded-full hover:bg-slate-300 text-slate-600 hover:text-slate-900 transition-colors"
+                              title={`Remove ${w}`}
                             >
-                              <span>{w}</span>
-                              {isSel && <Check className="w-3 h-3 text-forest-700" />}
+                              <X className="w-3 h-3" />
                             </button>
-                          );
-                        })}
-                      </div>
+                          </span>
+                        ))
+                      )}
                     </div>
                   </div>
                 </div>
