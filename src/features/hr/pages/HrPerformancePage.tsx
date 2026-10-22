@@ -355,29 +355,29 @@ export const HrPerformancePage: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-surface-border gap-6 text-sm font-medium">
+      <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 w-fit text-sm font-medium">
         <button
           type="button"
           onClick={() => setActiveTab('appraisals')}
-          className={`pb-3 border-b-2 flex items-center gap-2 transition-colors ${
+          className={`px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition-all ${
             activeTab === 'appraisals'
-              ? 'border-charcoal-900 text-charcoal-900 font-bold'
-              : 'border-transparent text-charcoal-500 hover:text-charcoal-800'
+              ? 'bg-white dark:bg-slate-900 text-charcoal-900 dark:text-white font-semibold shadow-xs'
+              : 'text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
-          <Award className="h-4 w-4 text-charcoal-700" />
+          <Award className="h-4 w-4 text-charcoal-600" />
           <span>Staff Performance Appraisals ({reviews.length})</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('trainings')}
-          className={`pb-3 border-b-2 flex items-center gap-2 transition-colors ${
+          className={`px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition-all ${
             activeTab === 'trainings'
-              ? 'border-charcoal-900 text-charcoal-900 font-bold'
-              : 'border-transparent text-charcoal-500 hover:text-charcoal-800'
+              ? 'bg-white dark:bg-slate-900 text-charcoal-900 dark:text-white font-semibold shadow-xs'
+              : 'text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
-          <GraduationCap className="h-4 w-4 text-charcoal-700" />
+          <GraduationCap className="h-4 w-4 text-charcoal-600" />
           <span>Capacity Building & Training Sessions ({trainings.length})</span>
         </button>
       </div>

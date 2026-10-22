@@ -291,10 +291,17 @@ export const ActivityLifecycleWorkspaceModal: React.FC<ActivityLifecycleWorkspac
     }
   };
 
-  // Stage 4 Action
   const handleVerifyMe = async (decision: 'verified' | 'returned_for_correction') => {
     clearMessages();
+    if (decision === 'verified') {
+      const hasMetrics = participants.length > 0 || (activity.participantsCount || 0) > 0;
+      if (!hasMetrics) {
+        setErrorMessage('Cannot mark complete: Activity requires recorded participant reach metrics before verification.');
+        return;
+      }
+    }
     setIsLoading(true);
+
     try {
       await verifyActivityMe(activity.id, decision, meComments, currentUserId);
       setSuccessMessage(
@@ -440,14 +447,14 @@ export const ActivityLifecycleWorkspaceModal: React.FC<ActivityLifecycleWorkspac
         )}
 
         {/* 6 Lifecycle Stage Tabs */}
-        <div className="flex items-center gap-1.5 border-b border-slate-200 dark:border-neutral-800 overflow-x-auto pb-1 text-xs">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-neutral-900 rounded-xl border border-slate-200 dark:border-neutral-800 overflow-x-auto text-xs w-fit">
           <button
             type="button"
             onClick={() => setCurrentStage('request')}
-            className={`px-3 py-2 rounded-t-lg font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer ${
               currentStage === 'request'
-                ? 'bg-amber-500/10 text-[#b45309] border-b-2 border-[#D68904]'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                ? 'bg-white dark:bg-neutral-800 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
@@ -457,10 +464,10 @@ export const ActivityLifecycleWorkspaceModal: React.FC<ActivityLifecycleWorkspac
           <button
             type="button"
             onClick={() => setCurrentStage('procurement')}
-            className={`px-3 py-2 rounded-t-lg font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer ${
               currentStage === 'procurement'
-                ? 'bg-amber-500/10 text-[#b45309] border-b-2 border-[#D68904]'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                ? 'bg-white dark:bg-neutral-800 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <ShoppingCart className="w-3.5 h-3.5" />
@@ -470,10 +477,10 @@ export const ActivityLifecycleWorkspaceModal: React.FC<ActivityLifecycleWorkspac
           <button
             type="button"
             onClick={() => setCurrentStage('implementation')}
-            className={`px-3 py-2 rounded-t-lg font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer ${
               currentStage === 'implementation'
-                ? 'bg-amber-500/10 text-[#b45309] border-b-2 border-[#D68904]'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                ? 'bg-white dark:bg-neutral-800 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Users className="w-3.5 h-3.5" />
@@ -483,10 +490,10 @@ export const ActivityLifecycleWorkspaceModal: React.FC<ActivityLifecycleWorkspac
           <button
             type="button"
             onClick={() => setCurrentStage('me')}
-            className={`px-3 py-2 rounded-t-lg font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer ${
               currentStage === 'me'
-                ? 'bg-amber-500/10 text-[#b45309] border-b-2 border-[#D68904]'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                ? 'bg-white dark:bg-neutral-800 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
@@ -496,10 +503,10 @@ export const ActivityLifecycleWorkspaceModal: React.FC<ActivityLifecycleWorkspac
           <button
             type="button"
             onClick={() => setCurrentStage('retirement')}
-            className={`px-3 py-2 rounded-t-lg font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer ${
               currentStage === 'retirement'
-                ? 'bg-amber-500/10 text-[#b45309] border-b-2 border-[#D68904]'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                ? 'bg-white dark:bg-neutral-800 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Receipt className="w-3.5 h-3.5" />
@@ -509,10 +516,10 @@ export const ActivityLifecycleWorkspaceModal: React.FC<ActivityLifecycleWorkspac
           <button
             type="button"
             onClick={() => setCurrentStage('dossier')}
-            className={`px-3 py-2 rounded-t-lg font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer ${
               currentStage === 'dossier'
-                ? 'bg-amber-500/10 text-[#b45309] border-b-2 border-[#D68904]'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                ? 'bg-white dark:bg-neutral-800 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <FileCheck className="w-3.5 h-3.5" />

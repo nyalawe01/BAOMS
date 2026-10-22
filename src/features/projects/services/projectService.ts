@@ -1049,6 +1049,45 @@ export async function reviewActivity(
   const now = new Date().toISOString();
   const nextStatus = input.decision === 'approve' ? 'approved' : 'returned_for_correction';
 
+  // Enforcement: An activity cannot be marked complete/approved without attached documents and metrics
+  if (input.decision === 'approve') {
+    const { data: actRow } = await supabase
+      .from('activities')
+      .select('participants_count')
+      .eq('id', input.activityId)
+      .single();
+
+    const { count: partCount } = await supabase
+      .from('activity_participants')
+      .select('*', { count: 'exact', head: true })
+      .eq('activity_id', input.activityId);
+
+    const totalMetrics = (actRow?.participants_count || 0) + (partCount || 0);
+    if (totalMetrics <= 0) {
+      throw new Error(
+        'Cannot approve activity: Participant reach metrics must be recorded before an activity can be marked complete.'
+      );
+    }
+
+    const { count: docCount } = await supabase
+      .from('project_documents')
+      .select('*', { count: 'exact', head: true })
+      .eq('activity_id', input.activityId);
+
+    if (!docCount || docCount <= 0) {
+      const { count: genDocCount } = await supabase
+        .from('project_documents')
+        .select('*', { count: 'exact', head: true })
+        .contains('metadata', { activityId: input.activityId });
+
+      if (!genDocCount || genDocCount <= 0) {
+        throw new Error(
+          'Cannot approve activity: Supporting verification documents (e.g., attendance registers, reports) must be attached before completion.'
+        );
+      }
+    }
+  }
+
   const { data, error } = await supabase
     .from('activities')
     .update({
@@ -1943,6 +1982,42 @@ export async function verifyActivityMe(
   };
 
   if (decision === 'verified') {
+    const { data: actRow } = await supabase
+      .from('activities')
+      .select('participants_count')
+      .eq('id', activityId)
+      .single();
+
+    const { count: partCount } = await supabase
+      .from('activity_participants')
+      .select('*', { count: 'exact', head: true })
+      .eq('activity_id', activityId);
+
+    const totalMetrics = (actRow?.participants_count || 0) + (partCount || 0);
+    if (totalMetrics <= 0) {
+      throw new Error(
+        'Cannot complete M&E verification: Participant reach and indicator metrics must be recorded.'
+      );
+    }
+
+    const { count: docCount } = await supabase
+      .from('project_documents')
+      .select('*', { count: 'exact', head: true })
+      .eq('activity_id', activityId);
+
+    if (!docCount || docCount <= 0) {
+      const { count: genDocCount } = await supabase
+        .from('project_documents')
+        .select('*', { count: 'exact', head: true })
+        .contains('metadata', { activityId });
+
+      if (!genDocCount || genDocCount <= 0) {
+        throw new Error(
+          'Cannot complete M&E verification: Supporting verification documents (e.g., attendance registers, signed logs) must be attached before completion.'
+        );
+      }
+    }
+
     updateData.implementation_status = 'verified';
     updateData.submission_status = 'approved';
     // Mark individual participant records verified

@@ -50,6 +50,19 @@ export const ReviewActivityModal: React.FC<ReviewActivityModalProps> = ({
       return;
     }
 
+    if (decision === 'approve') {
+      const hasMetrics = (activity.participantsCount || 0) > 0;
+      const hasDocs = activity.evidenceDocuments && activity.evidenceDocuments.length > 0;
+      if (!hasMetrics) {
+        setError('Cannot mark complete: Activity requires recorded participant reach metrics before completion.');
+        return;
+      }
+      if (!hasDocs) {
+        setError('Cannot mark complete: Activity requires attached verification documents (attendance register, signed logs, or field reports).');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     try {
       await onSubmit({

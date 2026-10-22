@@ -279,53 +279,53 @@ export const HrContractsPage: React.FC = () => {
       )}
 
       {/* Tabs */}
-      <div className="flex border-b border-surface-border gap-6 text-sm font-medium">
+      <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 w-fit text-sm font-medium">
         <button
           type="button"
           onClick={() => setActiveTab('all')}
-          className={`pb-3 border-b-2 flex items-center gap-2 transition-colors ${
+          className={`px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition-all ${
             activeTab === 'all'
-              ? 'border-charcoal-900 text-charcoal-900 font-bold'
-              : 'border-transparent text-charcoal-500 hover:text-charcoal-800'
+              ? 'bg-white dark:bg-slate-900 text-charcoal-900 dark:text-white font-semibold shadow-xs'
+              : 'text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
-          <FileText className="h-4 w-4 text-charcoal-700" />
+          <FileText className="h-4 w-4 text-charcoal-600" />
           <span>All Contracts ({staffList.length})</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('expiring')}
-          className={`pb-3 border-b-2 flex items-center gap-2 transition-colors ${
+          className={`px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition-all ${
             activeTab === 'expiring'
-              ? 'border-charcoal-900 text-charcoal-900 font-bold'
-              : 'border-transparent text-charcoal-500 hover:text-charcoal-800'
+              ? 'bg-white dark:bg-slate-900 text-charcoal-900 dark:text-white font-semibold shadow-xs'
+              : 'text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
-          <AlertCircle className="h-4 w-4 text-charcoal-700" />
+          <AlertCircle className="h-4 w-4 text-charcoal-600" />
           <span>Renewal Watchlist ({expiring60.length})</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('fixed_term')}
-          className={`pb-3 border-b-2 flex items-center gap-2 transition-colors ${
+          className={`px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition-all ${
             activeTab === 'fixed_term'
-              ? 'border-charcoal-900 text-charcoal-900 font-bold'
-              : 'border-transparent text-charcoal-500 hover:text-charcoal-800'
+              ? 'bg-white dark:bg-slate-900 text-charcoal-900 dark:text-white font-semibold shadow-xs'
+              : 'text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
-          <Clock className="h-4 w-4 text-charcoal-700" />
+          <Clock className="h-4 w-4 text-charcoal-600" />
           <span>Fixed-Term ({fixedTermCount})</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('permanent')}
-          className={`pb-3 border-b-2 flex items-center gap-2 transition-colors ${
+          className={`px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition-all ${
             activeTab === 'permanent'
-              ? 'border-charcoal-900 text-charcoal-900 font-bold'
-              : 'border-transparent text-charcoal-500 hover:text-charcoal-800'
+              ? 'bg-white dark:bg-slate-900 text-charcoal-900 dark:text-white font-semibold shadow-xs'
+              : 'text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
-          <Shield className="h-4 w-4 text-charcoal-700" />
+          <Shield className="h-4 w-4 text-charcoal-600" />
           <span>Permanent ({permanentCount})</span>
         </button>
       </div>

@@ -58,7 +58,7 @@ export const ProjectBlueprintBuilderStep: React.FC<ProjectBlueprintBuilderStepPr
   blueprint,
   onChange,
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'template' | 'indicators' | 'form' | 'checklists'>('template');
+  const [activeSubTab, setActiveSubTab] = useState<'indicators' | 'form'>('indicators');
 
   const handleApplyTemplate = (template: ProjectTemplateDefinition) => {
     onChange({
@@ -212,109 +212,24 @@ export const ProjectBlueprintBuilderStep: React.FC<ProjectBlueprintBuilderStepPr
         <div className="flex flex-wrap items-center gap-1.5 bg-white p-1 rounded-lg border border-forest-200">
           <button
             type="button"
-            onClick={() => setActiveSubTab('template')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
-              activeSubTab === 'template' ? 'bg-forest-800 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50'
-            }`}
-          >
-            1. Templates ({ORGANIZATIONAL_TEMPLATES.length})
-          </button>
-          <button
-            type="button"
             onClick={() => setActiveSubTab('indicators')}
             className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
-              activeSubTab === 'indicators' ? 'bg-forest-800 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50'
+              activeSubTab === 'indicators' ? 'bg-[#D68904] text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50'
             }`}
           >
-            2. Indicators ({blueprint.indicators.length})
+            1. Indicators &amp; Targets ({blueprint.indicators.length})
           </button>
           <button
             type="button"
             onClick={() => setActiveSubTab('form')}
             className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
-              activeSubTab === 'form' ? 'bg-forest-800 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50'
+              activeSubTab === 'form' ? 'bg-[#D68904] text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50'
             }`}
           >
-            3. Collection Form ({blueprint.formFields.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('checklists')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
-              activeSubTab === 'checklists' ? 'bg-forest-800 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50'
-            }`}
-          >
-            4. Checklists ({blueprint.checklists.length})
+            2. Field Collection Form ({blueprint.formFields.length})
           </button>
         </div>
       </div>
-
-      {/* SUB-TAB 1: TEMPLATE SELECTION */}
-      {activeSubTab === 'template' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-slate-900">Choose an Organizational Starter Blueprint</h3>
-            <span className="text-xs text-slate-500">Pick a preset or start custom</span>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {ORGANIZATIONAL_TEMPLATES.map((tmpl) => {
-              const isSelected = blueprint.templateId === tmpl.id;
-              return (
-                <Card
-                  key={tmpl.id}
-                  className={`p-4 border transition cursor-pointer flex flex-col justify-between ${
-                    isSelected ? 'border-forest-600 ring-2 ring-forest-100 bg-forest-50/20' : 'border-slate-200 hover:border-forest-300'
-                  }`}
-                  onClick={() => handleApplyTemplate(tmpl)}
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-start justify-between">
-                      <span className="text-xs font-mono font-bold text-forest-700 bg-forest-50 px-2 py-0.5 rounded">
-                        {tmpl.category}
-                      </span>
-                      {isSelected && <Badge variant="success">Active</Badge>}
-                    </div>
-                    <h4 className="font-bold text-sm text-slate-900 leading-snug">{tmpl.name}</h4>
-                    <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">{tmpl.description}</p>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                    <span>{tmpl.indicators.length} Pre-built KPIs</span>
-                    <span className="font-semibold text-forest-700 flex items-center gap-1">
-                      Apply Blueprint <ArrowRight className="w-3 h-3" />
-                    </span>
-                  </div>
-                </Card>
-              );
-            })}
-
-            {/* Custom Blank Slate Option */}
-            <Card
-              className={`p-4 border border-dashed transition cursor-pointer flex flex-col justify-between ${
-                blueprint.templateId === 'custom_blank' ? 'border-forest-600 ring-2 ring-forest-100 bg-forest-50/20' : 'border-slate-300 hover:border-slate-400'
-              }`}
-              onClick={handleApplyBlankSlate}
-            >
-              <div className="space-y-2">
-                <span className="text-xs font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
-                  Blank Slate
-                </span>
-                <h4 className="font-bold text-sm text-slate-900">Custom Project from Scratch</h4>
-                <p className="text-xs text-slate-500">
-                  Build custom indicators, attendance form fields, and inspection checklists tailored to unique donor mandates.
-                </p>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-slate-100 text-right">
-                <span className="text-xs font-semibold text-forest-700 flex items-center justify-end gap-1">
-                  Configure Custom <ArrowRight className="w-3 h-3" />
-                </span>
-              </div>
-            </Card>
-          </div>
-        </div>
-      )}
 
       {/* SUB-TAB 2: INDICATORS TABLE BUILDER */}
       {activeSubTab === 'indicators' && (
@@ -541,49 +456,7 @@ export const ProjectBlueprintBuilderStep: React.FC<ProjectBlueprintBuilderStepPr
         </div>
       )}
 
-      {/* SUB-TAB 4: QUALITY & SAFEGUARDING CHECKLISTS */}
-      {activeSubTab === 'checklists' && (
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900">Activity Quality &amp; Compliance Checklists</h3>
-              <p className="text-xs text-slate-500">
-                Verification criteria that coordinators or field officers must check off for field activities.
-              </p>
-            </div>
-            <Button size="sm" onClick={handleAddChecklist}>
-              <Plus className="w-4 h-4 mr-1" /> Add Checklist Item
-            </Button>
-          </div>
 
-          <div className="space-y-2">
-            {blueprint.checklists.length === 0 && (
-              <p className="text-xs text-slate-500 p-4 bg-slate-50 rounded-lg text-center">
-                No checklist criteria defined yet.
-              </p>
-            )}
-
-            {blueprint.checklists.map((item, idx) => (
-              <div key={idx} className="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-white">
-                <CheckSquare className="w-4 h-4 text-forest-700 shrink-0" />
-                <input
-                  className="flex-1 text-xs rounded-md border border-slate-300 p-2"
-                  value={item}
-                  onChange={(e) => handleUpdateChecklist(idx, e.target.value)}
-                  placeholder="e.g. Parental consent forms collected and filed safely"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleRemoveChecklist(idx)}
-                  className="text-red-500 hover:text-red-700 p-1"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

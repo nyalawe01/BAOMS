@@ -198,41 +198,41 @@ export const HrOnboardingPage: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-surface-border gap-6 text-sm font-medium">
+      <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 w-fit text-sm font-medium">
         <button
           type="button"
           onClick={() => setActiveTab('pending_vetting')}
-          className={`pb-3 border-b-2 flex items-center gap-2 transition-colors ${
+          className={`px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition-all ${
             activeTab === 'pending_vetting'
-              ? 'border-charcoal-900 text-charcoal-900 font-bold'
-              : 'border-transparent text-charcoal-500 hover:text-charcoal-800'
+              ? 'bg-white dark:bg-slate-900 text-charcoal-900 dark:text-white font-semibold shadow-xs'
+              : 'text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
-          <Clock className="h-4 w-4 text-charcoal-700" />
+          <Clock className="h-4 w-4 text-charcoal-600" />
           <span>Clearance Vetting Queue ({awaitingHr.length})</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('onboarding_tracker')}
-          className={`pb-3 border-b-2 flex items-center gap-2 transition-colors ${
+          className={`px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition-all ${
             activeTab === 'onboarding_tracker'
-              ? 'border-charcoal-900 text-charcoal-900 font-bold'
-              : 'border-transparent text-charcoal-500 hover:text-charcoal-800'
+              ? 'bg-white dark:bg-slate-900 text-charcoal-900 dark:text-white font-semibold shadow-xs'
+              : 'text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
-          <FileCheck className="h-4 w-4 text-charcoal-700" />
+          <FileCheck className="h-4 w-4 text-charcoal-600" />
           <span>Induction & Checklist Tracker ({activeOnboardingStaff.length})</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('recent_inductions')}
-          className={`pb-3 border-b-2 flex items-center gap-2 transition-colors ${
+          className={`px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition-all ${
             activeTab === 'recent_inductions'
-              ? 'border-charcoal-900 text-charcoal-900 font-bold'
-              : 'border-transparent text-charcoal-500 hover:text-charcoal-800'
+              ? 'bg-white dark:bg-slate-900 text-charcoal-900 dark:text-white font-semibold shadow-xs'
+              : 'text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
-          <CheckCircle2 className="h-4 w-4 text-charcoal-700" />
+          <CheckCircle2 className="h-4 w-4 text-charcoal-600" />
           <span>Completed Staff Inductions ({completedInductees.length})</span>
         </button>
       </div>

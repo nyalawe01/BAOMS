@@ -410,16 +410,21 @@ export const ProjectWorkspacePage: React.FC = () => {
 
       {/* Executive Director Charter Approval Callout */}
       {project.status === 'planning' && (
-        <div className="p-4 bg-amber-50 border border-amber-300 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-full bg-amber-200/80 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <ShieldCheck className="w-5 h-5 text-amber-900" />
+        <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center flex-shrink-0 mt-0.5 text-rose-700">
+              <ShieldCheck className="w-5 h-5" />
             </div>
-            <div>
-              <h4 className="text-sm font-bold text-amber-950">
-                Project Charter Pending Executive Director Sign-off (Planning Phase)
-              </h4>
-              <p className="text-xs text-amber-800 mt-0.5 max-w-2xl">
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h4 className="text-sm font-bold text-rose-950">
+                  Project Charter Pending Executive Director Sign-off (Planning Phase)
+                </h4>
+                <span className="text-[10px] font-semibold tracking-wider uppercase bg-rose-200/80 text-rose-900 px-2 py-0.5 rounded-full">
+                  Awaiting Executive Director Decision
+                </span>
+              </div>
+              <p className="text-xs text-rose-800 leading-relaxed max-w-2xl">
                 This project was registered in planning status. Formal Executive Director authorization is required to transition this charter to Active, unlocking field implementation workplans, requisitions, and financial drawdown.
               </p>
             </div>

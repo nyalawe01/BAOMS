@@ -174,14 +174,14 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center border-b border-slate-200 dark:border-neutral-800 gap-2">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-neutral-900 rounded-xl border border-slate-200 dark:border-neutral-800 w-fit">
           <button
             type="button"
             onClick={() => setActiveTab('narrative')}
-            className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
               activeTab === 'narrative'
-                ? 'border-[#D68904] text-[#D68904]'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white'
+                ? 'bg-white dark:bg-neutral-800 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
@@ -191,10 +191,10 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('analytics')}
-            className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
               activeTab === 'analytics'
-                ? 'border-[#D68904] text-[#D68904]'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white'
+                ? 'bg-white dark:bg-neutral-800 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <TrendingUp className="w-3.5 h-3.5" />
@@ -204,10 +204,10 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('challenges')}
-            className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
               activeTab === 'challenges'
-                ? 'border-[#D68904] text-[#D68904]'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white'
+                ? 'bg-white dark:bg-neutral-800 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <AlertTriangle className="w-3.5 h-3.5" />
@@ -217,10 +217,10 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('evidence')}
-            className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
               activeTab === 'evidence'
-                ? 'border-[#D68904] text-[#D68904]'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white'
+                ? 'bg-white dark:bg-neutral-800 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Paperclip className="w-3.5 h-3.5" />

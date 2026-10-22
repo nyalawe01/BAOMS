@@ -69,9 +69,10 @@ export const ProjectEnginePage: React.FC = () => {
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
   const [editingSubmissionId, setEditingSubmissionId] = useState<string | null>(null);
 
-  const canManage = hasPermission('projects.manage') || hasPermission('me.manage') || roles.includes('system_admin');
+  const isExecutiveDirector = roles.includes('executive_director') && !roles.includes('system_admin');
+  const canManage = (hasPermission('projects.manage') || hasPermission('me.manage') || roles.includes('system_admin')) && !isExecutiveDirector;
   const canVerify = hasPermission('me.validate') || roles.includes('system_admin') || roles.includes('executive_director');
-  const canManageTemplates = hasPermission('me.manage') || roles.includes('system_admin') || roles.includes('executive_director');
+  const canManageTemplates = (hasPermission('me.manage') || roles.includes('system_admin')) && !isExecutiveDirector;
   const canApproveTemplates = roles.includes('system_admin') || roles.includes('executive_director');
 
   const reload = useCallback(async () => {
@@ -538,22 +539,6 @@ export const ProjectEnginePage: React.FC = () => {
         </Card>
       </div>
 
-      <Card className="space-y-4 border border-slate-200 bg-white p-5">
-        <h2 className="font-semibold">Organization templates</h2>
-        {!data.indicators.length && !data.forms.length && <div className="flex flex-wrap items-end gap-3 rounded-lg bg-slate-50 p-3">
-          <label className="min-w-64 flex-1"><span className={labelClass}>Start from an approved template</span><select className={inputClass} value={templateVersionToApply} onChange={(e) => setTemplateVersionToApply(e.target.value)}><option value="">Build this project from scratch</option>{templates.filter((template) => template.status === 'active').flatMap((template) => template.versions.filter((version) => version.status === 'published').map((version) => <option key={version.id} value={version.id}>{template.name} · v{version.versionNumber}</option>))}</select></label>
-          <Button disabled={busy || !templateVersionToApply} onClick={() => void useTemplate()}>Apply template</Button>
-        </div>}
-        {canManageTemplates && <div className="flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 p-3">
-          <label className="min-w-64 flex-1"><span className={labelClass}>Save this project setup as an organization template</span><input className={inputClass} value={templateName} onChange={(e) => setTemplateName(e.target.value)} placeholder="e.g. Youth community forum project" /></label>
-          <Button variant="outline" disabled={busy} onClick={() => void makeTemplate()}>Create template draft</Button>
-        </div>}
-        <div className="space-y-2">{templates.map((template) => template.versions.map((version) => <div key={version.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 p-3">
-          <div><p className="font-medium">{template.name} <span className="text-xs font-normal text-slate-500">v{version.versionNumber}</span></p><p className="text-xs text-slate-500">{template.code} · template {template.status} · version {version.status}</p></div>
-          {canApproveTemplates && template.status === 'draft' && version.status === 'draft' && <Button size="sm" disabled={busy} onClick={() => void runAction(() => approveOrganizationTemplate(template.id, version.id), 'Organization template approved and published.')}>Approve template</Button>}
-        </div>))}{templates.length === 0 && <p className="text-sm text-slate-500">No organization templates are available.</p>}</div>
-      </Card>
-
       {canManage && <Card className="space-y-3 border border-slate-200 bg-white p-5">
         <h2 className="font-semibold">Assign data collection</h2>
         <div className="grid gap-3 md:grid-cols-4">
@@ -564,185 +549,6 @@ export const ProjectEnginePage: React.FC = () => {
         </div>
         <Button disabled={busy} onClick={() => void makeAssignment()}>Create assignment</Button>
       </Card>}
-
-      <Card className="space-y-6 border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-forest-50 text-forest-700">
-            <ClipboardList className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-base font-semibold text-slate-900">Submit a collection</h2>
-            <p className="text-xs text-slate-500">Record field observations and submission reports against approved forms</p>
-          </div>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          <label className="block">
-            <span className={labelClass}>Published, assigned, or saved form</span>
-            <select
-              className={inputClass}
-              value={collectFormId}
-              onChange={(e) => {
-                setCollectFormId(e.target.value);
-                setCollectAssignmentId('');
-                setCollectVersionOverride('');
-                setEditingSubmissionId(null);
-                setAnswers({});
-              }}
-            >
-              <option value="">Select form</option>
-              {data.forms
-                .filter((form) => form.status === 'published' || myAssignments.some((assignment) => assignment.formId === form.id) || data.submissions.some((submission) => submission.formId === form.id && submission.submittedBy === user?.id && ['draft', 'returned'].includes(submission.status)))
-                .map((form) => <option key={form.id} value={form.id}>{form.name}</option>)}
-            </select>
-          </label>
-          <label className="block">
-            <span className={labelClass}>Assigned period (if assigned)</span>
-            <select
-              className={inputClass}
-              value={collectAssignmentId}
-              onChange={(e) => setCollectAssignmentId(e.target.value)}
-            >
-              <option value="">Unassigned collection</option>
-              {myAssignments
-                .filter((assignment) => assignment.formId === collectFormId)
-                .map((assignment) => (
-                  <option key={assignment.id} value={assignment.id}>
-                    {assignment.periodKey}{assignment.dueDate ? ` · due ${assignment.dueDate}` : ''}
-                  </option>
-                ))}
-            </select>
-          </label>
-          <label className="block">
-            <span className={labelClass}>Collection date</span>
-            <input
-              type="date"
-              className={inputClass}
-              value={collectedOn}
-              onChange={(e) => setCollectedOn(e.target.value)}
-            />
-          </label>
-        </div>
-
-        {selectedVersion && (
-          <div className="space-y-5 rounded-2xl border border-slate-200 bg-slate-50/60 p-5 sm:p-6">
-            <div className="border-b border-slate-200/80 pb-3">
-              <h3 className="text-sm font-semibold text-slate-900">{selectedVersion.schema.title || 'Collection Form'}</h3>
-              <p className="text-xs text-slate-500">Version {selectedVersion.versionNumber} · Please fill in all required answers carefully.</p>
-            </div>
-
-            <div className="grid gap-5 md:grid-cols-2">
-              {selectedVersion.schema.fields.map((field) => (
-                <div
-                  key={field.key}
-                  className={cn(
-                    'rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs transition-colors hover:border-slate-300',
-                    field.type === 'textarea' ? 'md:col-span-2' : ''
-                  )}
-                >
-                  <label className="block">
-                    <span className="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-700">
-                      <span>{field.label}{field.required ? ' *' : ''}</span>
-                      <span className="text-[11px] font-normal normal-case text-slate-400">key: {field.key}</span>
-                    </span>
-
-                    {field.type === 'textarea' ? (
-                      <textarea
-                        className="w-full min-h-[160px] rounded-xl border border-slate-300 bg-white p-4 text-sm leading-relaxed text-slate-900 placeholder:text-slate-400 focus:border-[#D68904] focus:outline-none focus:ring-2 focus:ring-[#D68904]/20 transition-colors shadow-none"
-                        rows={6}
-                        placeholder={`Enter detailed response for ${field.label}...`}
-                        value={String(answers[field.key] ?? '')}
-                        onChange={(e) => setAnswers({ ...answers, [field.key]: e.target.value })}
-                      />
-                    ) : field.type === 'select' ? (
-                      <select
-                        className={inputClass}
-                        value={String(answers[field.key] ?? '')}
-                        onChange={(e) => setAnswers({ ...answers, [field.key]: e.target.value || undefined })}
-                      >
-                        <option value="">Select an option</option>
-                        {(field.options || []).map((option) => (
-                          <option key={option} value={option}>{option}</option>
-                        ))}
-                      </select>
-                    ) : field.type === 'multiselect' ? (
-                      <div className="space-y-1.5">
-                        <select
-                          multiple
-                          className="w-full min-h-[120px] rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-[#D68904] focus:outline-none focus:ring-2 focus:ring-[#D68904]/20 transition-colors shadow-none"
-                          value={Array.isArray(answers[field.key]) ? (answers[field.key] as string[]) : []}
-                          onChange={(e) =>
-                            setAnswers({
-                              ...answers,
-                              [field.key]: Array.from(e.target.selectedOptions, (option) => option.value),
-                            })
-                          }
-                        >
-                          {(field.options || []).map((option) => (
-                            <option key={option} value={option} className="py-1">{option}</option>
-                          ))}
-                        </select>
-                        <p className="text-[11px] text-slate-400">Hold Ctrl (or Cmd on Mac) to select multiple choices.</p>
-                      </div>
-                    ) : field.type === 'boolean' ? (
-                      <select
-                        className={inputClass}
-                        value={answers[field.key] === undefined ? '' : String(answers[field.key])}
-                        onChange={(e) => setAnswers({ ...answers, [field.key]: e.target.value === '' ? undefined : e.target.value === 'true' })}
-                      >
-                        <option value="">Select</option>
-                        <option value="true">Yes</option>
-                        <option value="false">No</option>
-                      </select>
-                    ) : (
-                      <input
-                        className={inputClass}
-                        type={field.type === 'integer' || field.type === 'decimal' ? 'number' : field.type === 'date' ? 'date' : 'text'}
-                        step={field.type === 'decimal' ? 'any' : undefined}
-                        placeholder={`Enter ${field.label.toLowerCase()}...`}
-                        value={String(answers[field.key] ?? '')}
-                        onChange={(e) =>
-                          setAnswers({
-                            ...answers,
-                            [field.key]:
-                              e.target.value === ''
-                                ? undefined
-                                : field.type === 'integer' || field.type === 'decimal'
-                                ? Number(e.target.value)
-                                : e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </label>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-200">
-              <Button disabled={busy} variant="outline" onClick={() => void saveSubmission(false)}>
-                {editingSubmissionId ? 'Update draft' : 'Save draft'}
-              </Button>
-              <Button disabled={busy} onClick={() => void saveSubmission(true)}>
-                <ShieldCheck className="mr-2 h-4 w-4" />
-                {editingSubmissionId ? 'Resubmit for verification' : 'Submit for verification'}
-              </Button>
-              {editingSubmissionId && (
-                <Button variant="ghost" onClick={() => { setEditingSubmissionId(null); setAnswers({}); }}>
-                  Cancel edit
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
-        {!selectedVersion && (
-          <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center">
-            <ClipboardList className="mx-auto h-8 w-8 text-slate-300" />
-            <p className="mt-2 text-sm font-medium text-slate-600">Choose a form above to load questions</p>
-            <p className="text-xs text-slate-400">Select an approved published form or an assigned reporting period to submit data.</p>
-          </div>
-        )}
-      </Card>
 
       <Card className="space-y-3 border border-slate-200 bg-white p-5">
         <div className="flex items-center justify-between"><h2 className="font-semibold">Submission verification</h2><Badge variant="warning">{pendingSubmissions.length} pending</Badge></div>

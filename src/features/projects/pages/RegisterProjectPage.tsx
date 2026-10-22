@@ -33,6 +33,7 @@ import { addNotification } from '@/services/notificationsService';
 import { useAuth } from '@/features/auth/useAuth';
 import { applyOrganizationTemplate, getOrganizationProjectTemplates, initializeProjectEngine } from '../dynamic/service';
 import type { OrganizationProjectTemplate } from '../dynamic/types';
+import { supabase } from '@/lib/supabase';
 import {
   ProjectBlueprintBuilderStep,
   ProjectBlueprintState,
@@ -66,8 +67,7 @@ interface ProjectDraftState {
     name: string;
     category: string;
     description: string;
-    objectives: string;
-    beneficiaries: string;
+    partnerOrganizations: string;
   };
   funding: {
     funder: string;
@@ -76,11 +76,15 @@ interface ProjectDraftState {
     endDate: string;
     totalBudget: string;
     currency: string;
-    disbursementSchedule: string;
+    durationCadence: string;
   };
   governance: {
     managerId: string;
     coordinatorId: string;
+    countries: string[];
+    regions: string[];
+    districts: string[];
+    wards: string[];
     targetRegions: string[];
     partnerOrganizations: string;
   };
@@ -97,8 +101,7 @@ const INITIAL_PROJECT_DRAFT: ProjectDraftState = {
     name: '',
     category: 'Youth Empowerment & Education',
     description: '',
-    objectives: '',
-    beneficiaries: '1,500 Vulnerable Children and Youth',
+    partnerOrganizations: 'Local Ward Development Committees, CBO Coalition',
   },
   funding: {
     funder: '',
@@ -107,12 +110,16 @@ const INITIAL_PROJECT_DRAFT: ProjectDraftState = {
     endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
     totalBudget: '75000000',
     currency: 'TZS',
-    disbursementSchedule: 'Quarterly tranches based on approved milestone verification.',
+    durationCadence: 'Annually',
   },
   governance: {
     managerId: '',
     coordinatorId: '',
-    targetRegions: ['Dar es Salaam - Kigamboni', 'Dar es Salaam - Temeke'],
+    countries: ['Tanzania'],
+    regions: ['Dar es Salaam'],
+    districts: ['Kigamboni', 'Ilala'],
+    wards: ['Somangila', 'Vijibweni'],
+    targetRegions: ['Dar es Salaam - Kigamboni', 'Dar es Salaam - Ilala'],
     partnerOrganizations: 'Local Ward Development Committees, CBO Coalition',
   },
   resultsFramework: [
@@ -137,9 +144,9 @@ const INITIAL_PROJECT_DRAFT: ProjectDraftState = {
               title: 'Community Stakeholder Mobilization & Candidate Onboarding',
               description: 'Ward-level introductory briefing and enrollment of eligible youth participants.',
               activityDate: new Date().toISOString().slice(0, 10),
-              wardLocation: 'Dar es Salaam - Kigamboni',
+              wardLocation: 'Kigamboni - Somangila',
               targetParticipants: 60,
-              budgetEstimated: 2500000,
+              budgetEstimated: 0,
               assignedStaffId: '',
               procurementRequired: true,
             },
@@ -149,9 +156,9 @@ const INITIAL_PROJECT_DRAFT: ProjectDraftState = {
               title: '5-Day Intensive Practical Skills & Financial Literacy Training',
               description: 'Hands-on training sessions in entrepreneurship, small business management, and life skills.',
               activityDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-              wardLocation: 'Dar es Salaam - Temeke',
+              wardLocation: 'Kigamboni - Vijibweni',
               targetParticipants: 50,
-              budgetEstimated: 4800000,
+              budgetEstimated: 0,
               assignedStaffId: '',
               procurementRequired: true,
             },
@@ -182,7 +189,7 @@ const INITIAL_PROJECT_DRAFT: ProjectDraftState = {
       required: f.required,
       helpText: f.helpText,
     })),
-    checklists: [...ORGANIZATIONAL_TEMPLATES[0].checklists],
+    checklists: [],
   },
 };
 
@@ -244,6 +251,14 @@ export const RegisterProjectPage: React.FC = () => {
             ...parsed,
             blueprint: parsed.blueprint || INITIAL_PROJECT_DRAFT.blueprint,
             resultsFramework: parsed.resultsFramework || INITIAL_PROJECT_DRAFT.resultsFramework,
+            governance: {
+              ...INITIAL_PROJECT_DRAFT.governance,
+              ...(parsed.governance || {}),
+              countries: parsed.governance?.countries || ['Tanzania'],
+              regions: parsed.governance?.regions || ['Dar es Salaam'],
+              districts: parsed.governance?.districts || ['Kigamboni'],
+              wards: parsed.governance?.wards || ['Somangila'],
+            },
           });
           setHasDraftRestored(true);
           setSaveTimestamp(parsed.savedAt);
@@ -272,20 +287,20 @@ export const RegisterProjectPage: React.FC = () => {
   const steps: StepItem[] = [
     {
       id: 0,
-      title: t('projects.stepper.identity', 'Project Identity & Scope'),
-      subtitle: t('projects.stepper.identitySub', 'Code, Name & Objectives'),
+      title: 'Identity & Reference Docs',
+      subtitle: 'Code, Name, Partners & Attachments',
       icon: <Briefcase className="w-4 h-4" />,
     },
     {
       id: 1,
-      title: t('projects.stepper.funding', 'Funding & Timeline'),
-      subtitle: t('projects.stepper.fundingSub', 'Funder, Grant & Budget'),
+      title: 'Budget & Project Duration',
+      subtitle: 'Total Budget, Cadence & Timeline',
       icon: <DollarSign className="w-4 h-4" />,
     },
     {
       id: 2,
-      title: t('projects.stepper.governance', 'Governance & Regions'),
-      subtitle: t('projects.stepper.governanceSub', 'Manager, Team & Districts'),
+      title: 'Governance & Locations',
+      subtitle: 'Manager & Cascading Coverage',
       icon: <Users className="w-4 h-4" />,
     },
     {
@@ -296,20 +311,14 @@ export const RegisterProjectPage: React.FC = () => {
     },
     {
       id: 4,
-      title: 'M&E Blueprint & Forms',
-      subtitle: 'Dynamic Metrics, Registers & KPIs',
+      title: 'M&E Blueprint',
+      subtitle: 'Indicators & Collection Forms',
       icon: <Sparkles className="w-4 h-4" />,
     },
     {
       id: 5,
-      title: t('projects.stepper.documents', 'Supporting Documents'),
-      subtitle: t('projects.stepper.documentsSub', 'Charters, MoUs & Grants'),
-      icon: <FileStack className="w-4 h-4" />,
-    },
-    {
-      id: 6,
-      title: t('projects.stepper.review', 'Review & Approval'),
-      subtitle: t('projects.stepper.reviewSub', 'Final Verification'),
+      title: 'Review & Finalize',
+      subtitle: 'Final Verification & Charter',
       icon: <CheckCircle2 className="w-4 h-4" />,
     },
   ];
@@ -391,8 +400,12 @@ export const RegisterProjectPage: React.FC = () => {
         setValidationError(t('projects.errors.managerRequired', 'Project Manager assignment is required.'));
         return false;
       }
-      if (formData.governance.targetRegions.length === 0) {
-        setValidationError(t('projects.errors.regionsRequired', 'Please select at least one implementation district.'));
+      if (!formData.governance.countries || formData.governance.countries.length === 0) {
+        setValidationError('At least one Implementation Country is required.');
+        return false;
+      }
+      if (!formData.governance.regions || formData.governance.regions.length === 0) {
+        setValidationError('At least one Implementation Region is required.');
         return false;
       }
       return true;
@@ -467,27 +480,6 @@ export const RegisterProjectPage: React.FC = () => {
     }
   };
 
-  const toggleRegion = (district: string) => {
-    const current = formData.governance.targetRegions;
-    if (current.includes(district)) {
-      setFormData({
-        ...formData,
-        governance: {
-          ...formData.governance,
-          targetRegions: current.filter((d) => d !== district),
-        },
-      });
-    } else {
-      setFormData({
-        ...formData,
-        governance: {
-          ...formData.governance,
-          targetRegions: [...current, district],
-        },
-      });
-    }
-  };
-
   const handleFinalizeProject = async () => {
     setIsSubmitting(true);
     setValidationError(null);
@@ -498,10 +490,7 @@ export const RegisterProjectPage: React.FC = () => {
       const input: CreateProjectInput = {
         projectCode: formData.identity.projectCode.trim().toUpperCase(),
         name: formData.identity.name.trim(),
-        description:
-          formData.identity.description.trim() ||
-          formData.identity.objectives.trim() ||
-          undefined,
+        description: formData.identity.description.trim() || undefined,
         funder: formData.funding.funder.trim(),
         startDate: formData.funding.startDate,
         endDate: formData.funding.endDate,
@@ -518,58 +507,79 @@ export const RegisterProjectPage: React.FC = () => {
 
       const created = await createProject(input, actor);
 
-      let templateApplyError: string | null = null;
-      if (formData.templateVersionId) {
-        try {
-          // An approved database template is a complete starter configuration.
-          // Do not also apply the wizard's local blueprint or it would duplicate forms and indicators.
-          await applyOrganizationTemplate(created.id, formData.templateVersionId);
-        } catch (templateError) {
-          templateApplyError = templateError instanceof Error ? templateError.message : String(templateError);
-        }
-      } else {
-        try {
-          // Every project receives an immutable initial configuration snapshot,
-          // including projects whose indicators/forms come from the wizard.
-          await initializeProjectEngine(created.id);
-          if (formData.blueprint && (formData.blueprint.indicators.length > 0 || formData.blueprint.formFields.length > 0)) {
-            await initializeProjectBlueprint({
-              projectId: created.id,
-              userId: user?.id || 'admin',
-              indicators: formData.blueprint.indicators.map((ind) => ({
-                code: ind.code.trim().toUpperCase(),
-                name: ind.name.trim(),
-                description: ind.description.trim(),
-                unit: ind.unit.trim() || 'count',
-                target: ind.target ? parseFloat(ind.target) : null,
-                baseline: ind.baseline ? parseFloat(ind.baseline) : null,
-                calculationType: ind.calculationType,
-                sourceFieldKey: ind.sourceFieldKey.trim(),
-                aggregation:
-                  ind.calculationType === 'average'
-                    ? 'average'
-                    : ind.calculationType === 'latest_value_or_milestone_state'
-                    ? 'latest'
-                    : 'sum',
-              })),
-              forms: formData.blueprint.formFields.length
-                ? [{
-                    name: formData.blueprint.formName.trim() || `${created.name} Activity Log`,
-                    fields: formData.blueprint.formFields.map((f) => ({
-                      key: f.key.trim(),
-                      label: f.label.trim(),
-                      type: f.type,
-                      required: f.required,
-                      helpText: f.helpText,
-                    })),
-                    publishImmediately: true,
-                  }]
-                : [],
+      // Persist supporting & reference documents attached in Step 0 into entity_supporting_documents
+      if (documents && documents.length > 0) {
+        for (const doc of documents) {
+          try {
+            let storagePath: string | null = null;
+            if (doc.file) {
+              const fileExt = doc.file.name.split('.').pop() || 'bin';
+              const filePath = `projects/${created.id}/${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+              const { data: uploadData } = await supabase.storage
+                .from('documents')
+                .upload(filePath, doc.file, { upsert: true });
+              if (uploadData?.path) {
+                storagePath = uploadData.path;
+              }
+            }
+            await supabase.from('entity_supporting_documents').insert({
+              entity_type: 'project',
+              entity_id: created.id,
+              custom_name: doc.customName || doc.file.name,
+              original_name: doc.file.name,
+              document_tag: doc.tag || 'other',
+              notes: doc.notes || '',
+              storage_path: storagePath,
+              file_size: doc.file.size,
+              mime_type: doc.file.type,
+              uploaded_by: user?.id || null,
             });
+          } catch (docErr) {
+            console.warn('[RegisterProjectPage] Could not persist entity document:', docErr);
           }
-        } catch (engineError) {
-          templateApplyError = engineError instanceof Error ? engineError.message : String(engineError);
         }
+      }
+
+      let templateApplyError: string | null = null;
+      try {
+        await initializeProjectEngine(created.id);
+        if (formData.blueprint && (formData.blueprint.indicators.length > 0 || formData.blueprint.formFields.length > 0)) {
+          await initializeProjectBlueprint({
+            projectId: created.id,
+            userId: user?.id || 'admin',
+            indicators: formData.blueprint.indicators.map((ind) => ({
+              code: ind.code.trim().toUpperCase(),
+              name: ind.name.trim(),
+              description: ind.description.trim(),
+              unit: ind.unit.trim() || 'count',
+              target: ind.target ? parseFloat(ind.target) : null,
+              baseline: ind.baseline ? parseFloat(ind.baseline) : null,
+              calculationType: ind.calculationType,
+              sourceFieldKey: ind.sourceFieldKey.trim(),
+              aggregation:
+                ind.calculationType === 'average'
+                  ? 'average'
+                  : ind.calculationType === 'latest_value_or_milestone_state'
+                  ? 'latest'
+                  : 'sum',
+            })),
+            forms: formData.blueprint.formFields.length
+              ? [{
+                  name: formData.blueprint.formName.trim() || `${created.name} Activity Log`,
+                  fields: formData.blueprint.formFields.map((f) => ({
+                    key: f.key.trim(),
+                    label: f.label.trim(),
+                    type: f.type,
+                    required: f.required,
+                    helpText: f.helpText,
+                  })),
+                  publishImmediately: true,
+                }]
+              : [],
+          });
+        }
+      } catch (engineError) {
+        templateApplyError = engineError instanceof Error ? engineError.message : String(engineError);
       }
 
       // Persist Results Framework (Outcomes -> Outputs -> Activities)
@@ -603,7 +613,7 @@ export const RegisterProjectPage: React.FC = () => {
       // Clear draft
       localStorage.removeItem(DRAFT_STORAGE_KEY);
 
-      // Navigate to project workspace or list
+      // Navigate directly to project workspace
       navigate(`/projects/${created.id}`);
     } catch (err: unknown) {
       setValidationError((err as Error).message || 'Failed to create project.');
@@ -623,16 +633,69 @@ export const RegisterProjectPage: React.FC = () => {
     (sum, o) => sum + (o.outputs || []).reduce((actSum, op) => actSum + (op.activities?.length || 0), 0),
     0
   );
-  const totalActivityBudget = (formData.resultsFramework || []).reduce(
-    (sum, o) =>
-      sum +
-      (o.outputs || []).reduce(
-        (actSum, op) =>
-          actSum + (op.activities || []).reduce((bSum, a) => bSum + (a.budgetEstimated || 0), 0),
-        0
-      ),
-    0
-  );
+
+  // Derived locations from Step 2 (by District then Ward)
+  const derivedLocations = useMemo(() => {
+    const locs: string[] = [];
+    const districts = formData.governance.districts || [];
+    const wards = formData.governance.wards || [];
+    if (districts.length > 0 && wards.length > 0) {
+      districts.forEach((d) => {
+        wards.forEach((w) => {
+          locs.push(`${d} - ${w}`);
+        });
+      });
+    } else if (districts.length > 0) {
+      districts.forEach((d) => locs.push(d));
+    } else if (formData.governance.regions?.length > 0) {
+      formData.governance.regions.forEach((r) => locs.push(r));
+    }
+    return locs.length > 0
+      ? locs
+      : ['Kigamboni - Somangila', 'Kigamboni - Vijibweni', 'Ilala - Kivukoni', 'Bagamoyo - Kaole'];
+  }, [formData.governance.districts, formData.governance.wards, formData.governance.regions]);
+
+  const COUNTRY_OPTIONS = ['Tanzania', 'Kenya', 'Uganda', 'Rwanda', 'Burundi'];
+  const REGION_OPTIONS = [
+    'Dar es Salaam',
+    'Pwani / Coast Region',
+    'Morogoro',
+    'Arusha',
+    'Dodoma',
+    'Mwanza',
+    'Kilimanjaro',
+    'Tanga',
+    'Zanzibar',
+  ];
+  const DISTRICT_OPTIONS = [
+    'Kigamboni',
+    'Ilala',
+    'Temeke',
+    'Kinondoni',
+    'Ubungo',
+    'Bagamoyo',
+    'Kibaha',
+    'Kisarawe',
+    'Kilosa',
+    'Morogoro Urban',
+    'Arusha City',
+    'Dodoma Urban',
+  ];
+  const WARD_OPTIONS = [
+    'Somangila',
+    'Vijibweni',
+    'Kivukoni',
+    'Kariakoo',
+    'Upanga',
+    'Mbagala',
+    'Magomeni',
+    'Ubungo Mjini',
+    'Bagamoyo Mjini',
+    'Kaole',
+    'Dunda',
+    'Msata',
+    'Zinga',
+  ];
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
@@ -731,34 +794,22 @@ export const RegisterProjectPage: React.FC = () => {
 
       {/* Step Content Container */}
       <Card className="bg-white border border-surface-border">
-        {/* Step 1: Project Identity & Scope */}
+        {/* Step 1: Project Identity & Reference Documents */}
         {formData.step === 0 && (
           <div>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Briefcase className="w-5 h-5 text-forest-700" />
-                <CardTitle>{t('projects.step1Title', 'Step 1: Project Identity & Scope')}</CardTitle>
+                <CardTitle>Step 1: Project Identity, Partners &amp; Reference Documents</CardTitle>
               </div>
               <p className="text-xs text-charcoal-muted mt-1">
-                Define the project alphanumeric identifier, official program title, sector category, and core objectives.
+                Establish the project code, title, sector category, partner organizations, and attach all reference documents and specifications.
               </p>
             </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <Select
-                label="Project setup template"
-                value={formData.templateVersionId || ''}
-                onChange={(e) => setFormData({ ...formData, templateVersionId: e.target.value })}
-                options={[
-                  { value: '', label: 'Build from scratch' },
-                  ...approvedTemplates.flatMap((template) => template.versions
-                    .filter((version) => version.status === 'published')
-                    .map((version) => ({ value: version.id, label: `${template.name} · v${version.versionNumber}` }))),
-                ]}
-                helperText="Approved templates preconfigure indicators and published field forms. You can customize them in the project workspace."
-              />
+            <CardContent className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  label={`${t('projects.fields.projectCode', 'Project Code')} *`}
+                  label={`${t('projects.fields.projectCode', 'Project Code (ID)')} *`}
                   placeholder="e.g. PRJ-BYA-2026"
                   value={formData.identity.projectCode}
                   onChange={(e) =>
@@ -767,7 +818,7 @@ export const RegisterProjectPage: React.FC = () => {
                       identity: { ...formData.identity, projectCode: e.target.value.toUpperCase() },
                     })
                   }
-                  helperText="Unique alphanumeric project code"
+                  helperText="Unique alphanumeric identifier for this project"
                   required
                 />
 
@@ -816,7 +867,7 @@ export const RegisterProjectPage: React.FC = () => {
 
                 <div className="md:col-span-2">
                   <Input
-                    label={`${t('projects.fields.projectName', 'Official Project Name')} *`}
+                    label={`${t('projects.fields.projectName', 'Project Name / Title')} *`}
                     placeholder="e.g. Babawatoto Youth Academy 2026: Vocational & Cultural Literacy Initiative"
                     value={formData.identity.name}
                     onChange={(e) =>
@@ -828,121 +879,70 @@ export const RegisterProjectPage: React.FC = () => {
                     required
                   />
                 </div>
+
+                <div className="md:col-span-2">
+                  <Textarea
+                    label="Project Description &amp; Specifics"
+                    placeholder="Detailed executive description of the project, problem statement, community background, and specific implementation targets..."
+                    value={formData.identity.description}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        identity: { ...formData.identity, description: e.target.value },
+                      })
+                    }
+                    rows={4}
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <Input
+                    label="Partners / Sponsors / Key Stakeholders"
+                    placeholder="e.g. Foundation for Civil Society, Bagamoyo Arts Council, Ward Development Committees"
+                    value={formData.identity.partnerOrganizations}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        identity: { ...formData.identity, partnerOrganizations: e.target.value },
+                      })
+                    }
+                    helperText="List supporting partners, funding sponsors, or municipal institutions"
+                  />
+                </div>
               </div>
 
-              <Textarea
-                label={t('projects.fields.description', 'Project Description & Background')}
-                placeholder="Detailed executive summary of the program, target communities, problem statement, and organizational mandate..."
-                value={formData.identity.description}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    identity: { ...formData.identity, description: e.target.value },
-                  })
-                }
-                rows={3}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Textarea
-                  label={t('projects.fields.objectives', 'Core Strategic Objectives & Key Milestones')}
-                  placeholder="1. Train 500 youth in digital literacy.&#10;2. Establish 10 community arts hubs.&#10;3. Distribute education kits."
-                  value={formData.identity.objectives}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      identity: { ...formData.identity, objectives: e.target.value },
-                    })
-                  }
-                  rows={3}
-                />
-
-                <Input
-                  label={t('projects.fields.beneficiaries', 'Target Beneficiaries & Estimated Reach')}
-                  placeholder="e.g. 1,500 children and adolescent youth"
-                  value={formData.identity.beneficiaries}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      identity: { ...formData.identity, beneficiaries: e.target.value },
-                    })
-                  }
+              {/* Supporting & Reference Documents Upload */}
+              <div className="pt-4 border-t border-surface-border">
+                <DocumentUploadSection
+                  documents={documents}
+                  onChange={setDocuments}
+                  title="Attach Relevant &amp; Reference Project Documents"
+                  hint="Attach full project proposal, concept notes, donor agreement, specifications, or reference files (PDF, Word, Excel, PNG, max 25MB)."
                 />
               </div>
             </CardContent>
           </div>
         )}
 
-        {/* Step 2: Strategic Funding & Timeline */}
+        {/* Step 2: Budget & Project Duration */}
         {formData.step === 1 && (
           <div>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-forest-700" />
-                <CardTitle>{t('projects.step2Title', 'Step 2: Strategic Funding & Timeline')}</CardTitle>
+                <CardTitle>Step 2: Allocated Project Budget &amp; Duration</CardTitle>
               </div>
               <p className="text-xs text-charcoal-muted mt-1">
-                Configure donor grant details, contractual timeline, total approved budget, and financial disbursement terms.
+                Insert the total approved budget for the whole project, operating currency, project duration cadence, and contract agreement timeline.
               </p>
             </CardHeader>
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="p-6 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label={`${t('projects.fields.funder', 'Grant Donor / Funding Partner')} *`}
-                  placeholder="e.g. Foundation for Civil Society (FCS)"
-                  value={formData.funding.funder}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      funding: { ...formData.funding, funder: e.target.value },
-                    })
-                  }
-                  required
-                />
-
-                <Input
-                  label={t('projects.fields.grantNumber', 'Grant Agreement Reference Number')}
-                  placeholder="e.g. FCS/TZ/2026/G-8812"
-                  value={formData.funding.grantNumber}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      funding: { ...formData.funding, grantNumber: e.target.value },
-                    })
-                  }
-                />
-
-                <Input
-                  type="date"
-                  label={`${t('projects.fields.startDate', 'Contract Agreement Start Date')} *`}
-                  value={formData.funding.startDate}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      funding: { ...formData.funding, startDate: e.target.value },
-                    })
-                  }
-                  required
-                />
-
-                <Input
-                  type="date"
-                  label={`${t('projects.fields.endDate', 'Contract Agreement End Date')} *`}
-                  value={formData.funding.endDate}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      funding: { ...formData.funding, endDate: e.target.value },
-                    })
-                  }
-                  required
-                />
-
                 <Input
                   type="number"
                   min="0"
                   step="1000"
-                  label={`${t('projects.fields.totalBudget', 'Total Approved Project Budget')} *`}
+                  label="Allocated Budget for the Whole Project *"
                   placeholder="75000000"
                   value={formData.funding.totalBudget}
                   onChange={(e) =>
@@ -951,11 +951,12 @@ export const RegisterProjectPage: React.FC = () => {
                       funding: { ...formData.funding, totalBudget: e.target.value },
                     })
                   }
+                  helperText="Total financial ceiling appropriated for this project charter"
                   required
                 />
 
                 <Select
-                  label={`${t('projects.fields.currency', 'Operating Currency')} *`}
+                  label="Operating Currency *"
                   value={formData.funding.currency}
                   onChange={(e) =>
                     setFormData({
@@ -969,40 +970,115 @@ export const RegisterProjectPage: React.FC = () => {
                     { value: 'EUR', label: 'EUR (Euro)' },
                   ]}
                 />
+
+                <Select
+                  label="Project Duration / Implementation Cadence *"
+                  value={formData.funding.durationCadence}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      funding: { ...formData.funding, durationCadence: e.target.value },
+                    })
+                  }
+                  options={[
+                    { value: 'Quarterly', label: 'Quarterly (3-Month Cadence)' },
+                    { value: 'Semi-Annually', label: 'Semi-Annually (6-Month Cadence)' },
+                    { value: 'Annually', label: 'Annually (12-Month Cadence)' },
+                    { value: 'Multi-Year', label: 'Multi-Year Long-term Program' },
+                    { value: 'Single Phase', label: 'Single Phase / Short Project' },
+                  ]}
+                  helperText="Reporting frequency and lifecycle review cadence"
+                />
+
+                <Input
+                  label="Grant Donor / Funding Partner *"
+                  placeholder="e.g. Foundation for Civil Society (FCS)"
+                  value={formData.funding.funder}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      funding: { ...formData.funding, funder: e.target.value },
+                    })
+                  }
+                  required
+                />
+
+                <Input
+                  label="Grant Agreement Reference Number (Optional)"
+                  placeholder="e.g. FCS/TZ/2026/G-8812"
+                  value={formData.funding.grantNumber}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      funding: { ...formData.funding, grantNumber: e.target.value },
+                    })
+                  }
+                />
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="date"
+                    label="Start Date *"
+                    value={formData.funding.startDate}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        funding: { ...formData.funding, startDate: e.target.value },
+                      })
+                    }
+                    required
+                  />
+                  <Input
+                    type="date"
+                    label="End Date *"
+                    value={formData.funding.endDate}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        funding: { ...formData.funding, endDate: e.target.value },
+                      })
+                    }
+                    required
+                  />
+                </div>
               </div>
 
-              <Textarea
-                label={t('projects.fields.disbursementSchedule', 'Disbursement Schedule & Milestone Tranches')}
-                placeholder="e.g. 40% initial mobilization advance upon signing, 40% upon Midterm Progress Report approval, 20% upon Final Evaluation."
-                value={formData.funding.disbursementSchedule}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    funding: { ...formData.funding, disbursementSchedule: e.target.value },
-                  })
-                }
-                rows={2}
-              />
+              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 flex items-start gap-2.5">
+                <Briefcase className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-slate-900 block mb-0.5">Budget Allocation Policy:</strong>
+                  During initial project creation, budget is defined only as a whole-project appropriation. Budgets and funding requests are established individually per activity after formal Executive Director approval of the project charter.
+                </div>
+              </div>
             </CardContent>
           </div>
         )}
 
-        {/* Step 3: Governance Team & Target Regions */}
+        {/* Step 3: Governance Team & Cascading Locations */}
         {formData.step === 2 && (
           <div>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-forest-700" />
-                <CardTitle>{t('projects.step3Title', 'Step 3: Governance Team & Target Regions')}</CardTitle>
+                <CardTitle>Step 3: Governance &amp; Implementation Locations</CardTitle>
               </div>
               <p className="text-xs text-charcoal-muted mt-1">
-                Assign institutional leads, field coordinators, partner organizations, and geographic implementation districts.
+                Designate the Project Manager responsible for institutional control and approval hierarchy, and select cascading implementation locations.
               </p>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
+              {/* Governance staffing policy alert */}
+              <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-start gap-3">
+                <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-sm text-emerald-950 block mb-1">Collaborative Staff Participation:</strong>
+                  All project activities will be handled collectively by all staff members due to lean team capacity. No separate staff participant assignments are required; assigning the responsible Project Manager establishes the necessary hierarchy of control, approval gates, and operational oversight.
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select
-                  label={`${t('projects.fields.projectManager', 'Assigned Project Manager')} *`}
+                  label="Assigned Responsible Project Manager *"
                   value={formData.governance.managerId}
                   onChange={(e) =>
                     setFormData({
@@ -1014,11 +1090,12 @@ export const RegisterProjectPage: React.FC = () => {
                     value: s.id,
                     label: `${s.displayName} (${s.role.replace('_', ' ')})`,
                   }))}
+                  helperText="Lead responsible officer for project execution, approvals, and reporting"
                   required
                 />
 
                 <Select
-                  label={t('projects.fields.projectCoordinator', 'Assigned Field Coordinator (Optional)')}
+                  label="Assigned Field Coordinator (Optional)"
                   value={formData.governance.coordinatorId}
                   onChange={(e) =>
                     setFormData({
@@ -1033,85 +1110,173 @@ export const RegisterProjectPage: React.FC = () => {
                       label: `${s.displayName} (${s.role.replace('_', ' ')})`,
                     })),
                   ]}
+                  helperText="Field monitoring and operational coordination lead"
                 />
-
-                <div className="md:col-span-2">
-                  <Input
-                    label={t('projects.fields.partnerOrganizations', 'Partner Organizations & Stakeholders')}
-                    placeholder="e.g. Kigamboni Community Center, Ward Social Welfare Office"
-                    value={formData.governance.partnerOrganizations}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        governance: {
-                          ...formData.governance,
-                          partnerOrganizations: e.target.value,
-                        },
-                      })
-                    }
-                  />
-                </div>
               </div>
 
-              {/* District Selection Chips */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between border-b border-surface-border pb-2">
-                  <label className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-forest-700" />
-                    Target Implementation Districts *
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-charcoal-muted">
-                      {formData.governance.targetRegions.length} selected
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (formData.governance.targetRegions.length === AVAILABLE_DISTRICTS.length) {
-                          setFormData((prev) => ({
-                            ...prev,
-                            governance: { ...prev.governance, targetRegions: [] },
-                          }));
-                        } else {
-                          setFormData((prev) => ({
-                            ...prev,
-                            governance: { ...prev.governance, targetRegions: [...AVAILABLE_DISTRICTS] },
-                          }));
-                        }
-                      }}
-                      className="text-xs text-charcoal-700 hover:text-charcoal-900 font-semibold underline underline-offset-2 cursor-pointer"
-                    >
-                      {formData.governance.targetRegions.length === AVAILABLE_DISTRICTS.length ? 'Deselect All' : 'Select All'}
-                    </button>
-                  </div>
+              {/* Geographic Cascading Dropdowns */}
+              <div className="space-y-4 pt-2">
+                <div className="border-b border-surface-border pb-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-charcoal-800 flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4 text-forest-700" />
+                    Target Implementation Geography (Multi-Select Dropdowns)
+                  </h3>
+                  <p className="text-[11px] text-charcoal-muted mt-0.5">
+                    Select the geographic coverage. Country and Region are required; District and Ward are optional and derive activity location choices.
+                  </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-                  {AVAILABLE_DISTRICTS.map((district) => {
-                    const isSelected = formData.governance.targetRegions.includes(district);
-                    return (
-                      <button
-                        type="button"
-                        key={district}
-                        onClick={() => toggleRegion(district)}
-                        className={`px-3 py-2 text-xs rounded-lg border text-left flex items-center justify-between transition-colors ${
-                          isSelected
-                            ? 'bg-forest-50 border-forest-600 text-forest-900 font-semibold'
-                            : 'bg-white border-surface-border text-charcoal-700 hover:bg-slate-50'
-                        }`}
-                      >
-                        <span>{district}</span>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-forest-700" />}
-                      </button>
-                    );
-                  })}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Country Dropdown (Required) */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-charcoal-800">
+                      Country * <span className="text-rose-600">(Must select at least one)</span>
+                    </label>
+                    <div className="p-3 rounded-lg border border-surface-border bg-slate-50/50 space-y-2">
+                      <div className="flex flex-wrap gap-1.5">
+                        {COUNTRY_OPTIONS.map((c) => {
+                          const isSel = formData.governance.countries?.includes(c);
+                          return (
+                            <button
+                              key={c}
+                              type="button"
+                              onClick={() => {
+                                const current = formData.governance.countries || [];
+                                const updated = isSel ? current.filter((x) => x !== c) : [...current, c];
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  governance: { ...prev.governance, countries: updated },
+                                }));
+                              }}
+                              className={`px-2.5 py-1 text-xs rounded-md border font-medium flex items-center gap-1 transition-colors ${
+                                isSel
+                                  ? 'bg-forest-50 border-forest-600 text-forest-900 font-bold'
+                                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                              }`}
+                            >
+                              <span>{c}</span>
+                              {isSel && <Check className="w-3 h-3 text-forest-700" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Region Dropdown (Required) */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-charcoal-800">
+                      Region * <span className="text-rose-600">(Must select at least one)</span>
+                    </label>
+                    <div className="p-3 rounded-lg border border-surface-border bg-slate-50/50 space-y-2">
+                      <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+                        {REGION_OPTIONS.map((r) => {
+                          const isSel = formData.governance.regions?.includes(r);
+                          return (
+                            <button
+                              key={r}
+                              type="button"
+                              onClick={() => {
+                                const current = formData.governance.regions || [];
+                                const updated = isSel ? current.filter((x) => x !== r) : [...current, r];
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  governance: { ...prev.governance, regions: updated },
+                                }));
+                              }}
+                              className={`px-2.5 py-1 text-xs rounded-md border font-medium flex items-center gap-1 transition-colors ${
+                                isSel
+                                  ? 'bg-forest-50 border-forest-600 text-forest-900 font-bold'
+                                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                              }`}
+                            >
+                              <span>{r}</span>
+                              {isSel && <Check className="w-3 h-3 text-forest-700" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* District Dropdown (Optional) */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-charcoal-800">
+                      Districts (Optional multi-select)
+                    </label>
+                    <div className="p-3 rounded-lg border border-surface-border bg-slate-50/50 space-y-2">
+                      <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+                        {DISTRICT_OPTIONS.map((d) => {
+                          const isSel = formData.governance.districts?.includes(d);
+                          return (
+                            <button
+                              key={d}
+                              type="button"
+                              onClick={() => {
+                                const current = formData.governance.districts || [];
+                                const updated = isSel ? current.filter((x) => x !== d) : [...current, d];
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  governance: { ...prev.governance, districts: updated },
+                                }));
+                              }}
+                              className={`px-2.5 py-1 text-xs rounded-md border font-medium flex items-center gap-1 transition-colors ${
+                                isSel
+                                  ? 'bg-forest-50 border-forest-600 text-forest-900 font-bold'
+                                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                              }`}
+                            >
+                              <span>{d}</span>
+                              {isSel && <Check className="w-3 h-3 text-forest-700" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Ward Dropdown (Optional) */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-charcoal-800">
+                      Wards (Optional multi-select)
+                    </label>
+                    <div className="p-3 rounded-lg border border-surface-border bg-slate-50/50 space-y-2">
+                      <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+                        {WARD_OPTIONS.map((w) => {
+                          const isSel = formData.governance.wards?.includes(w);
+                          return (
+                            <button
+                              key={w}
+                              type="button"
+                              onClick={() => {
+                                const current = formData.governance.wards || [];
+                                const updated = isSel ? current.filter((x) => x !== w) : [...current, w];
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  governance: { ...prev.governance, wards: updated },
+                                }));
+                              }}
+                              className={`px-2.5 py-1 text-xs rounded-md border font-medium flex items-center gap-1 transition-colors ${
+                                isSel
+                                  ? 'bg-forest-50 border-forest-600 text-forest-900 font-bold'
+                                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                              }`}
+                            >
+                              <span>{w}</span>
+                              {isSel && <Check className="w-3 h-3 text-forest-700" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </div>
         )}
 
-        {/* Step 4: Results Framework & Activities Hierarchy */}
+        {/* Step 4: Results Framework (Outcomes -> Outputs -> Activities) */}
         {formData.step === 3 && (
           <div className="p-6">
             <ProjectResultsFrameworkBuilder
@@ -1119,11 +1284,12 @@ export const RegisterProjectPage: React.FC = () => {
               onChange={(rf) => setFormData((prev) => ({ ...prev, resultsFramework: rf }))}
               staffList={activeStaff}
               currency={formData.funding.currency}
+              availableLocations={derivedLocations}
             />
           </div>
         )}
 
-        {/* Step 5: Dynamic M&E Blueprint, Indicators & Form Builder */}
+        {/* Step 5: Dynamic M&E Blueprint & Field Forms */}
         {formData.step === 4 && (
           <div className="p-6">
             <ProjectBlueprintBuilderStep
@@ -1133,39 +1299,16 @@ export const RegisterProjectPage: React.FC = () => {
           </div>
         )}
 
-        {/* Step 6: Supporting Documents (Optional with custom rename) */}
+        {/* Step 6: Review Project Charter & Finalize */}
         {formData.step === 5 && (
           <div>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <FileStack className="w-5 h-5 text-slate-700" />
-                <CardTitle>{t('projects.step3DocsTitle', 'Step 6: Supporting Documentation & Charters')}</CardTitle>
-              </div>
-              <p className="text-xs text-charcoal-muted mt-1">
-                Attach project charters, donor MoUs, concept proposals, and baseline reports. You can rename each document by custom name.
-              </p>
-            </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              <DocumentUploadSection
-                documents={documents}
-                onChange={setDocuments}
-                title="Upload Project Files"
-                hint="PDF, PNG, JPG, or spreadsheets up to 25MB each. You can customize the name of each document before submission."
-              />
-            </CardContent>
-          </div>
-        )}
-
-        {/* Step 7: Review, Budget Allocation & Final Approval */}
-        {formData.step === 6 && (
-          <div>
-            <CardHeader>
-              <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-forest-700" />
-                <CardTitle>{t('projects.step4Title', 'Step 7: Review Project Charter & Finalize')}</CardTitle>
+                <CardTitle>Step 6: Review Project Charter &amp; Launch</CardTitle>
               </div>
               <p className="text-xs text-charcoal-muted mt-1">
-                Verify all operational metrics, financial appropriations, and team assignments before creating the workspace.
+                Verify all operational metrics, governance leads, cascading implementation locations, results framework, and attached documents before registering this charter.
               </p>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
@@ -1176,7 +1319,7 @@ export const RegisterProjectPage: React.FC = () => {
                   <div className="flex items-center justify-between border-b border-surface-border pb-1.5">
                     <span className="text-xs font-bold text-charcoal-800 uppercase tracking-wider flex items-center gap-1.5">
                       <Briefcase className="w-3.5 h-3.5 text-forest-700" />
-                      Project Identity
+                      Project Identity &amp; Partners
                     </span>
                     <button
                       type="button"
@@ -1189,7 +1332,7 @@ export const RegisterProjectPage: React.FC = () => {
                   <div className="text-xs space-y-1 text-charcoal-700">
                     <div>
                       <span className="font-semibold text-charcoal-900">Code:</span>{' '}
-                      <span className="font-mono bg-white px-1 py-0.5 rounded border border-surface-border">
+                      <span className="font-mono bg-white px-1 py-0.5 rounded border border-surface-border font-bold">
                         {formData.identity.projectCode}
                       </span>
                     </div>
@@ -1200,8 +1343,12 @@ export const RegisterProjectPage: React.FC = () => {
                       <span className="font-semibold text-charcoal-900">Category:</span> {formData.identity.category}
                     </div>
                     <div>
-                      <span className="font-semibold text-charcoal-900">Target Reach:</span>{' '}
-                      {formData.identity.beneficiaries}
+                      <span className="font-semibold text-charcoal-900">Partners / Sponsors:</span>{' '}
+                      {formData.identity.partnerOrganizations || 'None specified'}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-charcoal-900">Attached Documents:</span>{' '}
+                      {documents.length} files attached
                     </div>
                   </div>
                 </div>
@@ -1211,7 +1358,7 @@ export const RegisterProjectPage: React.FC = () => {
                   <div className="flex items-center justify-between border-b border-surface-border pb-1.5">
                     <span className="text-xs font-bold text-charcoal-800 uppercase tracking-wider flex items-center gap-1.5">
                       <DollarSign className="w-3.5 h-3.5 text-forest-700" />
-                      Funding & Timeline
+                      Budget &amp; Timeline
                     </span>
                     <button
                       type="button"
@@ -1223,21 +1370,19 @@ export const RegisterProjectPage: React.FC = () => {
                   </div>
                   <div className="text-xs space-y-1 text-charcoal-700">
                     <div>
-                      <span className="font-semibold text-charcoal-900">Funder / Donor:</span> {formData.funding.funder}
-                    </div>
-                    <div>
-                      <span className="font-semibold text-charcoal-900">Grant Ref:</span>{' '}
-                      {formData.funding.grantNumber || 'Pending'}
-                    </div>
-                    <div>
-                      <span className="font-semibold text-charcoal-900">Duration:</span>{' '}
-                      {formData.funding.startDate} to {formData.funding.endDate}
-                    </div>
-                    <div>
-                      <span className="font-semibold text-charcoal-900">Total Budget:</span>{' '}
-                      <span className="font-bold text-emerald-800 font-mono">
+                      <span className="font-semibold text-charcoal-900">Total Approved Budget:</span>{' '}
+                      <span className="font-bold text-emerald-800 font-mono text-sm">
                         {formData.funding.currency} {Number(formData.funding.totalBudget).toLocaleString()}
                       </span>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-charcoal-900">Cadence:</span> {formData.funding.durationCadence}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-charcoal-900">Grant Donor:</span> {formData.funding.funder}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-charcoal-900">Duration:</span> {formData.funding.startDate} to {formData.funding.endDate}
                     </div>
                   </div>
                 </div>
@@ -1247,7 +1392,7 @@ export const RegisterProjectPage: React.FC = () => {
                   <div className="flex items-center justify-between border-b border-surface-border pb-1.5">
                     <span className="text-xs font-bold text-charcoal-800 uppercase tracking-wider flex items-center gap-1.5">
                       <Users className="w-3.5 h-3.5 text-forest-700" />
-                      Governance Team
+                      Governance Leads
                     </span>
                     <button
                       type="button"
@@ -1259,21 +1404,20 @@ export const RegisterProjectPage: React.FC = () => {
                   </div>
                   <div className="text-xs space-y-1 text-charcoal-700">
                     <div>
-                      <span className="font-semibold text-charcoal-900">Manager:</span>{' '}
+                      <span className="font-semibold text-charcoal-900">Project Manager:</span>{' '}
                       {selectedManager?.displayName} ({selectedManager?.role.replace('_', ' ')})
                     </div>
                     <div>
-                      <span className="font-semibold text-charcoal-900">Coordinator:</span>{' '}
-                      {selectedCoordinator?.displayName || 'Unassigned / Direct'}
+                      <span className="font-semibold text-charcoal-900">Field Coordinator:</span>{' '}
+                      {selectedCoordinator?.displayName || 'Direct PM Supervision'}
                     </div>
-                    <div>
-                      <span className="font-semibold text-charcoal-900">Partners:</span>{' '}
-                      {formData.governance.partnerOrganizations || 'None'}
+                    <div className="text-[11px] text-slate-500 italic mt-1">
+                      All staff members participate collectively in activity implementation.
                     </div>
                   </div>
                 </div>
 
-                {/* Target Regions Box */}
+                {/* Target Locations Box */}
                 <div className="p-4 rounded-lg border border-surface-border bg-surface-muted/20 space-y-2">
                   <div className="flex items-center justify-between border-b border-surface-border pb-1.5">
                     <span className="text-xs font-bold text-charcoal-800 uppercase tracking-wider flex items-center gap-1.5">
@@ -1289,15 +1433,21 @@ export const RegisterProjectPage: React.FC = () => {
                     </button>
                   </div>
                   <div className="text-xs space-y-1 text-charcoal-700">
-                    <div className="flex flex-wrap gap-1 pt-1">
-                      {formData.governance.targetRegions.map((region) => (
-                        <span
-                          key={region}
-                          className="bg-white border border-surface-border text-charcoal-800 px-2 py-0.5 rounded text-[11px] font-medium"
-                        >
-                          {region}
-                        </span>
-                      ))}
+                    <div>
+                      <span className="font-semibold text-charcoal-900">Countries:</span>{' '}
+                      {(formData.governance.countries || []).join(', ') || 'Tanzania'}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-charcoal-900">Regions:</span>{' '}
+                      {(formData.governance.regions || []).join(', ') || 'None selected'}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-charcoal-900">Districts:</span>{' '}
+                      {(formData.governance.districts || []).join(', ') || 'All districts'}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-charcoal-900">Wards:</span>{' '}
+                      {(formData.governance.wards || []).join(', ') || 'All wards'}
                     </div>
                   </div>
                 </div>
@@ -1307,7 +1457,7 @@ export const RegisterProjectPage: React.FC = () => {
                   <div className="flex items-center justify-between border-b border-surface-border pb-1.5">
                     <span className="text-xs font-bold text-charcoal-800 uppercase tracking-wider flex items-center gap-1.5">
                       <Layers className="w-3.5 h-3.5 text-forest-700" />
-                      Results Framework &amp; Activities ({totalActivities} Activities planned)
+                      Results Framework Hierarchy ({totalActivities} Activities across {formData.resultsFramework?.length || 0} Outcomes)
                     </span>
                     <button
                       type="button"
@@ -1319,18 +1469,18 @@ export const RegisterProjectPage: React.FC = () => {
                   </div>
                   <div className="text-xs space-y-2 text-charcoal-700 pt-1">
                     <div className="flex flex-wrap items-center gap-3">
-                      <span><strong>Strategic Outcomes:</strong> {formData.resultsFramework?.length || 0}</span>
+                      <span><strong>Outcomes:</strong> {formData.resultsFramework?.length || 0}</span>
                       <span>•</span>
-                      <span><strong>Deliverable Outputs:</strong> {totalOutputs}</span>
+                      <span><strong>Outputs:</strong> {totalOutputs}</span>
                       <span>•</span>
                       <span><strong>Activities:</strong> {totalActivities}</span>
                       <span>•</span>
-                      <span><strong>Estimated Activity Budget:</strong> <span className="font-mono font-bold text-emerald-800">{formData.funding.currency} {totalActivityBudget.toLocaleString()}</span></span>
+                      <span className="text-slate-500 italic">Activity budgets will be appropriated after project authorization</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Dynamic M&E Blueprint & Indicators Box */}
+                {/* M&E Blueprint Summary Box */}
                 <div className="p-4 rounded-lg border border-surface-border bg-surface-muted/20 space-y-2 md:col-span-2">
                   <div className="flex items-center justify-between border-b border-surface-border pb-1.5">
                     <span className="text-xs font-bold text-charcoal-800 uppercase tracking-wider flex items-center gap-1.5">
@@ -1345,62 +1495,11 @@ export const RegisterProjectPage: React.FC = () => {
                       Edit Blueprint
                     </button>
                   </div>
-                  <div className="text-xs space-y-2 text-charcoal-700 pt-1">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span><strong>Collection Form:</strong> {formData.blueprint?.formName} ({formData.blueprint?.formFields.length || 0} questions)</span>
-                      <span>•</span>
-                      <span><strong>Checklists:</strong> {formData.blueprint?.checklists.length || 0} quality criteria</span>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 pt-1">
-                      {formData.blueprint?.indicators.map((ind, i) => (
-                        <div key={i} className="p-2 rounded bg-white border border-surface-border flex items-center justify-between">
-                          <div>
-                            <span className="font-mono text-[10px] font-bold text-forest-800 bg-forest-50 px-1 py-0.5 rounded mr-1.5">{ind.code}</span>
-                            <span className="font-medium text-slate-800 text-[11px]">{ind.name}</span>
-                          </div>
-                          {ind.target && (
-                            <span className="text-[11px] font-bold text-forest-700 whitespace-nowrap ml-2">
-                              Goal: {ind.target} {ind.unit}
-                            </span>
-                          )}
-                        </div>
-                      ))}
+                  <div className="text-xs space-y-1 text-charcoal-700 pt-1">
+                    <div>
+                      <strong>Collection Form:</strong> {formData.blueprint?.formName} ({formData.blueprint?.formFields.length || 0} field questions)
                     </div>
                   </div>
-                </div>
-
-                {/* Supporting Documents Box */}
-                <div className="p-4 rounded-lg border border-surface-border bg-surface-muted/20 space-y-2 md:col-span-2">
-                  <div className="flex items-center justify-between border-b border-surface-border pb-1.5">
-                    <span className="text-xs font-bold text-charcoal-800 uppercase tracking-wider flex items-center gap-1.5">
-                      <FileStack className="w-3.5 h-3.5 text-forest-700" />
-                      Attached Project Documents ({documents.length})
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, step: 5 })}
-                      className="text-xs text-forest-700 hover:underline font-semibold"
-                    >
-                      Edit
-                    </button>
-                  </div>
-                  {documents.length === 0 ? (
-                    <p className="text-xs text-slate-400 italic">No supporting documents uploaded.</p>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                      {documents.map((d) => (
-                        <div key={d.id} className="p-2 rounded bg-white border border-surface-border flex items-center justify-between text-xs">
-                          <div>
-                            <span className="font-semibold text-slate-800">{d.customName}</span>
-                            <span className="text-slate-400 ml-1.5">({d.file.name})</span>
-                          </div>
-                          <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 uppercase font-mono">
-                            {d.tag}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -1411,10 +1510,10 @@ export const RegisterProjectPage: React.FC = () => {
                   <div className="font-bold text-sm">Ready to Charter Project Workspace</div>
                   <div>
                     Clicking "Launch Project Workspace" will establish the project code{' '}
-                    <span className="font-mono font-bold">{formData.identity.projectCode}</span> in the registry,
-                    initialize the initial budget appropriation ledger of {formData.funding.currency}{' '}
-                    {Number(formData.funding.totalBudget).toLocaleString()}, assign governance roles, and open the
-                    dedicated project workspace.
+                    <span className="font-mono font-bold">{formData.identity.projectCode}</span> in planning status,
+                    record the total approved project budget of {formData.funding.currency}{' '}
+                    {Number(formData.funding.totalBudget).toLocaleString()}, attach all reference documents, and submit
+                    the charter to the Executive Director for formal activation sign-off.
                   </div>
                 </div>
               </div>
@@ -1453,7 +1552,7 @@ export const RegisterProjectPage: React.FC = () => {
               <span>{t('common.saveDraft', 'Save Draft')}</span>
             </Button>
 
-            {formData.step < 6 ? (
+            {formData.step < 5 ? (
               <Button
                 type="button"
                 variant="primary"
@@ -1483,3 +1582,4 @@ export const RegisterProjectPage: React.FC = () => {
     </div>
   );
 };
+

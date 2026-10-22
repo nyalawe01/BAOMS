@@ -25,11 +25,12 @@ export interface DraftActivityItem {
   title: string;
   description: string;
   activityDate: string;
+  durationDays?: number;
   wardLocation: string;
   targetParticipants: number;
-  budgetEstimated: number;
-  assignedStaffId: string;
-  procurementRequired: boolean;
+  budgetEstimated?: number;
+  assignedStaffId?: string;
+  procurementRequired?: boolean;
 }
 
 export interface DraftOutputItem {
@@ -54,15 +55,17 @@ export interface DraftOutcomeItem {
 interface ProjectResultsFrameworkBuilderProps {
   outcomes: DraftOutcomeItem[];
   onChange: (outcomes: DraftOutcomeItem[]) => void;
-  staffList: StaffMemberOption[];
+  staffList?: StaffMemberOption[];
   currency?: string;
+  availableLocations?: string[];
 }
 
 export const ProjectResultsFrameworkBuilder: React.FC<ProjectResultsFrameworkBuilderProps> = ({
   outcomes,
   onChange,
-  staffList,
+  staffList = [],
   currency = 'TZS',
+  availableLocations = [],
 }) => {
   const [expandedOutcomes, setExpandedOutcomes] = useState<Record<string, boolean>>({
     [outcomes[0]?.id || 'out-1']: true,
@@ -97,11 +100,12 @@ export const ProjectResultsFrameworkBuilder: React.FC<ProjectResultsFrameworkBui
               title: `Community Implementation Activity`,
               description: '',
               activityDate: new Date().toISOString().slice(0, 10),
-              wardLocation: 'Temeke',
+              durationDays: 1,
+              wardLocation: availableLocations[0] || 'Temeke',
               targetParticipants: 50,
-              budgetEstimated: 2500000,
-              assignedStaffId: staffList[0]?.id || '',
-              procurementRequired: true,
+              budgetEstimated: 0,
+              assignedStaffId: '',
+              procurementRequired: false,
             },
           ],
         },
@@ -177,10 +181,11 @@ export const ProjectResultsFrameworkBuilder: React.FC<ProjectResultsFrameworkBui
       title: `Field Session / Activity ${actNum}`,
       description: '',
       activityDate: new Date().toISOString().slice(0, 10),
-      wardLocation: 'Kigamboni',
+      durationDays: 1,
+      wardLocation: availableLocations[0] || 'Kigamboni',
       targetParticipants: 30,
-      budgetEstimated: 1500000,
-      assignedStaffId: staffList[0]?.id || '',
+      budgetEstimated: 0,
+      assignedStaffId: '',
       procurementRequired: false,
     };
 
@@ -265,14 +270,14 @@ export const ProjectResultsFrameworkBuilder: React.FC<ProjectResultsFrameworkBui
 
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <span className="text-[11px] font-semibold text-charcoal-muted block">Total Activities</span>
-            <span className="font-bold text-sm text-forest-900">{totalActivitiesCount} Planned</span>
+            <span className="text-[11px] font-semibold text-charcoal-muted block">Total Outcomes</span>
+            <span className="font-bold text-sm text-forest-900">{outcomes.length} Planned</span>
           </div>
           <div className="h-8 w-px bg-forest-200" />
           <div className="text-right">
-            <span className="text-[11px] font-semibold text-charcoal-muted block">Allocated Budget</span>
+            <span className="text-[11px] font-semibold text-charcoal-muted block">Total Activities</span>
             <span className="font-bold text-sm text-forest-900 font-mono">
-              {currency} {totalEstimatedActivityBudget.toLocaleString()}
+              {totalActivitiesCount} Activities
             </span>
           </div>
           <Button size="sm" onClick={handleAddOutcome} className="ml-2">
@@ -448,118 +453,140 @@ export const ProjectResultsFrameworkBuilder: React.FC<ProjectResultsFrameworkBui
                           {output.activities.map((act, aIdx) => (
                             <div
                               key={act.id}
-                              className="p-3 rounded-lg border border-slate-200 bg-slate-50/30 grid gap-2.5 sm:grid-cols-6 items-center text-xs"
+                              className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/40 space-y-3 text-xs hover:border-slate-300 transition"
                             >
-                              <div className="sm:col-span-2 space-y-1">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="font-mono text-[10px] font-bold text-forest-700 bg-forest-50 px-1 py-0.5 rounded">
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+                                  <span className="font-mono text-[10px] font-bold text-forest-800 bg-forest-100 px-2 py-0.5 rounded">
                                     {act.code}
                                   </span>
                                   <input
-                                    className="font-semibold text-xs text-slate-900 rounded border border-slate-300 p-1 flex-1"
+                                    className="font-bold text-xs text-slate-900 rounded-lg border border-slate-300 p-1.5 flex-1 bg-white focus:outline-none focus:ring-1 focus:ring-[#D68904]"
                                     value={act.title}
                                     onChange={(e) =>
                                       handleUpdateActivity(oIdx, outIdx, aIdx, 'title', e.target.value)
                                     }
-                                    placeholder="Activity Title"
+                                    placeholder="Activity Title (e.g. Community Mobilization Workshop)"
                                   />
                                 </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveActivity(oIdx, outIdx, aIdx)}
+                                  className="text-slate-400 hover:text-red-600 p-1 ml-auto"
+                                  title="Delete Activity"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
                               </div>
 
+                              {/* Activity Description */}
                               <div>
-                                <label className="text-[10px] text-slate-500 font-semibold block mb-0.5 flex items-center gap-1">
-                                  <Calendar className="w-3 h-3 text-slate-400" /> Date
-                                </label>
-                                <input
-                                  type="date"
-                                  className="w-full text-xs p-1 rounded border border-slate-300"
-                                  value={act.activityDate}
+                                <textarea
+                                  className="w-full text-xs rounded-lg border border-slate-300 p-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#D68904] placeholder:text-slate-400"
+                                  rows={2}
+                                  value={act.description}
                                   onChange={(e) =>
-                                    handleUpdateActivity(oIdx, outIdx, aIdx, 'activityDate', e.target.value)
+                                    handleUpdateActivity(oIdx, outIdx, aIdx, 'description', e.target.value)
                                   }
+                                  placeholder="Describe the operational activity details, methodology, objectives, and deliverables..."
                                 />
                               </div>
 
-                              <div>
-                                <label className="text-[10px] text-slate-500 font-semibold block mb-0.5 flex items-center gap-1">
-                                  <MapPin className="w-3 h-3 text-slate-400" /> Ward / Venue
-                                </label>
-                                <input
-                                  className="w-full text-xs p-1 rounded border border-slate-300"
-                                  value={act.wardLocation}
-                                  onChange={(e) =>
-                                    handleUpdateActivity(oIdx, outIdx, aIdx, 'wardLocation', e.target.value)
-                                  }
-                                  placeholder="e.g. Temeke"
-                                />
-                              </div>
-
-                              <div>
-                                <label className="text-[10px] text-slate-500 font-semibold block mb-0.5 flex items-center gap-1">
-                                  <Users className="w-3 h-3 text-slate-400" /> Target / Lead
-                                </label>
-                                <div className="flex items-center gap-1">
+                              {/* 3 Parameter Controls: Date & Duration Slider, Location Dropdown, Target (Manual Typing) */}
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+                                {/* Control 1: Date & Duration Slider */}
+                                <div className="p-2.5 rounded-lg bg-white border border-slate-200 space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <label className="text-[10px] text-slate-600 font-bold uppercase tracking-wider flex items-center gap-1">
+                                      <Calendar className="w-3 h-3 text-[#D68904]" /> Start Date &amp; Duration
+                                    </label>
+                                    <span className="font-mono text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
+                                      {act.durationDays || 1} {(act.durationDays || 1) === 1 ? 'day' : 'days'}
+                                      {(act.durationDays || 1) >= 7 ? ` (${Math.round((act.durationDays || 1) / 7)} wk)` : ''}
+                                    </span>
+                                  </div>
                                   <input
-                                    type="number"
-                                    className="w-12 text-xs p-1 rounded border border-slate-300 font-mono"
-                                    value={act.targetParticipants}
+                                    type="date"
+                                    className="w-full text-xs p-1.5 rounded border border-slate-300 bg-white"
+                                    value={act.activityDate}
+                                    onChange={(e) =>
+                                      handleUpdateActivity(oIdx, outIdx, aIdx, 'activityDate', e.target.value)
+                                    }
+                                  />
+                                  <div className="space-y-1">
+                                    <input
+                                      type="range"
+                                      min="1"
+                                      max="30"
+                                      step="1"
+                                      value={act.durationDays || 1}
+                                      onChange={(e) =>
+                                        handleUpdateActivity(oIdx, outIdx, aIdx, 'durationDays', Number(e.target.value))
+                                      }
+                                      className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#D68904]"
+                                    />
+                                    <div className="flex justify-between text-[9px] text-slate-400 font-mono">
+                                      <span>1 day</span>
+                                      <span>1 wk</span>
+                                      <span>2 wks</span>
+                                      <span>1 month</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Control 2: Derived Location Dropdown (District / Ward) */}
+                                <div className="p-2.5 rounded-lg bg-white border border-slate-200 space-y-2">
+                                  <label className="text-[10px] text-slate-600 font-bold uppercase tracking-wider flex items-center gap-1">
+                                    <MapPin className="w-3 h-3 text-[#D68904]" /> Location (District / Ward)
+                                  </label>
+                                  <select
+                                    className="w-full text-xs p-2 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#D68904] cursor-pointer"
+                                    value={act.wardLocation}
+                                    onChange={(e) =>
+                                      handleUpdateActivity(oIdx, outIdx, aIdx, 'wardLocation', e.target.value)
+                                    }
+                                  >
+                                    <option value="">-- Select Location --</option>
+                                    {(availableLocations.length > 0
+                                      ? availableLocations
+                                      : ['Kigamboni', 'Ilala', 'Temeke', 'Kinondoni', 'Ubungo', 'Bagamoyo', 'Kibaha', 'Kilosa']
+                                    ).map((loc) => (
+                                      <option key={loc} value={loc}>
+                                        {loc}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  <p className="text-[10px] text-slate-400 leading-tight">
+                                    Derived from project target districts &amp; wards
+                                  </p>
+                                </div>
+
+                                {/* Control 3: Target Reach (Manual typing without spinner arrows) */}
+                                <div className="p-2.5 rounded-lg bg-white border border-slate-200 space-y-2">
+                                  <label className="text-[10px] text-slate-600 font-bold uppercase tracking-wider flex items-center gap-1">
+                                    <Users className="w-3 h-3 text-[#D68904]" /> Target Beneficiaries / Reach
+                                  </label>
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    className="w-full text-xs p-2 rounded-lg border border-slate-300 font-mono bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:outline-none focus:ring-1 focus:ring-[#D68904]"
+                                    placeholder="e.g. 50"
+                                    value={act.targetParticipants ?? ''}
                                     onChange={(e) =>
                                       handleUpdateActivity(
                                         oIdx,
                                         outIdx,
                                         aIdx,
                                         'targetParticipants',
-                                        Number(e.target.value)
-                                      )
-                                    }
-                                    title="Target participants"
-                                  />
-                                  <select
-                                    className="flex-1 text-[11px] p-1 rounded border border-slate-300 bg-white"
-                                    value={act.assignedStaffId}
-                                    onChange={(e) =>
-                                      handleUpdateActivity(oIdx, outIdx, aIdx, 'assignedStaffId', e.target.value)
-                                    }
-                                  >
-                                    <option value="">Select Staff</option>
-                                    {staffList.map((s) => (
-                                      <option key={s.id} value={s.id}>
-                                        {s.displayName}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center justify-between gap-1">
-                                <div>
-                                  <label className="text-[10px] text-slate-500 font-semibold block mb-0.5 flex items-center gap-1">
-                                    <DollarSign className="w-3 h-3 text-slate-400" /> Budget ({currency})
-                                  </label>
-                                  <input
-                                    type="number"
-                                    className="w-24 text-xs p-1 rounded border border-slate-300 font-mono"
-                                    value={act.budgetEstimated}
-                                    onChange={(e) =>
-                                      handleUpdateActivity(
-                                        oIdx,
-                                        outIdx,
-                                        aIdx,
-                                        'budgetEstimated',
-                                        Number(e.target.value)
+                                        Number(e.target.value.replace(/\D/g, '')) || 0
                                       )
                                     }
                                   />
+                                  <p className="text-[10px] text-slate-400 leading-tight">
+                                    Type number manually (budget set post-approval)
+                                  </p>
                                 </div>
-
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveActivity(oIdx, outIdx, aIdx)}
-                                  className="text-slate-400 hover:text-red-600 p-1 mt-4"
-                                  title="Delete Activity"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
                               </div>
                             </div>
                           ))}

@@ -83,7 +83,7 @@ export const NotificationsPage: React.FC = () => {
       />
 
       {/* Filter Tabs */}
-      <div className="flex border-b border-surface-border gap-6 text-sm font-medium">
+      <div className="flex flex-wrap gap-2 text-xs font-medium">
         {[
           { id: 'all', label: `All Alerts (${notifications.length})` },
           { id: 'unread', label: `Unread (${unreadCount})` },
@@ -95,10 +95,10 @@ export const NotificationsPage: React.FC = () => {
             key={tab.id}
             type="button"
             onClick={() => setFilterType(tab.id)}
-            className={`pb-3 border-b-2 flex items-center gap-2 transition-colors ${
+            className={`py-1.5 px-3 rounded-md flex items-center gap-2 transition-colors ${
               filterType === tab.id
-                ? 'border-charcoal-900 text-charcoal-900 font-bold'
-                : 'border-transparent text-charcoal-500 hover:text-charcoal-800'
+                ? 'bg-slate-200 text-slate-900 font-semibold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <span>{tab.label}</span>

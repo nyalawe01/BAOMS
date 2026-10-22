@@ -29,6 +29,7 @@ import {
   FileCheck,
   Receipt,
   Sparkles,
+  Download,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
@@ -126,6 +127,25 @@ export const ApprovalsPage: React.FC = () => {
       const fetchedProjects = await getProjects();
       setAllProjects(fetchedProjects);
 
+      // Fetch real attached documents from entity_supporting_documents
+      const { data: realDocs } = await supabase
+        .from('entity_supporting_documents')
+        .select('*')
+        .eq('entity_type', 'project');
+
+      const docsByProjectId: Record<string, any[]> = {};
+      (realDocs || []).forEach((d) => {
+        if (!docsByProjectId[d.entity_id]) docsByProjectId[d.entity_id] = [];
+        docsByProjectId[d.entity_id].push({
+          id: d.id,
+          name: d.custom_name || d.original_name,
+          originalName: d.original_name,
+          tag: d.document_tag,
+          storagePath: d.storage_path,
+          size: d.file_size,
+        });
+      });
+
       fetchedProjects.forEach((proj) => {
         if (proj.status === 'planning') {
           items.push({
@@ -150,11 +170,7 @@ export const ApprovalsPage: React.FC = () => {
             justification:
               proj.description ||
               `Donor: ${proj.funder}. Total Budget: ${proj.currency || 'TZS'} ${(proj.totalBudget || 0).toLocaleString()}. Requires Executive Director authorization to activate workplans, procurement, and expenditure drawdowns.`,
-            supportingDocuments: [
-              { name: 'Project Strategic Logframe & Objectives' },
-              { name: 'Results Framework & Indicators' },
-              { name: 'Budget Allocations by Quarter' },
-            ],
+            supportingDocuments: docsByProjectId[proj.id] || [],
             rawRecord: proj,
           });
         }
@@ -702,6 +718,46 @@ export const ApprovalsPage: React.FC = () => {
     }
   };
 
+  const handleViewDocument = async (doc: any) => {
+    if (!doc.storagePath) {
+      Swal.fire({
+        title: doc.name,
+        text: `Attached file "${doc.originalName || doc.name}" is recorded in project governance records.`,
+        icon: 'info',
+      });
+      return;
+    }
+    const { data } = supabase.storage.from('documents').getPublicUrl(doc.storagePath);
+    if (data?.publicUrl) {
+      window.open(data.publicUrl, '_blank');
+    }
+  };
+
+  const handleDownloadDocument = async (doc: any) => {
+    if (!doc.storagePath) {
+      Swal.fire({
+        title: 'Document Record',
+        text: `Attachment "${doc.originalName || doc.name}" is archived in project charter records.`,
+        icon: 'info',
+      });
+      return;
+    }
+    try {
+      const { data, error } = await supabase.storage.from('documents').download(doc.storagePath);
+      if (error) throw error;
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = doc.originalName || doc.name || 'document';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      showError('Download Failed', err.message || 'Could not download the requested file.');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -777,13 +833,13 @@ export const ApprovalsPage: React.FC = () => {
                   setViewMode(mode.id as ExecutiveViewMode);
                   setSearchParams({ mode: mode.id, tab: activeTab });
                 }}
-                className={`py-3.5 px-5 text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-2 border-b-2 ${
+                className={`py-2.5 px-4 text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-2 rounded-md ${
                   isActive
-                    ? 'border-[#D68904] text-charcoal-900 bg-white font-bold'
-                    : 'border-transparent text-charcoal-muted hover:text-charcoal-900 hover:bg-slate-100/50'
+                    ? 'bg-white text-slate-900 shadow-xs font-semibold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-[#D68904]' : 'text-slate-500'}`} />
+                <Icon className={`w-4 h-4 ${isActive ? 'text-slate-900' : 'text-slate-500'}`} />
                 <span>{mode.label}</span>
                 {mode.count !== null && (
                   <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${mode.badgeClass}`}>
@@ -878,14 +934,14 @@ export const ApprovalsPage: React.FC = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`py-3 px-2 border-b-2 text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+                    className={`py-1.5 px-3 text-xs rounded-md font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                       activeTab === tab.id
-                        ? 'border-[#D68904] text-charcoal-900'
-                        : 'border-transparent text-charcoal-muted hover:text-charcoal-900'
+                        ? 'bg-slate-200 text-slate-900 font-semibold'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
                     <span>{tab.label}</span>
-                    <span className="text-[10px] font-mono bg-slate-200/80 px-1.5 py-0.2 rounded text-slate-700">
+                    <span className="text-[10px] font-mono bg-white/80 px-1.5 py-0.2 rounded text-slate-700 border border-slate-200 font-bold">
                       {tab.count}
                     </span>
                   </button>
@@ -950,8 +1006,12 @@ export const ApprovalsPage: React.FC = () => {
                         key={item.id}
                         className="hover:bg-slate-50/60 transition-colors cursor-pointer group"
                         onClick={() => {
-                          setSelectedItem(item);
-                          setIsDetailDrawerOpen(true);
+                          if (item.type === 'project' && item.id.startsWith('proj-')) {
+                            navigate(`/projects/${item.rawRecord.id}`);
+                          } else {
+                            setSelectedItem(item);
+                            setIsDetailDrawerOpen(true);
+                          }
                         }}
                       >
                         <td className="py-3 px-4 font-mono font-bold text-charcoal-900 whitespace-nowrap">
@@ -959,7 +1019,7 @@ export const ApprovalsPage: React.FC = () => {
                         </td>
                         <td className="py-3 px-4 max-w-xs">
                           <div className="font-semibold text-charcoal-900 truncate">{item.title}</div>
-                          <div className="text-[10px] font-mono uppercase text-[#D68904] mt-0.5">
+                          <div className="text-[10px] font-mono uppercase text-slate-500 mt-0.5">
                             {item.moduleLabel}
                           </div>
                         </td>
@@ -994,19 +1054,34 @@ export const ApprovalsPage: React.FC = () => {
                           </span>
                         </td>
                         <td className="py-3 px-4 text-right whitespace-nowrap">
-                          <Button
-                            size="xs"
-                            variant="outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedItem(item);
-                              setIsDetailDrawerOpen(true);
-                            }}
-                            className="text-[#374151]"
-                          >
-                            <Eye className="h-3.5 w-3.5 mr-1 text-[#374151]" />
-                            Review
-                          </Button>
+                          {item.type === 'project' && item.id.startsWith('proj-') ? (
+                            <Button
+                              size="xs"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/projects/${item.rawRecord.id}`);
+                              }}
+                              className="text-slate-800 border-slate-300 hover:bg-slate-100"
+                            >
+                              <ExternalLink className="h-3.5 w-3.5 mr-1 text-slate-700" />
+                              Open Workspace
+                            </Button>
+                          ) : (
+                            <Button
+                              size="xs"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedItem(item);
+                                setIsDetailDrawerOpen(true);
+                              }}
+                              className="text-[#374151]"
+                            >
+                              <Eye className="h-3.5 w-3.5 mr-1 text-[#374151]" />
+                              Review
+                            </Button>
+                          )}
                         </td>
                       </tr>
                     ))
@@ -1699,24 +1774,56 @@ export const ApprovalsPage: React.FC = () => {
               </h4>
               {selectedItem.supportingDocuments && selectedItem.supportingDocuments.length > 0 ? (
                 <div className="space-y-2">
-                  {selectedItem.supportingDocuments.map((doc, idx) => (
+                  {selectedItem.supportingDocuments.map((doc: any, idx: number) => (
                     <div
                       key={idx}
-                      className="p-3 rounded-md border border-slate-200 bg-slate-50/50 flex items-center justify-between text-xs"
+                      className="p-3 rounded-lg border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs shadow-xs"
                     >
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-[#374151]" />
-                        <span className="font-medium text-charcoal-900">{doc.name}</span>
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="p-2 bg-slate-100 rounded-md shrink-0">
+                          <FileText className="h-4 w-4 text-slate-700" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-semibold text-charcoal-900 truncate">{doc.name}</div>
+                          <div className="text-[10px] text-charcoal-muted flex items-center gap-2">
+                            {doc.originalName && doc.originalName !== doc.name && (
+                              <span className="truncate">{doc.originalName}</span>
+                            )}
+                            {doc.tag && (
+                              <span className="bg-slate-100 px-1.5 py-0.5 rounded uppercase font-mono text-[9px] text-slate-600">
+                                {doc.tag}
+                              </span>
+                            )}
+                            {doc.size && <span>{(doc.size / 1024).toFixed(0)} KB</span>}
+                          </div>
+                        </div>
                       </div>
-                      <span className="text-[10px] font-mono text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded">
-                        Verified Attached
-                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
+                        <Button
+                          size="xs"
+                          variant="outline"
+                          onClick={() => handleViewDocument(doc)}
+                          className="h-7 text-xs"
+                        >
+                          <Eye className="w-3.5 h-3.5 mr-1" />
+                          View
+                        </Button>
+                        <Button
+                          size="xs"
+                          variant="outline"
+                          onClick={() => handleDownloadDocument(doc)}
+                          className="h-7 text-xs"
+                        >
+                          <Download className="w-3.5 h-3.5 mr-1" />
+                          Download
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="p-3 rounded border border-dashed border-slate-200 text-center text-xs text-slate-400">
-                  No additional supporting attachments submitted.
+                <div className="p-4 rounded-lg border border-dashed border-slate-200 text-center text-xs text-slate-400 bg-slate-50/50">
+                  No supporting governance documents attached to this project charter in the database.
                 </div>
               )}
             </div>

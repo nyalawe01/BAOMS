@@ -248,7 +248,7 @@ export const HrReportsPage: React.FC = () => {
               onClick={() => setSelectedReport(item.id as ReportType)}
               className={`p-3.5 rounded-lg border text-left transition-all ${
                 isSelected
-                  ? 'border-charcoal-900 bg-slate-50 ring-1 ring-charcoal-900'
+                  ? 'border-primary-600 bg-primary-50/40 ring-1 ring-primary-500 shadow-xs'
                   : 'border-surface-border bg-white hover:border-slate-300'
               }`}
             >

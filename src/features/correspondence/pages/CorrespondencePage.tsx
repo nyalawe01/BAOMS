@@ -160,16 +160,16 @@ export const CorrespondencePage: React.FC = () => {
       </div>
 
       {/* Main Tabs Navigation */}
-      <div className="flex border-b border-surface-border gap-6">
+      <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 w-fit">
         <button
           onClick={() => {
             setActiveTab('incoming');
             setCurrentPage(1);
           }}
-          className={`pb-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
+          className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 ${
             activeTab === 'incoming'
-              ? 'border-charcoal-900 text-charcoal-900'
-              : 'border-transparent text-charcoal-muted hover:text-charcoal-800'
+              ? 'bg-white dark:bg-slate-900 text-charcoal-900 dark:text-white shadow-xs'
+              : 'text-charcoal-muted hover:text-charcoal-900'
           }`}
         >
           <ArrowDownLeft className="h-4 w-4" />
@@ -181,10 +181,10 @@ export const CorrespondencePage: React.FC = () => {
             setActiveTab('outgoing');
             setCurrentPage(1);
           }}
-          className={`pb-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
+          className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 ${
             activeTab === 'outgoing'
-              ? 'border-charcoal-900 text-charcoal-900'
-              : 'border-transparent text-charcoal-muted hover:text-charcoal-800'
+              ? 'bg-white dark:bg-slate-900 text-charcoal-900 dark:text-white shadow-xs'
+              : 'text-charcoal-muted hover:text-charcoal-900'
           }`}
         >
           <ArrowUpRight className="h-4 w-4" />

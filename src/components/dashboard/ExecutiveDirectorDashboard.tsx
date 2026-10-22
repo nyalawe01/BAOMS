@@ -460,15 +460,15 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
       </div>
 
       {/* Institutional View Filter Navigation */}
-      <div className="border-b border-slate-200/80 overflow-x-auto no-scrollbar">
-        <div className="flex items-center gap-2 min-w-max pb-1">
+      <div className="overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 w-fit min-w-max">
           <button
             type="button"
             onClick={() => setActiveTab('overview')}
-            className={`px-3.5 py-2 text-xs font-medium rounded-t-md transition-colors border-b-2 flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
               activeTab === 'overview'
-                ? 'border-[#D68904] text-slate-900 bg-slate-100/70 font-semibold'
-                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <BarChart3 className="w-4 h-4 text-slate-600" />
@@ -478,10 +478,10 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('projects')}
-            className={`px-3.5 py-2 text-xs font-medium rounded-t-md transition-colors border-b-2 flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
               activeTab === 'projects'
-                ? 'border-[#D68904] text-slate-900 bg-slate-100/70 font-semibold'
-                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Briefcase className="w-4 h-4 text-slate-600" />
@@ -491,10 +491,10 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('finance')}
-            className={`px-3.5 py-2 text-xs font-medium rounded-t-md transition-colors border-b-2 flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
               activeTab === 'finance'
-                ? 'border-[#D68904] text-slate-900 bg-slate-100/70 font-semibold'
-                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Wallet className="w-4 h-4 text-slate-600" />
@@ -504,10 +504,10 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('procurement')}
-            className={`px-3.5 py-2 text-xs font-medium rounded-t-md transition-colors border-b-2 flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
               activeTab === 'procurement'
-                ? 'border-[#D68904] text-slate-900 bg-slate-100/70 font-semibold'
-                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <ShoppingCart className="w-4 h-4 text-slate-600" />
@@ -517,10 +517,10 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('hr')}
-            className={`px-3.5 py-2 text-xs font-medium rounded-t-md transition-colors border-b-2 flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
               activeTab === 'hr'
-                ? 'border-[#D68904] text-slate-900 bg-slate-100/70 font-semibold'
-                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Users className="w-4 h-4 text-slate-600" />
@@ -530,16 +530,16 @@ export const ExecutiveDirectorDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('approvals')}
-            className={`px-3.5 py-2 text-xs font-medium rounded-t-md transition-colors border-b-2 flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
               activeTab === 'approvals'
-                ? 'border-[#D68904] text-slate-900 bg-slate-100/70 font-semibold'
-                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <CheckSquare className="w-4 h-4 text-slate-600" />
             <span>Executive Decisions</span>
             {totalPendingDecisionsCount > 0 && (
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full font-bold bg-[#D68904] text-white">
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full font-bold bg-amber-500 text-white">
                 {totalPendingDecisionsCount}
               </span>
             )}

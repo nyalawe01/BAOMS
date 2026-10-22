@@ -305,13 +305,13 @@ export const HrPage: React.FC<HrPageProps> = ({ defaultTab = 'staff' }) => {
       />
 
       {/* Navigation Tabs */}
-      <div className="flex items-center border-b border-surface-border bg-surface-card px-2 gap-2">
+      <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 w-fit">
         <button
           onClick={() => setActiveTab('staff')}
-          className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+          className={`py-2 px-3.5 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 ${
             activeTab === 'staff'
-              ? 'border-charcoal-900 text-charcoal-900 font-bold'
-              : 'border-transparent text-charcoal-muted hover:text-charcoal-800'
+              ? 'bg-white dark:bg-slate-900 text-charcoal-900 dark:text-white shadow-xs'
+              : 'text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
           <Users className="h-4 w-4" />
@@ -320,10 +320,10 @@ export const HrPage: React.FC<HrPageProps> = ({ defaultTab = 'staff' }) => {
 
         <button
           onClick={() => setActiveTab('leave')}
-          className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+          className={`py-2 px-3.5 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 ${
             activeTab === 'leave'
-              ? 'border-charcoal-900 text-charcoal-900 font-bold'
-              : 'border-transparent text-charcoal-muted hover:text-charcoal-800'
+              ? 'bg-white dark:bg-slate-900 text-charcoal-900 dark:text-white shadow-xs'
+              : 'text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
           <Calendar className="h-4 w-4" />
@@ -337,10 +337,10 @@ export const HrPage: React.FC<HrPageProps> = ({ defaultTab = 'staff' }) => {
 
         <button
           onClick={() => setActiveTab('contracts')}
-          className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+          className={`py-2 px-3.5 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 ${
             activeTab === 'contracts'
-              ? 'border-charcoal-900 text-charcoal-900 font-bold'
-              : 'border-transparent text-charcoal-muted hover:text-charcoal-800'
+              ? 'bg-white dark:bg-slate-900 text-charcoal-900 dark:text-white shadow-xs'
+              : 'text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
           <Clock className="h-4 w-4" />
@@ -349,10 +349,10 @@ export const HrPage: React.FC<HrPageProps> = ({ defaultTab = 'staff' }) => {
 
         <button
           onClick={() => setActiveTab('checklists')}
-          className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+          className={`py-2 px-3.5 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 ${
             activeTab === 'checklists'
-              ? 'border-charcoal-900 text-charcoal-900 font-bold'
-              : 'border-transparent text-charcoal-muted hover:text-charcoal-800'
+              ? 'bg-white dark:bg-slate-900 text-charcoal-900 dark:text-white shadow-xs'
+              : 'text-charcoal-muted hover:text-charcoal-800'
           }`}
         >
           <ClipboardList className="h-4 w-4" />
