@@ -267,8 +267,7 @@ export const CreateCorrespondenceModal: React.FC<CreateCorrespondenceModalProps>
               onFilesChange={setAttachedFiles}
               multiple
               accept=".pdf,.doc,.docx,.jpg,.png"
-              maxSizeMB={15}
-              hint="Attach signed scans, delivery slips, or supporting PDFs (Max 15MB each)."
+              hint="Attach signed scans, delivery slips, or supporting PDFs. No size limit."
             />
           </div>
 

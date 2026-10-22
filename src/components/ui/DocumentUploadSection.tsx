@@ -109,7 +109,7 @@ export const DocumentUploadSection: React.FC<DocumentUploadSectionProps> = ({
   documents,
   onChange,
   accept = '.pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.webp,.zip',
-  maxFileSizeMB = 25,
+  maxFileSizeMB,
   title = 'Supporting Documents',
   hint = 'Upload quotations, contracts, ID copies, receipts, or any other relevant files. All uploads are optional.',
   className,
@@ -119,13 +119,10 @@ export const DocumentUploadSection: React.FC<DocumentUploadSectionProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState('');
 
-  const maxBytes = maxFileSizeMB * 1024 * 1024;
-
   const addFiles = (files: FileList | null) => {
     if (!files) return;
     const newDocs: UploadedDocument[] = [];
     Array.from(files).forEach((file) => {
-      if (file.size > maxBytes) return; // skip oversized
       newDocs.push(newDoc(file));
     });
     onChange([...documents, ...newDocs]);
@@ -196,7 +193,7 @@ export const DocumentUploadSection: React.FC<DocumentUploadSectionProps> = ({
           {isDragging ? 'Drop files here…' : 'Drag & drop files or click to browse'}
         </p>
         <p className="text-[11px] text-slate-400 mt-1">
-          {accept.split(',').join(', ')} · max {maxFileSizeMB} MB per file
+          {accept.split(',').join(', ')} · Unlimited uploads (No size limit)
         </p>
         <input
           ref={inputRef}

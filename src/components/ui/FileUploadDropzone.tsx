@@ -91,21 +91,10 @@ export const FileUploadDropzone: React.FC<FileUploadDropzoneProps> = ({
   const validateAndAddFiles = (newFiles: FileList | File[]) => {
     setValidationError(null);
     const valid: File[] = [];
-    const maxSizeBytes = maxSizeMB * 1024 * 1024;
     const fileArray = Array.from(newFiles);
 
     for (const file of fileArray) {
       if (!file) continue;
-      if (file.size > maxSizeBytes) {
-        const errMsg = `File "${file.name}" exceeds the maximum size of ${maxSizeMB}MB.`;
-        setValidationError(errMsg);
-        showToast({
-          title: 'File Too Large',
-          message: errMsg,
-          variant: 'warning',
-        });
-        continue;
-      }
       valid.push(file);
     }
 
@@ -247,7 +236,7 @@ export const FileUploadDropzone: React.FC<FileUploadDropzoneProps> = ({
           </div>
 
           <p className="mt-1 text-xs text-gray-400">
-            {hint || `Pick a file or folder up to ${maxSizeMB}MB.`}
+            {hint || 'Pick a file or folder. Unlimited uploads (no size limit).'}
           </p>
 
           {allowFolder && (

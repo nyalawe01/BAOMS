@@ -148,8 +148,7 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
             onFileSelect={handleFileChange}
             error={fileError}
             accept=".pdf,.docx,.doc,.xlsx,.xls,.jpg,.jpeg,.png,.webp"
-            maxSizeMB={25}
-            hint="PDF, Microsoft Word, Microsoft Excel, PNG, JPG (Max 25 MB). Pick a file or entire folder."
+            hint="PDF, Microsoft Word, Microsoft Excel, PNG, JPG. No size limit. Pick a file or entire folder."
           />
         </div>
 

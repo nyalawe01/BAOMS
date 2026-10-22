@@ -211,10 +211,9 @@ export const UploadDocumentPage: React.FC = () => {
               }}
               error={fileError}
               accept=".pdf,.docx,.xlsx,.jpg,.jpeg,.png"
-              maxSizeBytes={25 * 1024 * 1024}
               helperText={t(
                 'documents.uploadHelper',
-                'Supported: PDF, DOCX, XLSX, JPEG, PNG (Max: 25MB). Content will be hashed and versioned.'
+                'Supported: PDF, DOCX, XLSX, JPEG, PNG. Unlimited file size. Content will be hashed and versioned.'
               )}
             />
           </CardContent>
