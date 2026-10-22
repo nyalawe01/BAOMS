@@ -325,18 +325,23 @@ export const ProjectManagerDashboard: React.FC = () => {
           'pm.dashboardSubtitle',
           'Portfolio oversight, workplan delivery, coordinator review desk, and milestone analytics.'
         )}
+        badge={
+          <span className="inline-flex items-center rounded-full bg-forest-50 px-2.5 py-0.5 text-xs font-semibold text-forest-700 border border-forest-200/80">
+            Portfolio Management
+          </span>
+        }
         breadcrumbs={[
           { label: t('navigation.dashboard', 'Dashboard'), href: '/dashboard' },
           { label: t('navigation.projects', 'Projects'), href: '/projects' },
           { label: t('pm.overview', 'Overview') },
         ]}
         actions={
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             {/* Project Filter */}
             <select
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
-              className="px-3 py-1.5 border border-gray-300 rounded-lg text-xs text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-[#D68904]"
+              className="h-9 px-3 py-1.5 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#D68904]/20 focus:border-[#D68904] transition-colors shadow-none cursor-pointer"
             >
               <option value="all">{t('projects.allProjects', 'All Projects Portfolio')}</option>
               {projects.map((p) => (
@@ -350,7 +355,7 @@ export const ProjectManagerDashboard: React.FC = () => {
             <select
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value as any)}
-              className="px-3 py-1.5 border border-gray-300 rounded-lg text-xs text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-[#D68904]"
+              className="h-9 px-3 py-1.5 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#D68904]/20 focus:border-[#D68904] transition-colors shadow-none cursor-pointer"
             >
               <option value="all">{t('common.allTime', 'All Periods')}</option>
               <option value="month">{t('common.thisMonth', 'This Month')}</option>
@@ -362,9 +367,9 @@ export const ProjectManagerDashboard: React.FC = () => {
               variant="outline"
               size="sm"
               onClick={() => navigate('/projects/activities')}
-              className="text-xs border-gray-300 text-gray-700"
+              className="h-9 text-xs border-slate-300 text-slate-700 hover:bg-slate-50 font-medium rounded-xl"
             >
-              <Activity className="w-3.5 h-3.5 mr-1 text-[#374151]" />
+              <Activity className="w-3.5 h-3.5 mr-1.5 text-slate-600" />
               {t('projects.tabs.activities', 'Work Plans')}
             </Button>
 
@@ -372,9 +377,9 @@ export const ProjectManagerDashboard: React.FC = () => {
               variant="primary"
               size="sm"
               onClick={() => navigate('/projects/new')}
-              className="text-xs"
+              className="h-9 text-xs font-semibold rounded-xl bg-[#D68904] hover:bg-[#b86e03] text-white shadow-none"
             >
-              <Plus className="w-3.5 h-3.5 mr-1 text-black" />
+              <Plus className="w-3.5 h-3.5 mr-1.5 text-white" />
               {t('projects.newProject', 'New Project')}
             </Button>
           </div>
@@ -382,77 +387,77 @@ export const ProjectManagerDashboard: React.FC = () => {
       />
 
       {/* 6 Required KPI Cards - AdminCN Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
         {/* 1. Assigned Projects */}
-        <Card className="p-4 bg-white border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        <Card className="p-4 bg-white border border-slate-200/90 rounded-xl shadow-xs transition-shadow hover:shadow-sm">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 uppercase tracking-wider">
             <span>{t('pm.kpi.assignedProjects', 'Assigned Projects')}</span>
-            <Briefcase className="w-4 h-4 text-[#374151]" />
+            <Briefcase className="w-4 h-4 text-slate-600" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-gray-900 font-mono tabular-nums leading-tight">
+          <div className="mt-2 text-2xl font-bold text-slate-900 font-mono tabular-nums leading-tight">
             {metrics.assignedProjects}
           </div>
-          <p className="mt-1 text-xs text-gray-500 truncate">Portfolio in scope</p>
+          <p className="mt-1 text-xs text-slate-500 truncate">Portfolio in scope</p>
         </Card>
 
         {/* 2. Active Projects */}
-        <Card className="p-4 bg-white border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        <Card className="p-4 bg-white border border-slate-200/90 rounded-xl shadow-xs transition-shadow hover:shadow-sm">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 uppercase tracking-wider">
             <span>{t('pm.kpi.activeProjects', 'Active Projects')}</span>
-            <TrendingUp className="w-4 h-4 text-[#374151]" />
+            <TrendingUp className="w-4 h-4 text-slate-600" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-gray-900 font-mono tabular-nums leading-tight">
+          <div className="mt-2 text-2xl font-bold text-slate-900 font-mono tabular-nums leading-tight">
             {metrics.activeProjects}
           </div>
-          <p className="mt-1 text-xs text-gray-500 truncate">In field delivery</p>
+          <p className="mt-1 text-xs text-slate-500 truncate">In field delivery</p>
         </Card>
 
         {/* 3. Activities in Progress */}
-        <Card className="p-4 bg-white border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        <Card className="p-4 bg-white border border-slate-200/90 rounded-xl shadow-xs transition-shadow hover:shadow-sm">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 uppercase tracking-wider">
             <span>{t('pm.kpi.activitiesInProgress', 'In Progress')}</span>
-            <Activity className="w-4 h-4 text-[#374151]" />
+            <Activity className="w-4 h-4 text-slate-600" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-gray-900 font-mono tabular-nums leading-tight">
+          <div className="mt-2 text-2xl font-bold text-slate-900 font-mono tabular-nums leading-tight">
             {metrics.activitiesInProgress}
           </div>
-          <p className="mt-1 text-xs text-gray-500 truncate">Field operations active</p>
+          <p className="mt-1 text-xs text-slate-500 truncate">Field operations active</p>
         </Card>
 
         {/* 4. Overdue Activities & Tasks */}
-        <Card className="p-4 bg-white border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        <Card className="p-4 bg-white border border-slate-200/90 rounded-xl shadow-xs transition-shadow hover:shadow-sm">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 uppercase tracking-wider">
             <span>{t('pm.kpi.overdue', 'Overdue Items')}</span>
-            <AlertTriangle className="w-4 h-4 text-[#374151]" />
+            <AlertTriangle className="w-4 h-4 text-rose-500" />
           </div>
           <div className="mt-2 text-2xl font-bold text-rose-700 font-mono tabular-nums leading-tight">
             {metrics.overdueTasks}
           </div>
-          <p className="mt-1 text-xs text-gray-500 truncate">Past targeted completion</p>
+          <p className="mt-1 text-xs text-slate-500 truncate">Past targeted completion</p>
         </Card>
 
         {/* 5. Upcoming Deliverables */}
-        <Card className="p-4 bg-white border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        <Card className="p-4 bg-white border border-slate-200/90 rounded-xl shadow-xs transition-shadow hover:shadow-sm">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 uppercase tracking-wider">
             <span>{t('pm.kpi.upcomingDeliverables', 'Deliverables Due')}</span>
-            <Calendar className="w-4 h-4 text-[#374151]" />
+            <Calendar className="w-4 h-4 text-slate-600" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-gray-900 font-mono tabular-nums leading-tight">
+          <div className="mt-2 text-2xl font-bold text-slate-900 font-mono tabular-nums leading-tight">
             {metrics.upcomingDeliverables}
           </div>
-          <p className="mt-1 text-xs text-gray-500 truncate">Next 30 days window</p>
+          <p className="mt-1 text-xs text-slate-500 truncate">Next 30 days window</p>
         </Card>
 
         {/* 6. Pending Reviews */}
-        <Card className="p-4 bg-white border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        <Card className="p-4 bg-white border border-slate-200/90 rounded-xl shadow-xs transition-shadow hover:shadow-sm">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 uppercase tracking-wider">
             <span>{t('pm.kpi.pendingReviews', 'Pending Reviews')}</span>
-            <Clock className="w-4 h-4 text-[#374151]" />
+            <Clock className="w-4 h-4 text-amber-500" />
           </div>
           <div className="mt-2 text-2xl font-bold text-amber-600 font-mono tabular-nums leading-tight">
             {metrics.pendingReviews}
           </div>
-          <p className="mt-1 text-xs text-gray-500 truncate">Field reports in queue</p>
+          <p className="mt-1 text-xs text-slate-500 truncate">Field reports in queue</p>
         </Card>
       </div>
 
