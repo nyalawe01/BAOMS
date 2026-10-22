@@ -177,23 +177,53 @@ input[type="checkbox"]:focus-visible {
     border-bottom: 1px solid #f1f5f9;
   }
 
-  /* Global Select Inputs */
-  select:not([data-unstyled="true"]) {
+  /* Global Inputs, Textareas, and Selects: Spacious, comfortable, readable */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([data-unstyled="true"]) {
+    min-height: 44px;
     border-radius: 0.75rem;
-    border-color: #e2e8f0;
+    border: 1px solid #cbd5e1;
     background-color: #ffffff;
-    font-size: 0.75rem;
-    padding-left: 0.75rem;
-    padding-right: 2rem;
-    padding-top: 0.375rem;
-    padding-bottom: 0.375rem;
+    font-size: 0.875rem; /* 14px */
+    padding: 0.625rem 1rem;
+    color: #1e293b;
+    box-shadow: none;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
-  select:not([data-unstyled="true"]):focus {
+  textarea:not([data-unstyled="true"]) {
+    min-height: 140px;
+    border-radius: 0.75rem;
+    border: 1px solid #cbd5e1;
+    background-color: #ffffff;
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.6;
+    padding: 0.875rem 1rem;
+    color: #1e293b;
+    box-shadow: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  select:not([data-unstyled="true"]) {
+    min-height: 44px;
+    border-radius: 0.75rem;
+    border: 1px solid #cbd5e1;
+    background-color: #ffffff;
+    font-size: 0.875rem; /* 14px */
+    padding-left: 1rem;
+    padding-right: 2.5rem;
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+    color: #1e293b;
+    box-shadow: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  select:not([data-unstyled="true"]):focus,
+  input:not([type="checkbox"]):not([type="radio"]):focus,
+  textarea:focus {
     outline: none;
     border-color: #D68904 !important;
-    box-shadow: 0 0 0 1px #D68904 !important;
+    box-shadow: 0 0 0 2px rgba(214, 137, 4, 0.2) !important;
   }
 }
 

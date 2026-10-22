@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { AlertCircle, CheckCircle2, ClipboardList, Plus, RefreshCw, ShieldCheck, Target } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ClipboardList, Plus, RefreshCw, ShieldCheck, Target, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -31,8 +32,8 @@ import { validateFormAnswers, validateFormSchema } from './validation';
 import { ProjectEngineVisualizer } from './ProjectEngineVisualizer';
 
 const EMPTY_DATA: ProjectEngineData = { indicators: [], forms: [], versions: [], assignments: [], submissions: [] };
-const inputClass = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-forest-700 focus:outline-none focus:ring-2 focus:ring-forest-100';
-const labelClass = 'mb-1 block text-xs font-semibold text-slate-600';
+const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 focus:border-[#D68904] focus:outline-none focus:ring-2 focus:ring-[#D68904]/20 transition-colors shadow-none leading-normal';
+const labelClass = 'mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-700';
 
 type BuilderField = DynamicFormSchema['fields'][number] & { optionsText: string };
 
@@ -137,7 +138,8 @@ export const ProjectEnginePage: React.FC = () => {
     finally { setBusy(false); }
   };
 
-  const addBuilderField = () => setBuilderFields((fields) => [...fields, { key: '', label: '', type: 'text', required: false, optionsText: '' }]);
+  const addBuilderField = () => setBuilderFields((fields) => [...fields, { key: `field_${fields.length + 1}`, label: '', type: 'text', required: false, optionsText: '' }]);
+  const removeBuilderField = (indexToRemove: number) => setBuilderFields((fields) => fields.filter((_, i) => i !== indexToRemove));
   const updateBuilderField = (index: number, key: keyof BuilderField, value: string | boolean | number | undefined) => setBuilderFields((fields) => fields.map((field, i) => i === index ? { ...field, [key]: value } as BuilderField : field));
 
   const saveNewIndicator = async (event: React.FormEvent) => {
@@ -304,28 +306,235 @@ export const ProjectEnginePage: React.FC = () => {
           </div>
         </Card>
 
-        <Card className="space-y-4 border border-slate-200 bg-white p-5">
-          <div className="flex items-center gap-2"><ClipboardList className="h-5 w-5 text-forest-700" /><h2 className="font-semibold">Collection forms</h2></div>
-          {canManage && <div className="space-y-3 rounded-lg bg-slate-50 p-3">
-            <label><span className={labelClass}>New form name</span><input className={inputClass} value={formName} onChange={(e) => setFormName(e.target.value)} placeholder="e.g. Monthly youth activity report" /></label>
-            <div className="space-y-2">{builderFields.map((field, index) => <div key={index} className="grid gap-2 sm:grid-cols-[1fr_1fr_140px_auto]">
-              <input className={inputClass} aria-label={`Field ${index + 1} key`} placeholder="stable_key" value={field.key} onChange={(e) => updateBuilderField(index, 'key', e.target.value)} />
-              <input className={inputClass} aria-label={`Field ${index + 1} label`} placeholder="Question label" value={field.label} onChange={(e) => updateBuilderField(index, 'label', e.target.value)} />
-              <select className={inputClass} aria-label={`Field ${index + 1} type`} value={field.type} onChange={(e) => updateBuilderField(index, 'type', e.target.value)}><option value="text">Short text</option><option value="textarea">Long text</option><option value="integer">Whole number</option><option value="decimal">Decimal</option><option value="date">Date</option><option value="boolean">Yes / no</option><option value="select">Single choice</option><option value="multiselect">Multiple choice</option></select>
-              {(field.type === 'select' || field.type === 'multiselect') && <input className={`${inputClass} sm:col-span-2`} aria-label={`Field ${index + 1} options`} placeholder="Options, separated by commas" value={field.optionsText} onChange={(e) => updateBuilderField(index, 'optionsText', e.target.value)} />}
-              {(field.type === 'integer' || field.type === 'decimal') && <><input className={inputClass} aria-label={`Field ${index + 1} minimum`} type="number" step={field.type === 'decimal' ? 'any' : '1'} placeholder="Minimum (optional)" value={field.min ?? ''} onChange={(e) => updateBuilderField(index, 'min', e.target.value === '' ? undefined : Number(e.target.value))} /><input className={inputClass} aria-label={`Field ${index + 1} maximum`} type="number" step={field.type === 'decimal' ? 'any' : '1'} placeholder="Maximum (optional)" value={field.max ?? ''} onChange={(e) => updateBuilderField(index, 'max', e.target.value === '' ? undefined : Number(e.target.value))} /></>}
-              <label className="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" checked={field.required} onChange={(e) => updateBuilderField(index, 'required', e.target.checked)} />Required</label>
-            </div>)}<Button variant="outline" size="sm" onClick={addBuilderField}><Plus className="mr-1 h-4 w-4" />Add field</Button></div>
-            <div className="flex flex-wrap gap-2"><Button disabled={busy} onClick={() => void makeForm()}>{editingDraft ? 'Update draft form' : 'Save draft form'}</Button>{editingDraft && <Button variant="outline" onClick={() => { setEditingDraft(null); setFormName(''); }}>Cancel edit</Button>}</div>
+        <Card className="space-y-6 border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-forest-50 text-forest-700">
+                <ClipboardList className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-slate-900">Collection forms builder</h2>
+                <p className="text-xs text-slate-500">Configure reporting forms and custom data collection fields</p>
+              </div>
+            </div>
+            {editingDraft && <Badge variant="warning">Editing draft version</Badge>}
+          </div>
+
+          {canManage && <div className="space-y-5 rounded-2xl border border-slate-200/90 bg-slate-50/70 p-5 sm:p-6">
+            <div>
+              <label className="block">
+                <span className={labelClass}>New form name *</span>
+                <input
+                  className={inputClass}
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                  placeholder="e.g. Monthly youth activity report"
+                />
+              </label>
+              <p className="mt-1 text-xs text-slate-500">Provide an identifiable title for field staff and enumerators.</p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Form Questions & Fields</h3>
+                <span className="text-xs font-medium text-slate-500">{builderFields.length} {builderFields.length === 1 ? 'question' : 'questions'}</span>
+              </div>
+
+              <div className="space-y-4">
+                {builderFields.map((field, index) => (
+                  <div key={index} className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs transition-shadow hover:shadow-sm">
+                    <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
+                      <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-forest-50 text-xs font-semibold text-forest-700">{index + 1}</span>
+                        Field #{index + 1} Configuration
+                      </span>
+                      {builderFields.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2.5 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                          onClick={() => removeBuilderField(index)}
+                        >
+                          <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                          Delete field
+                        </Button>
+                      )}
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="block">
+                          <span className={labelClass}>Question / Field Label *</span>
+                          <input
+                            className={inputClass}
+                            aria-label={`Field ${index + 1} label`}
+                            placeholder="e.g. Participants"
+                            value={field.label}
+                            onChange={(e) => updateBuilderField(index, 'label', e.target.value)}
+                          />
+                        </label>
+                        <p className="mt-1 text-[11px] text-slate-500">Prompt displayed on the collection instrument.</p>
+                      </div>
+
+                      <div>
+                        <label className="block">
+                          <span className={labelClass}>Field Key (technical identifier) *</span>
+                          <input
+                            className={inputClass}
+                            aria-label={`Field ${index + 1} key`}
+                            placeholder="e.g. participants"
+                            value={field.key}
+                            onChange={(e) => updateBuilderField(index, 'key', e.target.value)}
+                          />
+                        </label>
+                        <p className="mt-1 text-[11px] text-slate-500">Used as source key for indicators and analytics.</p>
+                      </div>
+
+                      <div className="sm:col-span-2">
+                        <label className="block">
+                          <span className={labelClass}>Input Data Type *</span>
+                          <select
+                            className={inputClass}
+                            aria-label={`Field ${index + 1} type`}
+                            value={field.type}
+                            onChange={(e) => updateBuilderField(index, 'type', e.target.value)}
+                          >
+                            <option value="text">Short text (single line answer)</option>
+                            <option value="textarea">Long text / narrative (multiline paragraph)</option>
+                            <option value="integer">Whole number (count, participants, attendance)</option>
+                            <option value="decimal">Decimal number (monetary, percentage, rate)</option>
+                            <option value="date">Date selector</option>
+                            <option value="boolean">Yes / No boolean choice</option>
+                            <option value="select">Single choice dropdown menu</option>
+                            <option value="multiselect">Multiple choice select</option>
+                          </select>
+                        </label>
+                      </div>
+
+                      {(field.type === 'select' || field.type === 'multiselect') && (
+                        <div className="sm:col-span-2">
+                          <label className="block">
+                            <span className={labelClass}>Dropdown options (comma separated) *</span>
+                            <input
+                              className={inputClass}
+                              aria-label={`Field ${index + 1} options`}
+                              placeholder="e.g. Option 1, Option 2, Option 3"
+                              value={field.optionsText}
+                              onChange={(e) => updateBuilderField(index, 'optionsText', e.target.value)}
+                            />
+                          </label>
+                          <p className="mt-1 text-xs text-slate-500">Comma-separated list of values the user can choose from.</p>
+                        </div>
+                      )}
+
+                      {(field.type === 'integer' || field.type === 'decimal') && (
+                        <>
+                          <div>
+                            <label className="block">
+                              <span className={labelClass}>Minimum (optional)</span>
+                              <input
+                                className={inputClass}
+                                aria-label={`Field ${index + 1} minimum`}
+                                type="number"
+                                step={field.type === 'decimal' ? 'any' : '1'}
+                                placeholder="e.g. 0"
+                                value={field.min ?? ''}
+                                onChange={(e) => updateBuilderField(index, 'min', e.target.value === '' ? undefined : Number(e.target.value))}
+                              />
+                            </label>
+                          </div>
+                          <div>
+                            <label className="block">
+                              <span className={labelClass}>Maximum (optional)</span>
+                              <input
+                                className={inputClass}
+                                aria-label={`Field ${index + 1} maximum`}
+                                type="number"
+                                step={field.type === 'decimal' ? 'any' : '1'}
+                                placeholder="e.g. 1000"
+                                value={field.max ?? ''}
+                                onChange={(e) => updateBuilderField(index, 'max', e.target.value === '' ? undefined : Number(e.target.value))}
+                              />
+                            </label>
+                          </div>
+                        </>
+                      )}
+
+                      <div className="sm:col-span-2 pt-2 border-t border-slate-100">
+                        <label className="flex items-center gap-3 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-slate-300 text-[#D68904] focus:ring-[#D68904]"
+                            checked={field.required}
+                            onChange={(e) => updateBuilderField(index, 'required', e.target.checked)}
+                          />
+                          <span className="text-sm font-medium text-slate-700">Required (mandatory answer)</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full py-3.5 border-dashed border-slate-300 hover:border-[#D68904] hover:bg-[#D68904]/5 font-medium"
+                onClick={addBuilderField}
+              >
+                <Plus className="mr-2 h-4 w-4 text-[#D68904]" />
+                Add another field
+              </Button>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-200">
+              <Button disabled={busy} onClick={() => void makeForm()}>
+                {editingDraft ? 'Update draft form' : 'Save draft form'}
+              </Button>
+              {editingDraft && (
+                <Button variant="outline" onClick={() => { setEditingDraft(null); setFormName(''); }}>
+                  Cancel edit
+                </Button>
+              )}
+            </div>
           </div>}
-          <div className="space-y-2">{data.forms.map((form) => {
-            const version = form.currentVersionId ? versionsById.get(form.currentVersionId) : undefined;
-            const draftVersion = data.versions.find((item) => item.formId === form.id && item.status === 'draft');
-            return <div key={form.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 p-3">
-              <div><p className="font-medium">{form.name}</p><p className="text-xs text-slate-500">{form.status} · version {version?.versionNumber || draftVersion?.versionNumber || '—'} · {version?.schema.fields.length || draftVersion?.schema.fields.length || 0} fields</p></div>
-              {canManage && <div className="flex gap-2">{draftVersion && <><Button size="sm" variant="outline" disabled={busy} onClick={() => editDraft(form.id, draftVersion.id)}>Edit draft</Button><Button size="sm" disabled={busy} onClick={() => void runAction(() => publishDynamicForm(form.id, draftVersion.id), 'Form version published. Historical records remain pinned to their original version.')}>Publish draft</Button></>}{form.status === 'published' && !draftVersion && <Button size="sm" variant="outline" disabled={busy} onClick={() => startNewVersion(form.id, form.name)}>New version</Button>}</div>}
-            </div>;
-          })}{data.forms.length === 0 && <p className="text-sm text-slate-500">No forms configured yet.</p>}</div>
+
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Existing Forms</h3>
+            {data.forms.map((form) => {
+              const version = form.currentVersionId ? versionsById.get(form.currentVersionId) : undefined;
+              const draftVersion = data.versions.find((item) => item.formId === form.id && item.status === 'draft');
+              return (
+                <div key={form.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-4 transition-colors hover:bg-slate-50/50">
+                  <div>
+                    <p className="font-semibold text-slate-900">{form.name}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Status: <span className="font-medium text-slate-700 capitalize">{form.status}</span> · Version {version?.versionNumber || draftVersion?.versionNumber || '—'} · {version?.schema.fields.length || draftVersion?.schema.fields.length || 0} fields</p>
+                  </div>
+                  {canManage && (
+                    <div className="flex flex-wrap gap-2">
+                      {draftVersion && (
+                        <>
+                          <Button size="sm" variant="outline" disabled={busy} onClick={() => editDraft(form.id, draftVersion.id)}>
+                            Edit draft
+                          </Button>
+                          <Button size="sm" disabled={busy} onClick={() => void runAction(() => publishDynamicForm(form.id, draftVersion.id), 'Form version published. Historical records remain pinned to their original version.')}>
+                            Publish draft
+                          </Button>
+                        </>
+                      )}
+                      {form.status === 'published' && !draftVersion && (
+                        <Button size="sm" variant="outline" disabled={busy} onClick={() => startNewVersion(form.id, form.name)}>
+                          New version
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            {data.forms.length === 0 && <p className="text-sm text-slate-500 py-3">No forms configured yet.</p>}
+          </div>
         </Card>
       </div>
 
@@ -356,23 +565,183 @@ export const ProjectEnginePage: React.FC = () => {
         <Button disabled={busy} onClick={() => void makeAssignment()}>Create assignment</Button>
       </Card>}
 
-      <Card className="space-y-4 border border-slate-200 bg-white p-5">
-        <div className="flex items-center gap-2"><ClipboardList className="h-5 w-5 text-forest-700" /><h2 className="font-semibold">Submit a collection</h2></div>
-        <div className="grid gap-3 md:grid-cols-3">
-          <label><span className={labelClass}>Published, assigned, or saved form</span><select className={inputClass} value={collectFormId} onChange={(e) => { setCollectFormId(e.target.value); setCollectAssignmentId(''); setCollectVersionOverride(''); setEditingSubmissionId(null); setAnswers({}); }}><option value="">Select form</option>{data.forms.filter((form) => form.status === 'published' || myAssignments.some((assignment) => assignment.formId === form.id) || data.submissions.some((submission) => submission.formId === form.id && submission.submittedBy === user?.id && ['draft', 'returned'].includes(submission.status))).map((form) => <option key={form.id} value={form.id}>{form.name}</option>)}</select></label>
-          <label><span className={labelClass}>Assigned period (if assigned)</span><select className={inputClass} value={collectAssignmentId} onChange={(e) => setCollectAssignmentId(e.target.value)}><option value="">Unassigned collection</option>{myAssignments.filter((assignment) => assignment.formId === collectFormId).map((assignment) => <option key={assignment.id} value={assignment.id}>{assignment.periodKey}{assignment.dueDate ? ` · due ${assignment.dueDate}` : ''}</option>)}</select></label>
-          <label><span className={labelClass}>Collection date</span><input type="date" className={inputClass} value={collectedOn} onChange={(e) => setCollectedOn(e.target.value)} /></label>
+      <Card className="space-y-6 border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-forest-50 text-forest-700">
+            <ClipboardList className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">Submit a collection</h2>
+            <p className="text-xs text-slate-500">Record field observations and submission reports against approved forms</p>
+          </div>
         </div>
-        {selectedVersion && <div className="grid gap-4 md:grid-cols-2">{selectedVersion.schema.fields.map((field) => <label key={field.key} className={field.type === 'textarea' ? 'md:col-span-2' : ''}>
-          <span className={labelClass}>{field.label}{field.required ? ' *' : ''}</span>
-          {field.type === 'textarea' ? <textarea className={inputClass} rows={3} value={String(answers[field.key] ?? '')} onChange={(e) => setAnswers({ ...answers, [field.key]: e.target.value })} />
-            : field.type === 'select' ? <select className={inputClass} value={String(answers[field.key] ?? '')} onChange={(e) => setAnswers({ ...answers, [field.key]: e.target.value || undefined })}><option value="">Select</option>{(field.options || []).map((option) => <option key={option} value={option}>{option}</option>)}</select>
-              : field.type === 'multiselect' ? <select multiple className={inputClass} value={Array.isArray(answers[field.key]) ? answers[field.key] as string[] : []} onChange={(e) => setAnswers({ ...answers, [field.key]: Array.from(e.target.selectedOptions, (option) => option.value) })}>{(field.options || []).map((option) => <option key={option} value={option}>{option}</option>)}</select>
-            : field.type === 'boolean' ? <select className={inputClass} value={answers[field.key] === undefined ? '' : String(answers[field.key])} onChange={(e) => setAnswers({ ...answers, [field.key]: e.target.value === '' ? undefined : e.target.value === 'true' })}><option value="">Select</option><option value="true">Yes</option><option value="false">No</option></select>
-              : <input className={inputClass} type={field.type === 'integer' || field.type === 'decimal' ? 'number' : field.type === 'date' ? 'date' : 'text'} step={field.type === 'decimal' ? 'any' : undefined} value={String(answers[field.key] ?? '')} onChange={(e) => setAnswers({ ...answers, [field.key]: e.target.value === '' ? undefined : field.type === 'integer' || field.type === 'decimal' ? Number(e.target.value) : e.target.value })} />}
-        </label>)}</div>}
-        {selectedVersion && <div className="flex flex-wrap gap-2"><Button disabled={busy} variant="outline" onClick={() => void saveSubmission(false)}>{editingSubmissionId ? 'Update draft' : 'Save draft'}</Button><Button disabled={busy} onClick={() => void saveSubmission(true)}><ShieldCheck className="mr-2 h-4 w-4" />{editingSubmissionId ? 'Resubmit for verification' : 'Submit for verification'}</Button>{editingSubmissionId && <Button variant="ghost" onClick={() => { setEditingSubmissionId(null); setAnswers({}); }}>Cancel edit</Button>}</div>}
-        {!selectedVersion && <p className="text-sm text-slate-500">Choose a published form to load its versioned fields.</p>}
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <label className="block">
+            <span className={labelClass}>Published, assigned, or saved form</span>
+            <select
+              className={inputClass}
+              value={collectFormId}
+              onChange={(e) => {
+                setCollectFormId(e.target.value);
+                setCollectAssignmentId('');
+                setCollectVersionOverride('');
+                setEditingSubmissionId(null);
+                setAnswers({});
+              }}
+            >
+              <option value="">Select form</option>
+              {data.forms
+                .filter((form) => form.status === 'published' || myAssignments.some((assignment) => assignment.formId === form.id) || data.submissions.some((submission) => submission.formId === form.id && submission.submittedBy === user?.id && ['draft', 'returned'].includes(submission.status)))
+                .map((form) => <option key={form.id} value={form.id}>{form.name}</option>)}
+            </select>
+          </label>
+          <label className="block">
+            <span className={labelClass}>Assigned period (if assigned)</span>
+            <select
+              className={inputClass}
+              value={collectAssignmentId}
+              onChange={(e) => setCollectAssignmentId(e.target.value)}
+            >
+              <option value="">Unassigned collection</option>
+              {myAssignments
+                .filter((assignment) => assignment.formId === collectFormId)
+                .map((assignment) => (
+                  <option key={assignment.id} value={assignment.id}>
+                    {assignment.periodKey}{assignment.dueDate ? ` · due ${assignment.dueDate}` : ''}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className={labelClass}>Collection date</span>
+            <input
+              type="date"
+              className={inputClass}
+              value={collectedOn}
+              onChange={(e) => setCollectedOn(e.target.value)}
+            />
+          </label>
+        </div>
+
+        {selectedVersion && (
+          <div className="space-y-5 rounded-2xl border border-slate-200 bg-slate-50/60 p-5 sm:p-6">
+            <div className="border-b border-slate-200/80 pb-3">
+              <h3 className="text-sm font-semibold text-slate-900">{selectedVersion.schema.title || 'Collection Form'}</h3>
+              <p className="text-xs text-slate-500">Version {selectedVersion.versionNumber} · Please fill in all required answers carefully.</p>
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-2">
+              {selectedVersion.schema.fields.map((field) => (
+                <div
+                  key={field.key}
+                  className={cn(
+                    'rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs transition-colors hover:border-slate-300',
+                    field.type === 'textarea' ? 'md:col-span-2' : ''
+                  )}
+                >
+                  <label className="block">
+                    <span className="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-700">
+                      <span>{field.label}{field.required ? ' *' : ''}</span>
+                      <span className="text-[11px] font-normal normal-case text-slate-400">key: {field.key}</span>
+                    </span>
+
+                    {field.type === 'textarea' ? (
+                      <textarea
+                        className="w-full min-h-[160px] rounded-xl border border-slate-300 bg-white p-4 text-sm leading-relaxed text-slate-900 placeholder:text-slate-400 focus:border-[#D68904] focus:outline-none focus:ring-2 focus:ring-[#D68904]/20 transition-colors shadow-none"
+                        rows={6}
+                        placeholder={`Enter detailed response for ${field.label}...`}
+                        value={String(answers[field.key] ?? '')}
+                        onChange={(e) => setAnswers({ ...answers, [field.key]: e.target.value })}
+                      />
+                    ) : field.type === 'select' ? (
+                      <select
+                        className={inputClass}
+                        value={String(answers[field.key] ?? '')}
+                        onChange={(e) => setAnswers({ ...answers, [field.key]: e.target.value || undefined })}
+                      >
+                        <option value="">Select an option</option>
+                        {(field.options || []).map((option) => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                    ) : field.type === 'multiselect' ? (
+                      <div className="space-y-1.5">
+                        <select
+                          multiple
+                          className="w-full min-h-[120px] rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-[#D68904] focus:outline-none focus:ring-2 focus:ring-[#D68904]/20 transition-colors shadow-none"
+                          value={Array.isArray(answers[field.key]) ? (answers[field.key] as string[]) : []}
+                          onChange={(e) =>
+                            setAnswers({
+                              ...answers,
+                              [field.key]: Array.from(e.target.selectedOptions, (option) => option.value),
+                            })
+                          }
+                        >
+                          {(field.options || []).map((option) => (
+                            <option key={option} value={option} className="py-1">{option}</option>
+                          ))}
+                        </select>
+                        <p className="text-[11px] text-slate-400">Hold Ctrl (or Cmd on Mac) to select multiple choices.</p>
+                      </div>
+                    ) : field.type === 'boolean' ? (
+                      <select
+                        className={inputClass}
+                        value={answers[field.key] === undefined ? '' : String(answers[field.key])}
+                        onChange={(e) => setAnswers({ ...answers, [field.key]: e.target.value === '' ? undefined : e.target.value === 'true' })}
+                      >
+                        <option value="">Select</option>
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                      </select>
+                    ) : (
+                      <input
+                        className={inputClass}
+                        type={field.type === 'integer' || field.type === 'decimal' ? 'number' : field.type === 'date' ? 'date' : 'text'}
+                        step={field.type === 'decimal' ? 'any' : undefined}
+                        placeholder={`Enter ${field.label.toLowerCase()}...`}
+                        value={String(answers[field.key] ?? '')}
+                        onChange={(e) =>
+                          setAnswers({
+                            ...answers,
+                            [field.key]:
+                              e.target.value === ''
+                                ? undefined
+                                : field.type === 'integer' || field.type === 'decimal'
+                                ? Number(e.target.value)
+                                : e.target.value,
+                          })
+                        }
+                      />
+                    )}
+                  </label>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-200">
+              <Button disabled={busy} variant="outline" onClick={() => void saveSubmission(false)}>
+                {editingSubmissionId ? 'Update draft' : 'Save draft'}
+              </Button>
+              <Button disabled={busy} onClick={() => void saveSubmission(true)}>
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                {editingSubmissionId ? 'Resubmit for verification' : 'Submit for verification'}
+              </Button>
+              {editingSubmissionId && (
+                <Button variant="ghost" onClick={() => { setEditingSubmissionId(null); setAnswers({}); }}>
+                  Cancel edit
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+        {!selectedVersion && (
+          <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center">
+            <ClipboardList className="mx-auto h-8 w-8 text-slate-300" />
+            <p className="mt-2 text-sm font-medium text-slate-600">Choose a form above to load questions</p>
+            <p className="text-xs text-slate-400">Select an approved published form or an assigned reporting period to submit data.</p>
+          </div>
+        )}
       </Card>
 
       <Card className="space-y-3 border border-slate-200 bg-white p-5">
