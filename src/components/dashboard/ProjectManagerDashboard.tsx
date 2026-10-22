@@ -222,28 +222,6 @@ export const ProjectManagerDashboard: React.FC = () => {
     ];
   }, [scopedData.projects]);
 
-  // Chart 2: Activity Implementation & Verification Status
-  const activityStatusChartData = useMemo((): AnalyticsDataPoint[] => {
-    const counts = {
-      Approved: 0,
-      'In Review': 0,
-      Draft: 0,
-      Returned: 0,
-    };
-    scopedData.activities.forEach((a) => {
-      if (a.submissionStatus === 'approved') counts['Approved'] += 1;
-      else if (a.submissionStatus === 'submitted') counts['In Review'] += 1;
-      else if (a.submissionStatus === 'draft') counts['Draft'] += 1;
-      else if (a.submissionStatus === 'returned_for_correction') counts['Returned'] += 1;
-    });
-
-    return [
-      { label: 'Verified & Approved', value: counts['Approved'], color: '#15803d' },
-      { label: 'Awaiting PM Review', value: counts['In Review'], color: '#D68904' },
-      { label: 'Drafted in Field', value: counts['Draft'], color: '#64748b' },
-      { label: 'Returned for Edit', value: counts['Returned'], color: '#b91c1c' },
-    ];
-  }, [scopedData.activities]);
 
   // Pending Review Desk Submissions
   const pendingSubmissions = useMemo(() => {
@@ -486,58 +464,31 @@ export const ProjectManagerDashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Analytics Visualizer Row - 2 Balanced Panels */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-        <Card className="p-5 bg-white border border-gray-200 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <h2 className="text-sm font-bold text-gray-900">
-                {t('pm.charts.portfolioStatus', 'Project Portfolio Status Breakdown')}
-              </h2>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Distribution of managed projects across operational stages
-              </p>
-            </div>
-            <span className="text-xs font-mono bg-gray-100 text-gray-700 px-2 py-0.5 rounded border border-gray-200">
-              {metrics.assignedProjects} Projects
-            </span>
+      {/* Analytics Visualizer Row - Portfolio Status Breakdown */}
+      <Card className="p-5 bg-white border border-slate-200/90 rounded-2xl shadow-xs hover:shadow-sm transition-shadow">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900">
+              {t('pm.charts.portfolioStatus', 'Project Portfolio Status Breakdown')}
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Distribution of managed projects across operational stages
+            </p>
           </div>
+          <span className="text-xs font-mono bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-full border border-slate-200">
+            {metrics.assignedProjects} Projects
+          </span>
+        </div>
 
-          <div className="min-h-[220px]">
-            <AnalyticsVisualizer
-              data={projectStatusChartData}
-              defaultMode="pie"
-              availableModes={['pie', 'bar', 'table']}
-              height={200}
-            />
-          </div>
-        </Card>
-
-        <Card className="p-5 bg-white border border-gray-200 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <h2 className="text-sm font-bold text-gray-900">
-                {t('pm.charts.activityStatus', 'Activity Verification & Execution')}
-              </h2>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Field activity validation pipeline and review progress
-              </p>
-            </div>
-            <span className="text-xs font-mono bg-gray-100 text-gray-700 px-2 py-0.5 rounded border border-gray-200">
-              {scopedData.activities.length} Activities
-            </span>
-          </div>
-
-          <div className="min-h-[220px]">
-            <AnalyticsVisualizer
-              data={activityStatusChartData}
-              defaultMode="bar"
-              availableModes={['bar', 'table']}
-              height={200}
-            />
-          </div>
-        </Card>
-      </div>
+        <div className="min-h-[220px]">
+          <AnalyticsVisualizer
+            data={projectStatusChartData}
+            defaultMode="pie"
+            availableModes={['pie', 'bar', 'table']}
+            height={220}
+          />
+        </div>
+      </Card>
 
       {/* 1. Coordinator Submissions Awaiting Review (Full-Width Row) */}
       <div id="action-queue" className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-xs hover:shadow-sm transition-shadow">
