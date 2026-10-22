@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/features/auth/useAuth';
 import { SystemAdminDashboard } from './SystemAdminDashboard';
 import { ExecutiveDirectorDashboard } from './ExecutiveDirectorDashboard';
@@ -11,6 +12,34 @@ import { MonitoringEvaluationDashboard } from './MonitoringEvaluationDashboard';
 
 export const SampleDashboard: React.FC = () => {
   const { roles, hasRole, isAdmin } = useAuth();
+  const [searchParams] = useSearchParams();
+
+  // Allow URL query parameter (?view=pm or ?view=project_manager)
+  const requestedView = searchParams.get('view') || searchParams.get('role');
+  if (requestedView === 'project_manager' || requestedView === 'pm') {
+    return <ProjectManagerDashboard />;
+  }
+  if (requestedView === 'executive_director' || requestedView === 'ed') {
+    return <ExecutiveDirectorDashboard />;
+  }
+  if (requestedView === 'finance_officer' || requestedView === 'finance') {
+    return <FinanceOfficerDashboard />;
+  }
+  if (requestedView === 'system_admin' || requestedView === 'admin') {
+    return <SystemAdminDashboard />;
+  }
+  if (requestedView === 'project_coordinator' || requestedView === 'coordinator') {
+    return <ProjectCoordinatorDashboard />;
+  }
+  if (requestedView === 'me_officer' || requestedView === 'me') {
+    return <MonitoringEvaluationDashboard />;
+  }
+  if (requestedView === 'hr_administrator' || requestedView === 'hr') {
+    return <HrAdministratorDashboard />;
+  }
+  if (requestedView === 'procurement_officer' || requestedView === 'procurement') {
+    return <ProcurementOfficerDashboard />;
+  }
 
   // Primary role resolution with fallback logic
   const activeRole = roles[0] || 'project_coordinator';

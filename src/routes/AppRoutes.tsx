@@ -39,6 +39,7 @@ import { OrganizationPage } from '@/features/organization/pages/OrganizationPage
 import { MonitoringEvaluationPage } from '@/features/me/pages/MonitoringEvaluationPage';
 import { ApprovalsPage } from '@/features/approvals/pages/ApprovalsPage';
 import { SampleDashboard } from '@/components/dashboard/SampleDashboard';
+import { ProjectManagerDashboard } from '@/components/dashboard/ProjectManagerDashboard';
 import { DesignSystemPreview } from '@/components/preview/DesignSystemPreview';
 import { FoundationDashboard } from '@/components/FoundationDashboard';
 const AuthenticatedShellLayout: React.FC = () => {
@@ -63,6 +64,9 @@ export const AppRoutes: React.FC = () => {
       {/* Authenticated Application Shell Routes */}
       <Route element={<AuthenticatedShellLayout />}>
         <Route path="/" element={<SampleDashboard />} />
+        <Route path="/dashboard" element={<SampleDashboard />} />
+        <Route path="/dashboard/pm" element={<ProjectManagerDashboard />} />
+        <Route path="/dashboard/project-manager" element={<ProjectManagerDashboard />} />
         <Route
           path="/design-system"
           element={

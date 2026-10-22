@@ -38,6 +38,7 @@ import {
   FolderOpen,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
@@ -319,55 +320,44 @@ export const ProjectManagerDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <PageHeader
-        title={t('pm.dashboardTitle', 'Project Manager Dashboard')}
-        subtitle={t(
-          'pm.dashboardSubtitle',
-          'Portfolio oversight, workplan delivery, coordinator review desk, and milestone analytics.'
-        )}
-        badge={
-          <span className="inline-flex items-center rounded-full bg-forest-50 px-2.5 py-0.5 text-xs font-semibold text-forest-700 border border-forest-200/80">
-            Portfolio Management
-          </span>
-        }
-        breadcrumbs={[
+      <div className="space-y-4 pb-5 border-b border-slate-200/80">
+        <Breadcrumbs items={[
           { label: t('navigation.dashboard', 'Dashboard'), href: '/dashboard' },
           { label: t('navigation.projects', 'Projects'), href: '/projects' },
           { label: t('pm.overview', 'Overview') },
-        ]}
-        actions={
-          <div className="flex flex-wrap items-center gap-2.5">
-            {/* Project Filter */}
-            <select
-              value={selectedProjectId}
-              onChange={(e) => setSelectedProjectId(e.target.value)}
-              className="h-9 px-3 py-1.5 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#D68904]/20 focus:border-[#D68904] transition-colors shadow-none cursor-pointer"
-            >
-              <option value="all">{t('projects.allProjects', 'All Projects Portfolio')}</option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.projectCode ? `[${p.projectCode}] ` : ''}{p.name}
-                </option>
-              ))}
-            </select>
+        ]} />
 
-            {/* Period Filter */}
-            <select
-              value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value as any)}
-              className="h-9 px-3 py-1.5 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#D68904]/20 focus:border-[#D68904] transition-colors shadow-none cursor-pointer"
-            >
-              <option value="all">{t('common.allTime', 'All Periods')}</option>
-              <option value="month">{t('common.thisMonth', 'This Month')}</option>
-              <option value="quarter">{t('common.thisQuarter', 'This Quarter')}</option>
-              <option value="year">{t('common.yearToDate', 'Year to Date')}</option>
-            </select>
+        {/* Title & Subtitle Row */}
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+          <div className="flex items-start gap-3.5 min-w-0 flex-1">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-forest-50 border border-forest-200/60 text-[#D68904]">
+              <Briefcase className="h-5 w-5" />
+            </div>
+            <div className="space-y-1.5 min-w-0">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 leading-tight">
+                  {t('pm.dashboardTitle', 'Project Manager Dashboard')}
+                </h1>
+                <span className="inline-flex items-center rounded-full bg-forest-50 px-2.5 py-0.5 text-xs font-semibold text-forest-700 border border-forest-200/80">
+                  Portfolio Operations
+                </span>
+              </div>
+              <p className="text-sm text-slate-500 max-w-4xl leading-relaxed">
+                {t(
+                  'pm.dashboardSubtitle',
+                  'Portfolio oversight, workplan delivery, coordinator review desk, and milestone analytics.'
+                )}
+              </p>
+            </div>
+          </div>
 
+          {/* Quick Action Buttons */}
+          <div className="flex items-center gap-2.5 shrink-0 self-start">
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigate('/projects/activities')}
-              className="h-9 text-xs border-slate-300 text-slate-700 hover:bg-slate-50 font-medium rounded-xl"
+              className="h-9 px-3.5 text-xs border-slate-300 text-slate-700 hover:bg-slate-50 font-medium rounded-xl shadow-none"
             >
               <Activity className="w-3.5 h-3.5 mr-1.5 text-slate-600" />
               {t('projects.tabs.activities', 'Work Plans')}
@@ -377,14 +367,54 @@ export const ProjectManagerDashboard: React.FC = () => {
               variant="primary"
               size="sm"
               onClick={() => navigate('/projects/new')}
-              className="h-9 text-xs font-semibold rounded-xl bg-[#D68904] hover:bg-[#b86e03] text-white shadow-none"
+              className="h-9 px-3.5 text-xs font-semibold rounded-xl bg-[#D68904] hover:bg-[#b86e03] text-white shadow-none"
             >
               <Plus className="w-3.5 h-3.5 mr-1.5 text-white" />
               {t('projects.newProject', 'New Project')}
             </Button>
           </div>
-        }
-      />
+        </div>
+
+        {/* Scope & Period Filter Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Project Scope:</span>
+              <select
+                value={selectedProjectId}
+                onChange={(e) => setSelectedProjectId(e.target.value)}
+                className="h-9 px-3 py-1.5 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#D68904]/20 focus:border-[#D68904] transition-colors shadow-none cursor-pointer min-w-[200px]"
+              >
+                <option value="all">{t('projects.allProjects', 'All Projects Portfolio')}</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.projectCode ? `[${p.projectCode}] ` : ''}{p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Period:</span>
+              <select
+                value={selectedPeriod}
+                onChange={(e) => setSelectedPeriod(e.target.value as any)}
+                className="h-9 px-3 py-1.5 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#D68904]/20 focus:border-[#D68904] transition-colors shadow-none cursor-pointer"
+              >
+                <option value="all">{t('common.allTime', 'All Periods')}</option>
+                <option value="month">{t('common.thisMonth', 'This Month')}</option>
+                <option value="quarter">{t('common.thisQuarter', 'This Quarter')}</option>
+                <option value="year">{t('common.yearToDate', 'Year to Date')}</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+            <span className="flex h-2 w-2 rounded-full bg-emerald-500"></span>
+            <span>Live Portfolio Tracking · {projects.length} {projects.length === 1 ? 'project' : 'projects'} active</span>
+          </div>
+        </div>
+      </div>
 
       {/* 6 Required KPI Cards - AdminCN Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
