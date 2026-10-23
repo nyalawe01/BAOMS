@@ -23,6 +23,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker, DateRangePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { Stepper, StepItem } from '@/components/ui/Stepper';
@@ -630,14 +631,13 @@ export const RegisterStaffPage: React.FC = () => {
                   />
                 </div>
 
-                <Input
-                  type="date"
+                <DatePicker
                   label={t('hr.dob', 'Date of Birth (DOB)')}
                   value={formData.personal.dateOfBirth}
-                  onChange={(e) =>
+                  onChange={(val) =>
                     setFormData({
                       ...formData,
-                      personal: { ...formData.personal, dateOfBirth: e.target.value },
+                      personal: { ...formData.personal, dateOfBirth: val },
                     })
                   }
                 />
@@ -825,28 +825,29 @@ export const RegisterStaffPage: React.FC = () => {
                   ]}
                 />
 
-                <Input
-                  type="date"
-                  label={`${t('hr.startDate', 'Contract Start Date')} *`}
-                  value={formData.employment.startDate}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      employment: { ...formData.employment, startDate: e.target.value },
-                    })
-                  }
-                  required
-                />
-
-                {formData.employment.contractType !== 'permanent' && (
-                  <Input
-                    type="date"
-                    label={`${t('hr.endDate', 'Contract End Date')} *`}
-                    value={formData.employment.endDate}
-                    onChange={(e) =>
+                {formData.employment.contractType !== 'permanent' ? (
+                  <div className="md:col-span-2">
+                    <DateRangePicker
+                      label={`${t('hr.contractPeriod', 'Contract Period (Start & End Date)')} *`}
+                      startDate={formData.employment.startDate}
+                      endDate={formData.employment.endDate}
+                      onRangeChange={(start, end) =>
+                        setFormData({
+                          ...formData,
+                          employment: { ...formData.employment, startDate: start, endDate: end },
+                        })
+                      }
+                      required
+                    />
+                  </div>
+                ) : (
+                  <DatePicker
+                    label={`${t('hr.startDate', 'Contract Start Date')} *`}
+                    value={formData.employment.startDate}
+                    onChange={(val) =>
                       setFormData({
                         ...formData,
-                        employment: { ...formData.employment, endDate: e.target.value },
+                        employment: { ...formData.employment, startDate: val },
                       })
                     }
                     required

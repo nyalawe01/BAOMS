@@ -14,6 +14,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { FileUploadDropzone } from '@/components/ui/FileUploadDropzone';
@@ -283,11 +284,10 @@ export const UploadDocumentPage: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Input
+                <DatePicker
                   label={t('documents.documentDate', 'Document Effective Date *')}
-                  type="date"
                   value={documentDate}
-                  onChange={(e) => setDocumentDate(e.target.value)}
+                  onChange={(val) => setDocumentDate(val)}
                   required
                 />
               </div>

@@ -3,6 +3,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { CreatePurchaseOrderInput, VendorRecord } from '../types/procurement';
@@ -149,11 +150,10 @@ export const CreatePurchaseOrderModal: React.FC<CreatePurchaseOrderModalProps> =
             </Select>
           </div>
 
-          <Input
-            type="date"
+          <DatePicker
             label="Expected Delivery Date"
             value={expectedDeliveryDate}
-            onChange={(e) => setExpectedDeliveryDate(e.target.value)}
+            onChange={(val) => setExpectedDeliveryDate(val)}
             required
           />
         </div>

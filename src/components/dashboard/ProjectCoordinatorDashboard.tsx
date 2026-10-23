@@ -39,6 +39,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Card } from '@/components/ui/Card';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
 import { Pagination } from '@/components/ui/Pagination';
@@ -841,12 +842,11 @@ export const ProjectCoordinatorDashboard: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-semibold text-gray-700 block mb-1">Activity Date *</label>
-                  <input
-                    type="date"
+                  <DatePicker
+                    label="Activity Date *"
                     value={formDate}
-                    onChange={(e) => setFormDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#D68904]"
+                    onChange={(val) => setFormDate(val)}
+                    required
                   />
                 </div>
                 <div>

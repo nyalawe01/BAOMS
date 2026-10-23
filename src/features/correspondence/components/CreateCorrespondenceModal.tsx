@@ -11,6 +11,7 @@ import { createCorrespondence } from '../services/correspondenceService';
 import { useAuth } from '@/features/auth/useAuth';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { FileUploadDropzone } from '@/components/ui/FileUploadDropzone';
 import { Mail, AlertCircle } from 'lucide-react';
 
@@ -185,15 +186,11 @@ export const CreateCorrespondenceModal: React.FC<CreateCorrespondenceModalProps>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-1">
-                {t('correspondence.date', 'Correspondence Date')} *
-              </label>
-              <input
-                type="date"
-                required
+              <DatePicker
+                label={`${t('correspondence.date', 'Correspondence Date')} *`}
                 value={correspondenceDate}
-                onChange={(e) => setCorrespondenceDate(e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-forest-600"
+                onChange={(val) => setCorrespondenceDate(val)}
+                required
               />
             </div>
 

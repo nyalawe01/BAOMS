@@ -17,6 +17,7 @@ import {
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { StaffMemberOption } from '@/services/staffService';
 
 export interface DraftActivityItem {
@@ -505,12 +506,11 @@ export const ProjectResultsFrameworkBuilder: React.FC<ProjectResultsFrameworkBui
                                       {(act.durationDays || 1) >= 7 ? ` (${Math.round((act.durationDays || 1) / 7)} wk)` : ''}
                                     </span>
                                   </div>
-                                  <input
-                                    type="date"
-                                    className="w-full text-xs p-1.5 rounded border border-slate-300 bg-white"
+                                  <DatePicker
                                     value={act.activityDate}
-                                    onChange={(e) =>
-                                      handleUpdateActivity(oIdx, outIdx, aIdx, 'activityDate', e.target.value)
+                                    placeholder="Start Date"
+                                    onChange={(val) =>
+                                      handleUpdateActivity(oIdx, outIdx, aIdx, 'activityDate', val)
                                     }
                                   />
                                   <div className="space-y-1">

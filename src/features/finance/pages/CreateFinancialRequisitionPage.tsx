@@ -27,6 +27,7 @@ import { FullPageStepper, FullPageStep } from '@/components/ui/FullPageStepper';
 import { MultiContactFields, ContactEntry } from '@/components/ui/MultiContactFields';
 import { DocumentUploadSection, UploadedDocument, serializeDocuments } from '@/components/ui/DocumentUploadSection';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
@@ -329,11 +330,10 @@ export const CreateFinancialRequisitionPage: React.FC<CreateFinancialRequisition
               </Select>
             </div>
 
-            <Input
-              type="date"
+            <DatePicker
               label="Payment Due Date"
               value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
+              onChange={(val) => setDueDate(val)}
               helperText="When the payment or reimbursement is needed"
             />
           </div>

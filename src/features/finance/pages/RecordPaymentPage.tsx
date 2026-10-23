@@ -32,6 +32,7 @@ import {
   MultiBankItem,
 } from '@/components/ui/MultiContactAndBankFields';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { useToast } from '@/lib/ToastContext';
@@ -366,11 +367,10 @@ export const RecordPaymentPage: React.FC<RecordPaymentPageProps> = ({
                 required
               />
 
-              <Input
+              <DatePicker
                 label="Disbursement Date *"
-                type="date"
                 value={paymentDate}
-                onChange={(e) => setPaymentDate(e.target.value)}
+                onChange={(val) => setPaymentDate(val)}
                 required
               />
             </div>

@@ -13,6 +13,7 @@ import {
 import Swal from 'sweetalert2';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { StaffProfileRecord, StaffCertification, LoanBoardStatus } from '../types/hr';
 import { updateHrDossier } from '../services/hrService';
 import { createNotification } from '@/services/notificationsService';
@@ -194,14 +195,10 @@ export const CompleteHrOnboardingModal: React.FC<CompleteHrOnboardingModalProps>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-charcoal-700 mb-1">
-                Date of Birth (DOB)
-              </label>
-              <input
-                type="date"
+              <DatePicker
+                label="Date of Birth (DOB)"
                 value={dateOfBirth}
-                onChange={(e) => setDateOfBirth(e.target.value)}
-                className="w-full px-3 py-2 border border-surface-border rounded-md text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-[#D68904]/30 focus:border-[#D68904] bg-white font-mono"
+                onChange={(val) => setDateOfBirth(val)}
               />
             </div>
 

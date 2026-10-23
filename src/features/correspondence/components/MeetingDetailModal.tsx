@@ -17,6 +17,7 @@ import {
 import { useAuth } from '@/features/auth/useAuth';
 import { showSuccess, showError } from '@/lib/sweetAlert';
 import { Button } from '@/components/ui/Button';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Badge } from '@/components/ui/Badge';
 import {
   X,
@@ -347,12 +348,11 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                       onChange={(e) => setActionAssignee(e.target.value)}
                       className="w-full px-3 py-1.5 text-sm rounded-lg border border-surface-border bg-surface-card"
                     />
-                    <input
-                      type="date"
+                    <DatePicker
+                      placeholder="Due Date"
                       required
                       value={actionDueDate}
-                      onChange={(e) => setActionDueDate(e.target.value)}
-                      className="w-full px-3 py-1.5 text-sm rounded-lg border border-surface-border bg-surface-card"
+                      onChange={(val) => setActionDueDate(val)}
                     />
                   </div>
                   <div className="flex justify-end gap-2">

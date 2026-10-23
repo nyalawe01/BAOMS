@@ -34,6 +34,7 @@ import {
   MultiBankItem,
 } from '@/components/ui/MultiContactAndBankFields';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { useToast } from '@/lib/ToastContext';
@@ -438,11 +439,10 @@ export const CreateFinancialRequestPage: React.FC<CreateFinancialRequestPageProp
                 />
               </div>
 
-              <Input
+              <DatePicker
                 label="Target Payment Due Date *"
-                type="date"
                 value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
+                onChange={(val) => setDueDate(val)}
                 required
               />
 

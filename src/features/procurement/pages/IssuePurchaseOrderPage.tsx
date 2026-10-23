@@ -24,6 +24,7 @@ import {
 import { FullPageStepper, FullPageStep } from '@/components/ui/FullPageStepper';
 import { DocumentUploadSection, UploadedDocument, serializeDocuments } from '@/components/ui/DocumentUploadSection';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { Badge } from '@/components/ui/Badge';
@@ -276,11 +277,10 @@ export const IssuePurchaseOrderPage: React.FC<IssuePurchaseOrderPageProps> = ({
               )}
             </div>
 
-            <Input
-              type="date"
+            <DatePicker
               label="Expected Delivery Date *"
               value={expectedDeliveryDate}
-              onChange={(e) => setExpectedDeliveryDate(e.target.value)}
+              onChange={(val) => setExpectedDeliveryDate(val)}
               required
             />
 

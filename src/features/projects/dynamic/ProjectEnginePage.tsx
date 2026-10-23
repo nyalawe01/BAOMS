@@ -4,6 +4,7 @@ import { AlertCircle, CheckCircle2, ClipboardList, Plus, RefreshCw, ShieldCheck,
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { DatePicker, DateRangePicker } from '@/components/ui/DatePicker';
 import { Card } from '@/components/ui/Card';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { useAuth } from '@/features/auth/useAuth';
@@ -293,9 +294,16 @@ export const ProjectEnginePage: React.FC = () => {
             <label><span className={labelClass}>Target (required for percentage)</span><input type="number" min="0" step="any" className={inputClass} value={indicatorDraft.target} onChange={(e) => setIndicatorDraft({ ...indicatorDraft, target: e.target.value })} /></label>
             <div className="sm:col-span-2"><Button type="submit" disabled={busy}><Plus className="mr-2 h-4 w-4" />Add indicator</Button></div>
           </form>}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label><span className={labelClass}>Collection date from</span><input type="date" className={inputClass} value={indicatorStartDate} onChange={(e) => setIndicatorStartDate(e.target.value)} /></label>
-            <label><span className={labelClass}>Collection date through</span><input type="date" className={inputClass} value={indicatorEndDate} onChange={(e) => setIndicatorEndDate(e.target.value)} /></label>
+          <div className="py-1">
+            <DateRangePicker
+              label="Collection Date Range (From – Through)"
+              startDate={indicatorStartDate}
+              endDate={indicatorEndDate}
+              onRangeChange={(start, end) => {
+                setIndicatorStartDate(start);
+                setIndicatorEndDate(end);
+              }}
+            />
           </div>
           <div className="space-y-3">
             {indicatorResults.length === 0 && <p className="text-sm text-slate-500">No indicators configured yet.</p>}
@@ -545,7 +553,13 @@ export const ProjectEnginePage: React.FC = () => {
           <label><span className={labelClass}>Published form</span><select className={inputClass} value={assignFormId} onChange={(e) => setAssignFormId(e.target.value)}><option value="">Select form</option>{data.forms.filter((form) => form.status === 'published').map((form) => <option key={form.id} value={form.id}>{form.name}</option>)}</select></label>
           <label><span className={labelClass}>Assignee</span><select className={inputClass} value={assignMemberId} onChange={(e) => setAssignMemberId(e.target.value)}><option value="">Select member</option>{members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}</select></label>
           <label><span className={labelClass}>Reporting period key</span><input className={inputClass} placeholder="2026-Q4" value={assignPeriod} onChange={(e) => setAssignPeriod(e.target.value)} /></label>
-          <label><span className={labelClass}>Due date</span><input type="date" className={inputClass} value={assignDueDate} onChange={(e) => setAssignDueDate(e.target.value)} /></label>
+          <div>
+            <DatePicker
+              label="Due Date"
+              value={assignDueDate}
+              onChange={(val) => setAssignDueDate(val)}
+            />
+          </div>
         </div>
         <Button disabled={busy} onClick={() => void makeAssignment()}>Create assignment</Button>
       </Card>}

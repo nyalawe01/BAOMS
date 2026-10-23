@@ -21,6 +21,7 @@ import {
 import Swal from 'sweetalert2';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Badge } from '@/components/ui/Badge';
 import { SkeletonTable } from '@/components/ui/Skeleton';
 import { Modal } from '@/components/ui/Modal';
@@ -514,16 +515,12 @@ export const HrContractsPage: React.FC = () => {
             </div>
 
             {newContractType !== 'permanent' && (
-              <div>
-                <label className="block text-xs font-medium text-charcoal-700 mb-1">New Effective End Date</label>
-                <input
-                  type="date"
-                  value={newEndDate}
-                  onChange={(e) => setNewEndDate(e.target.value)}
-                  className="w-full text-xs rounded border border-surface-border p-2 bg-white"
-                  required
-                />
-              </div>
+              <DatePicker
+                label="New Effective End Date"
+                value={newEndDate}
+                onChange={(val) => setNewEndDate(val)}
+                required
+              />
             )}
 
             <div>

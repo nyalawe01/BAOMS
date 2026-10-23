@@ -19,6 +19,7 @@ import {
 import Swal from 'sweetalert2';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { getStaffProfiles } from '../services/hrService';
@@ -722,12 +723,10 @@ export const HrPerformancePage: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-medium text-charcoal-700 mb-1">Session Date</label>
-              <input
-                type="date"
+              <DatePicker
+                label="Session Date"
                 value={trainingDate}
-                onChange={(e) => setTrainingDate(e.target.value)}
-                className="w-full p-2 border border-surface-border rounded bg-white text-xs"
+                onChange={(val) => setTrainingDate(val)}
                 required
               />
             </div>

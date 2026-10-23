@@ -12,6 +12,7 @@ import { AlertCircle, UploadCloud } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { FileUploadDropzone } from '@/components/ui/FileUploadDropzone';
@@ -236,11 +237,10 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
 
         <div>
           {/* Document Date */}
-          <Input
-            type="date"
+          <DatePicker
             label={t('documents.effectiveDate', 'Document Effective Date *')}
             value={documentDate}
-            onChange={(e) => setDocumentDate(e.target.value)}
+            onChange={(val) => setDocumentDate(val)}
             required
           />
         </div>
