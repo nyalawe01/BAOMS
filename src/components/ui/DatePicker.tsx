@@ -83,7 +83,7 @@ const MONTH_NAMES = [
   'December',
 ];
 
-const WEEKDAY_NAMES = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+const WEEKDAY_NAMES = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
 /* -------------------------------------------------------------------------- */
 /*                               CONTEXT TYPES                                */
@@ -134,7 +134,7 @@ export const Label: React.FC<{
   <label
     htmlFor={htmlFor}
     className={cn(
-      'block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5 select-none',
+      'block text-xs font-semibold uppercase tracking-wider text-foreground mb-1.5 select-none',
       className
     )}
   >
@@ -148,7 +148,7 @@ export const DateField = {
     className,
     children,
     fullWidth = true,
-    variant = 'default',
+    variant = 'secondary',
     onClick,
   }: {
     className?: string;
@@ -161,9 +161,8 @@ export const DateField = {
       <div
         onClick={onClick}
         className={cn(
-          'group relative flex min-h-[44px] items-center rounded-xl border border-slate-300/80 bg-white px-3.5 py-2 text-sm text-slate-800 shadow-2xs transition-all duration-150',
+          'group relative flex min-h-[44px] items-center rounded-xl border border-border/80 bg-default px-3.5 py-2 text-sm shadow-sm transition-all duration-150',
           'hover:border-slate-400 focus-within:border-[#D68904] focus-within:ring-2 focus-within:ring-[#D68904]/20',
-          variant === 'secondary' && 'bg-slate-50/50',
           fullWidth ? 'w-full' : 'w-auto',
           className
         )}
@@ -215,11 +214,12 @@ export const DateField = {
         : ctx?.singleDate || '';
 
     const formatted = formatDisplayDate(dateVal);
+    const displayVal = formatted || (slot === 'start' ? 'Start date' : slot === 'end' ? 'End date' : placeholder || 'Select date');
 
     if (children) {
       return (
-        <div className={cn('flex items-center text-sm font-medium text-slate-800', className)}>
-          {children(formatted || placeholder || (slot === 'start' ? 'Start date' : slot === 'end' ? 'End date' : 'Select date'))}
+        <div className={cn('flex items-center text-sm font-medium text-foreground cursor-pointer select-none', className)}>
+          {children(displayVal)}
         </div>
       );
     }
@@ -232,7 +232,7 @@ export const DateField = {
         value={formatted}
         placeholder={placeholder || (slot === 'start' ? 'Start date' : slot === 'end' ? 'End date' : 'Select date')}
         className={cn(
-          'w-full bg-transparent font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none cursor-pointer text-sm truncate',
+          'w-full bg-transparent font-medium text-foreground placeholder:text-muted focus:outline-none cursor-pointer text-sm truncate',
           className
         )}
       />
@@ -247,7 +247,7 @@ export const DateField = {
     className?: string;
   }) => {
     return (
-      <span className={cn('text-sm font-medium text-slate-800 select-none truncate', className)}>
+      <span className={cn('text-sm font-medium text-foreground select-none truncate', className)}>
         {segment}
       </span>
     );
@@ -279,18 +279,18 @@ export const CalendarHeader: React.FC<{
   const ctx = useDatePickerContext();
 
   return (
-    <div className={cn('flex items-center justify-between px-1 pb-3 pt-1 border-b border-slate-100', className)}>
+    <div className={cn('flex items-center justify-between px-1 pb-2 pt-1 border-b border-border/80', className)}>
       {children || (
         <>
-          <div className="flex items-center gap-1.5 font-semibold text-slate-800 text-sm">
+          <div className="flex items-center gap-1.5 font-medium text-foreground text-sm">
             <span>{MONTH_NAMES[ctx.viewMonth]}</span>
-            <span className="text-slate-500 font-normal">{ctx.viewYear}</span>
+            <span className="text-muted font-normal">{ctx.viewYear}</span>
           </div>
           <div className="flex items-center gap-1">
             <button
               type="button"
               onClick={ctx.prevMonth}
-              className="p-1 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+              className="p-1 rounded-lg text-muted hover:bg-default transition-colors"
               title="Previous Month"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -298,7 +298,7 @@ export const CalendarHeader: React.FC<{
             <button
               type="button"
               onClick={ctx.nextMonth}
-              className="p-1 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+              className="p-1 rounded-lg text-muted hover:bg-default transition-colors"
               title="Next Month"
             >
               <ChevronRight className="w-4 h-4" />
@@ -322,7 +322,7 @@ export const CalendarNavButton: React.FC<{
       type="button"
       onClick={isPrev ? ctx.prevMonth : ctx.nextMonth}
       className={cn(
-        'p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors select-none',
+        'p-1.5 rounded-lg text-muted hover:bg-default transition-colors select-none',
         className
       )}
       title={isPrev ? 'Previous Month' : 'Next Month'}
@@ -338,7 +338,6 @@ export const CalendarHeading: React.FC<{
   const ctx = useDatePickerContext();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
-  // Quick year options (+- 10 years or 50 years back for birth dates)
   const years = useMemo(() => {
     const current = new Date().getFullYear();
     const arr: number[] = [];
@@ -353,16 +352,16 @@ export const CalendarHeading: React.FC<{
       <button
         type="button"
         onClick={() => setIsPickerOpen(!isPickerOpen)}
-        className="text-sm font-semibold text-slate-800 hover:text-[#D68904] flex items-center gap-1 px-1.5 py-0.5 rounded-md hover:bg-slate-100 transition-colors"
+        className="text-sm font-medium text-foreground hover:text-[#D68904] flex items-center gap-1 px-1.5 py-0.5 rounded-md hover:bg-default transition-colors"
       >
         <span>{MONTH_NAMES[ctx.viewMonth]}</span>
         <span>{ctx.viewYear}</span>
       </button>
 
       {isPickerOpen && (
-        <div className="absolute top-full left-0 mt-1 z-30 p-2 bg-white rounded-xl shadow-xl border border-slate-200 grid grid-cols-2 gap-2 w-48 max-h-48 overflow-y-auto">
+        <div className="absolute top-full left-0 mt-1 z-30 p-2 bg-surface rounded-xl shadow-xl border border-border/80 grid grid-cols-2 gap-2 w-48 max-h-48 overflow-y-auto">
           <div>
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-1">Month</div>
+            <div className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1 px-1">Month</div>
             {MONTH_NAMES.map((m, idx) => (
               <button
                 key={m}
@@ -372,7 +371,7 @@ export const CalendarHeading: React.FC<{
                   setIsPickerOpen(false);
                 }}
                 className={cn(
-                  'w-full text-left text-xs px-2 py-1 rounded hover:bg-amber-50 hover:text-[#D68904]',
+                  'w-full text-left text-xs px-2 py-1 rounded hover:bg-default hover:text-[#D68904]',
                   idx === ctx.viewMonth && 'bg-[#D68904] text-white font-semibold hover:bg-[#D68904] hover:text-white'
                 )}
               >
@@ -381,7 +380,7 @@ export const CalendarHeading: React.FC<{
             ))}
           </div>
           <div>
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-1">Year</div>
+            <div className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1 px-1">Year</div>
             {years.map((y) => (
               <button
                 key={y}
@@ -391,7 +390,7 @@ export const CalendarHeading: React.FC<{
                   setIsPickerOpen(false);
                 }}
                 className={cn(
-                  'w-full text-left text-xs px-2 py-1 rounded hover:bg-amber-50 hover:text-[#D68904]',
+                  'w-full text-left text-xs px-2 py-1 rounded hover:bg-default hover:text-[#D68904]',
                   y === ctx.viewYear && 'bg-[#D68904] text-white font-semibold hover:bg-[#D68904] hover:text-white'
                 )}
               >
@@ -415,12 +414,7 @@ export const CalendarGridHeader: React.FC<{
         children ? (
           <React.Fragment key={day}>{children(day)}</React.Fragment>
         ) : (
-          <div
-            key={day}
-            className="text-center text-[11px] font-semibold text-slate-400 uppercase tracking-wider py-1"
-          >
-            {day}
-          </div>
+          <CalendarHeaderCell key={day}>{day}</CalendarHeaderCell>
         )
       )}
     </div>
@@ -431,7 +425,7 @@ export const CalendarHeaderCell: React.FC<{
   className?: string;
   children: ReactNode;
 }> = ({ className, children }) => (
-  <div className={cn('text-center text-[11px] font-semibold text-slate-400 uppercase tracking-wider py-1', className)}>
+  <div className={cn('text-center text-xs text-muted font-medium select-none py-1', className)}>
     {children}
   </div>
 );
@@ -448,9 +442,8 @@ export const CalendarGridBody: React.FC<{
     const firstDayOfMonth = new Date(year, month, 1);
     const lastDayOfMonth = new Date(year, month + 1, 0);
 
-    // Adjust for Monday start (0 = Sunday, 1 = Monday, ...)
-    let startDayOfWeek = firstDayOfMonth.getDay() - 1;
-    if (startDayOfWeek === -1) startDayOfWeek = 6;
+    // Standard Sunday start (0 = Sunday)
+    const startDayOfWeek = firstDayOfMonth.getDay();
 
     const days: { date: Date; dateStr: string; isCurrentMonth: boolean }[] = [];
 
@@ -466,7 +459,7 @@ export const CalendarGridBody: React.FC<{
       days.push({ date: current, dateStr: formatISODate(current), isCurrentMonth: true });
     }
 
-    // Trailing days to fill 5 or 6 rows (multiples of 7)
+    // Trailing days to fill multiples of 7
     const remaining = 7 - (days.length % 7);
     if (remaining < 7) {
       for (let i = 1; i <= remaining; i++) {
@@ -519,11 +512,11 @@ export const CalendarCell: React.FC<{
           onClick={() => ctx.onSelectDate(dateStr)}
           className={cn(
             'w-8 h-8 rounded-full text-xs flex items-center justify-center font-medium transition-all select-none',
-            !date.isCurrentMonth && 'text-slate-300',
-            date.isCurrentMonth && !isSelected && 'text-slate-700 hover:bg-slate-100',
+            !date.isCurrentMonth && 'text-muted/40',
+            date.isCurrentMonth && !isSelected && 'text-foreground hover:bg-default',
             isToday && !isSelected && 'border border-[#D68904] font-bold text-[#D68904]',
             isSelected && 'bg-[#D68904] text-white font-semibold shadow-xs hover:bg-[#b86e03]',
-            isDisabled && 'opacity-30 cursor-not-allowed hover:bg-transparent text-slate-300',
+            isDisabled && 'opacity-30 cursor-not-allowed hover:bg-transparent text-muted/30',
             className
           )}
         >
@@ -542,7 +535,6 @@ export const CalendarCell: React.FC<{
   const isEnd = ctx.rangeEnd === dateStr;
   const isSingleDayRange = isStart && isEnd;
 
-  // If start is set but end is not, use hover date to preview the range
   const isPreviewing = Boolean(ctx.rangeStart && !ctx.rangeEnd && ctx.hoverDate);
   const effectiveEndObj = isPreviewing ? hoverObj : endObj;
 
@@ -572,13 +564,13 @@ export const CalendarCell: React.FC<{
         onClick={() => ctx.onSelectDate(dateStr)}
         className={cn(
           'w-8 h-8 text-xs flex items-center justify-center font-medium transition-all select-none',
-          !date.isCurrentMonth && 'text-slate-300',
-          date.isCurrentMonth && !isStart && !isEnd && !isBetweenDates && 'text-slate-700 hover:bg-slate-100 rounded-full',
+          !date.isCurrentMonth && 'text-muted/40',
+          date.isCurrentMonth && !isStart && !isEnd && !isBetweenDates && 'text-foreground hover:bg-default rounded-full',
           isBetweenDates && 'text-amber-900 font-semibold',
           isToday && !isStart && !isEnd && 'font-bold text-[#D68904]',
           (isStart || isEnd) &&
             'bg-[#D68904] text-white font-semibold shadow-xs hover:bg-[#b86e03] rounded-full z-10',
-          isDisabled && 'opacity-30 cursor-not-allowed hover:bg-transparent text-slate-300',
+          isDisabled && 'opacity-30 cursor-not-allowed hover:bg-transparent text-muted/30',
           className
         )}
       >
@@ -605,20 +597,28 @@ export const RangeCalendar = Object.assign(
     return (
       <div
         aria-label={ariaLabel}
-        className={cn('w-72 select-none rounded-2xl bg-white p-2.5', className)}
+        className={cn('w-72 select-none rounded-2xl bg-surface p-2', className)}
       >
         {children || (
           <>
             <CalendarHeader>
-              <CalendarHeading />
+              <CalendarHeading className="font-medium text-foreground" />
               <div className="flex items-center gap-1">
-                <CalendarNavButton slot="previous" />
-                <CalendarNavButton slot="next" />
+                <CalendarNavButton className="text-muted hover:bg-default" slot="previous" />
+                <CalendarNavButton className="text-muted hover:bg-default" slot="next" />
               </div>
             </CalendarHeader>
             <div className="pt-2">
-              <CalendarGridHeader />
-              <CalendarGridBody />
+              <CalendarGridHeader>
+                {(day) => (
+                  <CalendarHeaderCell className="text-xs text-muted">
+                    {day}
+                  </CalendarHeaderCell>
+                )}
+              </CalendarGridHeader>
+              <CalendarGridBody>
+                {(date) => <CalendarCell date={date} />}
+              </CalendarGridBody>
             </div>
           </>
         )}
@@ -652,20 +652,28 @@ export const Calendar = Object.assign(
     return (
       <div
         aria-label={ariaLabel}
-        className={cn('w-72 select-none rounded-2xl bg-white p-2.5', className)}
+        className={cn('w-72 select-none rounded-2xl bg-surface p-2', className)}
       >
         {children || (
           <>
             <CalendarHeader>
-              <CalendarHeading />
+              <CalendarHeading className="font-medium text-foreground" />
               <div className="flex items-center gap-1">
-                <CalendarNavButton slot="previous" />
-                <CalendarNavButton slot="next" />
+                <CalendarNavButton className="text-muted hover:bg-default" slot="previous" />
+                <CalendarNavButton className="text-muted hover:bg-default" slot="next" />
               </div>
             </CalendarHeader>
             <div className="pt-2">
-              <CalendarGridHeader />
-              <CalendarGridBody />
+              <CalendarGridHeader>
+                {(day) => (
+                  <CalendarHeaderCell className="text-xs text-muted">
+                    {day}
+                  </CalendarHeaderCell>
+                )}
+              </CalendarGridHeader>
+              <CalendarGridBody>
+                {(date) => <CalendarCell date={date} />}
+              </CalendarGridBody>
             </div>
           </>
         )}
@@ -700,7 +708,6 @@ export const DatePickerPopover: React.FC<{
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
-        // Check if click was on the trigger button or input
         const trigger = popoverRef.current.parentElement?.querySelector('[data-datepicker-trigger]');
         if (trigger && trigger.contains(e.target as Node)) {
           return;
@@ -731,7 +738,7 @@ export const DatePickerPopover: React.FC<{
     <div
       ref={popoverRef}
       className={cn(
-        'absolute left-0 top-full mt-1.5 z-50 rounded-2xl border border-slate-200/90 bg-white p-2 shadow-xl animate-fadeIn',
+        'absolute left-0 top-full mt-1.5 z-50 rounded-2xl border border-border/80 bg-surface p-2 shadow-sm animate-fadeIn',
         className
       )}
     >
@@ -756,8 +763,8 @@ export const DatePickerTrigger: React.FC<{
       }}
       disabled={ctx.disabled}
       className={cn(
-        'inline-flex items-center justify-center p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors select-none',
-        ctx.isOpen && 'text-[#D68904] bg-amber-50',
+        'inline-flex items-center justify-center p-1.5 rounded-lg text-muted hover:bg-default transition-colors select-none',
+        ctx.isOpen && 'text-[#D68904] bg-default',
         className
       )}
       title="Open Calendar"
@@ -775,7 +782,7 @@ export const RangeSeparator: React.FC<{
   className?: string;
   children?: ReactNode;
 }> = ({ className, children }) => (
-  <span className={cn('text-slate-400 font-medium select-none px-1 text-xs', className)}>
+  <span className={cn('text-muted font-medium select-none px-1 text-xs', className)}>
     {children || '–'}
   </span>
 );
@@ -830,7 +837,6 @@ export const DatePicker = Object.assign(
 
       const [isOpen, setIsOpen] = useState(false);
 
-      // Default month/year view to selected date or current date
       const initialDate = parseISODate(singleDate) || new Date();
       const [viewYear, setViewYear] = useState(initialDate.getFullYear());
       const [viewMonth, setViewMonth] = useState(initialDate.getMonth());
@@ -917,19 +923,20 @@ export const DatePicker = Object.assign(
             ) : (
               <>
                 <DateField.Group
+                  fullWidth
+                  variant="secondary"
                   onClick={() => {
                     if (!disabled) setIsOpen(!isOpen);
                   }}
                   className={cn(
+                    'rounded-xl border border-border/80 bg-default shadow-sm',
                     error && 'border-red-500 focus-within:border-red-500 focus-within:ring-red-500/20',
-                    disabled && 'bg-slate-100 cursor-not-allowed opacity-60'
+                    disabled && 'bg-default/60 cursor-not-allowed opacity-60'
                   )}
                 >
-                  <DateField.Input
-                    placeholder={placeholder}
-                    value={singleDate}
-                    disabled={disabled}
-                  />
+                  <DateField.Input slot="single" placeholder={placeholder} disabled={disabled}>
+                    {(segment) => <DateField.Segment segment={segment} />}
+                  </DateField.Input>
 
                   {name && <input type="hidden" name={name} value={singleDate} />}
 
@@ -941,19 +948,39 @@ export const DatePicker = Object.assign(
                           e.stopPropagation();
                           clearSelection();
                         }}
-                        className="p-1 text-slate-400 hover:text-slate-600 rounded-md transition-colors mr-1"
+                        className="p-1 text-muted hover:text-foreground rounded-md transition-colors mr-1"
                         title="Clear date"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
                     )}
-                    <DatePickerTrigger />
+                    <DatePickerTrigger className="text-muted">
+                      <DatePickerTriggerIndicator />
+                    </DatePickerTrigger>
                   </DateField.Suffix>
                 </DateField.Group>
 
-                <DatePickerPopover>
-                  <Calendar />
-                  <div className="flex items-center justify-between pt-2 px-1 border-t border-slate-100 text-xs">
+                <DatePickerPopover className="border border-border/80 shadow-sm">
+                  <Calendar aria-label={label || 'Date picker'} className="rounded-2xl bg-surface p-2">
+                    <Calendar.Header>
+                      <Calendar.Heading className="font-medium text-foreground" />
+                      <Calendar.NavButton className="text-muted hover:bg-default" slot="previous" />
+                      <Calendar.NavButton className="text-muted hover:bg-default" slot="next" />
+                    </Calendar.Header>
+                    <Calendar.Grid>
+                      <Calendar.GridHeader>
+                        {(day) => (
+                          <Calendar.HeaderCell className="text-xs text-muted">
+                            {day}
+                          </Calendar.HeaderCell>
+                        )}
+                      </Calendar.GridHeader>
+                      <Calendar.GridBody>
+                        {(date) => <Calendar.Cell date={date} />}
+                      </Calendar.GridBody>
+                    </Calendar.Grid>
+                  </Calendar>
+                  <div className="flex items-center justify-between pt-2 px-1 border-t border-border/80 text-xs">
                     <button
                       type="button"
                       onClick={() => {
@@ -969,7 +996,7 @@ export const DatePicker = Object.assign(
                       <button
                         type="button"
                         onClick={clearSelection}
-                        className="text-slate-400 hover:text-slate-700 font-medium"
+                        className="text-muted hover:text-foreground font-medium"
                       >
                         Clear
                       </button>
@@ -982,7 +1009,7 @@ export const DatePicker = Object.assign(
             {error ? (
               <p className="text-xs text-red-600 font-medium">{error}</p>
             ) : helperText ? (
-              <p className="text-xs text-slate-500">{helperText}</p>
+              <p className="text-xs text-muted">{helperText}</p>
             ) : null}
           </div>
         </DatePickerContext.Provider>
@@ -1032,8 +1059,8 @@ export const DateRangePicker = Object.assign(
         defaultValue = { start: '', end: '' },
         onChange,
         onRangeChange,
-        startName = 'startDate',
-        endName = 'endDate',
+        startName = 'checkin',
+        endName = 'checkout',
         minDate,
         maxDate,
         required,
@@ -1065,7 +1092,6 @@ export const DateRangePicker = Object.assign(
       const [hoverDate, setHoverDate] = useState<string | null>(null);
       const [isOpen, setIsOpen] = useState(false);
 
-      // Default month/year view to start date or today
       const initialDate = parseISODate(rangeStart) || new Date();
       const [viewYear, setViewYear] = useState(initialDate.getFullYear());
       const [viewMonth, setViewMonth] = useState(initialDate.getMonth());
@@ -1113,14 +1139,11 @@ export const DateRangePicker = Object.assign(
 
       const onSelectDate = useCallback(
         (dateStr: string) => {
-          // If no start date, or both start & end are already set, begin new range
           if (!rangeStart || (rangeStart && rangeEnd)) {
             updateRange(dateStr, '');
             setHoverDate(null);
           } else if (rangeStart && !rangeEnd) {
-            // Second click: finalize range
             if (dateStr < rangeStart) {
-              // User clicked an earlier date, make it start
               updateRange(dateStr, rangeStart);
             } else {
               updateRange(rangeStart, dateStr);
@@ -1175,19 +1198,24 @@ export const DateRangePicker = Object.assign(
             ) : (
               <>
                 <DateField.Group
+                  fullWidth
+                  variant="secondary"
                   onClick={() => {
                     if (!disabled) setIsOpen(!isOpen);
                   }}
                   className={cn(
+                    'rounded-xl border border-border/80 bg-default shadow-sm',
                     error && 'border-red-500 focus-within:border-red-500 focus-within:ring-red-500/20',
-                    disabled && 'bg-slate-100 cursor-not-allowed opacity-60'
+                    disabled && 'bg-default/60 cursor-not-allowed opacity-60'
                   )}
                 >
-                  <DateField.InputContainer>
-                    <DateField.Input slot="start" placeholder="Start date" />
-                    <RangeSeparator className="text-slate-400" />
-                    <DateField.Input slot="end" placeholder="End date" />
-                  </DateField.InputContainer>
+                  <DateField.Input slot="start">
+                    {(segment) => <DateField.Segment segment={segment} />}
+                  </DateField.Input>
+                  <RangeSeparator className="text-muted" />
+                  <DateField.Input slot="end">
+                    {(segment) => <DateField.Segment segment={segment} />}
+                  </DateField.Input>
 
                   {startName && <input type="hidden" name={startName} value={rangeStart} />}
                   {endName && <input type="hidden" name={endName} value={rangeEnd} />}
@@ -1200,21 +1228,41 @@ export const DateRangePicker = Object.assign(
                           e.stopPropagation();
                           clearSelection();
                         }}
-                        className="p-1 text-slate-400 hover:text-slate-600 rounded-md transition-colors mr-1"
+                        className="p-1 text-muted hover:text-foreground rounded-md transition-colors mr-1"
                         title="Clear range"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
                     )}
-                    <DatePickerTrigger />
+                    <DatePickerTrigger className="text-muted">
+                      <DatePickerTriggerIndicator />
+                    </DatePickerTrigger>
                   </DateField.Suffix>
                 </DateField.Group>
 
-                <DatePickerPopover>
+                <DatePickerPopover className="border border-border/80 shadow-sm">
                   <div className="flex flex-col gap-2">
-                    <RangeCalendar />
-                    {/* Quick presets for convenience */}
-                    <div className="flex flex-wrap items-center justify-between gap-1 pt-2 px-1 border-t border-slate-100 text-xs">
+                    <RangeCalendar aria-label={label || 'Stay dates'} className="rounded-2xl bg-surface p-2">
+                      <RangeCalendar.Header>
+                        <RangeCalendar.Heading className="font-medium text-foreground" />
+                        <RangeCalendar.NavButton className="text-muted hover:bg-default" slot="previous" />
+                        <RangeCalendar.NavButton className="text-muted hover:bg-default" slot="next" />
+                      </RangeCalendar.Header>
+                      <RangeCalendar.Grid>
+                        <RangeCalendar.GridHeader>
+                          {(day) => (
+                            <RangeCalendar.HeaderCell className="text-xs text-muted">
+                              {day}
+                            </RangeCalendar.HeaderCell>
+                          )}
+                        </RangeCalendar.GridHeader>
+                        <RangeCalendar.GridBody>
+                          {(date) => <RangeCalendar.Cell date={date} />}
+                        </RangeCalendar.GridBody>
+                      </RangeCalendar.Grid>
+                    </RangeCalendar>
+
+                    <div className="flex flex-wrap items-center justify-between gap-1 pt-2 px-1 border-t border-border/80 text-xs">
                       <div className="flex items-center gap-1.5">
                         <button
                           type="button"
@@ -1225,7 +1273,7 @@ export const DateRangePicker = Object.assign(
                             updateRange(todayStr, formatISODate(next30));
                             setIsOpen(false);
                           }}
-                          className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-amber-50 hover:text-[#D68904] text-slate-600 font-medium transition-colors"
+                          className="px-2 py-0.5 rounded-md bg-default hover:bg-amber-50 hover:text-[#D68904] text-muted font-medium transition-colors"
                         >
                           +30 Days
                         </button>
@@ -1238,7 +1286,7 @@ export const DateRangePicker = Object.assign(
                             updateRange(todayStr, formatISODate(next90));
                             setIsOpen(false);
                           }}
-                          className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-amber-50 hover:text-[#D68904] text-slate-600 font-medium transition-colors"
+                          className="px-2 py-0.5 rounded-md bg-default hover:bg-amber-50 hover:text-[#D68904] text-muted font-medium transition-colors"
                         >
                           +3 Months
                         </button>
@@ -1251,7 +1299,7 @@ export const DateRangePicker = Object.assign(
                             updateRange(todayStr, formatISODate(nextYear));
                             setIsOpen(false);
                           }}
-                          className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-amber-50 hover:text-[#D68904] text-slate-600 font-medium transition-colors"
+                          className="px-2 py-0.5 rounded-md bg-default hover:bg-amber-50 hover:text-[#D68904] text-muted font-medium transition-colors"
                         >
                           +1 Year
                         </button>
@@ -1261,7 +1309,7 @@ export const DateRangePicker = Object.assign(
                         <button
                           type="button"
                           onClick={clearSelection}
-                          className="text-slate-400 hover:text-slate-700 font-medium ml-auto"
+                          className="text-muted hover:text-foreground font-medium ml-auto"
                         >
                           Clear
                         </button>
@@ -1275,7 +1323,7 @@ export const DateRangePicker = Object.assign(
             {error ? (
               <p className="text-xs text-red-600 font-medium">{error}</p>
             ) : helperText ? (
-              <p className="text-xs text-slate-500">{helperText}</p>
+              <p className="text-xs text-muted">{helperText}</p>
             ) : null}
           </div>
         </DatePickerContext.Provider>

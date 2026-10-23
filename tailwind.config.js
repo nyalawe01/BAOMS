@@ -60,7 +60,23 @@ export default {
           500: '#6b7280',
           600: '#4b5563',
         },
+        border: {
+          DEFAULT: '#e4e4e7',
+          border: '#e4e4e7',
+        },
+        default: {
+          DEFAULT: '#f4f4f5',
+          hover: '#e4e4e7',
+        },
+        muted: {
+          DEFAULT: '#71717a',
+          foreground: '#71717a',
+        },
+        foreground: {
+          DEFAULT: '#18181b',
+        },
         surface: {
+          DEFAULT: '#ffffff',
           bg: '#f9fafb',
           card: '#ffffff',
           border: '#e5e7eb',

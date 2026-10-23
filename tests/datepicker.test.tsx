@@ -37,8 +37,7 @@ describe('DatePicker Component', () => {
     );
 
     expect(screen.getByText('Activity Date')).toBeInTheDocument();
-    const input = screen.getByDisplayValue('Oct 23, 2026');
-    expect(input).toBeInTheDocument();
+    expect(screen.getByText('Oct 23, 2026')).toBeInTheDocument();
   });
 });
 
@@ -55,8 +54,8 @@ describe('DateRangePicker Component', () => {
     );
 
     expect(screen.getByText('Project Duration')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Jan 1, 2026')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Dec 31, 2026')).toBeInTheDocument();
+    expect(screen.getByText('Jan 1, 2026')).toBeInTheDocument();
+    expect(screen.getByText('Dec 31, 2026')).toBeInTheDocument();
   });
 });
 
