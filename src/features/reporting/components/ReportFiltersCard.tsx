@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ReportCategory, ReportFilterParams } from '../types/reporting';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { DateRangePicker } from '@/components/ui/DatePicker';
 import {
   FileSpreadsheet,
   Play,
@@ -105,25 +106,13 @@ export const ReportFiltersCard: React.FC<ReportFiltersCardProps> = ({
               </select>
             </div>
 
-            <div className="flex items-center gap-2">
-              <input
-                type="date"
-                value={filters.startDate || ''}
-                onChange={(e) =>
-                  onFilterChange({ ...filters, startDate: e.target.value })
+            <div>
+              <DateRangePicker
+                startDate={filters.startDate}
+                endDate={filters.endDate}
+                onRangeChange={(start, end) =>
+                  onFilterChange({ ...filters, startDate: start, endDate: end })
                 }
-                className="w-full px-2.5 py-2 text-xs rounded-lg border border-surface-border bg-surface-card"
-                title="Start Date"
-              />
-              <span className="text-xs text-charcoal-muted">to</span>
-              <input
-                type="date"
-                value={filters.endDate || ''}
-                onChange={(e) =>
-                  onFilterChange({ ...filters, endDate: e.target.value })
-                }
-                className="w-full px-2.5 py-2 text-xs rounded-lg border border-surface-border bg-surface-card"
-                title="End Date"
               />
             </div>
           </div>

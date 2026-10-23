@@ -14,6 +14,7 @@ import {
 } from '../services/hrService';
 import { useAuth } from '@/features/auth/useAuth';
 import { Button } from '@/components/ui/Button';
+import { DateRangePicker } from '@/components/ui/DatePicker';
 import { X, Calendar, AlertCircle, Info } from 'lucide-react';
 
 interface CreateLeaveRequestModalProps {
@@ -270,32 +271,16 @@ export const CreateLeaveRequestModal: React.FC<CreateLeaveRequestModalProps> = (
           </div>
 
           {/* Date Range */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-1">
-                {t('hr.startDate', 'Start Date')} *
-              </label>
-              <input
-                type="date"
-                required
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-forest-600"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-1">
-                {t('hr.endDate', 'End Date')} *
-              </label>
-              <input
-                type="date"
-                required
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-forest-600"
-              />
-            </div>
-          </div>
+          <DateRangePicker
+            label={t('hr.leavePeriod', 'Leave Period (Start & End Date)')}
+            startDate={startDate}
+            endDate={endDate}
+            onRangeChange={(start, end) => {
+              setStartDate(start);
+              setEndDate(end);
+            }}
+            required
+          />
 
           {/* Days requested preview badge */}
           <div className="p-3 rounded-lg border border-surface-border bg-surface-muted/20 flex items-center justify-between">

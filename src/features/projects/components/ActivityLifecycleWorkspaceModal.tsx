@@ -24,6 +24,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Textarea } from '@/components/ui/Textarea';
 import { Select } from '@/components/ui/Select';
 import { Card } from '@/components/ui/Card';
@@ -538,11 +539,11 @@ export const ActivityLifecycleWorkspaceModal: React.FC<ActivityLifecycleWorkspac
                 placeholder="e.g. Conduct Ward Mobilization Workshop"
               />
 
-              <Input
-                type="date"
+              <DatePicker
                 label="Target Activity Date *"
                 value={requestForm.date}
-                onChange={(e) => setRequestForm({ ...requestForm, date: e.target.value })}
+                onChange={(val) => setRequestForm({ ...requestForm, date: val })}
+                required
               />
 
               <div className="md:col-span-2">

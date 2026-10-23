@@ -18,3 +18,15 @@ export * from './Card';
 export * from './StatusIndicator';
 export * from './EmptyState';
 export * from './Tabs';
+export {
+  DatePicker,
+  DateRangePicker,
+  DateField,
+  RangeCalendar,
+  Calendar,
+  parseISODate,
+  formatISODate,
+  formatDisplayDate,
+  type DatePickerProps,
+  type DateRangePickerProps,
+} from './DatePicker';

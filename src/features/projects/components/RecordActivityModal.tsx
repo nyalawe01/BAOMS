@@ -12,6 +12,7 @@ import { Activity, Paperclip, AlertCircle, X, UploadCloud } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Textarea } from '@/components/ui/Textarea';
 import { CreateActivityInput } from '../types/project';
 
@@ -168,11 +169,10 @@ export const RecordActivityModal: React.FC<RecordActivityModalProps> = ({
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Input
-            type="date"
+          <DatePicker
             label={t('projects.fields.activityDate', 'Activity Date')}
             value={activityDate}
-            onChange={(e) => setActivityDate(e.target.value)}
+            onChange={(val) => setActivityDate(val)}
             required
           />
 

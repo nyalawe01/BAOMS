@@ -9,6 +9,7 @@ import { Briefcase, AlertCircle } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DateRangePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { CreateProjectInput } from '../types/project';
@@ -167,23 +168,16 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           rows={3}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            type="date"
-            label={t('projects.fields.startDate', 'Start Date')}
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            required
-          />
-
-          <Input
-            type="date"
-            label={t('projects.fields.endDate', 'End Date')}
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            required
-          />
-        </div>
+        <DateRangePicker
+          label={t('projects.fields.projectDuration', 'Project Duration (Start & End Date)')}
+          startDate={startDate}
+          endDate={endDate}
+          onRangeChange={(start, end) => {
+            setStartDate(start);
+            setEndDate(end);
+          }}
+          required
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2">

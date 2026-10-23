@@ -9,6 +9,7 @@ import { AlertCircle } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { FinancialRequestRecord, PaymentMethod, RecordPaymentPayload } from '../types/finance';
@@ -195,13 +196,10 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-charcoal-muted uppercase tracking-wider mb-1.5">
-              {t('finance.disbursementDate', 'Payment Date')} *
-            </label>
-            <Input
-              type="date"
+            <DatePicker
+              label={t('finance.disbursementDate', 'Payment Date')}
               value={paymentDate}
-              onChange={(e) => setPaymentDate(e.target.value)}
+              onChange={(val) => setPaymentDate(val)}
               required
             />
           </div>

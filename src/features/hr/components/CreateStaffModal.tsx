@@ -8,6 +8,7 @@ import {
 } from '../types/hr';
 import { createStaffProfile } from '../services/hrService';
 import { Button } from '@/components/ui/Button';
+import { DatePicker, DateRangePicker } from '@/components/ui/DatePicker';
 import { X, UserPlus, AlertCircle } from 'lucide-react';
 
 interface CreateStaffModalProps {
@@ -263,30 +264,26 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
               )}
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-1">
-                {t('hr.startDate', 'Start Date')} *
-              </label>
-              <input
-                type="date"
-                required
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-forest-600"
-              />
-            </div>
-
-            {contractType !== 'permanent' && (
-              <div>
-                <label className="block text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-1">
-                  {t('hr.endDate', 'Contract End Date')} *
-                </label>
-                <input
-                  type="date"
+            {contractType !== 'permanent' ? (
+              <div className="md:col-span-2">
+                <DateRangePicker
+                  label={t('hr.contractPeriod', 'Contract Period (Start & End Date)')}
+                  startDate={startDate}
+                  endDate={endDate}
+                  onRangeChange={(start, end) => {
+                    setStartDate(start);
+                    setEndDate(end);
+                  }}
                   required
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-surface-border bg-surface-card focus:outline-hidden focus:ring-2 focus:ring-forest-600"
+                />
+              </div>
+            ) : (
+              <div>
+                <DatePicker
+                  label={t('hr.startDate', 'Start Date')}
+                  value={startDate}
+                  onChange={(val) => setStartDate(val)}
+                  required
                 />
               </div>
             )}

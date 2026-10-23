@@ -28,7 +28,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "lucide-react": ["src/lib/fontAwesomeIcons.tsx"]
+      "lucide-react": ["src/lib/fontAwesomeIcons.tsx"],
+      "@heroui/react": ["src/components/ui/DatePicker.tsx"]
     }
   },
   "include": ["src", "tests"]

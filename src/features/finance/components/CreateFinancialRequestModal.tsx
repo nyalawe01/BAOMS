@@ -9,6 +9,7 @@ import { Plus, Trash2, AlertCircle, FileText, UploadCloud, Paperclip, X } from '
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import {
@@ -299,13 +300,10 @@ export const CreateFinancialRequestModal: React.FC<CreateFinancialRequestModalPr
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-charcoal-muted uppercase tracking-wider mb-1.5">
-              {t('finance.requiredByDate', 'Required By / Due Date')}
-            </label>
-            <Input
-              type="date"
+            <DatePicker
+              label={t('finance.requiredByDate', 'Required By / Due Date')}
               value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
+              onChange={(val) => setDueDate(val)}
             />
           </div>
         </div>

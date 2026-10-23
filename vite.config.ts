@@ -9,6 +9,7 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       'lucide-react': path.resolve(__dirname, './src/lib/fontAwesomeIcons.tsx'),
+      '@heroui/react': path.resolve(__dirname, './src/components/ui/DatePicker.tsx'),
     },
   },
   build: {

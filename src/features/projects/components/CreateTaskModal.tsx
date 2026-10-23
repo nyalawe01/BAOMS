@@ -9,6 +9,7 @@ import { CheckSquare, AlertCircle } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import {
@@ -154,11 +155,10 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           />
         </div>
 
-        <Input
-          type="date"
+        <DatePicker
           label={t('projects.fields.dueDate', 'Due Date')}
           value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
+          onChange={(val) => setDueDate(val)}
         />
 
         <div className="flex justify-end gap-3 pt-4 border-t border-surface-border">

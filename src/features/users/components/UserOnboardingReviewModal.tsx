@@ -19,6 +19,7 @@ import {
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { Badge } from '@/components/ui/Badge';
 import { ROLES, RoleCode } from '@/lib/permissions';
@@ -355,12 +356,11 @@ export const UserOnboardingReviewModal: React.FC<UserOnboardingReviewModalProps>
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Date of Birth
-                </label>
-                <Input type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
-              </div>
+              <DatePicker
+                label="Date of Birth"
+                value={dob}
+                onChange={(val) => setDob(val)}
+              />
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -451,12 +451,11 @@ export const UserOnboardingReviewModal: React.FC<UserOnboardingReviewModalProps>
                 </Select>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Appointment Start Date
-                </label>
-                <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-              </div>
+              <DatePicker
+                label="Appointment Start Date"
+                value={startDate}
+                onChange={(val) => setStartDate(val)}
+              />
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">

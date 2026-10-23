@@ -23,6 +23,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DateRangePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { Stepper, StepItem } from '@/components/ui/Stepper';
@@ -1016,32 +1017,18 @@ export const RegisterProjectPage: React.FC = () => {
                   }
                 />
 
-                <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    type="date"
-                    label="Start Date *"
-                    value={formData.funding.startDate}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        funding: { ...formData.funding, startDate: e.target.value },
-                      })
-                    }
-                    required
-                  />
-                  <Input
-                    type="date"
-                    label="End Date *"
-                    value={formData.funding.endDate}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        funding: { ...formData.funding, endDate: e.target.value },
-                      })
-                    }
-                    required
-                  />
-                </div>
+                <DateRangePicker
+                  label="Project Duration (Start & End Date) *"
+                  startDate={formData.funding.startDate}
+                  endDate={formData.funding.endDate}
+                  onRangeChange={(start, end) =>
+                    setFormData({
+                      ...formData,
+                      funding: { ...formData.funding, startDate: start, endDate: end },
+                    })
+                  }
+                  required
+                />
               </div>
 
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 flex items-start gap-2.5">
