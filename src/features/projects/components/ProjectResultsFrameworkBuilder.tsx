@@ -17,7 +17,7 @@ import {
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { DatePicker } from '@/components/ui/DatePicker';
+import { DateRangePicker } from '@/components/ui/DatePicker';
 import { StaffMemberOption } from '@/services/staffService';
 
 export interface DraftActivityItem {
@@ -26,6 +26,7 @@ export interface DraftActivityItem {
   title: string;
   description: string;
   activityDate: string;
+  endDate?: string;
   durationDays?: number;
   wardLocation: string;
   targetParticipants: number;
@@ -101,6 +102,7 @@ export const ProjectResultsFrameworkBuilder: React.FC<ProjectResultsFrameworkBui
               title: `Community Implementation Activity`,
               description: '',
               activityDate: new Date().toISOString().slice(0, 10),
+              endDate: new Date().toISOString().slice(0, 10),
               durationDays: 1,
               wardLocation: availableLocations[0] || 'Temeke',
               targetParticipants: 50,
@@ -182,6 +184,7 @@ export const ProjectResultsFrameworkBuilder: React.FC<ProjectResultsFrameworkBui
       title: `Field Session / Activity ${actNum}`,
       description: '',
       activityDate: new Date().toISOString().slice(0, 10),
+      endDate: new Date().toISOString().slice(0, 10),
       durationDays: 1,
       wardLocation: availableLocations[0] || 'Kigamboni',
       targetParticipants: 30,
@@ -214,6 +217,39 @@ export const ProjectResultsFrameworkBuilder: React.FC<ProjectResultsFrameworkBui
         if (outIdx !== outputIndex) return outp;
         const newActivities = outp.activities.map((act, aIdx) =>
           aIdx === actIndex ? { ...act, [key]: val } : act
+        );
+        return { ...outp, activities: newActivities };
+      });
+      return { ...o, outputs: newOutputs };
+    });
+    onChange(updated);
+  };
+
+  const handleUpdateActivityDateRange = (
+    outcomeIndex: number,
+    outputIndex: number,
+    actIndex: number,
+    startDate: string,
+    endDate: string
+  ) => {
+    const days =
+      startDate && endDate
+        ? Math.max(
+            1,
+            Math.round(
+              (new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000
+            ) + 1
+          )
+        : 1;
+
+    const updated = outcomes.map((o, oIdx) => {
+      if (oIdx !== outcomeIndex) return o;
+      const newOutputs = o.outputs.map((outp, outIdx) => {
+        if (outIdx !== outputIndex) return outp;
+        const newActivities = outp.activities.map((act, aIdx) =>
+          aIdx === actIndex
+            ? { ...act, activityDate: startDate, endDate: endDate || startDate, durationDays: days }
+            : act
         );
         return { ...outp, activities: newActivities };
       });
@@ -493,45 +529,37 @@ export const ProjectResultsFrameworkBuilder: React.FC<ProjectResultsFrameworkBui
                                 />
                               </div>
 
-                              {/* 3 Parameter Controls: Date & Duration Slider, Location Dropdown, Target (Manual Typing) */}
+                              {/* 3 Parameter Controls: Date Range Picker, Location Dropdown, Target (Manual Typing) */}
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
-                                {/* Control 1: Date & Duration Slider */}
-                                <div className="p-2.5 rounded-lg bg-white border border-slate-200 space-y-2">
-                                  <div className="flex items-center justify-between">
-                                    <label className="text-[10px] text-slate-600 font-bold uppercase tracking-wider flex items-center gap-1">
-                                      <Calendar className="w-3 h-3 text-[#D68904]" /> Start Date &amp; Duration
-                                    </label>
-                                    <span className="font-mono text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
-                                      {act.durationDays || 1} {(act.durationDays || 1) === 1 ? 'day' : 'days'}
-                                      {(act.durationDays || 1) >= 7 ? ` (${Math.round((act.durationDays || 1) / 7)} wk)` : ''}
-                                    </span>
-                                  </div>
-                                  <DatePicker
-                                    value={act.activityDate}
-                                    placeholder="Start Date"
-                                    onChange={(val) =>
-                                      handleUpdateActivity(oIdx, outIdx, aIdx, 'activityDate', val)
+                                {/* Control 1: Date Range Picker (HeroUI Style) */}
+                                <div className="p-2.5 rounded-lg bg-white border border-slate-200">
+                                  <DateRangePicker
+                                    label="Activity Timeline"
+                                    startDate={act.activityDate}
+                                    endDate={
+                                      act.endDate ||
+                                      (act.activityDate && act.durationDays && act.durationDays > 1
+                                        ? new Date(
+                                            new Date(act.activityDate).getTime() +
+                                              (act.durationDays - 1) * 86400000
+                                          )
+                                            .toISOString()
+                                            .slice(0, 10)
+                                        : act.activityDate)
+                                    }
+                                    onRangeChange={(start, end) =>
+                                      handleUpdateActivityDateRange(oIdx, outIdx, aIdx, start, end)
+                                    }
+                                    helperText={
+                                      act.durationDays && act.durationDays > 0
+                                        ? `${act.durationDays} ${act.durationDays === 1 ? 'day' : 'days'}${
+                                            act.durationDays >= 7
+                                              ? ` (${Math.round((act.durationDays / 7) * 10) / 10} wks)`
+                                              : ''
+                                          }`
+                                        : undefined
                                     }
                                   />
-                                  <div className="space-y-1">
-                                    <input
-                                      type="range"
-                                      min="1"
-                                      max="30"
-                                      step="1"
-                                      value={act.durationDays || 1}
-                                      onChange={(e) =>
-                                        handleUpdateActivity(oIdx, outIdx, aIdx, 'durationDays', Number(e.target.value))
-                                      }
-                                      className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#D68904]"
-                                    />
-                                    <div className="flex justify-between text-[9px] text-slate-400 font-mono">
-                                      <span>1 day</span>
-                                      <span>1 wk</span>
-                                      <span>2 wks</span>
-                                      <span>1 month</span>
-                                    </div>
-                                  </div>
                                 </div>
 
                                 {/* Control 2: Derived Location Dropdown (District / Ward) */}
