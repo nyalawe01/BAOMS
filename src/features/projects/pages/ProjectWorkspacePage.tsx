@@ -373,7 +373,7 @@ export const ProjectWorkspacePage: React.FC = () => {
               <Button
                 variant="primary"
                 size="sm"
-                onClick={() => setIsActivityModalOpen(true)}
+                onClick={() => navigate(`/projects/${id}/activities/new`)}
                 className="flex items-center gap-1.5"
               >
                 <Activity className="w-4 h-4" />
@@ -904,7 +904,7 @@ export const ProjectWorkspacePage: React.FC = () => {
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => setIsActivityModalOpen(true)}
+                  onClick={() => navigate(`/projects/${id}/activities/new`)}
                   className="bg-[#D68904] hover:bg-[#b45309] text-white flex items-center gap-1.5 text-xs font-semibold"
                 >
                   <Plus className="w-4 h-4" />
@@ -962,7 +962,7 @@ export const ProjectWorkspacePage: React.FC = () => {
                 canRecordActivity
                   ? {
                       label: t('projects.recordActivity', 'Record Field Activity'),
-                      onClick: () => setIsActivityModalOpen(true),
+                      onClick: () => navigate(`/projects/${id}/activities/new`),
                     }
                   : undefined
               }

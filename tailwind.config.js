@@ -64,13 +64,29 @@ export default {
           DEFAULT: '#e4e4e7',
           border: '#e4e4e7',
         },
+        input: '#e2e8f0',
+        background: '#ffffff',
+        primary: {
+          DEFAULT: '#D68904',
+          foreground: '#ffffff',
+          hover: '#b86e03',
+          50: '#fdf9f0',
+          100: '#fbf0d9',
+          500: '#D68904',
+          600: '#b86e03',
+          700: '#915206',
+        },
+        destructive: {
+          DEFAULT: '#ef4444',
+          foreground: '#ffffff',
+        },
         default: {
           DEFAULT: '#f4f4f5',
           hover: '#e4e4e7',
         },
         muted: {
-          DEFAULT: '#71717a',
-          foreground: '#71717a',
+          DEFAULT: '#f1f5f9',
+          foreground: '#64748b',
         },
         foreground: {
           DEFAULT: '#18181b',

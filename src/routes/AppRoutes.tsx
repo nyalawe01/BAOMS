@@ -14,6 +14,8 @@ import { ProjectsPage } from '@/features/projects/pages/ProjectsPage';
 import { ProjectWorkspacePage } from '@/features/projects/pages/ProjectWorkspacePage';
 import { ProjectEnginePage } from '@/features/projects/dynamic/ProjectEnginePage';
 import { RegisterProjectPage } from '@/features/projects/pages/RegisterProjectPage';
+import { RecordActivityPage } from '@/features/projects/pages/RecordActivityPage';
+import { ActivityCalendarPage } from '@/features/projects/pages/ActivityCalendarPage';
 import { FinancePage } from '@/features/finance/pages/FinancePage';
 import { CreateFinancialRequestPage } from '@/features/finance/pages/CreateFinancialRequestPage';
 import { RecordPaymentPage } from '@/features/finance/pages/RecordPaymentPage';
@@ -249,6 +251,38 @@ export const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute requiredPermissions={['projects.view']}>
               <ProjectEnginePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/:id/activities/new"
+          element={
+            <ProtectedRoute requiredPermissions={['projects.report']}>
+              <RecordActivityPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/activities/new"
+          element={
+            <ProtectedRoute requiredPermissions={['projects.report']}>
+              <RecordActivityPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/calendar"
+          element={
+            <ProtectedRoute requiredPermissions={['projects.view']}>
+              <ActivityCalendarPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/calendar"
+          element={
+            <ProtectedRoute requiredPermissions={['projects.view']}>
+              <ActivityCalendarPage />
             </ProtectedRoute>
           }
         />

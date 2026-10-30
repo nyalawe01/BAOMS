@@ -47,9 +47,6 @@ export const RecordActivityModal: React.FC<RecordActivityModalProps> = ({
 
   // Extended analytical fields
   const [showExtendedFields, setShowExtendedFields] = useState(false);
-  const [backgroundContext, setBackgroundContext] = useState('');
-  const [methodology, setMethodology] = useState('');
-  const [sessionNarrative, setSessionNarrative] = useState('');
   const [quoteText, setQuoteText] = useState('');
   const [quoteSpeaker, setQuoteSpeaker] = useState('');
   const [femaleCount, setFemaleCount] = useState('');
@@ -80,8 +77,8 @@ export const RecordActivityModal: React.FC<RecordActivityModalProps> = ({
       setError(t('projects.errors.activityTitleRequired', 'Activity title is required.'));
       return;
     }
-    if (!progress.trim() && !sessionNarrative.trim()) {
-      setError(t('projects.errors.progressRequired', 'Progress and outputs summary or narrative is required.'));
+    if (!progress.trim()) {
+      setError(t('projects.errors.progressRequired', 'Progress and outputs summary is required.'));
       return;
     }
 
@@ -114,13 +111,10 @@ export const RecordActivityModal: React.FC<RecordActivityModalProps> = ({
         activityDate,
         location: location.trim() || undefined,
         participantsCount: isNaN(participants) ? 0 : participants,
-        progress: progress.trim() || sessionNarrative.trim(),
+        progress: progress.trim(),
         challenges: challenges.trim() || undefined,
         followUpActions: followUpActions.trim() || undefined,
         submitImmediately,
-        backgroundContext: backgroundContext.trim() || undefined,
-        methodology: methodology.trim() || undefined,
-        sessionNarrative: sessionNarrative.trim() || undefined,
         participantQuotes: quotes,
         demographicBreakdown,
         budgetAllocated: budgetAllocated ? parseFloat(budgetAllocated) : undefined,
@@ -240,30 +234,6 @@ export const RecordActivityModal: React.FC<RecordActivityModalProps> = ({
 
           {showExtendedFields && (
             <div className="space-y-3 mt-3 pt-3 border-t border-slate-200 dark:border-neutral-700">
-              <Textarea
-                label="Background & Institutional Context"
-                placeholder="Explain the local problem context, historical baseline, and why this intervention was conducted..."
-                value={backgroundContext}
-                onChange={(e) => setBackgroundContext(e.target.value)}
-                rows={2}
-              />
-
-              <Textarea
-                label="Methodology & Facilitation Protocol"
-                placeholder="Participatory tools used, workshop structuring, interactive exercises..."
-                value={methodology}
-                onChange={(e) => setMethodology(e.target.value)}
-                rows={2}
-              />
-
-              <Textarea
-                label="Detailed Multi-Paragraph Field Session Narrative"
-                placeholder="Write long narrative paragraphs detailing the full flow of events, dialogue highlights, breakthroughs..."
-                value={sessionNarrative}
-                onChange={(e) => setSessionNarrative(e.target.value)}
-                rows={4}
-              />
-
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <Input
                   type="number"

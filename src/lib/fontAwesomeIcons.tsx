@@ -791,6 +791,8 @@ export const Landmark = createIcon('Landmark', 'landmark');
 export const User2 = createIcon('User2', 'user');
 export const ArrowUpDown = createIcon('ArrowUpDown', 'arrows-up-down');
 export const CalendarCheck = createIcon('CalendarCheck', 'calendar-check');
+export const List = createIcon('List', 'list-check');
+export const Columns = createIcon('Columns', 'table-columns');
 
 // Generic fallback proxy for any unlisted Lucide icons
 const fallbackIcon = createIcon('FallbackIcon', 'circle-question');

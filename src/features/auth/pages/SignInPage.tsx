@@ -1,53 +1,22 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle } from 'lucide-react';
 import { useAuth } from '@/features/auth/useAuth';
-import { isSupabaseConfigured } from '@/lib/supabase';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { AuthForm } from '@/components/ui/premium-auth';
 
 export const SignInPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, isLoading, mfaPending, verifyMfa, cancelMfa } = useAuth();
+  const { signIn, isLoading, mfaPending, verifyMfa, cancelMfa, requestPasswordReset } = useAuth();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [mfaCode, setMfaCode] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
 
   const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || '/';
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage('');
-
-    if (!email.trim() || !password) {
-      setErrorMessage(t('auth.fillAllFields', 'Please enter both email address and password.'));
-      return;
-    }
-
-    if (password.length < 6) {
-      setErrorMessage(t('auth.passwordTooShort', 'Password must be at least 6 characters long.'));
-      return;
-    }
-
-    const result = await signIn(email, password, rememberMe);
-
-    if (result.success) {
-      navigate(from, { replace: true });
-    } else if (result.mfaRequired) {
-      setErrorMessage('');
-    } else {
-      setErrorMessage(result.error || t('auth.invalidCredentials', 'Sign in failed. Check your credentials.'));
-      if (result.error?.includes('deactivated')) {
-        navigate('/account-deactivated');
-      }
-    }
-  };
 
   const handleMfaSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +33,33 @@ export const SignInPage: React.FC = () => {
     } else {
       setErrorMessage(result.error || 'MFA verification failed.');
     }
+  };
+
+  const handleSignIn = async (email: string, password: string, rememberMe: boolean) => {
+    const result = await signIn(email, password, rememberMe);
+    if (result.success) {
+      navigate(from, { replace: true });
+      return { success: true };
+    } else if (result.mfaRequired) {
+      return { success: false, mfaRequired: true };
+    } else {
+      if (result.error?.includes('deactivated')) {
+        navigate('/account-deactivated');
+      }
+      return {
+        success: false,
+        error: result.error || t('auth.invalidCredentials', 'Sign in failed. Check your credentials.'),
+      };
+    }
+  };
+
+  const handleResetPassword = async (email: string) => {
+    return await requestPasswordReset(email);
+  };
+
+  const handleSignUp = async (_data: { email: string; name: string }) => {
+    navigate('/register');
+    return { success: true };
   };
 
   return (
@@ -87,7 +83,7 @@ export const SignInPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Embedded Lottie Animation - Visible on Tablets & Laptops */}
+          {/* Embedded Lottie Animation - Visible on Tablets & Laptops (Preserved) */}
           <div className="hidden md:flex w-full max-w-sm aspect-square items-center justify-center overflow-hidden">
             <iframe
               src="https://lottie.host/embed/5cf8b905-5a7f-462c-b066-96626bb67908/FhKmmHOj6w.lottie"
@@ -107,7 +103,7 @@ export const SignInPage: React.FC = () => {
         </div>
 
         {/* Right Side: Form */}
-        <div className="md:w-1/2 w-full flex flex-col justify-center p-6 sm:p-8 md:p-12 bg-white">
+        <div className="md:w-1/2 w-full flex flex-col justify-center p-4 sm:p-6 md:p-10 bg-white">
           {mfaPending ? (
             <div className="max-w-md mx-auto w-full">
               <div className="text-center space-y-1 mb-6">
@@ -186,125 +182,17 @@ export const SignInPage: React.FC = () => {
             </div>
           ) : (
             <div className="max-w-md mx-auto w-full">
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#D68904] mb-2 text-center">
-                Welcome Back
-              </h2>
-              <p className="text-xs text-center text-slate-500 mb-8">
-                {t('auth.signInTitle', 'Staff Portal Sign In')} — {t('app.shortName', 'BAOMS')}
+              <AuthForm
+                initialMode="login"
+                className="p-0"
+                onSignIn={handleSignIn}
+                onSignUp={handleSignUp}
+                onResetPassword={handleResetPassword}
+                onSuccess={() => navigate(from, { replace: true })}
+              />
+              <p className="text-[11px] text-center text-gray-400 mt-4">
+                Official @babawatoto.or.tz organization credentials required.
               </p>
-
-              {errorMessage && (
-                <div
-                  className="mb-6 flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 p-3.5 text-xs text-red-700"
-                  role="alert"
-                >
-                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                  <span>{errorMessage}</span>
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label htmlFor="email" className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    {t('auth.email', 'Email Address')}
-                  </label>
-                  <div className="relative">
-                    <img
-                      src="https://cdn-icons-png.flaticon.com/512/561/561127.png"
-                      alt="Email"
-                      className="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 opacity-70 pointer-events-none"
-                    />
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      aria-label="Email Address"
-                      placeholder="name@babawatoto.or.tz"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="pl-12 pr-4 py-3 w-full rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#D68904] text-gray-700 text-base shadow-xs transition duration-200 border border-transparent focus:bg-white"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="password" className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    {t('auth.password', 'Password')}
-                  </label>
-                  <div className="relative">
-                    <img
-                      src="https://cdn-icons-png.flaticon.com/512/3064/3064155.png"
-                      alt="Password"
-                      className="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 opacity-70 pointer-events-none"
-                    />
-                    <input
-                      type="password"
-                      id="password"
-                      name="password"
-                      aria-label="Password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="pl-12 pr-4 py-3 w-full rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#D68904] text-gray-700 text-base shadow-xs transition duration-200 border border-transparent focus:bg-white"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between text-sm">
-                  <label className="flex items-center gap-2 cursor-pointer text-gray-600">
-                    <input
-                      type="checkbox"
-                      id="remember"
-                      name="remember"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="rounded border-slate-300 text-charcoal-900 focus:ring-slate-400"
-                    />
-                    <span className="text-sm text-slate-700">
-                      {t('auth.rememberMe', 'Remember me')}
-                    </span>
-                  </label>
-
-                  <Link
-                    to="/reset-password"
-                    className="text-sm font-semibold text-[#D68904] hover:underline"
-                  >
-                    {t('auth.forgotPassword', 'Forgot password?')}
-                  </Link>
-                </div>
-
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  isLoading={isLoading}
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <span>Signing in...</span>
-                  ) : (
-                    <span>{t('auth.signInButton', 'Log In')} / Sign In</span>
-                  )}
-                </Button>
-              </form>
-
-              <div className="text-center mt-6">
-                <p className="text-gray-600 text-sm">
-                  Don't have an account?
-                  <Link
-                    to="/register"
-                    className="text-[#D68904] font-semibold hover:underline ml-1"
-                  >
-                    Register
-                  </Link>
-                </p>
-                <p className="text-[11px] text-gray-400 mt-2">
-                  Official @babawatoto.or.tz organization email required for self-registration.
-                </p>
-              </div>
             </div>
           )}
         </div>

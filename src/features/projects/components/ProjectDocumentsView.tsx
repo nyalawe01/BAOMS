@@ -173,7 +173,7 @@ export const ProjectDocumentsView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Banner / Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-4 bg-white border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
@@ -215,24 +215,6 @@ export const ProjectDocumentsView: React.FC = () => {
             </div>
             <div className="p-2.5 rounded-lg border border-gray-200 text-gray-700 bg-gray-50">
               <Paperclip className="w-5 h-5 text-gray-700" />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 bg-white border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                {t('projects.documents.storageStatus', 'Storage & Security')}
-              </p>
-              <h3 className="text-sm font-bold text-gray-900 mt-1 flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                Cloudflare R2 / Secure
-              </h3>
-              <p className="text-xs text-gray-500 mt-1">RLS Encrypted Access</p>
-            </div>
-            <div className="p-2.5 rounded-lg border border-gray-200 text-emerald-700 bg-emerald-50">
-              <ShieldCheck className="w-5 h-5 text-emerald-700" />
             </div>
           </div>
         </Card>

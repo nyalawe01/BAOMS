@@ -41,7 +41,7 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
 
     return (
       <div className="relative flex items-center w-full">
-        <div className="pointer-events-none absolute left-3 flex items-center text-charcoal-light">
+        <div className="pointer-events-none absolute left-3.5 flex items-center text-charcoal-light z-10">
           <Search className="h-4 w-4" aria-hidden="true" />
         </div>
 
@@ -57,7 +57,7 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           placeholder={placeholder}
           className={cn(
             'w-full rounded-md border border-surface-border bg-white text-charcoal transition-colors',
-            'pl-9 pr-9 placeholder:text-charcoal-light shadow-xs',
+            'pl-10 pr-10 placeholder:text-charcoal-light shadow-xs',
             'focus:outline-none focus:border-[#D68904] focus:ring-1 focus:ring-[#D68904]',
             size === 'sm' ? 'h-8 text-xs' : 'h-9 text-xs sm:text-sm',
             className

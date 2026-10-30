@@ -24,12 +24,75 @@
   .text-foreground {
     color: #18181b;
   }
+
+  .animate-in {
+    animation-duration: 0.25s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    animation-fill-mode: both;
+  }
+  .fade-in-0 {
+    animation-name: fadeIn;
+  }
+  .fade-in-50 {
+    animation-name: fadeInHalf;
+  }
+  .slide-in-from-right-5 {
+    animation-name: slideInRight;
+  }
+  .slide-in-from-bottom-1 {
+    animation-name: slideInBottom;
+  }
+  .slide-in-from-top-5 {
+    animation-name: slideInTop;
+  }
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
     transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInHalf {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInBottom {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInTop {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
   }
   to {
     opacity: 1;
@@ -193,7 +256,7 @@ input[type="checkbox"]:focus-visible {
   }
 
   /* Global Inputs, Textareas, and Selects: Spacious, comfortable, readable */
-  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([data-unstyled="true"]) {
+  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([data-unstyled="true"])) {
     min-height: 44px;
     border-radius: 0.75rem;
     border: 1px solid #cbd5e1;
@@ -205,7 +268,7 @@ input[type="checkbox"]:focus-visible {
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
-  textarea:not([data-unstyled="true"]) {
+  :where(textarea:not([data-unstyled="true"])) {
     min-height: 140px;
     border-radius: 0.75rem;
     border: 1px solid #cbd5e1;
@@ -218,7 +281,7 @@ input[type="checkbox"]:focus-visible {
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
-  select:not([data-unstyled="true"]) {
+  :where(select:not([data-unstyled="true"])) {
     min-height: 44px;
     border-radius: 0.75rem;
     border: 1px solid #cbd5e1;

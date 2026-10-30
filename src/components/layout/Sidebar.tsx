@@ -168,6 +168,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           items: [
             { to: '/', label: t('nav.projectDashboard', 'Dashboard'), icon: BentoDashboardIcon },
             { to: '/projects', label: t('nav.myProjects', 'My Projects'), icon: Briefcase },
+            { to: '/projects/calendar', label: 'Activity Calendar & Events', icon: Calendar },
             { to: '/projects/planning', label: t('nav.projectPlanning', 'Project Planning'), icon: Calendar },
             { to: '/projects/activities', label: t('nav.workPlansActivities', 'Work Plans & Activities'), icon: CheckSquare },
             { to: '/projects/team', label: t('nav.projectTeam', 'Project Team'), icon: Users },
